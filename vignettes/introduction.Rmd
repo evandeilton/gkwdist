@@ -1,0 +1,66 @@
+---
+title: "Introduction to gkwdist"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to gkwdist}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Overview
+
+The **gkwdist** package implements the Generalized Kumaraswamy (GKw) 
+distribution and six nested sub-families for modeling bounded continuous 
+data on the interval (0,1).
+
+## The GKw Family
+
+The five-parameter Generalized Kumaraswamy distribution has PDF:
+
+$$f(x; \alpha, \beta, a, b, \lambda) = \alpha \beta \lambda a b x^{a-1} (1-x^a)^{b-1} [1-(1-x^a)^b]^{\beta-1} \{1-[1-(1-x^a)^b]^\beta\}^{\lambda-1}$$
+
+## Available Distributions
+
+1. **Beta** (`dbeta_`, `pbeta_`, etc.): $a = b = \lambda = 1$
+2. **Kumaraswamy** (`dkw`, `pkw`, etc.): $\beta = \lambda = 1$
+3. **Exponentiated-Kumaraswamy** (`dekw`): $a = b = 1$
+4. **Kumaraswamy-Kumaraswamy** (`dkkw`): $\lambda = 1$
+5. **Beta-Kumaraswamy** (`dbkw`): $b = \lambda = 1$
+6. **McDonald** (`dmc`): Full 5-parameter model
+
+## Quick Start
+
+```{r example, eval=FALSE}
+library(gkwdist)
+
+# Generate random data from Kumaraswamy distribution
+set.seed(123)
+x <- rkw(n = 1000, alpha = 2, beta = 3)
+
+# Density
+d <- dkw(x, alpha = 2, beta = 3)
+
+# Distribution function
+p <- pkw(x, alpha = 2, beta = 3)
+
+# Quantiles
+q <- qkw(c(0.25, 0.5, 0.75), alpha = 2, beta = 3)
+
+# Visualization
+hist(x, probability = TRUE, main = "Kumaraswamy(2, 3)")
+curve(dkw(x, 2, 3), add = TRUE, col = "red", lwd = 2)
+```
+
+## References
+
+Kumaraswamy, P. (1980). A generalized probability density function for 
+double-bounded random processes. *Journal of Hydrology*, 46(1-2), 79-88.

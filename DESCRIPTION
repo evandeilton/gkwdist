@@ -1,0 +1,19 @@
+Package: gkwdist
+Title: Generalized Kumaraswamy Distribution
+Version: 1.0.0
+Description: Implements the five-parameter Generalized Kumaraswamy distribution and six nested sub-families for bounded continuous data on (0,1). Provides fast maximum likelihood estimation via Template Model Builder ('TMB'), with comprehensive diagnostics, model selection tools, and simulation capabilities. Ideal for modeling proportions, rates, and indices with complex distributional features (bimodality, asymmetry, heavy tails) beyond standard Beta or Kumaraswamy distributions.
+License: MIT + file LICENSE
+URL: https://evandeilton.github.io/gkwdist/, https://github.com/evandeilton/gkwdist
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports: Rcpp, RcppArmadillo, magrittr, numDeriv
+LinkingTo: Rcpp, RcppArmadillo
+Suggests: betareg, knitr, rmarkdown, testthat (>= 3.0.0)
+Config/testthat/edition: 3
+NeedsCompilation: yes
+Packaged: 2025-07-08 23:44:58 UTC; jlopes
+VignetteBuilder: knitr
+Authors@R: 
+    person("José Evandeilton", "Lopes", , "evandeilton@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0007-5887-4084"))
