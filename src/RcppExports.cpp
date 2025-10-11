@@ -504,6 +504,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gkwgetstartvalues
+Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector& x, std::string family, int n_starts);
+RcppExport SEXP _gkwdist_gkwgetstartvalues(SEXP xSEXP, SEXP familySEXP, SEXP n_startsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
+    Rcpp::traits::input_parameter< int >::type n_starts(n_startsSEXP);
+    rcpp_result_gen = Rcpp::wrap(gkwgetstartvalues(x, family, n_starts));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dkkw
 Rcpp::NumericVector dkkw(const arma::vec& x, const Rcpp::NumericVector& alpha, const Rcpp::NumericVector& beta, const Rcpp::NumericVector& delta, const Rcpp::NumericVector& lambda, bool log_prob);
 RcppExport SEXP _gkwdist_dkkw(SEXP xSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP deltaSEXP, SEXP lambdaSEXP, SEXP log_probSEXP) {
@@ -735,6 +748,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_gkwdist_llgkw", (DL_FUNC) &_gkwdist_llgkw, 2},
     {"_gkwdist_grgkw", (DL_FUNC) &_gkwdist_grgkw, 2},
     {"_gkwdist_hsgkw", (DL_FUNC) &_gkwdist_hsgkw, 2},
+    {"_gkwdist_gkwgetstartvalues", (DL_FUNC) &_gkwdist_gkwgetstartvalues, 3},
     {"_gkwdist_dkkw", (DL_FUNC) &_gkwdist_dkkw, 6},
     {"_gkwdist_pkkw", (DL_FUNC) &_gkwdist_pkkw, 7},
     {"_gkwdist_qkkw", (DL_FUNC) &_gkwdist_qkkw, 7},

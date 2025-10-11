@@ -7,20 +7,22 @@
 
 ## Overview
 
-`gkwdist` implements the **Generalized Kumaraswamy (GKw)** distribution family and its seven nested sub-models for bounded continuous data on $(0,1)$. The package provides complete distribution functions and high-performance analytical derivatives implemented in C++/RcppArmadillo.
+`gkwdist` implements the **Generalized Kumaraswamy (GKw)** distribution family and its seven nested sub-models for bounded continuous data on $(0,1)$. All functions are implemented in **C++** via RcppArmadillo for maximum computational efficiency.
 
 **Key Features:**
 - Seven flexible distributions for proportions, rates, and bounded data
 - Standard R distribution API: `d*`, `p*`, `q*`, `r*`
-- Analytical log-likelihood, gradient, and Hessian functions (C++)
-- 10-50× faster than numerical alternatives
-- Numerically stable implementations
+- Analytical log-likelihood, gradient, and Hessian functions
+- **All functions implemented in C++** for optimal performance
+- 10-50× faster than equivalent R implementations
+- Numerically stable for extreme parameter values
 
 ---
 
 ## Installation
 
 ```r
+# Install from GitHub
 # install.packages("devtools")
 devtools::install_github("evandeilton/gkwdist")
 ```
@@ -29,7 +31,7 @@ devtools::install_github("evandeilton/gkwdist")
 
 ## The Distribution Family
 
-### Function Table
+### Complete Function Table
 
 | Distribution | Code | Parameters | Functions |
 |:---|:---:|:---|:---|
@@ -43,24 +45,26 @@ devtools::install_github("evandeilton/gkwdist")
 
 ### Function Types
 
-**Distribution Functions (R):**
+**Distribution Functions (C++ implementation with R interface):**
 
 - `d*()` — Probability density function (PDF)
 - `p*()` — Cumulative distribution function (CDF)
 - `q*()` — Quantile function (inverse CDF)
 - `r*()` — Random number generation
 
-**Analytical Functions (C++):**
+**Analytical Functions for Maximum Likelihood (C++ implementation):**
 
-- `ll*()` — Log-likelihood:
+All analytical functions use the signature: `function(par, data)` where `par` is a numeric vector of parameters.
+
+- `ll*(par, data)` — Log-likelihood:
 
 $$\ell(\boldsymbol{\theta}; \mathbf{x}) = \sum_{i=1}^n \log f(x_i; \boldsymbol{\theta})$$
 
-- `gr*()` — Gradient (score vector):
+- `gr*(par, data)` — Gradient (score vector):
 
 $$\nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
 
-- `hs*()` — Hessian matrix:
+- `hs*(par, data)` — Hessian matrix:
 
 $$\nabla^2_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
 
@@ -205,23 +209,23 @@ $$\mathbb{E}(X^r) = \frac{B(\gamma+r, \delta)}{B(\gamma, \delta)}, \quad \mathbb
 ## Hierarchical Structure
 
 ```
-                    GKw(α, β, γ, δ, λ)
-                     /              \
-                λ = 1                γ = 1
-                   /                    \
-          BKw(α, β, γ, δ)        KKw(α, β, δ, λ)
+                  GKw(α, β, γ, δ, λ)
+                  /               \
+               λ = 1             γ = 1
+                /                    \
+       BKw(α, β, γ, δ)         KKw(α, β, δ, λ)
              |                          |
-       α=β=1 |                   δ = 1  |
+           α=β=1                      δ = 1
              |                          |
         MC(γ, δ, λ)              EKw(α, β, λ)
              |                          |
-         λ=1 |                          |
+            λ=1                         |
              |                          |
-        Beta(γ, δ)          γ=δ=1       |
+        Beta(γ, δ)                    γ=δ=1
              |                          |
              +----------- λ=1 ----------+
-                          |
-                    Kw(α, β)
+                           |
+                       Kw(α, β)
 ```
 
 ---
@@ -233,32 +237,45 @@ $$\mathbb{E}(X^r) = \frac{B(\gamma+r, \delta)}{B(\gamma, \delta)}, \quad \mathbb
 ```r
 library(gkwdist)
 
+# Set parameters
 alpha <- 2; beta <- 3; gamma <- 1.5; delta <- 2; lambda <- 1.2
 x <- seq(0.01, 0.99, length.out = 100)
 
+# Density
 dens <- dgkw(x, alpha, beta, gamma, delta, lambda)
-cdf  <- pgkw(x, alpha, beta, gamma, delta, lambda)
 
+# CDF
+cdf <- pgkw(x, alpha, beta, gamma, delta, lambda)
+
+# Quantiles
 q <- qgkw(c(0.25, 0.5, 0.75), alpha, beta, gamma, delta, lambda)
 print(q)
 
+# Random generation
 set.seed(123)
 random_sample <- rgkw(1000, alpha, beta, gamma, delta, lambda)
 
+# Visualization
 par(mfrow = c(1, 2))
 plot(x, dens, type = "l", lwd = 2, col = "blue",
-     main = "GKw PDF", xlab = "x", ylab = "Density"); grid()
+     main = "GKw PDF", xlab = "x", ylab = "Density")
+grid()
+
 plot(x, cdf, type = "l", lwd = 2, col = "red",
-     main = "GKw CDF", xlab = "x", ylab = "F(x)"); grid()
+     main = "GKw CDF", xlab = "x", ylab = "F(x)")
+grid()
 ```
 
-### Example 2: Comparing Sub-families
+### Example 2: Comparing Distribution Families
 
 ```r
 library(gkwdist)
 
+par(mfrow = c(1,1), mar = c(3,3,2,2))
+
 x <- seq(0.001, 0.999, length.out = 500)
 
+# Compute densities for all families
 d_gkw  <- dgkw(x, 2, 3, 1.5, 2, 1.2)
 d_bkw  <- dbkw(x, 2, 3, 1.5, 2)
 d_kkw  <- dkkw(x, 2, 3, 2, 1.2)
@@ -267,6 +284,7 @@ d_mc   <- dmc(x, 2, 3, 1.2)
 d_kw   <- dkw(x, 2, 5)
 d_beta <- dbeta_(x, 2, 3)
 
+# Plot comparison
 plot(x, d_gkw, type = "l", lwd = 2, col = "black",
      ylim = c(0, max(d_gkw, d_bkw, d_kkw, d_ekw, d_mc, d_kw, d_beta)),
      main = "Distribution Family Comparison",
@@ -281,170 +299,308 @@ legend("topright",
        legend = c("GKw", "BKw", "KKw", "EKw", "MC", "Kw", "Beta"),
        col = c("black", "red", "blue", "green", "purple", "orange", "brown"),
        lwd = 2, cex = 0.85)
+grid()
 ```
 
-### Example 3: Maximum Likelihood Estimation
+### Example 3: Maximum Likelihood Estimation Using optim()
 
 ```r
 library(gkwdist)
 
+# Generate synthetic data from Kumaraswamy distribution
 set.seed(2024)
-n <- 200
+
+n <- 2000
 true_alpha <- 2.5
 true_beta  <- 3.5
 data <- rkw(n, true_alpha, true_beta)
 
-nll <- function(par, data) {
-  if (any(par <= 0)) return(1e10)
-  -llkw(data, alpha = par[1], beta = par[2])
-}
-grad <- function(par, data) {
-  if (any(par <= 0)) return(rep(0, length(par)))
-  -grkw(data, alpha = par[1], beta = par[2])
-}
+par_ini <- gkwgetstartvalues(data, family = "kw", n_starts = 2)
 
-fit <- optim(par = c(1, 1), fn = nll, gr = grad,
-             data = data, method = "BFGS", hessian = TRUE)
+# Optimization using Nelder-Mead with analytical gradient
+fit <- optim(
+  par = par_ini,
+  fn = llkw, # Negative log-likelihood function
+  gr = grkw, # Analytical gradient (score function)
+  data = data,
+  method = "Nelder-Mead",
+  hessian = TRUE
+)
 
+# Standard errors from observed information matrix
 se <- sqrt(diag(solve(fit$hessian)))
+
+# 95% Confidence intervals
 ci <- cbind(
   Lower    = fit$par - 1.96 * se,
   Estimate = fit$par,
   Upper    = fit$par + 1.96 * se
 )
 rownames(ci) <- c("alpha", "beta")
+
+cat("True parameters:    ", true_alpha, true_beta, "\n")
+cat("Estimated parameters:", fit$par, "\n\n")
 print(ci)
 ```
 
-### Example 4: Diagnostic Plot
+### Example 4: Goodness-of-Fit Diagnostic Plot
 
 ```r
 library(gkwdist)
 
+# Using fitted model from Example 3
 x_grid <- seq(0.001, 0.999, length.out = 200)
-fitted_dens <- dkw(x_grid, fit$par[1], fit$par[2])
-true_dens   <- dkw(x_grid, true_alpha, true_beta)
 
+# Fitted density
+fitted_dens <- dkw(x_grid, fit$par[1], fit$par[2])
+
+# True density (for comparison)
+true_dens <- dkw(x_grid, true_alpha, true_beta)
+
+# Diagnostic plot
 hist(data, breaks = 30, probability = TRUE,
      col = "lightgray", border = "white",
-     main = "Kumaraswamy Fit",
+     main = "Kumaraswamy Distribution Fit",
      xlab = "Data", ylab = "Density")
-lines(x_grid, fitted_dens, col = "red",  lwd = 2, lty = 1)
-lines(x_grid, true_dens,   col = "blue", lwd = 2, lty = 2)
-legend("topright", legend = c("Data", "Fitted", "True"),
+lines(x_grid, fitted_dens, col = "red", lwd = 2, lty = 1)
+lines(x_grid, true_dens, col = "blue", lwd = 2, lty = 2)
+legend("topright",
+       legend = c("Observed Data", "Fitted Model", "True Model"),
        col = c("gray", "red", "blue"),
        lwd = c(10, 2, 2), lty = c(1, 1, 2))
+grid()
 ```
 
-### Example 5: Model Selection with AIC/BIC
+### Example 5: Model Selection Using AIC and BIC
 
 ```r
 library(gkwdist)
 
+# Generate data from Exponentiated Kumaraswamy
 set.seed(456)
-n <- 150
+n <- 1500
 data <- rekw(n, alpha = 2, beta = 3, lambda = 1.5)
 
+# Define competing models
 models <- list(
   Beta = list(
-    nll = function(par) -llbeta_(data, par[1], par[2]),
-    start = c(1, 1), npar = 2
+    nll = function(par) llbeta(par, data),
+    gr = function(par) grbeta(par, data),
+    start = gkwgetstartvalues(data, family = "beta"),
+    npar = 2
   ),
   Kw = list(
-    nll = function(par) -llkw(data, par[1], par[2]),
-    start = c(1, 1), npar = 2
+    nll = function(par) llkw(par, data),
+    gr = function(par) grkw(par, data),
+    start = gkwgetstartvalues(data, family = "kw"),
+    npar = 2
   ),
   EKw = list(
-    nll = function(par) -llekw(data, par[1], par[2], par[3]),
-    start = c(1, 1, 1), npar = 3
+    nll = function(par) llekw(par, data),
+    gr = function(par) grekw(par, data),
+    start = gkwgetstartvalues(data, family = "ekw"),
+    npar = 3
   ),
   MC = list(
-    nll = function(par) -llmc(data, par[1], par[2], par[3]),
-    start = c(1, 1, 1), npar = 3
+    nll = function(par) llmc(par, data),
+    gr = function(par) grmc(par, data),
+    start = gkwgetstartvalues(data, family = "mc"),
+    npar = 3
   )
 )
 
-fits   <- lapply(models, function(m) optim(par = m$start, fn = m$nll, method = "BFGS"))
+# Fit all models using optim with analytical gradients
+fits <- lapply(models, function(m) {
+  optim(par = m$start, fn = m$nll, gr = m$gr, method = "Nelder-Mead")
+})
+
+# Extract log-likelihoods and compute information criteria
 loglik <- sapply(fits, function(f) -f$value)
-k      <- sapply(models, `[[`, "npar")
+k <- sapply(models, `[[`, "npar")
 
 results <- data.frame(
   Model  = names(models),
+  Coefs  = sapply(fits, function(f) paste0(round(f$par, 3), collapse = "|")),
   LogLik = loglik,
   nPar   = k,
   AIC    = -2 * loglik + 2 * k,
   BIC    = -2 * loglik + k * log(n)
 )
-print(results[order(results$AIC), ], row.names = FALSE)
-cat("\nBest model (AIC):", results$Model[which.min(results$AIC)], "\n")
+
+# Sort by AIC
+results <- results[order(results$AIC), ]
+print(results, row.names = FALSE)
+cat("\nBest model by AIC:", results$Model[1], "\n")
 ```
 
-### Example 6: Using Analytical Functions
+### Example 6: Using Analytical Functions Directly
 
 ```r
 library(gkwdist)
 
+# Generate data from EKw
 set.seed(789)
-n <- 100
+n <- 1000
 data <- rekw(n, alpha = 2, beta = 3, lambda = 1.5)
 params <- c(2, 3, 1.5)
 
-ll    <- llekw(data, params[1], params[2], params[3])
-score <- grekw(data, params[1], params[2], params[3])
-hess  <- hsekw(data, params[1], params[2], params[3])
+# Compute analytical functions at true parameters
+ll <- llekw(params, data)
+score <- grekw(params, data)
+hess <- hsekw(params, data)
 
-fisher <- -hess
+# Fisher information matrix (negative Hessian)
+fisher <- hess
+
+# Asymptotic standard errors
 se <- sqrt(diag(solve(fisher)))
 names(se) <- c("alpha", "beta", "lambda")
 
 cat("Log-likelihood:", ll, "\n")
-cat("\nScore vector:\n"); print(score)
-cat("\nHessian matrix:\n"); print(hess)
-cat("\nAsymptotic SEs:\n"); print(se)
+cat("\nScore vector (should be close to zero at true params):\n")
+print(score)
+cat("\nHessian matrix:\n")
+print(hess)
+cat("\nFisher Information matrix:\n")
+print(fisher)
+cat("\nAsymptotic standard errors:\n")
+print(se)
 ```
 
-### Example 7: Q-Q Plot
+### Example 7: Q-Q Plot for Model Validation
 
 ```r
 library(gkwdist)
 
+# Generate data and fit model
 set.seed(101)
-n <- 200
+n <- 2000
 data <- rkw(n, alpha = 2, beta = 3)
 
-fit <- optim(par = c(1, 1),
-             fn = function(par) -llkw(data, par[1], par[2]),
-             method = "BFGS")
+# Fit using optim
+fit <- optim(
+  par = c(1, 1),
+  fn = function(par) llkw(par, data),
+  gr = function(par) grkw(par, data),
+  method = "Nelder-Mead"
+)
 
+# Theoretical quantiles
 p <- ppoints(n)
 theoretical_q <- qkw(p, fit$par[1], fit$par[2])
-empirical_q   <- sort(data)
 
+# Empirical quantiles
+empirical_q <- sort(data)
+
+# Q-Q plot
 plot(theoretical_q, empirical_q,
-     xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles",
-     main = "Q-Q Plot: Kumaraswamy",
+     xlab = "Theoretical Quantiles",
+     ylab = "Empirical Quantiles",
+     main = "Q-Q Plot: Kumaraswamy Distribution",
      pch = 19, col = rgb(0, 0, 1, 0.5))
 abline(0, 1, col = "red", lwd = 2, lty = 2)
 grid()
 ```
 
+### Example 8: Fitting GKw (Full Model) Using optim()
+
+```r
+library(gkwdist)
+
+# Generate data from GKw
+set.seed(2025)
+n <- 10000
+true_params <- c(alpha = 2, beta = 2.5, gamma = 1.5, delta = 2, lambda = 1.3)
+data <- rgkw(n, true_params[1], true_params[2], true_params[3],
+             true_params[4], true_params[5])
+
+# Best init values
+par_ini <- gkwgetstartvalues(data, n_starts = 5)
+
+# Fit using optim with analytical gradient
+fit_gkw <- optim(
+  par = par_ini, 
+  fn = llgkw,    # Negative log-likelihood
+  gr = grgkw,    # Negative Analytical gradient
+  data = data,
+  method = "BFGS",
+  hessian = TRUE,
+  control = list(maxit = 1000)
+)
+
+# Results
+se <- sqrt(diag(solve(fit_gkw$hessian)))
+estimates <- data.frame(
+  Parameter = names(true_params),
+  True = true_params,
+  Estimate = fit_gkw$par,
+  SE = se
+)
+print(estimates, digits = 4)
+```
+
+### Example 9: Comparing Analytical vs Numerical Derivatives
+
+```r
+library(gkwdist)
+
+# Generate data
+set.seed(999)
+n <- 10000
+data <- rkw(n, alpha = 2, beta = 3)
+par <- c(2, 3)
+
+# Analytical gradient
+grad_analytical <- grkw(par, data)
+
+# Numerical gradient (using finite differences)
+grad_numerical <- numDeriv::grad(
+  func = function(p) llkw(p, data),
+  x = par
+)
+
+# Compare
+comparison <- data.frame(
+  Parameter = c("alpha", "beta"),
+  Analytical = grad_analytical,
+  Numerical = grad_numerical,
+  Difference = abs(grad_analytical - grad_numerical)
+)
+print(comparison, digits = 8)
+```
+
 ---
 
-## Performance
+## Performance Comparison
+
+The C++ implementation provides substantial performance gains:
 
 ```r
 library(microbenchmark)
 
+# Generate large dataset
 n <- 10000
 data <- rkw(n, 2, 3)
 
-microbenchmark(
+# Compare log-likelihood computation
+benchmark <- microbenchmark(
   R_sum_log_d = sum(log(dkw(data, 2, 3))),
-  Cpp_ll      = llkw(data, 2, 3),
+  Cpp_ll = llkw(c(2, 3), data),
   times = 100
 )
-# Typical speedup: 10-50× faster
+
+print(benchmark)
+plot(benchmark)
+# Typical results: C++ implementation is 10-50× faster
 ```
+
+**Why C++ Implementation Matters:**
+
+- **Speed:** Critical for maximum likelihood estimation with large datasets
+- **Numerical Stability:** Better handling of extreme parameter values and edge cases
+- **Memory Efficiency:** Optimized memory allocation in tight loops
+- **Scalability:** Linear scaling with sample size
+- **Precision:** Analytical derivatives are exact (up to floating-point precision)
 
 ---
 
@@ -452,13 +608,22 @@ microbenchmark(
 
 | Data Characteristics | Recommended Distribution | Rationale |
 |:---|:---|:---|
-| Unimodal, symmetric | **Beta** | Parsimony; well-studied |
-| Unimodal, asymmetric | **Kumaraswamy** | Closed-form CDF/quantile |
+| Unimodal, symmetric | **Beta** | Parsimony; well-studied properties |
+| Unimodal, asymmetric | **Kumaraswamy** | Closed-form CDF and quantile |
 | Bimodal or U-shaped | **GKw** or **BKw** | Maximum flexibility |
-| Extreme skewness | **KKw** or **EKw** | Flexible tail control |
-| J-shaped (monotonic) | **Kw** or **Beta** | With appropriate parameters |
-| Power transformations | **McDonald** | Explicit power parameter |
-| Unknown shape | **GKw** | Test nested models |
+| Extreme skewness | **KKw** or **EKw** | Fine control over tail behavior |
+| J-shaped (monotonic) | **Kw** or **Beta** | With appropriate parameter values |
+| Power transformations | **McDonald** | Explicit power parameter $\lambda$ |
+| Unknown shape | **GKw** | Fit and test nested models |
+
+**Model Selection Workflow:**
+
+1. Start with **Beta** and **Kumaraswamy** (2 parameters)
+2. Check goodness-of-fit using Q-Q plots and formal tests
+3. If inadequate, try **EKw** or **MC** (3 parameters)
+4. For complex patterns, use **BKw**, **KKw**, or **GKw** (4-5 parameters)
+5. Use AIC/BIC to balance fit quality and parsimony
+6. Validate final model with residual diagnostics
 
 ---
 
@@ -507,4 +672,3 @@ Email: evandeilton@gmail.com
 ## License
 
 MIT License. See [LICENSE](LICENSE) file for details.
-

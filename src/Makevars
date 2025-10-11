@@ -26,6 +26,7 @@ SOURCES = beta_.cpp \
 					gkw.cpp \
 					kkw.cpp \
 					kw.cpp \
+					gkwinit.cpp \
 					RcppExports.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)

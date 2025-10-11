@@ -4431,6 +4431,82 @@ hsgkw <- function(par, data) {
     .Call(`_gkwdist_hsgkw`, par, data)
 }
 
+#' @title Estimate Distribution Parameters Using Method of Moments
+#'
+#' @description
+#' Estimates parameters for various distribution families from the Generalized Kumaraswamy
+#' family using the method of moments. The implementation is optimized for numerical
+#' stability and computational efficiency through Nelder-Mead optimization and adaptive
+#' numerical integration.
+#'
+#' @param x Numeric vector of observations. All values must be in the open interval (0,1).
+#'   Values outside this range will be automatically truncated to avoid numerical issues.
+#' @param family Character string specifying the distribution family. Valid options are:
+#'   \code{"gkw"} (Generalized Kumaraswamy - 5 parameters),
+#'   \code{"bkw"} (Beta-Kumaraswamy - 4 parameters),
+#'   \code{"kkw"} (Kumaraswamy-Kumaraswamy - 4 parameters),
+#'   \code{"ekw"} (Exponentiated Kumaraswamy - 3 parameters),
+#'   \code{"mc"} (McDonald - 3 parameters),
+#'   \code{"kw"} (Kumaraswamy - 2 parameters),
+#'   \code{"beta"} (Beta - 2 parameters).
+#'   The string is case-insensitive. Default is \code{"gkw"}.
+#' @param n_starts Integer specifying the number of different initial parameter values
+#'   to try during optimization. More starting points increase the probability of finding
+#'   the global optimum at the cost of longer computation time. Default is 5.
+#'
+#' @return Named numeric vector containing the estimated parameters for the specified
+#'   distribution family. Parameter names correspond to the distribution specification.
+#'   If estimation fails, returns a vector of NA values with appropriate parameter names.
+#'
+#' @details
+#' The function uses the method of moments to estimate distribution parameters by minimizing
+#' the weighted sum of squared relative errors between theoretical and sample moments
+#' (orders 1 through 5). The optimization employs the Nelder-Mead simplex algorithm,
+#' which is derivative-free and particularly robust for this problem.
+#'
+#' Key implementation features: logarithmic calculations for numerical stability,
+#' adaptive numerical integration using Simpson's rule with fallback to trapezoidal rule,
+#' multiple random starting points to avoid local minima, decreasing weights for
+#' higher-order moments (1.0, 0.8, 0.6, 0.4, 0.2), and automatic parameter constraint
+#' enforcement.
+#'
+#' Parameter Constraints:
+#' All parameters are constrained to positive values. Additionally, family-specific
+#' constraints are enforced: alpha and beta in (0.1, 50.0), gamma in (0.1, 10.0) for
+#' GKw-related families or (0.1, 50.0) for Beta, delta in (0.01, 10.0), and lambda in
+#' (0.1, 20.0).
+#'
+#' The function will issue warnings for empty input vectors, sample sizes less than 10
+#' (unreliable estimation), or failure to find valid parameter estimates (returns defaults).
+#'
+#' @examples
+#' \dontrun{
+#' # Generate sample data from Beta distribution
+#' set.seed(123)
+#' x <- rbeta(100, shape1 = 2, shape2 = 3)
+#'
+#' # Estimate Beta parameters
+#' params_beta <- gkwgetstartvalues(x, family = "beta")
+#' print(params_beta)
+#'
+#' # Estimate Kumaraswamy parameters
+#' params_kw <- gkwgetstartvalues(x, family = "kw")
+#' print(params_kw)
+#'
+#' # Estimate GKw parameters with more starting points
+#' params_gkw <- gkwgetstartvalues(x, family = "gkw", n_starts = 10)
+#' print(params_gkw)
+#' }
+#'
+#' @references
+#' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution with
+#' some tractability advantages. Statistical Methodology, 6(1), 70-81.
+#'
+#' @export
+gkwgetstartvalues <- function(x, family = "gkw", n_starts = 5L) {
+    .Call(`_gkwdist_gkwgetstartvalues`, x, family, n_starts)
+}
+
 #' @title Density of the Kumaraswamy-Kumaraswamy (kkw) Distribution
 #' @author Lopes, J. E.
 #' @keywords distribution density
