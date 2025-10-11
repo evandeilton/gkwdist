@@ -55,11 +55,6 @@
 * This is the initial CRAN submission
 * Package focuses exclusively on distribution functions (no high-level fitting interface)
 * Companion package `gkwreg` provides regression modeling capabilities
-
-# Development Notes
-
-For contributors and developers:
-
 * All user-facing functions maintain backward compatibility
 * C++ implementation uses RcppArmadillo for linear algebra operations
 * Analytical functions use robust log-scale computations to prevent overflow/underflow
