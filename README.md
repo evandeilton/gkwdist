@@ -53,12 +53,15 @@ devtools::install_github("evandeilton/gkwdist")
 **Analytical Functions (C++):**
 
 - `ll*()` — Log-likelihood:
+
 $$\ell(\boldsymbol{\theta}; \mathbf{x}) = \sum_{i=1}^n \log f(x_i; \boldsymbol{\theta})$$
 
 - `gr*()` — Gradient (score vector):
+
 $$\nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
 
 - `hs*()` — Hessian matrix:
+
 $$\nabla^2_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
 
 ---
@@ -72,9 +75,11 @@ $$\nabla^2_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
 **Parameters:** $\alpha, \beta, \gamma, \delta, \lambda > 0$
 
 **PDF:**
-$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma\lambda-1} \left\{1-[1-(1-x^\alpha)^\beta]^\lambda\right\}^{\delta-1}$$
+
+$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma\lambda-1} \{1-[1-(1-x^\alpha)^\beta]^\lambda\}^{\delta-1}$$
 
 **CDF:**
+
 $$F_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = I_{[1-(1-x^\alpha)^\beta]^\lambda}(\gamma, \delta)$$
 
 **Quantile:** Numerical inversion of the CDF.
@@ -86,9 +91,11 @@ $$F_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = I_{[1-(1-x^\alpha)
 **Relationship:** GKw with $\lambda = 1$
 
 **PDF:**
+
 $$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta\delta-1} [1-(1-x^\alpha)^\beta]^{\gamma-1}$$
 
 **CDF:**
+
 $$F_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = I_{1-(1-x^\alpha)^\beta}(\gamma, \delta)$$
 
 **Quantile:** Numerical inversion.
@@ -100,13 +107,16 @@ $$F_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = I_{1-(1-x^\alpha)^\beta}(\g
 **Relationship:** GKw with $\gamma = 1$
 
 **PDF:**
-$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\lambda-1} \left\{1-[1-(1-x^\alpha)^\beta]^\lambda\right\}^{\delta-1}$$
+
+$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\lambda-1} \{1-[1-(1-x^\alpha)^\beta]^\lambda\}^{\delta-1}$$
 
 **CDF:**
-$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \left\{1-[1-(1-x^\alpha)^\beta]^\lambda\right\}^\delta$$
+
+$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \{1-[1-(1-x^\alpha)^\beta]^\lambda\}^\delta$$
 
 **Quantile (closed-form):**
-$$Q_{\text{KKw}}(p; \alpha, \beta, \delta, \lambda) = \left[1 - \left(1 - \left[1-(1-p)^{1/\delta}\right]^{1/\lambda}\right)^{1/\beta}\right]^{1/\alpha}$$
+
+$$Q_{\text{KKw}}(p; \alpha, \beta, \delta, \lambda) = [1 - (1 - [1-(1-p)^{1/\delta}]^{1/\lambda})^{1/\beta}]^{1/\alpha}$$
 
 ---
 
@@ -115,13 +125,16 @@ $$Q_{\text{KKw}}(p; \alpha, \beta, \delta, \lambda) = \left[1 - \left(1 - \left[
 **Relationship:** GKw with $\gamma = \delta = 1$
 
 **PDF:**
+
 $$f_{\text{EKw}}(x; \alpha, \beta, \lambda) = \lambda \alpha \beta \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\lambda-1}$$
 
 **CDF:**
+
 $$F_{\text{EKw}}(x; \alpha, \beta, \lambda) = [1-(1-x^\alpha)^\beta]^\lambda$$
 
 **Quantile (closed-form):**
-$$Q_{\text{EKw}}(p; \alpha, \beta, \lambda) = \left[1-(1-p^{1/\lambda})^{1/\beta}\right]^{1/\alpha}$$
+
+$$Q_{\text{EKw}}(p; \alpha, \beta, \lambda) = [1-(1-p^{1/\lambda})^{1/\beta}]^{1/\alpha}$$
 
 ---
 
@@ -130,13 +143,16 @@ $$Q_{\text{EKw}}(p; \alpha, \beta, \lambda) = \left[1-(1-p^{1/\lambda})^{1/\beta
 **Relationship:** GKw with $\alpha = \beta = 1$
 
 **PDF:**
+
 $$f_{\text{MC}}(x; \gamma, \delta, \lambda) = \frac{\lambda}{B(\gamma, \delta)} x^{\gamma\lambda-1} (1-x^\lambda)^{\delta-1}$$
 
 **CDF:**
+
 $$F_{\text{MC}}(x; \gamma, \delta, \lambda) = I_{x^\lambda}(\gamma, \delta)$$
 
 **Quantile:**
-$$Q_{\text{MC}}(p; \gamma, \delta, \lambda) = \left[I_p^{-1}(\gamma, \delta)\right]^{1/\lambda}$$
+
+$$Q_{\text{MC}}(p; \gamma, \delta, \lambda) = [I_p^{-1}(\gamma, \delta)]^{1/\lambda}$$
 
 where $I_p^{-1}(\gamma, \delta)$ is the inverse of the regularized incomplete beta function.
 
@@ -147,16 +163,20 @@ where $I_p^{-1}(\gamma, \delta)$ is the inverse of the regularized incomplete be
 **Relationship:** GKw with $\gamma = \delta = \lambda = 1$
 
 **PDF:**
+
 $$f_{\text{Kw}}(x; \alpha, \beta) = \alpha \beta \, x^{\alpha-1} (1-x^\alpha)^{\beta-1}$$
 
 **CDF:**
+
 $$F_{\text{Kw}}(x; \alpha, \beta) = 1 - (1-x^\alpha)^\beta$$
 
 **Quantile (closed-form):**
-$$Q_{\text{Kw}}(p; \alpha, \beta) = \left[1-(1-p)^{1/\beta}\right]^{1/\alpha}$$
+
+$$Q_{\text{Kw}}(p; \alpha, \beta) = [1-(1-p)^{1/\beta}]^{1/\alpha}$$
 
 **Moments:**
-$$\mathbb{E}(X^r) = \beta B\left(1 + \frac{r}{\alpha}, \beta\right) = \frac{\beta \, \Gamma(1+r/\alpha) \, \Gamma(\beta)}{\Gamma(1+r/\alpha+\beta)}$$
+
+$$\mathbb{E}(X^r) = \beta B(1 + r/\alpha, \beta) = \frac{\beta \, \Gamma(1+r/\alpha) \, \Gamma(\beta)}{\Gamma(1+r/\alpha+\beta)}$$
 
 ---
 
@@ -165,15 +185,19 @@ $$\mathbb{E}(X^r) = \beta B\left(1 + \frac{r}{\alpha}, \beta\right) = \frac{\bet
 **Relationship:** GKw with $\alpha = \beta = \lambda = 1$
 
 **PDF:**
+
 $$f_{\text{Beta}}(x; \gamma, \delta) = \frac{1}{B(\gamma, \delta)} x^{\gamma-1} (1-x)^{\delta-1}$$
 
 **CDF:**
+
 $$F_{\text{Beta}}(x; \gamma, \delta) = I_x(\gamma, \delta)$$
 
 **Quantile:**
+
 $$Q_{\text{Beta}}(p; \gamma, \delta) = I_p^{-1}(\gamma, \delta)$$
 
 **Moments:**
+
 $$\mathbb{E}(X^r) = \frac{B(\gamma+r, \delta)}{B(\gamma, \delta)}, \quad \mathbb{E}(X) = \frac{\gamma}{\gamma+\delta}, \quad \text{Var}(X) = \frac{\gamma\delta}{(\gamma+\delta)^2(\gamma+\delta+1)}$$
 
 ---
@@ -440,7 +464,7 @@ microbenchmark(
 
 ## References
 
-- **Cordeiro, G. M., & de Castro, M. (2011).** A new family of generalized distributions. *Journal of Statistical Computation and Simulation*, 81(7), 883-898.
+- **Cordeiro, G. M., & de Castro, M. (2011).** A new family of generalized distributions. *Journal of Statistical Computation and Simulation*, 81(7), 883-898. [doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 - **Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010).** A new generalized Kumaraswamy distribution. *arXiv:1004.0911*. [arxiv.org/abs/1004.0911](https://arxiv.org/abs/1004.0911)
 
@@ -483,4 +507,4 @@ Email: evandeilton@gmail.com
 ## License
 
 MIT License. See [LICENSE](LICENSE) file for details.
-```
+
