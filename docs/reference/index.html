@@ -3,11 +3,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,7 +19,7 @@
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/evandeilton/gkwdist/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/evandeilton/gkwdist" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -32,9 +32,410 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="utility-functions">Utility Functions<a class="anchor" aria-label="anchor" href="#utility-functions"></a></h2>
+
+      <div class="section-desc"><p>Helper functions for parameter initialization</p></div>
 
 
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="gkwgetstartvalues.html">gkwgetstartvalues()</a></code>
+
+        </dt>
+        <dd>Estimate Distribution Parameters Using Method of Moments</dd>
+      </dl></div><div class="section level2">
+      <h2 id="generalized-kumaraswamy-gkw-distribution">Generalized Kumaraswamy (GKw) - Distribution<a class="anchor" aria-label="anchor" href="#generalized-kumaraswamy-gkw-distribution"></a></h2>
+
+      <div class="section-desc"><p>Density, CDF, quantile, and random generation (α, β, γ, δ, λ)</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="dgkw.html">dgkw()</a></code>
+
+        </dt>
+        <dd>Density of the Generalized Kumaraswamy Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="pgkw.html">pgkw()</a></code>
+
+        </dt>
+        <dd>Generalized Kumaraswamy Distribution CDF</dd>
+      </dl><dl><dt>
+
+          <code><a href="qgkw.html">qgkw()</a></code>
+
+        </dt>
+        <dd>Generalized Kumaraswamy Distribution Quantile Function</dd>
+      </dl><dl><dt>
+
+          <code><a href="rgkw.html">rgkw()</a></code>
+
+        </dt>
+        <dd>Generalized Kumaraswamy Distribution Random Generation</dd>
+      </dl></div><div class="section level2">
+      <h2 id="generalized-kumaraswamy-gkw-inference">Generalized Kumaraswamy (GKw) - Inference<a class="anchor" aria-label="anchor" href="#generalized-kumaraswamy-gkw-inference"></a></h2>
+
+      <div class="section-desc"><p>Log-likelihood, gradient, and Hessian</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="llgkw.html">llgkw()</a></code>
+
+        </dt>
+        <dd>Negative Log-Likelihood for the Generalized Kumaraswamy Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="grgkw.html">grgkw()</a></code>
+
+        </dt>
+        <dd>Gradient of the Negative Log-Likelihood for the GKw Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="hsgkw.html">hsgkw()</a></code>
+
+        </dt>
+        <dd>Hessian Matrix of the Negative Log-Likelihood for the GKw Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="beta-kumaraswamy-bkw-distribution">Beta-Kumaraswamy (BKw) - Distribution<a class="anchor" aria-label="anchor" href="#beta-kumaraswamy-bkw-distribution"></a></h2>
+
+      <div class="section-desc"><p>Density, CDF, quantile, and random generation (α, β, γ, δ)</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="dbkw.html">dbkw()</a></code>
+
+        </dt>
+        <dd>Density of the Beta-Kumaraswamy (BKw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="pbkw.html">pbkw()</a></code>
+
+        </dt>
+        <dd>Cumulative Distribution Function (CDF) of the Beta-Kumaraswamy (BKw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="qbkw.html">qbkw()</a></code>
+
+        </dt>
+        <dd>Quantile Function of the Beta-Kumaraswamy (BKw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="rbkw.html">rbkw()</a></code>
+
+        </dt>
+        <dd>Random Number Generation for the Beta-Kumaraswamy (BKw) Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="beta-kumaraswamy-bkw-inference">Beta-Kumaraswamy (BKw) - Inference<a class="anchor" aria-label="anchor" href="#beta-kumaraswamy-bkw-inference"></a></h2>
+
+      <div class="section-desc"><p>Log-likelihood, gradient, and Hessian</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="llbkw.html">llbkw()</a></code>
+
+        </dt>
+        <dd>Negative Log-Likelihood for Beta-Kumaraswamy (BKw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="grbkw.html">grbkw()</a></code>
+
+        </dt>
+        <dd>Gradient of the Negative Log-Likelihood for the BKw Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="hsbkw.html">hsbkw()</a></code>
+
+        </dt>
+        <dd>Hessian Matrix of the Negative Log-Likelihood for the BKw Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="kumaraswamy-kumaraswamy-kkw-distribution">Kumaraswamy-Kumaraswamy (KKw) - Distribution<a class="anchor" aria-label="anchor" href="#kumaraswamy-kumaraswamy-kkw-distribution"></a></h2>
+
+      <div class="section-desc"><p>Density, CDF, quantile, and random generation (α, β, δ, λ)</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="dkkw.html">dkkw()</a></code>
+
+        </dt>
+        <dd>Density of the Kumaraswamy-Kumaraswamy (kkw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="pkkw.html">pkkw()</a></code>
+
+        </dt>
+        <dd>Cumulative Distribution Function (CDF) of the kkw Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="qkkw.html">qkkw()</a></code>
+
+        </dt>
+        <dd>Quantile Function of the Kumaraswamy-Kumaraswamy (kkw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="rkkw.html">rkkw()</a></code>
+
+        </dt>
+        <dd>Random Number Generation for the kkw Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="kumaraswamy-kumaraswamy-kkw-inference">Kumaraswamy-Kumaraswamy (KKw) - Inference<a class="anchor" aria-label="anchor" href="#kumaraswamy-kumaraswamy-kkw-inference"></a></h2>
+
+      <div class="section-desc"><p>Log-likelihood, gradient, and Hessian</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="llkkw.html">llkkw()</a></code>
+
+        </dt>
+        <dd>Negative Log-Likelihood for the kkw Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="grkkw.html">grkkw()</a></code>
+
+        </dt>
+        <dd>Gradient of the Negative Log-Likelihood for the kkw Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="hskkw.html">hskkw()</a></code>
+
+        </dt>
+        <dd>Hessian Matrix of the Negative Log-Likelihood for the kkw Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="exponentiated-kumaraswamy-ekw-distribution">Exponentiated Kumaraswamy (EKw) - Distribution<a class="anchor" aria-label="anchor" href="#exponentiated-kumaraswamy-ekw-distribution"></a></h2>
+
+      <div class="section-desc"><p>Density, CDF, quantile, and random generation (α, β, λ)</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="dekw.html">dekw()</a></code>
+
+        </dt>
+        <dd>Density of the Exponentiated Kumaraswamy (EKw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="pekw.html">pekw()</a></code>
+
+        </dt>
+        <dd>Cumulative Distribution Function (CDF) of the EKw Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="qekw.html">qekw()</a></code>
+
+        </dt>
+        <dd>Quantile Function of the Exponentiated Kumaraswamy (EKw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="rekw.html">rekw()</a></code>
+
+        </dt>
+        <dd>Random Number Generation for the Exponentiated Kumaraswamy (EKw) Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="exponentiated-kumaraswamy-ekw-inference">Exponentiated Kumaraswamy (EKw) - Inference<a class="anchor" aria-label="anchor" href="#exponentiated-kumaraswamy-ekw-inference"></a></h2>
+
+      <div class="section-desc"><p>Log-likelihood, gradient, and Hessian</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="llekw.html">llekw()</a></code>
+
+        </dt>
+        <dd>Negative Log-Likelihood for the Exponentiated Kumaraswamy (EKw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="grekw.html">grekw()</a></code>
+
+        </dt>
+        <dd>Gradient of the Negative Log-Likelihood for the EKw Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="hsekw.html">hsekw()</a></code>
+
+        </dt>
+        <dd>Hessian Matrix of the Negative Log-Likelihood for the EKw Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="mcdonald-mc-distribution">McDonald (MC) - Distribution<a class="anchor" aria-label="anchor" href="#mcdonald-mc-distribution"></a></h2>
+
+      <div class="section-desc"><p>Density, CDF, quantile, and random generation (γ, δ, λ)</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="dmc.html">dmc()</a></code>
+
+        </dt>
+        <dd>Density of the McDonald (Mc)/Beta Power Distribution Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="pmc.html">pmc()</a></code>
+
+        </dt>
+        <dd>CDF of the McDonald (Mc)/Beta Power Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="qmc.html">qmc()</a></code>
+
+        </dt>
+        <dd>Quantile Function of the McDonald (Mc)/Beta Power Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="rmc.html">rmc()</a></code>
+
+        </dt>
+        <dd>Random Number Generation for the McDonald (Mc)/Beta Power Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="mcdonald-mc-inference">McDonald (MC) - Inference<a class="anchor" aria-label="anchor" href="#mcdonald-mc-inference"></a></h2>
+
+      <div class="section-desc"><p>Log-likelihood, gradient, and Hessian</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="llmc.html">llmc()</a></code>
+
+        </dt>
+        <dd>Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="grmc.html">grmc()</a></code>
+
+        </dt>
+        <dd>Gradient of the Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="hsmc.html">hsmc()</a></code>
+
+        </dt>
+        <dd>Hessian Matrix of the Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="kumaraswamy-kw-distribution">Kumaraswamy (Kw) - Distribution<a class="anchor" aria-label="anchor" href="#kumaraswamy-kw-distribution"></a></h2>
+
+      <div class="section-desc"><p>Density, CDF, quantile, and random generation (α, β)</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="dkw.html">dkw()</a></code>
+
+        </dt>
+        <dd>Density of the Kumaraswamy (Kw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="pkw.html">pkw()</a></code>
+
+        </dt>
+        <dd>Cumulative Distribution Function (CDF) of the Kumaraswamy (Kw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="qkw.html">qkw()</a></code>
+
+        </dt>
+        <dd>Quantile Function of the Kumaraswamy (Kw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="rkw.html">rkw()</a></code>
+
+        </dt>
+        <dd>Random Number Generation for the Kumaraswamy (Kw) Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="kumaraswamy-kw-inference">Kumaraswamy (Kw) - Inference<a class="anchor" aria-label="anchor" href="#kumaraswamy-kw-inference"></a></h2>
+
+      <div class="section-desc"><p>Log-likelihood, gradient, and Hessian</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="llkw.html">llkw()</a></code>
+
+        </dt>
+        <dd>Negative Log-Likelihood of the Kumaraswamy (Kw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="grkw.html">grkw()</a></code>
+
+        </dt>
+        <dd>Gradient of the Negative Log-Likelihood for the Kumaraswamy (Kw) Distribution</dd>
+      </dl><dl><dt>
+
+          <code><a href="hskw.html">hskw()</a></code>
+
+        </dt>
+        <dd>Hessian Matrix of the Negative Log-Likelihood for the Kw Distribution</dd>
+      </dl></div><div class="section level2">
+      <h2 id="beta-distribution">Beta - Distribution<a class="anchor" aria-label="anchor" href="#beta-distribution"></a></h2>
+
+      <div class="section-desc"><p>Density, CDF, quantile, and random generation (γ, δ)</p></div>
 
 
     </div><div class="section level2">
@@ -50,214 +451,10 @@
         <dd>Density of the Beta Distribution (gamma, delta+1 Parameterization)</dd>
       </dl><dl><dt>
 
-          <code><a href="dbkw.html">dbkw()</a></code>
-
-        </dt>
-        <dd>Density of the Beta-Kumaraswamy (BKw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="dekw.html">dekw()</a></code>
-
-        </dt>
-        <dd>Density of the Exponentiated Kumaraswamy (EKw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="dgkw.html">dgkw()</a></code>
-
-        </dt>
-        <dd>Density of the Generalized Kumaraswamy Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="dkkw.html">dkkw()</a></code>
-
-        </dt>
-        <dd>Density of the Kumaraswamy-Kumaraswamy (kkw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="dkw.html">dkw()</a></code>
-
-        </dt>
-        <dd>Density of the Kumaraswamy (Kw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="dmc.html">dmc()</a></code>
-
-        </dt>
-        <dd>Density of the McDonald (Mc)/Beta Power Distribution Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="gkwgetstartvalues.html">gkwgetstartvalues()</a></code>
-
-        </dt>
-        <dd>Estimate Distribution Parameters Using Method of Moments</dd>
-      </dl><dl><dt>
-
-          <code><a href="grbeta.html">grbeta()</a></code>
-
-        </dt>
-        <dd>Gradient of the Negative Log-Likelihood for the Beta Distribution (gamma, delta+1 Parameterization)</dd>
-      </dl><dl><dt>
-
-          <code><a href="grbkw.html">grbkw()</a></code>
-
-        </dt>
-        <dd>Gradient of the Negative Log-Likelihood for the BKw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="grekw.html">grekw()</a></code>
-
-        </dt>
-        <dd>Gradient of the Negative Log-Likelihood for the EKw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="grgkw.html">grgkw()</a></code>
-
-        </dt>
-        <dd>Gradient of the Negative Log-Likelihood for the GKw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="grkkw.html">grkkw()</a></code>
-
-        </dt>
-        <dd>Gradient of the Negative Log-Likelihood for the kkw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="grkw.html">grkw()</a></code>
-
-        </dt>
-        <dd>Gradient of the Negative Log-Likelihood for the Kumaraswamy (Kw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="grmc.html">grmc()</a></code>
-
-        </dt>
-        <dd>Gradient of the Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="hsbeta.html">hsbeta()</a></code>
-
-        </dt>
-        <dd>Hessian Matrix of the Negative Log-Likelihood for the Beta Distribution (gamma, delta+1 Parameterization)</dd>
-      </dl><dl><dt>
-
-          <code><a href="hsbkw.html">hsbkw()</a></code>
-
-        </dt>
-        <dd>Hessian Matrix of the Negative Log-Likelihood for the BKw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="hsekw.html">hsekw()</a></code>
-
-        </dt>
-        <dd>Hessian Matrix of the Negative Log-Likelihood for the EKw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="hsgkw.html">hsgkw()</a></code>
-
-        </dt>
-        <dd>Hessian Matrix of the Negative Log-Likelihood for the GKw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="hskkw.html">hskkw()</a></code>
-
-        </dt>
-        <dd>Hessian Matrix of the Negative Log-Likelihood for the kkw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="hskw.html">hskw()</a></code>
-
-        </dt>
-        <dd>Hessian Matrix of the Negative Log-Likelihood for the Kw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="hsmc.html">hsmc()</a></code>
-
-        </dt>
-        <dd>Hessian Matrix of the Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="llbeta.html">llbeta()</a></code>
-
-        </dt>
-        <dd>Negative Log-Likelihood for the Beta Distribution (gamma, delta+1 Parameterization)</dd>
-      </dl><dl><dt>
-
-          <code><a href="llbkw.html">llbkw()</a></code>
-
-        </dt>
-        <dd>Negative Log-Likelihood for Beta-Kumaraswamy (BKw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="llekw.html">llekw()</a></code>
-
-        </dt>
-        <dd>Negative Log-Likelihood for the Exponentiated Kumaraswamy (EKw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="llgkw.html">llgkw()</a></code>
-
-        </dt>
-        <dd>Negative Log-Likelihood for the Generalized Kumaraswamy Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="llkkw.html">llkkw()</a></code>
-
-        </dt>
-        <dd>Negative Log-Likelihood for the kkw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="llkw.html">llkw()</a></code>
-
-        </dt>
-        <dd>Negative Log-Likelihood of the Kumaraswamy (Kw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="llmc.html">llmc()</a></code>
-
-        </dt>
-        <dd>Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution</dd>
-      </dl><dl><dt>
-
           <code><a href="pbeta_.html">pbeta_()</a></code>
 
         </dt>
         <dd>CDF of the Beta Distribution (gamma, delta+1 Parameterization)</dd>
-      </dl><dl><dt>
-
-          <code><a href="pbkw.html">pbkw()</a></code>
-
-        </dt>
-        <dd>Cumulative Distribution Function (CDF) of the Beta-Kumaraswamy (BKw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="pekw.html">pekw()</a></code>
-
-        </dt>
-        <dd>Cumulative Distribution Function (CDF) of the EKw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="pgkw.html">pgkw()</a></code>
-
-        </dt>
-        <dd>Generalized Kumaraswamy Distribution CDF</dd>
-      </dl><dl><dt>
-
-          <code><a href="pkkw.html">pkkw()</a></code>
-
-        </dt>
-        <dd>Cumulative Distribution Function (CDF) of the kkw Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="pkw.html">pkw()</a></code>
-
-        </dt>
-        <dd>Cumulative Distribution Function (CDF) of the Kumaraswamy (Kw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="pmc.html">pmc()</a></code>
-
-        </dt>
-        <dd>CDF of the McDonald (Mc)/Beta Power Distribution</dd>
       </dl><dl><dt>
 
           <code><a href="qbeta_.html">qbeta_()</a></code>
@@ -266,84 +463,42 @@
         <dd>Quantile Function of the Beta Distribution (gamma, delta+1 Parameterization)</dd>
       </dl><dl><dt>
 
-          <code><a href="qbkw.html">qbkw()</a></code>
-
-        </dt>
-        <dd>Quantile Function of the Beta-Kumaraswamy (BKw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="qekw.html">qekw()</a></code>
-
-        </dt>
-        <dd>Quantile Function of the Exponentiated Kumaraswamy (EKw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="qgkw.html">qgkw()</a></code>
-
-        </dt>
-        <dd>Generalized Kumaraswamy Distribution Quantile Function</dd>
-      </dl><dl><dt>
-
-          <code><a href="qkkw.html">qkkw()</a></code>
-
-        </dt>
-        <dd>Quantile Function of the Kumaraswamy-Kumaraswamy (kkw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="qkw.html">qkw()</a></code>
-
-        </dt>
-        <dd>Quantile Function of the Kumaraswamy (Kw) Distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="qmc.html">qmc()</a></code>
-
-        </dt>
-        <dd>Quantile Function of the McDonald (Mc)/Beta Power Distribution</dd>
-      </dl><dl><dt>
-
           <code><a href="rbeta_.html">rbeta_()</a></code>
 
         </dt>
         <dd>Random Generation for the Beta Distribution (gamma, delta+1 Parameterization)</dd>
-      </dl><dl><dt>
+      </dl></div><div class="section level2">
+      <h2 id="beta-inference">Beta - Inference<a class="anchor" aria-label="anchor" href="#beta-inference"></a></h2>
 
-          <code><a href="rbkw.html">rbkw()</a></code>
+      <div class="section-desc"><p>Log-likelihood, gradient, and Hessian</p></div>
 
-        </dt>
-        <dd>Random Number Generation for the Beta-Kumaraswamy (BKw) Distribution</dd>
-      </dl><dl><dt>
 
-          <code><a href="rekw.html">rekw()</a></code>
+    </div><div class="section level2">
 
-        </dt>
-        <dd>Random Number Generation for the Exponentiated Kumaraswamy (EKw) Distribution</dd>
-      </dl><dl><dt>
 
-          <code><a href="rgkw.html">rgkw()</a></code>
 
-        </dt>
-        <dd>Generalized Kumaraswamy Distribution Random Generation</dd>
-      </dl><dl><dt>
 
-          <code><a href="rkkw.html">rkkw()</a></code>
+      <dl><dt>
+
+          <code><a href="llbeta.html">llbeta()</a></code>
 
         </dt>
-        <dd>Random Number Generation for the kkw Distribution</dd>
+        <dd>Negative Log-Likelihood for the Beta Distribution (gamma, delta+1 Parameterization)</dd>
       </dl><dl><dt>
 
-          <code><a href="rkw.html">rkw()</a></code>
+          <code><a href="grbeta.html">grbeta()</a></code>
 
         </dt>
-        <dd>Random Number Generation for the Kumaraswamy (Kw) Distribution</dd>
+        <dd>Gradient of the Negative Log-Likelihood for the Beta Distribution (gamma, delta+1 Parameterization)</dd>
       </dl><dl><dt>
 
-          <code><a href="rmc.html">rmc()</a></code>
+          <code><a href="hsbeta.html">hsbeta()</a></code>
 
         </dt>
-        <dd>Random Number Generation for the McDonald (Mc)/Beta Power Distribution</dd>
+        <dd>Hessian Matrix of the Negative Log-Likelihood for the Beta Distribution (gamma, delta+1 Parameterization)</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
