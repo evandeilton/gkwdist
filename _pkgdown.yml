@@ -7,7 +7,6 @@ navbar:
     left: [intro, reference, articles, news]
     right: [search, github]
 
-# Configure a logo do pacote
 logo:
   src: man/figures/gkwdist.png
   alt: "gkwdist logo"

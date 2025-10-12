@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# gkwdist: Generalized Kumaraswamy Distribution Family <img src="man/figures/gkwdist.png" align="right" height="138" />
+# gkwdist: Generalized Kumaraswamy Distribution Family <img src="man/figures/gkwdist.png" align="right" height="138" alt="gkwdist logo" />
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/gkwdist)](https://CRAN.R-project.org/package=gkwdist)
