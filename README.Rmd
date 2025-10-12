@@ -1,46 +1,56 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+
 # gkwdist: Generalized Kumaraswamy Distribution Family <img src="man/figures/gkwdist.png" align="right" height="138" />
 
-[![CRAN
-status](https://www.r-pkg.org/badges/version/gkwdist)](https://CRAN.R-project.org/package=gkwdist)
+[![CRAN status](https://www.r-pkg.org/badges/version/gkwdist)](https://CRAN.R-project.org/package=gkwdist)
 [![R-CMD-check](https://github.com/evandeilton/gkwdist/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/evandeilton/gkwdist/actions/workflows/R-CMD-check.yaml)
 [![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/gkwdist)](https://cran.r-project.org/package=gkwdist)
 [![License:MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
 
-`gkwdist` implements the **Generalized Kumaraswamy (GKw)** distribution
-family and its seven nested sub-models for bounded continuous data on
-$(0,1)$. All functions are implemented in **C++** via RcppArmadillo for
-maximum computational efficiency.
+`gkwdist` implements the **Generalized Kumaraswamy (GKw)** distribution family and its seven nested sub-models for bounded continuous data on $(0,1)$. All functions are implemented in **C++** via RcppArmadillo for maximum computational efficiency.
 
-**Key Features:** - Seven flexible distributions for proportions, rates,
-and bounded data - Standard R distribution API: `d*`, `p*`, `q*`, `r*` -
-Analytical log-likelihood, gradient, and Hessian functions - **All
-functions implemented in C++** for optimal performance - 10-50× faster
-than equivalent R implementations - Numerically stable for extreme
-parameter values
+**Key Features:**
+- Seven flexible distributions for proportions, rates, and bounded data
+- Standard R distribution API: `d*`, `p*`, `q*`, `r*`
+- Analytical log-likelihood, gradient, and Hessian functions
+- **All functions implemented in C++** for optimal performance
+- 10-50× faster than equivalent R implementations
+- Numerically stable for extreme parameter values
 
-------------------------------------------------------------------------
+---
 
 ## Installation
 
-``` r
+```r
 # Install from GitHub
 # install.packages("devtools")
 devtools::install_github("evandeilton/gkwdist")
 ```
 
-------------------------------------------------------------------------
+---
 
 ## The Distribution Family
 
 ### Complete Function Table
 
 | Distribution | Code | Parameters | Functions |
-|:---|:--:|:---|:---|
+|:---|:---:|:---|:---|
 | **Generalized Kumaraswamy** | `gkw` | $\alpha, \beta, \gamma, \delta, \lambda$ | `dgkw`, `pgkw`, `qgkw`, `rgkw`, `llgkw`, `grgkw`, `hsgkw` |
 | **Beta-Kumaraswamy** | `bkw` | $\alpha, \beta, \gamma, \delta$ | `dbkw`, `pbkw`, `qbkw`, `rbkw`, `llbkw`, `grbkw`, `hsbkw` |
 | **Kumaraswamy-Kumaraswamy** | `kkw` | $\alpha, \beta, \delta, \lambda$ | `dkkw`, `pkkw`, `qkkw`, `rkkw`, `llkkw`, `grkkw`, `hskkw` |
@@ -60,8 +70,7 @@ devtools::install_github("evandeilton/gkwdist")
 
 **Analytical Functions for Maximum Likelihood (C++ implementation):**
 
-All analytical functions use the signature: `function(par, data)` where
-`par` is a numeric vector of parameters.
+All analytical functions use the signature: `function(par, data)` where `par` is a numeric vector of parameters.
 
 - `ll*(par, data)` — Log-likelihood:
 
@@ -75,14 +84,11 @@ $$\nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
 
 $$\nabla^2_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
 
-------------------------------------------------------------------------
+---
 
 ## Mathematical Specification
 
-**Notation:** All parameters are positive; support $x \in (0, 1)$. The
-beta function is $B(a,b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$, and the
-regularized incomplete beta function is $I_z(a,b) = B_z(a,b)/B(a,b)$
-where $B_z(a,b) = \int_0^z t^{a-1}(1-t)^{b-1}dt$.
+**Notation:** All parameters are positive; support $x \in (0, 1)$. The beta function is $B(a,b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$, and the regularized incomplete beta function is $I_z(a,b) = B_z(a,b)/B(a,b)$ where $B_z(a,b) = \int_0^z t^{a-1}(1-t)^{b-1}dt$.
 
 ### 1. Generalized Kumaraswamy (GKw)
 
@@ -98,7 +104,7 @@ $$F_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = I_{[1-(1-x^\alpha)
 
 **Quantile:** Numerical inversion of the CDF.
 
-------------------------------------------------------------------------
+---
 
 ### 2. Beta-Kumaraswamy (BKw)
 
@@ -114,7 +120,7 @@ $$F_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = I_{1-(1-x^\alpha)^\beta}(\g
 
 **Quantile:** Numerical inversion.
 
-------------------------------------------------------------------------
+---
 
 ### 3. Kumaraswamy-Kumaraswamy (KKw)
 
@@ -132,7 +138,7 @@ $$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \{1-[1-(1-x^\alpha)^\b
 
 $$Q_{\text{KKw}}(p; \alpha, \beta, \delta, \lambda) = [1 - (1 - [1-(1-p)^{1/\delta}]^{1/\lambda})^{1/\beta}]^{1/\alpha}$$
 
-------------------------------------------------------------------------
+---
 
 ### 4. Exponentiated Kumaraswamy (EKw)
 
@@ -150,7 +156,7 @@ $$F_{\text{EKw}}(x; \alpha, \beta, \lambda) = [1-(1-x^\alpha)^\beta]^\lambda$$
 
 $$Q_{\text{EKw}}(p; \alpha, \beta, \lambda) = [1-(1-p^{1/\lambda})^{1/\beta}]^{1/\alpha}$$
 
-------------------------------------------------------------------------
+---
 
 ### 5. McDonald (Beta Power)
 
@@ -168,10 +174,9 @@ $$F_{\text{MC}}(x; \gamma, \delta, \lambda) = I_{x^\lambda}(\gamma, \delta)$$
 
 $$Q_{\text{MC}}(p; \gamma, \delta, \lambda) = [I_p^{-1}(\gamma, \delta)]^{1/\lambda}$$
 
-where $I_p^{-1}(\gamma, \delta)$ is the inverse of the regularized
-incomplete beta function.
+where $I_p^{-1}(\gamma, \delta)$ is the inverse of the regularized incomplete beta function.
 
-------------------------------------------------------------------------
+---
 
 ### 6. Kumaraswamy (Kw)
 
@@ -193,7 +198,7 @@ $$Q_{\text{Kw}}(p; \alpha, \beta) = [1-(1-p)^{1/\beta}]^{1/\alpha}$$
 
 $$\mathbb{E}(X^r) = \beta B(1 + r/\alpha, \beta) = \frac{\beta \, \Gamma(1+r/\alpha) \, \Gamma(\beta)}{\Gamma(1+r/\alpha+\beta)}$$
 
-------------------------------------------------------------------------
+---
 
 ### 7. Beta
 
@@ -215,35 +220,37 @@ $$Q_{\text{Beta}}(p; \gamma, \delta) = I_p^{-1}(\gamma, \delta)$$
 
 $$\mathbb{E}(X^r) = \frac{B(\gamma+r, \delta)}{B(\gamma, \delta)}, \quad \mathbb{E}(X) = \frac{\gamma}{\gamma+\delta}, \quad \text{Var}(X) = \frac{\gamma\delta}{(\gamma+\delta)^2(\gamma+\delta+1)}$$
 
-------------------------------------------------------------------------
+---
 
 ## Hierarchical Structure
 
-                                  GKw(α, β, γ, δ, λ)
-                                  /               \
-                               λ = 1             γ = 1
-                                /                    \
-                       BKw(α, β, γ, δ)         KKw(α, β, δ, λ)
-                             |                          |
-                         α = β = 1                    δ = 1
-                             |                          |
-                        MC(γ, δ, λ)              EKw(α, β, λ)
-                             |                          |
-                          λ = 1                         |
-                             |                          |
-                        Beta(γ, δ)                  γ = δ = 1
-                             |                          |
-                             +---------- λ = 1 ---------+
-                                           |
-                                       Kw(α, β)
+```
+                              GKw(α, β, γ, δ, λ)
+                              /               \
+                           λ = 1             γ = 1
+                            /                    \
+                   BKw(α, β, γ, δ)         KKw(α, β, δ, λ)
+                         |                          |
+                     α = β = 1                    δ = 1
+                         |                          |
+                    MC(γ, δ, λ)              EKw(α, β, λ)
+                         |                          |
+                      λ = 1                         |
+                         |                          |
+                    Beta(γ, δ)                  γ = δ = 1
+                         |                          |
+                         +---------- λ = 1 ---------+
+                                       |
+                                   Kw(α, β)
+```
 
-------------------------------------------------------------------------
+---
 
 ## Usage Examples
 
 ### Example 1: Basic Distribution Functions
 
-``` r
+```r
 library(gkwdist)
 
 # Set parameters
@@ -277,7 +284,7 @@ grid()
 
 ### Example 2: Comparing Distribution Families
 
-``` r
+```r
 library(gkwdist)
 
 par(mfrow = c(1,1), mar = c(3,3,2,2))
@@ -313,7 +320,7 @@ grid()
 
 ### Example 3: Maximum Likelihood Estimation Using optim()
 
-``` r
+```r
 library(gkwdist)
 
 # Generate synthetic data from Kumaraswamy distribution
@@ -354,7 +361,7 @@ print(ci)
 
 ### Example 4: Goodness-of-Fit Diagnostic Plot
 
-``` r
+```r
 library(gkwdist)
 
 # Using fitted model from Example 3
@@ -382,7 +389,7 @@ grid()
 
 ### Example 5: Model Selection Using AIC and BIC
 
-``` r
+```r
 library(gkwdist)
 
 # Generate data from Exponentiated Kumaraswamy
@@ -444,7 +451,7 @@ cat("\nBest model by AIC:", results$Model[1], "\n")
 
 ### Example 6: Using Analytical Functions Directly
 
-``` r
+```r
 library(gkwdist)
 
 # Generate data from EKw
@@ -478,7 +485,7 @@ print(se)
 
 ### Example 7: Q-Q Plot for Model Validation
 
-``` r
+```r
 library(gkwdist)
 
 # Generate data and fit model
@@ -513,7 +520,7 @@ grid()
 
 ### Example 8: Fitting GKw (Full Model) Using optim()
 
-``` r
+```r
 library(gkwdist)
 
 # Generate data from GKw
@@ -550,7 +557,7 @@ print(estimates, digits = 4)
 
 ### Example 9: Comparing Analytical vs Numerical Derivatives
 
-``` r
+```r
 library(gkwdist)
 
 # Generate data
@@ -578,13 +585,13 @@ comparison <- data.frame(
 print(comparison, digits = 8)
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Performance Comparison
 
 The C++ implementation provides substantial performance gains:
 
-``` r
+```r
 library(microbenchmark)
 
 # Generate large dataset
@@ -605,16 +612,13 @@ plot(benchmark)
 
 **Why C++ Implementation Matters:**
 
-- **Speed:** Critical for maximum likelihood estimation with large
-  datasets
-- **Numerical Stability:** Better handling of extreme parameter values
-  and edge cases
+- **Speed:** Critical for maximum likelihood estimation with large datasets
+- **Numerical Stability:** Better handling of extreme parameter values and edge cases
 - **Memory Efficiency:** Optimized memory allocation in tight loops
 - **Scalability:** Linear scaling with sample size
-- **Precision:** Analytical derivatives are exact (up to floating-point
-  precision)
+- **Precision:** Analytical derivatives are exact (up to floating-point precision)
 
-------------------------------------------------------------------------
+---
 
 ## When to Use Each Distribution
 
@@ -630,51 +634,36 @@ plot(benchmark)
 
 **Model Selection Workflow:**
 
-1.  Start with **Beta** and **Kumaraswamy** (2 parameters)
-2.  Check goodness-of-fit using Q-Q plots and formal tests
-3.  If inadequate, try **EKw** or **MC** (3 parameters)
-4.  For complex patterns, use **BKw**, **KKw**, or **GKw** (4-5
-    parameters)
-5.  Use AIC/BIC to balance fit quality and parsimony
-6.  Validate final model with residual diagnostics
+1. Start with **Beta** and **Kumaraswamy** (2 parameters)
+2. Check goodness-of-fit using Q-Q plots and formal tests
+3. If inadequate, try **EKw** or **MC** (3 parameters)
+4. For complex patterns, use **BKw**, **KKw**, or **GKw** (4-5 parameters)
+5. Use AIC/BIC to balance fit quality and parsimony
+6. Validate final model with residual diagnostics
 
-------------------------------------------------------------------------
+---
 
 ## References
 
-- **Cordeiro, G. M., & de Castro, M. (2011).** A new family of
-  generalized distributions. *Journal of Statistical Computation and
-  Simulation*, 81(7), 883-898.
+- **Cordeiro, G. M., & de Castro, M. (2011).** A new family of generalized distributions. *Journal of Statistical Computation and Simulation*, 81(7), 883-898.
 
-- **Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010).** A
-  new generalized Kumaraswamy distribution. *arXiv:1004.0911*.
-  [arxiv.org/abs/1004.0911](https://arxiv.org/abs/1004.0911)
+- **Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010).** A new generalized Kumaraswamy distribution. *arXiv:1004.0911*. [arxiv.org/abs/1004.0911](https://arxiv.org/abs/1004.0911)
 
-- **Kumaraswamy, P. (1980).** A generalized probability density function
-  for double-bounded random processes. *Journal of Hydrology*, 46(1-2),
-  79-88.
-  [doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694(80)90036-0)
+- **Kumaraswamy, P. (1980).** A generalized probability density function for double-bounded random processes. *Journal of Hydrology*, 46(1-2), 79-88. [doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694(80)90036-0)
 
-- **Jones, M. C. (2009).** Kumaraswamy’s distribution: A beta-type
-  distribution with some tractability advantages. *Statistical
-  Methodology*, 6(1), 70-81.
-  [doi:10.1016/j.stamet.2008.04.001](https://doi.org/10.1016/j.stamet.2008.04.001)
+- **Jones, M. C. (2009).** Kumaraswamy's distribution: A beta-type distribution with some tractability advantages. *Statistical Methodology*, 6(1), 70-81. [doi:10.1016/j.stamet.2008.04.001](https://doi.org/10.1016/j.stamet.2008.04.001)
 
-- **Lemonte, A. J. (2013).** A new exponential-type distribution with
-  constant, decreasing, increasing, upside-down bathtub and
-  bathtub-shaped failure rate function. *Computational Statistics & Data
-  Analysis*, 62, 149-170.
-  [doi:10.1016/j.csda.2013.01.011](https://doi.org/10.1016/j.csda.2013.01.011)
+- **Lemonte, A. J. (2013).** A new exponential-type distribution with constant, decreasing, increasing, upside-down bathtub and bathtub-shaped failure rate function. *Computational Statistics & Data Analysis*, 62, 149-170. [doi:10.1016/j.csda.2013.01.011](https://doi.org/10.1016/j.csda.2013.01.011)
 
-------------------------------------------------------------------------
+---
 
 ## Citation
 
-``` r
+```r
 citation("gkwdist")
 ```
 
-``` bibtex
+```bibtex
 @Manual{gkwdist2025,
   title  = {gkwdist: Generalized Kumaraswamy Distribution Family},
   author = {J. E. Lopes},
@@ -684,7 +673,7 @@ citation("gkwdist")
 }
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Author
 
@@ -692,9 +681,9 @@ citation("gkwdist")
 LEG - Laboratory of Statistics and Geoinformation  
 PPGMNE - Graduate Program in Numerical Methods in Engineering  
 Federal University of Paraná (UFPR), Brazil  
-Email: <evandeilton@gmail.com>
+Email: evandeilton@gmail.com
 
-------------------------------------------------------------------------
+---
 
 ## License
 
