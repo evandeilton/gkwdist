@@ -74,10 +74,10 @@
 </h3>
 <table class="table">
 <colgroup>
-<col width="23%">
-<col width="29%">
-<col width="23%">
-<col width="23%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
 </colgroup>
 <thead><tr>
 <th align="left">Distribution</th>
@@ -274,23 +274,23 @@
 <div class="section level2">
 <h2 id="hierarchical-structure">Hierarchical Structure<a class="anchor" aria-label="anchor" href="#hierarchical-structure"></a>
 </h2>
-<pre><code>                              GKw(α, β, γ, δ, λ)
-                              /               \
-                           λ = 1             γ = 1
-                            /                    \
-                   BKw(α, β, γ, δ)         KKw(α, β, δ, λ)
-                         |                          |
-                     α = β = 1                    δ = 1
-                         |                          |
-                    MC(γ, δ, λ)              EKw(α, β, λ)
-                         |                          |
-                      λ = 1                         |
-                         |                          |
-                    Beta(γ, δ)                  γ = δ = 1
-                         |                          |
-                         +---------- λ = 1 ---------+
-                                       |
-                                   Kw(α, β)</code></pre>
+<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>                              <span class="fu">GKw</span>(α, β, γ, δ, λ)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                              <span class="sc">/</span>               \</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>                           λ <span class="ot">=</span> <span class="dv">1</span>             γ <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>                            <span class="sc">/</span>                    \</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>                   <span class="fu">BKw</span>(α, β, γ, δ)         <span class="fu">KKw</span>(α, β, δ, λ)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>                         <span class="sc">|</span>                          <span class="er">|</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>                     α <span class="ot">=</span> β <span class="ot">=</span> <span class="dv">1</span>                    δ <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>                         <span class="sc">|</span>                          <span class="er">|</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>                    <span class="fu">MC</span>(γ, δ, λ)              <span class="fu">EKw</span>(α, β, λ)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>                         <span class="sc">|</span>                          <span class="er">|</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>                      λ <span class="ot">=</span> <span class="dv">1</span>                         <span class="sc">|</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>                         <span class="er">|</span>                          <span class="er">|</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>                    <span class="fu">Beta</span>(γ, δ)                  γ <span class="ot">=</span> δ <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>                         <span class="sc">|</span>                          <span class="er">|</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>                         <span class="sc">+----------</span> λ <span class="ot">=</span> <span class="dv">1</span> <span class="sc">---------+</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>                                       <span class="er">|</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>                                   <span class="fu">Kw</span>(α, β)</span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
