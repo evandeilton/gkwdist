@@ -10,3 +10,4 @@ navbar:
 logo:
   src: man/figures/gkwdist.png
   alt: "gkwdist logo"
+  width: 120px
