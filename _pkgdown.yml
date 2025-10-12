@@ -2,3 +2,12 @@ url: https://evandeilton.github.io/gkwdist/
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+# Configure a logo do pacote
+logo:
+  src: man/figures/gkwdist.png
+  alt: "gkwdist logo"
