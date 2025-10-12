@@ -1,13 +1,132 @@
 url: https://evandeilton.github.io/gkwdist/
 template:
   bootstrap: 5
+  bootswatch: minty
+
+# navbar:
+#   structure:
+#     left: [intro, reference, articles, news]
+#     right: [search, github]
 
 navbar:
   structure:
     left: [intro, reference, articles, news]
     right: [search, github]
+  components:
+    github:
+      icon: fab fa-github fa-lg
+      href: https://github.com/evandeilton/gkwdist
+      aria-label: GitHub
 
 logo:
   src: man/figures/gkwdist.png
   alt: "gkwdist logo"
   width: 120px
+
+
+reference:
+  - title: "Utility Functions"
+    desc: "Helper functions for parameter initialization"
+    contents:
+      - gkwgetstartvalues
+
+  - title: "Generalized Kumaraswamy (GKw)"
+    desc: "Full 5-parameter distribution: α, β, γ, δ, λ"
+    contents:
+      - subtitle: "Distribution Functions"
+      - dgkw
+      - pgkw
+      - qgkw
+      - rgkw
+      - subtitle: "Maximum Likelihood Functions"
+      - llgkw
+      - grgkw
+      - hsgkw
+
+  - title: "Beta-Kumaraswamy (BKw)"
+    desc: "4-parameter distribution: α, β, γ, δ (GKw with λ = 1)"
+    contents:
+      - subtitle: "Distribution Functions"
+      - dbkw
+      - pbkw
+      - qbkw
+      - rbkw
+      - subtitle: "Maximum Likelihood Functions"
+      - llbkw
+      - grbkw
+      - hsbkw
+
+  - title: "Kumaraswamy-Kumaraswamy (KKw)"
+    desc: "4-parameter distribution: α, β, δ, λ (GKw with γ = 1)"
+    contents:
+      - subtitle: "Distribution Functions"
+      - dkkw
+      - pkkw
+      - qkkw
+      - rkkw
+      - subtitle: "Maximum Likelihood Functions"
+      - llkkw
+      - grkkw
+      - hskkw
+
+  - title: "Exponentiated Kumaraswamy (EKw)"
+    desc: "3-parameter distribution: α, β, λ (GKw with γ = δ = 1)"
+    contents:
+      - subtitle: "Distribution Functions"
+      - dekw
+      - pekw
+      - qekw
+      - rekw
+      - subtitle: "Maximum Likelihood Functions"
+      - llekw
+      - grekw
+      - hsekw
+
+  - title: "McDonald (MC)"
+    desc: "3-parameter Beta Power distribution: γ, δ, λ (GKw with α = β = 1)"
+    contents:
+      - subtitle: "Distribution Functions"
+      - dmc
+      - pmc
+      - qmc
+      - rmc
+      - subtitle: "Maximum Likelihood Functions"
+      - llmc
+      - grmc
+      - hsmc
+
+  - title: "Kumaraswamy (Kw)"
+    desc: "2-parameter distribution: α, β (GKw with γ = δ = λ = 1)"
+    contents:
+      - subtitle: "Distribution Functions"
+      - dkw
+      - pkw
+      - qkw
+      - rkw
+      - subtitle: "Maximum Likelihood Functions"
+      - llkw
+      - grkw
+      - hskw
+
+  - title: "Beta Distribution"
+    desc: "2-parameter distribution: γ, δ (GKw with α = β = λ = 1)"
+    contents:
+      - subtitle: "Distribution Functions"
+      - dbeta_
+      - pbeta_
+      - qbeta_
+      - rbeta_
+      - subtitle: "Maximum Likelihood Functions"
+      - llbeta
+      - grbeta
+      - hsbeta
+
+home:
+  title: "gkwdist: Generalized Kumaraswamy Distribution Family"
+  description: |
+    Fast C++ implementation of the Generalized Kumaraswamy distribution 
+    family and its seven nested sub-models for bounded continuous data.
+
+development:
+  mode: auto
+  
