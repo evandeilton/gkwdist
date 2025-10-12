@@ -1,4 +1,6 @@
 # gkwdist 1.0.3
+* **README.md**: Fix typos and faill link
+  - Fix zzz.R file by removing useless texts
 
 # gkwdist 1.0.2
 
