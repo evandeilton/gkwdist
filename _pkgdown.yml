@@ -1,16 +1,13 @@
 url: https://evandeilton.github.io/gkwdist/
-
 template:
   bootstrap: 5
   bootswatch: cosmo
-
 home:
   title: "Generalized Kumaraswamy Distribution"
   description: >
     Implements the five-parameter Generalized Kumaraswamy distribution and 
     six nested sub-families for bounded continuous data on (0,1). Provides 
     fast maximum likelihood estimation via Template Model Builder (TMB).
-
 navbar:
   type: default
   left:
@@ -23,7 +20,6 @@ navbar:
     - icon: fab fa-github fa-lg
       href: https://github.com/evandeilton/gkwdist
       aria-label: GitHub
-
 reference:
   - title: "Density Functions"
     desc: "Probability density functions for all distributions"
@@ -61,7 +57,90 @@ reference:
     contents:
       - matches("^ll[a-z]+")
   
+  - title: "Utility Functions"
+    desc: "Helper functions for parameter estimation and diagnostics"
+    contents:
+      - gkwgetstartvalues
+      # Adicione aqui outras funções auxiliares se houver
+  
   - title: "Internal Functions"
     desc: "Internal helper functions"
     contents:
       - matches("^dot-")
+
+
+
+
+
+
+
+
+
+
+# url: https://evandeilton.github.io/gkwdist/
+# 
+# template:
+#   bootstrap: 5
+#   bootswatch: cosmo
+# 
+# home:
+#   title: "Generalized Kumaraswamy Distribution"
+#   description: >
+#     Implements the five-parameter Generalized Kumaraswamy distribution and 
+#     six nested sub-families for bounded continuous data on (0,1). Provides 
+#     fast maximum likelihood estimation via Template Model Builder (TMB).
+# 
+# navbar:
+#   type: default
+#   left:
+#     - icon: fa-home
+#       href: index.html
+#       aria-label: Home
+#     - text: "Reference"
+#       href: reference/index.html
+#   right:
+#     - icon: fab fa-github fa-lg
+#       href: https://github.com/evandeilton/gkwdist
+#       aria-label: GitHub
+# 
+# reference:
+#   - title: "Density Functions"
+#     desc: "Probability density functions for all distributions"
+#     contents:
+#       - matches("^d[a-z]+_?$")
+#       - -matches("^dot-")
+#   
+#   - title: "Distribution Functions (CDF)"
+#     desc: "Cumulative distribution functions"
+#     contents:
+#       - matches("^p[a-z]+_?$")
+#   
+#   - title: "Quantile Functions"
+#     desc: "Quantile functions (inverse CDF)"
+#     contents:
+#       - matches("^q[a-z]+_?$")
+#   
+#   - title: "Random Generation"
+#     desc: "Random number generation"
+#     contents:
+#       - matches("^r[a-z]+_?$")
+#   
+#   - title: "Gradient Functions"
+#     desc: "Gradient of log-likelihood"
+#     contents:
+#       - matches("^gr[a-z]+")
+#   
+#   - title: "Hessian Functions"
+#     desc: "Hessian of log-likelihood"
+#     contents:
+#       - matches("^hs[a-z]+")
+#   
+#   - title: "Log-Likelihood Functions"
+#     desc: "Log-likelihood functions"
+#     contents:
+#       - matches("^ll[a-z]+")
+#   
+#   - title: "Internal Functions"
+#     desc: "Internal helper functions"
+#     contents:
+#       - matches("^dot-")
