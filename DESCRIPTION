@@ -16,7 +16,7 @@ Description: Implements the five-parameter Generalized Kumaraswamy (GKw)
     such as bimodality, asymmetry, or heavy tails not adequately captured by 
     standard distributions like Beta or Kumaraswamy.
 License: MIT + file LICENSE
-URL: https://github.com/evandeilton/gkwdist, https://evandeilton.github.io/gkwdist/
+URL: https://github.com/evandeilton/gkwdist
 BugReports: https://github.com/evandeilton/gkwdist/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
