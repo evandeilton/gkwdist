@@ -629,7 +629,7 @@ plot(benchmark)
 
 ## References
 
-- **Cordeiro, G. M., & de Castro, M. (2011).** A new family of generalized distributions. *Journal of Statistical Computation and Simulation*, 81(7), 883-898. [doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
+- **Cordeiro, G. M., & de Castro, M. (2011).** A new family of generalized distributions. *Journal of Statistical Computation and Simulation*, 81(7), 883-898.
 
 - **Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010).** A new generalized Kumaraswamy distribution. *arXiv:1004.0911*. [arxiv.org/abs/1004.0911](https://arxiv.org/abs/1004.0911)
 
