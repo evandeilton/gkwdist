@@ -1,7 +1,7 @@
 utils::globalVariables(c(
   "packageVersion", "dev.interactive", "calculateMean", "index", "theoretical", "observed", "lower",
-  "upper", "log", "log_scale", "::", ":::", "x", "Theoretical", "Empirical", "value", "loglik", "cook_dist", 
-  "fitted", "abs_resid", "leverage", "y_obs", "linpred", "resid", "model_label", "metric", "y", "Type", "Deviation", 
+  "upper", "log", "log_scale", "::", ":::", "x", "Theoretical", "Empirical", "value", "loglik", "cook_dist",
+  "fitted", "abs_resid", "leverage", "y_obs", "linpred", "resid", "model_label", "metric", "y", "Type", "Deviation",
   "object", "p_empirical", "p_theoretical", "statistic", "type", "Residual", "Family", "Value", "Criterion", "Parameter"
 ))
 

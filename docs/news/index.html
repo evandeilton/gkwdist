@@ -35,8 +35,13 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.3" id="gkwdist-103">gkwdist 1.0.3<a class="anchor" aria-label="anchor" href="#gkwdist-103"></a></h2>
 <ul><li>
-<strong>README.md</strong>: Fix typos and faill link<ul><li>Fix zzz.R file by removing useless texts</li></ul></li></ul></div>
-    <div class="section level2"><h2 class="pkg-version" data-toc-text="1.0.2" id="gkwdist-102">gkwdist 1.0.2<a class="anchor" aria-label="anchor" href="#gkwdist-102"></a></h2></div>
+<strong>README.md</strong>: Fix typos and faill link
+<ul><li>Fix zzz.R file by removing useless texts</li>
+</ul></li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.2" id="gkwdist-102">gkwdist 1.0.2<a class="anchor" aria-label="anchor" href="#gkwdist-102"></a></h2>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.1" id="gkwdist-101">gkwdist 1.0.1<a class="anchor" aria-label="anchor" href="#gkwdist-101"></a></h2>
 <div class="section level3">
@@ -44,32 +49,38 @@
 <div class="section level4">
 <h4 id="enhanced-gkwgetstartvalues-function-1-0-1">Enhanced <code>gkwgetstartvalues()</code> Function<a class="anchor" aria-label="anchor" href="#enhanced-gkwgetstartvalues-function-1-0-1"></a></h4>
 <ul><li>
-<strong>NEW</strong>: Added <code>family</code> parameter to support all distribution families<ul><li>Automatically returns correct number of parameters for each family</li>
+<strong>NEW</strong>: Added <code>family</code> parameter to support all distribution families
+<ul><li>Automatically returns correct number of parameters for each family</li>
 <li>Family-specific initial value strategies for better convergence</li>
 <li>Supported families: <code>"gkw"</code>, <code>"bkw"</code>, <code>"kkw"</code>, <code>"ekw"</code>, <code>"mc"</code>, <code>"kw"</code>, <code>"beta"</code>
 </li>
 <li>Case-insensitive family names for user convenience</li>
-</ul></li></ul></div>
+</ul></li>
+</ul></div>
 <div class="section level4">
 <h4 id="documentation-enhancements-1-0-1">Documentation Enhancements<a class="anchor" aria-label="anchor" href="#documentation-enhancements-1-0-1"></a></h4>
 <ul><li>
-<strong>README.md</strong>: Complete rewrite with mathematical rigor<ul><li>All LaTeX formulas corrected and verified for proper rendering</li>
+<strong>README.md</strong>: Complete rewrite with mathematical rigor
+<ul><li>All LaTeX formulas corrected and verified for proper rendering</li>
 <li>Eight comprehensive examples using <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim()</a></code> with analytical gradients</li>
 <li>Corrected function signatures: all <code>ll*()</code>, <code>gr*()</code>, and <code>hs*()</code> functions use <code>(par, data)</code> signature</li>
 <li>Added performance benchmarks demonstrating 10-50× speedup with C++ implementation</li>
 <li>Hierarchical structure diagram for all distribution families</li>
 <li>Model selection workflow and practical guidelines</li>
 <li>Removed all references to deprecated <code>gkwfit()</code> function</li>
-</ul></li></ul></div>
+</ul></li>
+</ul></div>
 <div class="section level4">
 <h4 id="cran-submission-readiness-1-0-1">CRAN Submission Readiness<a class="anchor" aria-label="anchor" href="#cran-submission-readiness-1-0-1"></a></h4>
 <ul><li>
-<strong>DESCRIPTION</strong>: Fixed to meet CRAN requirements<ul><li>Proper <code>Authors@R</code> field formatting</li>
+<strong>DESCRIPTION</strong>: Fixed to meet CRAN requirements
+<ul><li>Proper <code>Authors@R</code> field formatting</li>
 <li>Removed unused dependencies (<code>numDeriv</code>)</li>
 <li>Corrected package dependencies (<code>RcppArmadillo</code> only in <code>LinkingTo</code>)</li>
 <li>Enhanced description with DOI references</li>
 <li>Fixed maintainer email formatting</li>
-</ul></li></ul></div>
+</ul></li>
+</ul></div>
 </div>
 <div class="section level3">
 <h3 id="bug-fixes-1-0-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-1"></a></h3>
@@ -80,14 +91,16 @@
 <div class="section level3">
 <h3 id="testing-1-0-1">Testing<a class="anchor" aria-label="anchor" href="#testing-1-0-1"></a></h3>
 <ul><li>
-<strong>NEW</strong>: Comprehensive test suite using <code>testthat</code><ul><li>100+ tests covering all exported functions</li>
+<strong>NEW</strong>: Comprehensive test suite using <code>testthat</code>
+<ul><li>100+ tests covering all exported functions</li>
 <li>Tests for all 7 distribution families (GKw, BKw, KKw, EKw, MC, Kw, Beta)</li>
 <li>PDF, CDF, quantile, and random generation tests</li>
 <li>Log-likelihood, gradient, and Hessian validation</li>
 <li>Parameter recovery tests with MLE</li>
 <li>Edge cases and boundary condition handling</li>
 <li>Integration tests for PDF-CDF consistency</li>
-</ul></li></ul></div>
+</ul></li>
+</ul></div>
 <div class="section level3">
 <h3 id="performance-1-0-1">Performance<a class="anchor" aria-label="anchor" href="#performance-1-0-1"></a></h3>
 <ul><li>All functions implemented in C++ for maximum computational efficiency</li>
