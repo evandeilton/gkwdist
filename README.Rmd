@@ -21,6 +21,7 @@ knitr::opts_chunk$set(
 [![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/gkwdist)](https://cran.r-project.org/package=gkwdist)
 [![License:MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+
 ## Overview
 
 `gkwdist` implements the **Generalized Kumaraswamy (GKw)** distribution family and its seven nested sub-models for bounded continuous data on $(0,1)$. All functions are implemented in **C++** via RcppArmadillo for maximum computational efficiency.
@@ -72,23 +73,25 @@ devtools::install_github("evandeilton/gkwdist")
 
 All analytical functions use the signature: `function(par, data)` where `par` is a numeric vector of parameters.
 
-- `ll*(par, data)` — Log-likelihood:
+- `ll*(par, data)` — Negative log-likelihood:
 
-$$\ell(\boldsymbol{\theta}; \mathbf{x}) = \sum_{i=1}^n \log f(x_i; \boldsymbol{\theta})$$
+$$-\ell(\boldsymbol{\theta}; \mathbf{x}) = -\sum_{i=1}^n \log f(x_i; \boldsymbol{\theta})$$
 
-- `gr*(par, data)` — Gradient (score vector):
+- `gr*(par, data)` — Negative gradient (negative score vector):
 
-$$\nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
+$$-\nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
 
-- `hs*(par, data)` — Hessian matrix:
+- `hs*(par, data)` — Negative Hessian matrix:
 
-$$\nabla^2_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
+$$-\nabla^2_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
+
+**Note:** These functions return **negative** values to facilitate direct use with optimization routines like `optim()`, which perform minimization by default.
 
 ---
 
 ## Mathematical Specification
 
-**Notation:** All parameters are positive; support $x \in (0, 1)$. The beta function is $B(a,b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$, and the regularized incomplete beta function is $I_z(a,b) = B_z(a,b)/B(a,b)$ where $B_z(a,b) = \int_0^z t^{a-1}(1-t)^{b-1}dt$.
+**Notation:** All parameters are strictly positive ($\alpha, \beta, \gamma, \delta, \lambda > 0$); support $x \in (0, 1)$. The beta function is $B(a,b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$, and the regularized incomplete beta function is $I_z(a,b) = B_z(a,b)/B(a,b)$ where $B_z(a,b) = \int_0^z t^{a-1}(1-t)^{b-1}dt$.
 
 ### 1. Generalized Kumaraswamy (GKw)
 
@@ -96,53 +99,69 @@ $$\nabla^2_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})$$
 
 **PDF:**
 
-$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma\lambda-1} \{1-[1-(1-x^\alpha)^\beta]^\lambda\}^{\delta-1}$$
+$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma\lambda-1} \left\{1-[1-(1-x^\alpha)^\beta]^\lambda\right\}^{\delta-1}$$
 
 **CDF:**
 
 $$F_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = I_{[1-(1-x^\alpha)^\beta]^\lambda}(\gamma, \delta)$$
 
-**Quantile:** Numerical inversion of the CDF.
+**Quantile:** Numerical inversion of the CDF via root-finding algorithms.
+
+**Moments:** Analytical expressions not available in closed form. Numerical integration or simulation methods required.
 
 ---
 
 ### 2. Beta-Kumaraswamy (BKw)
 
-**Relationship:** GKw with $\lambda = 1$
+**Relationship:** Special case of GKw with $\lambda = 1$
 
 **PDF:**
 
-$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta\delta-1} [1-(1-x^\alpha)^\beta]^{\gamma-1}$$
+$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma-1} \left\{1-[1-(1-x^\alpha)^\beta]\right\}^{\delta-1}$$
+
+Simplifying:
+
+$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma-1} (1-x^\alpha)^{\beta(\delta-1)}$$
+
+$$= \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta\delta-1} [1-(1-x^\alpha)^\beta]^{\gamma-1}$$
 
 **CDF:**
 
 $$F_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = I_{1-(1-x^\alpha)^\beta}(\gamma, \delta)$$
 
-**Quantile:** Numerical inversion.
+**Quantile:** Numerical inversion via root-finding. For the inverse:
+
+$$u = I_y(\gamma, \delta) \quad \text{where} \quad y = 1-(1-x^\alpha)^\beta$$
+
+Solving for $x$:
+
+$$x = \left[1-\left(1-I_u^{-1}(\gamma, \delta)\right)^{1/\beta}\right]^{1/\alpha}$$
 
 ---
 
 ### 3. Kumaraswamy-Kumaraswamy (KKw)
 
-**Relationship:** GKw with $\gamma = 1$
+**Relationship:** Special case of GKw with $\gamma = 1$
 
 **PDF:**
 
-$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\lambda-1} \{1-[1-(1-x^\alpha)^\beta]^\lambda\}^{\delta-1}$$
+$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\lambda-1} \left\{1-[1-(1-x^\alpha)^\beta]^\lambda\right\}^{\delta-1}$$
 
 **CDF:**
 
-$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \{1-[1-(1-x^\alpha)^\beta]^\lambda\}^\delta$$
+$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \left\{1-[1-(1-x^\alpha)^\beta]^\lambda\right\}^\delta$$
 
 **Quantile (closed-form):**
 
-$$Q_{\text{KKw}}(p; \alpha, \beta, \delta, \lambda) = [1 - (1 - [1-(1-p)^{1/\delta}]^{1/\lambda})^{1/\beta}]^{1/\alpha}$$
+$$Q_{\text{KKw}}(p; \alpha, \beta, \delta, \lambda) = \left[1 - \left(1 - \left[1-(1-p)^{1/\delta}\right]^{1/\lambda}\right)^{1/\beta}\right]^{1/\alpha}$$
+
+**Moments:** Analytical expressions not available in closed form.
 
 ---
 
 ### 4. Exponentiated Kumaraswamy (EKw)
 
-**Relationship:** GKw with $\gamma = \delta = 1$
+**Relationship:** Special case of GKw with $\gamma = \delta = 1$
 
 **PDF:**
 
@@ -154,13 +173,19 @@ $$F_{\text{EKw}}(x; \alpha, \beta, \lambda) = [1-(1-x^\alpha)^\beta]^\lambda$$
 
 **Quantile (closed-form):**
 
-$$Q_{\text{EKw}}(p; \alpha, \beta, \lambda) = [1-(1-p^{1/\lambda})^{1/\beta}]^{1/\alpha}$$
+$$Q_{\text{EKw}}(p; \alpha, \beta, \lambda) = \left[1-\left(1-p^{1/\lambda}\right)^{1/\beta}\right]^{1/\alpha}$$
+
+**Moments:**
+
+$$\mathbb{E}(X^r) = \lambda \sum_{k=0}^{\infty} \frac{(-1)^k \binom{\lambda}{k+1}}{k+1} \cdot \beta B\left(1 + \frac{r}{\alpha}, (k+1)\beta\right)$$
+
+where the binomial coefficient is generalized: $\binom{\lambda}{k+1} = \frac{\lambda(\lambda-1)\cdots(\lambda-k)}{(k+1)!}$.
 
 ---
 
 ### 5. McDonald (Beta Power)
 
-**Relationship:** GKw with $\alpha = \beta = 1$
+**Relationship:** Special case of GKw with $\alpha = \beta = 1$
 
 **PDF:**
 
@@ -174,13 +199,19 @@ $$F_{\text{MC}}(x; \gamma, \delta, \lambda) = I_{x^\lambda}(\gamma, \delta)$$
 
 $$Q_{\text{MC}}(p; \gamma, \delta, \lambda) = [I_p^{-1}(\gamma, \delta)]^{1/\lambda}$$
 
-where $I_p^{-1}(\gamma, \delta)$ is the inverse of the regularized incomplete beta function.
+where $I_p^{-1}(\gamma, \delta)$ is the inverse regularized incomplete beta function (quantile function of the Beta distribution).
+
+**Moments:**
+
+$$\mathbb{E}(X^r) = \frac{B(\gamma + r/\lambda, \delta)}{B(\gamma, \delta)}$$
+
+which is valid for $r/\lambda > -\gamma$.
 
 ---
 
 ### 6. Kumaraswamy (Kw)
 
-**Relationship:** GKw with $\gamma = \delta = \lambda = 1$
+**Relationship:** Special case of GKw with $\gamma = \delta = \lambda = 1$
 
 **PDF:**
 
@@ -196,13 +227,23 @@ $$Q_{\text{Kw}}(p; \alpha, \beta) = [1-(1-p)^{1/\beta}]^{1/\alpha}$$
 
 **Moments:**
 
-$$\mathbb{E}(X^r) = \beta B(1 + r/\alpha, \beta) = \frac{\beta \, \Gamma(1+r/\alpha) \, \Gamma(\beta)}{\Gamma(1+r/\alpha+\beta)}$$
+$$\mathbb{E}(X^r) = \beta B\left(1 + \frac{r}{\alpha}, \beta\right) = \frac{\beta \, \Gamma(1+r/\alpha) \, \Gamma(\beta)}{\Gamma(1+r/\alpha+\beta)}$$
+
+which is valid for $r/\alpha > -1$.
+
+**Special Cases:**
+
+$$\mathbb{E}(X) = \frac{\beta \, \Gamma(1+1/\alpha) \, \Gamma(\beta)}{\Gamma(1+1/\alpha+\beta)}$$
+
+$$\mathbb{E}(X^2) = \frac{\beta \, \Gamma(1+2/\alpha) \, \Gamma(\beta)}{\Gamma(1+2/\alpha+\beta)}$$
+
+$$\text{Var}(X) = \mathbb{E}(X^2) - [\mathbb{E}(X)]^2$$
 
 ---
 
 ### 7. Beta
 
-**Relationship:** GKw with $\alpha = \beta = \lambda = 1$
+**Relationship:** Special case of GKw with $\alpha = \beta = \lambda = 1$
 
 **PDF:**
 
@@ -218,7 +259,11 @@ $$Q_{\text{Beta}}(p; \gamma, \delta) = I_p^{-1}(\gamma, \delta)$$
 
 **Moments:**
 
-$$\mathbb{E}(X^r) = \frac{B(\gamma+r, \delta)}{B(\gamma, \delta)}, \quad \mathbb{E}(X) = \frac{\gamma}{\gamma+\delta}, \quad \text{Var}(X) = \frac{\gamma\delta}{(\gamma+\delta)^2(\gamma+\delta+1)}$$
+$$\mathbb{E}(X^r) = \frac{B(\gamma+r, \delta)}{B(\gamma, \delta)} = \frac{\Gamma(\gamma+r) \, \Gamma(\delta) \, \Gamma(\gamma+\delta)}{\Gamma(\gamma) \, \Gamma(\gamma+\delta+r) \, \Gamma(\delta)}$$
+
+$$\mathbb{E}(X) = \frac{\gamma}{\gamma+\delta}$$
+
+$$\text{Var}(X) = \frac{\gamma\delta}{(\gamma+\delta)^2(\gamma+\delta+1)}$$
 
 ---
 
@@ -235,14 +280,12 @@ $$\mathbb{E}(X^r) = \frac{B(\gamma+r, \delta)}{B(\gamma, \delta)}, \quad \mathbb
                          |                          |
                     MC(γ, δ, λ)              EKw(α, β, λ)
                          |                          |
-                      λ = 1                         |
+                      λ = 1                    γ = δ = 1
                          |                          |
-                    Beta(γ, δ)                  γ = δ = 1
-                         |                          |
-                         +---------- λ = 1 ---------+
-                                       |
-                                   Kw(α, β)
+                    Beta(γ, δ)                   Kw(α, β)
 ```
+
+**Note:** The Beta distribution is obtained from MC by setting $\lambda = 1$, or from GKw by setting $\alpha = \beta = \lambda = 1$. The Kumaraswamy distribution is obtained from EKw by setting $\lambda = 1$, or from GKw by setting $\gamma = \delta = \lambda = 1$.
 
 ---
 
@@ -331,15 +374,16 @@ true_alpha <- 2.5
 true_beta  <- 3.5
 data <- rkw(n, true_alpha, true_beta)
 
+# Get starting values
 par_ini <- gkwgetstartvalues(data, family = "kw", n_starts = 2)
 
-# Optimization using Nelder-Mead with analytical gradient
+# Optimization using BFGS with analytical gradient
 fit <- optim(
   par = par_ini,
-  fn = llkw, # Negative log-likelihood function
-  gr = grkw, # Analytical gradient (score function)
+  fn = llkw,  # Negative log-likelihood function
+  gr = grkw,  # Negative gradient (negative score function)
   data = data,
-  method = "Nelder-Mead",
+  method = "BFGS",
   hessian = TRUE
 )
 
@@ -427,7 +471,7 @@ models <- list(
 
 # Fit all models using optim with analytical gradients
 fits <- lapply(models, function(m) {
-  optim(par = m$start, fn = m$nll, gr = m$gr, method = "Nelder-Mead")
+  optim(par = m$start, fn = m$nll, gr = m$gr, method = "BFGS")
 })
 
 # Extract log-likelihoods and compute information criteria
@@ -437,10 +481,10 @@ k <- sapply(models, `[[`, "npar")
 results <- data.frame(
   Model  = names(models),
   Coefs  = sapply(fits, function(f) paste0(round(f$par, 3), collapse = "|")),
-  LogLik = loglik,
+  LogLik = round(loglik, 2),
   nPar   = k,
-  AIC    = -2 * loglik + 2 * k,
-  BIC    = -2 * loglik + k * log(n)
+  AIC    = round(-2 * loglik + 2 * k, 2),
+  BIC    = round(-2 * loglik + k * log(n), 2)
 )
 
 # Sort by AIC
@@ -461,22 +505,22 @@ data <- rekw(n, alpha = 2, beta = 3, lambda = 1.5)
 params <- c(2, 3, 1.5)
 
 # Compute analytical functions at true parameters
-ll <- llekw(params, data)
-score <- grekw(params, data)
-hess <- hsekw(params, data)
+nll <- llekw(params, data)
+neg_score <- grekw(params, data)
+neg_hess <- hsekw(params, data)
 
-# Fisher information matrix (negative Hessian)
-fisher <- hess
+# Fisher information matrix (negative of negative Hessian = Hessian)
+fisher <- -neg_hess
 
 # Asymptotic standard errors
 se <- sqrt(diag(solve(fisher)))
 names(se) <- c("alpha", "beta", "lambda")
 
-cat("Log-likelihood:", ll, "\n")
-cat("\nScore vector (should be close to zero at true params):\n")
-print(score)
-cat("\nHessian matrix:\n")
-print(hess)
+cat("Negative log-likelihood:", nll, "\n")
+cat("\nNegative score vector (should be close to zero at true params):\n")
+print(neg_score)
+cat("\nNegative Hessian matrix:\n")
+print(neg_hess)
 cat("\nFisher Information matrix:\n")
 print(fisher)
 cat("\nAsymptotic standard errors:\n")
@@ -498,7 +542,7 @@ fit <- optim(
   par = c(1, 1),
   fn = function(par) llkw(par, data),
   gr = function(par) grkw(par, data),
-  method = "Nelder-Mead"
+  method = "BFGS"
 )
 
 # Theoretical quantiles
@@ -530,14 +574,14 @@ true_params <- c(alpha = 2, beta = 2.5, gamma = 1.5, delta = 2, lambda = 1.3)
 data <- rgkw(n, true_params[1], true_params[2], true_params[3],
              true_params[4], true_params[5])
 
-# Best init values
-par_ini <- gkwgetstartvalues(data, n_starts = 5)
+# Get starting values
+par_ini <- gkwgetstartvalues(data, family = "gkw", n_starts = 5)
 
 # Fit using optim with analytical gradient
 fit_gkw <- optim(
   par = par_ini, 
   fn = llgkw,    # Negative log-likelihood
-  gr = grgkw,    # Negative Analytical gradient
+  gr = grgkw,    # Negative gradient
   data = data,
   method = "BFGS",
   hessian = TRUE,
@@ -566,11 +610,11 @@ n <- 10000
 data <- rkw(n, alpha = 2, beta = 3)
 par <- c(2, 3)
 
-# Analytical gradient
-grad_analytical <- grkw(par, data)
+# Negative analytical gradient
+neg_grad_analytical <- grkw(par, data)
 
 # Numerical gradient (using finite differences)
-grad_numerical <- numDeriv::grad(
+neg_grad_numerical <- numDeriv::grad(
   func = function(p) llkw(p, data),
   x = par
 )
@@ -578,9 +622,9 @@ grad_numerical <- numDeriv::grad(
 # Compare
 comparison <- data.frame(
   Parameter = c("alpha", "beta"),
-  Analytical = grad_analytical,
-  Numerical = grad_numerical,
-  Difference = abs(grad_analytical - grad_numerical)
+  Analytical = neg_grad_analytical,
+  Numerical = neg_grad_numerical,
+  Difference = abs(neg_grad_analytical - neg_grad_numerical)
 )
 print(comparison, digits = 8)
 ```
@@ -600,8 +644,8 @@ data <- rkw(n, 2, 3)
 
 # Compare log-likelihood computation
 benchmark <- microbenchmark(
-  R_sum_log_d = sum(log(dkw(data, 2, 3))),
-  Cpp_ll = llkw(c(2, 3), data),
+  R_sum_log_d = -sum(log(dkw(data, 2, 3))),  # Manual negative log-likelihood
+  Cpp_ll = llkw(c(2, 3), data),               # C++ negative log-likelihood
   times = 100
 )
 
@@ -645,7 +689,7 @@ plot(benchmark)
 
 ## References
 
-- **Cordeiro, G. M., & de Castro, M. (2011).** A new family of generalized distributions. *Journal of Statistical Computation and Simulation*, 81(7), 883-898.
+- **Cordeiro, G. M., & de Castro, M. (2011).** A new family of generalized distributions. *Journal of Statistical Computation and Simulation*, 81(7), 883-898. [doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 - **Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010).** A new generalized Kumaraswamy distribution. *arXiv:1004.0911*. [arxiv.org/abs/1004.0911](https://arxiv.org/abs/1004.0911)
 
@@ -653,7 +697,13 @@ plot(benchmark)
 
 - **Jones, M. C. (2009).** Kumaraswamy's distribution: A beta-type distribution with some tractability advantages. *Statistical Methodology*, 6(1), 70-81. [doi:10.1016/j.stamet.2008.04.001](https://doi.org/10.1016/j.stamet.2008.04.001)
 
-- **Lemonte, A. J. (2013).** A new exponential-type distribution with constant, decreasing, increasing, upside-down bathtub and bathtub-shaped failure rate function. *Computational Statistics & Data Analysis*, 62, 149-170. [doi:10.1016/j.csda.2013.01.011](https://doi.org/10.1016/j.csda.2013.01.011)
+- **Lemonte, A. J., & Cordeiro, G. M. (2013).** An extended Lomax distribution. *Statistics*, 47(4), 800-816. [doi:10.1080/02331888.2011.568119](https://doi.org/10.1080/02331888.2011.568119)
+
+- **Cordeiro, G. M., & Lemonte, A. J. (2011).** The β-Birnbaum–Saunders distribution: An improved distribution for fatigue life modeling. *Computational Statistics & Data Analysis*, 55(3), 1445-1461. [doi:10.1016/j.csda.2010.10.007](https://doi.org/10.1016/j.csda.2010.10.007)
+
+- **McDonald, J. B. (1984).** Some generalized functions for the size distribution of income. *Econometrica*, 52(3), 647-663. [doi:10.2307/1913469](https://doi.org/10.2307/1913469)
+
+- **Cordeiro, G. M., & Brito, R. S. (2012).** The beta power distribution. *Brazilian Journal of Probability and Statistics*, 26(1), 88-112. [doi:10.1214/10-BJPS124](https://doi.org/10.1214/10-BJPS124)
 
 ---
 
@@ -688,3 +738,4 @@ Email: evandeilton@gmail.com
 ## License
 
 MIT License. See [LICENSE](LICENSE) file for details.
+
