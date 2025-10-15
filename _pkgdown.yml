@@ -2,7 +2,7 @@ url: https://evandeilton.github.io/gkwdist/
 
 template:
   bootstrap: 5
-  bootswatch: minty
+  bootswatch: slate #minty
 
 navbar:
   structure:
