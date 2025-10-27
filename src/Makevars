@@ -17,20 +17,3 @@
 
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
-
-## Source files
-#SOURCES = beta_.cpp \
-#					bkw.cpp \
-#					bpmc.cpp \
-#					ekw.cpp \
-#					gkw.cpp \
-#					kkw.cpp \
-#					kw.cpp \
-#					gkwinit.cpp \
-#					RcppExports.cpp
-
-#OBJECTS = $(SOURCES:.cpp=.o)
-
-## Ensure utils.o is built first since other files depend on it
-#all: $(SHLIB)
-#utils.o: utils.cpp utils.h
