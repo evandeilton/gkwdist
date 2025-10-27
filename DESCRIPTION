@@ -1,8 +1,8 @@
 Package: gkwdist
 Title: Generalized Kumaraswamy Distribution Family
-Version: 1.0.3
-Authors@R: person(given = "Lopes,",
-                  family = "J. E.",
+Version: 1.0.4
+Authors@R: person(given = "J. E.",
+                  family = "Lopes",
                   role = c("aut", "cre"),
                   email = "evandeilton@gmail.com",
                   comment = c(ORCID = "0009-0007-5887-4084"))
@@ -19,10 +19,18 @@ License: MIT + file LICENSE
 URL: https://github.com/evandeilton/gkwdist, https://evandeilton.github.io/gkwdist/
 BugReports: https://github.com/evandeilton/gkwdist/issues
 Encoding: UTF-8
+Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
-Imports: Rcpp, RcppArmadillo, magrittr, numDeriv
-LinkingTo: Rcpp, RcppArmadillo
-Suggests: testthat (>= 3.0.0)
+Imports: 
+    Rcpp,
+    RcppArmadillo,
+    magrittr,
+    numDeriv
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo
+Suggests: 
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 NeedsCompilation: yes
