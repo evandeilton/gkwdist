@@ -51,17 +51,17 @@ inline double log1mexp(double u) {
   if (u > 0.0) {
     return R_NaN;  // log(1 - exp(positive)) would yield log of negative number
   }
-  
+
   // For values very close to 0, avoid potential instability
   if (u > -SQRT_EPSILON) {
     return std::log(-u); // Approximation for u ≈ 0-
   }
-  
+
   // For u in (-ln(2), 0], use log(-expm1(u)) for better accuracy
   if (u > -LN2) {
     return std::log(-std::expm1(u));
   }
-  
+
   // For u <= -ln(2), use log1p(-exp(u)) for better accuracy
   return std::log1p(-std::exp(u));
 }
@@ -97,10 +97,10 @@ inline double safe_log(double x) {
     if (x == 0.0) return R_NegInf;  // Log of zero is -Infinity
     return R_NaN;                   // Log of negative is NaN
   }
-  
+
   // Handle potential underflow
   if (x < DBL_MIN_SAFE) return LOG_DBL_MIN + std::log(x / DBL_MIN_SAFE); // More accurate scaling
-  
+
   return std::log(x);
 }
 
@@ -117,7 +117,7 @@ inline double safe_exp(double x) {
     if (x < LOG_DBL_MIN - 10.0) return 0.0; // Far below threshold - return 0
     return DBL_MIN_SAFE * std::exp(x - LOG_DBL_MIN); // Scaled computation near threshold
   }
-  
+
   return std::exp(x);
 }
 
@@ -134,18 +134,18 @@ inline double safe_exp(double x) {
 inline double safe_pow(double x, double y) {
   // Handle special cases
   if (std::isnan(x) || std::isnan(y)) return R_NaN;
-  
+
   // Handle x = 0 cases
   if (x == 0.0) {
     if (y > 0.0)  return 0.0;
     if (y == 0.0) return 1.0;   // 0^0 convention
     return R_PosInf;            // 0^negative is undefined/infinity
   }
-  
+
   // Common trivial cases
   if (x == 1.0 || y == 0.0) return 1.0;
   if (y == 1.0) return x;
-  
+
   // Check for negative base with non-integer exponent (undefined in real domain)
   if (x < 0.0) {
     // Check if y is effectively an integer
@@ -153,24 +153,24 @@ inline double safe_pow(double x, double y) {
     if (std::abs(y - y_rounded) > SQRT_EPSILON) {
       return R_NaN;  // Non-integer power of negative number
     }
-    
+
     // Handle integer powers of negative numbers
     int y_int = static_cast<int>(y_rounded);
     double abs_result = std::pow(std::abs(x), std::abs(y));
-    
+
     // Apply sign: negative^odd = negative, negative^even = positive
     bool negative_result = (y_int % 2 != 0);
-    
+
     // Handle potential over/underflow
     if (y < 0) {
       if (abs_result > 1.0/DBL_MIN_SAFE && negative_result) return -R_PosInf;
       if (abs_result > 1.0/DBL_MIN_SAFE) return R_PosInf;
       return negative_result ? -1.0/abs_result : 1.0/abs_result;
     }
-    
+
     return negative_result ? -abs_result : abs_result;
   }
-  
+
   // For positive base, compute via logarithm for better numerical stability
   if (std::abs(y) > 1e10) {
     // Handle extreme exponents separately
@@ -180,7 +180,7 @@ inline double safe_pow(double x, double y) {
     if (lx < 0.0 && y < 0.0 && y * lx < -LOG_DBL_MAX) return R_PosInf;     // Very large result
     if (lx > 0.0 && y < 0.0 && y * std::abs(lx) > LOG_DBL_MAX) return 0.0; // Very small result
   }
-  
+
   // Normal case: compute via logarithm
   double lx = std::log(x);
   double log_result = y * lx;
@@ -195,33 +195,33 @@ inline double safe_pow(double x, double y) {
  */
 inline arma::vec vec_log1mexp(const arma::vec& u) {
   arma::vec result(u.n_elem);
-  
+
   // Process each element individually for maximum reliability
   for (size_t i = 0; i < u.n_elem; ++i) {
     double ui = u(i);
-    
+
     // Input validation - ui must be non-positive
     if (ui > 0.0) {
       result(i) = arma::datum::nan;
       continue;
     }
-    
+
     // For values very close to 0, avoid potential instability
     if (ui > -SQRT_EPSILON) {
       result(i) = std::log(-ui);
       continue;
     }
-    
+
     // For ui in (-ln(2), 0], use log(-expm1(ui)) for better accuracy
     if (ui > -LN2) {
       result(i) = std::log(-std::expm1(ui));
       continue;
     }
-    
+
     // For ui <= -ln(2), use log1p(-exp(ui)) for better accuracy
     result(i) = std::log1p(-std::exp(ui));
   }
-  
+
   return result;
 }
 
@@ -233,11 +233,11 @@ inline arma::vec vec_log1mexp(const arma::vec& u) {
  */
 inline arma::vec vec_log1pexp(const arma::vec& x) {
   arma::vec result(x.n_elem);
-  
+
   // Process each element individually with optimized computation
   for (size_t i = 0; i < x.n_elem; ++i) {
     double xi = x(i);
-    
+
     // Apply appropriate approximation based on value range
     if (xi > 700.0) {
       result(i) = xi;
@@ -253,7 +253,7 @@ inline arma::vec vec_log1pexp(const arma::vec& x) {
       result(i) = 0.0;  // For extremely negative values
     }
   }
-  
+
   return result;
 }
 
@@ -265,11 +265,11 @@ inline arma::vec vec_log1pexp(const arma::vec& x) {
  */
 inline arma::vec vec_safe_log(const arma::vec& x) {
   arma::vec result(x.n_elem);
-  
+
   // Process each element individually
   for (size_t i = 0; i < x.n_elem; ++i) {
     double xi = x(i);
-    
+
     // Handle invalid or problematic inputs
     if (xi < 0.0) {
       result(i) = arma::datum::nan;
@@ -282,7 +282,7 @@ inline arma::vec vec_safe_log(const arma::vec& x) {
       result(i) = std::log(xi);
     }
   }
-  
+
   return result;
 }
 
@@ -294,11 +294,11 @@ inline arma::vec vec_safe_log(const arma::vec& x) {
  */
 inline arma::vec vec_safe_exp(const arma::vec& x) {
   arma::vec result(x.n_elem);
-  
+
   // Process each element individually
   for (size_t i = 0; i < x.n_elem; ++i) {
     double xi = x(i);
-    
+
     // Handle extreme values to prevent overflow/underflow
     if (xi > LOG_DBL_MAX) {
       result(i) = arma::datum::inf;
@@ -311,7 +311,7 @@ inline arma::vec vec_safe_exp(const arma::vec& x) {
       result(i) = std::exp(xi);
     }
   }
-  
+
   return result;
 }
 
@@ -324,31 +324,31 @@ inline arma::vec vec_safe_exp(const arma::vec& x) {
  */
 inline arma::vec vec_safe_pow(const arma::vec& x, double y) {
   arma::vec result(x.n_elem);
-  
+
   // Special case handling for trivial exponents
   if (y == 0.0) {
     return arma::vec(x.n_elem, arma::fill::ones);
   }
-  
+
   if (y == 1.0) {
     return x;
   }
-  
+
   // Check if y is effectively an integer for negative base handling
   bool y_is_int = (std::abs(y - std::round(y)) <= SQRT_EPSILON);
   int y_int = static_cast<int>(std::round(y));
   bool y_is_odd = y_is_int && (y_int % 2 != 0);
-  
+
   // Process each element individually
   for (size_t i = 0; i < x.n_elem; ++i) {
     double xi = x(i);
-    
+
     // Handle special cases
     if (std::isnan(xi)) {
       result(i) = arma::datum::nan;
       continue;
     }
-    
+
     // Handle x = 0 cases
     if (xi == 0.0) {
       if (y > 0.0) {
@@ -360,13 +360,13 @@ inline arma::vec vec_safe_pow(const arma::vec& x, double y) {
       }
       continue;
     }
-    
+
     // Handle x = 1 case
     if (xi == 1.0) {
       result(i) = 1.0;
       continue;
     }
-    
+
     // Handle negative base cases
     if (xi < 0.0) {
       if (!y_is_int) {
@@ -376,7 +376,7 @@ inline arma::vec vec_safe_pow(const arma::vec& x, double y) {
         // Process integer powers of negative numbers
         double abs_xi = std::abs(xi);
         double abs_result = std::pow(abs_xi, std::abs(y));
-        
+
         // Apply sign for odd powers
         if (y < 0) {
           if (y_is_odd) {
@@ -394,7 +394,7 @@ inline arma::vec vec_safe_pow(const arma::vec& x, double y) {
       }
       continue;
     }
-    
+
     // For positive base, compute via logarithm for better numerical stability
     // Handle extreme exponents separately
     if (std::abs(y) > 1e10) {
@@ -417,7 +417,7 @@ inline arma::vec vec_safe_pow(const arma::vec& x, double y) {
       result(i) = safe_exp(log_result);
     }
   }
-  
+
   return result;
 }
 
@@ -432,14 +432,14 @@ inline arma::vec vec_safe_pow(const arma::vec& x, const arma::vec& y) {
   if (x.n_elem != y.n_elem) {
     Rcpp::stop("Vectors must have same length in vec_safe_pow");
   }
-  
+
   arma::vec result(x.n_elem);
-  
+
   // Process element-wise with scalar function for maximum reliability
   for (size_t i = 0; i < x.n_elem; ++i) {
     result(i) = safe_pow(x(i), y(i));
   }
-  
+
   return result;
 }
 
@@ -470,17 +470,17 @@ inline bool check_pars(double alpha,
       std::isnan(delta) || std::isnan(lambda)) {
     return false;
   }
-  
+
   // Basic parameter constraints
   if (alpha <= 0.0 || beta <= 0.0 || gamma <= 0.0 || delta < 0.0 || lambda <= 0.0) {
     return false;
   }
-  
+
   // Optional stricter constraints to avoid numerical issues
   if (strict) {
     const double MIN_PARAM = 1e-5;
     const double MAX_PARAM = 1e5;
-    
+
     if (alpha < MIN_PARAM || beta < MIN_PARAM || gamma < MIN_PARAM || lambda < MIN_PARAM ||
         (delta > 0.0 && delta < MIN_PARAM)) {
       return false;
@@ -515,9 +515,9 @@ inline arma::uvec check_pars_vec(const arma::vec& alpha,
   // Find maximum length for broadcasting
   size_t n = std::max({alpha.n_elem, beta.n_elem, gamma.n_elem,
                       delta.n_elem, lambda.n_elem});
-  
+
   arma::uvec valid(n, arma::fill::ones);
-  
+
   for (size_t i = 0; i < n; ++i) {
     // Get parameter values with proper cycling/broadcasting
     double a = alpha[i % alpha.n_elem];
@@ -525,10 +525,10 @@ inline arma::uvec check_pars_vec(const arma::vec& alpha,
     double g = gamma[i % gamma.n_elem];
     double d = delta[i % delta.n_elem];
     double l = lambda[i % lambda.n_elem];
-    
+
     valid[i] = check_pars(a, b, g, d, l, strict);
   }
-  
+
   return valid;
 }
 
@@ -582,7 +582,7 @@ inline bool check_bkw_pars(double alpha,
   if (alpha <= 0.0 || beta <= 0.0 || gamma <= 0.0 || delta < 0.0) {
     return false;
   }
-  
+
   if (strict) {
     // Optional stricter numeric bounds
     const double MIN_PARAM = 1e-5;
