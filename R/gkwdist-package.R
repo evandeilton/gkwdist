@@ -1,6 +1,3 @@
-#' @keywords internal
-"_PACKAGE"
-
 #' Generalized Kumaraswamy Distribution Family
 #'
 #' @description
@@ -269,9 +266,8 @@
 #'
 #' @examples
 #' \donttest{
-#' ## ========================================================================
+#' 
 #' ## Example 1: Basic Distribution Functions
-#' ## ========================================================================
 #'
 #' library(gkwdist)
 #'
@@ -343,9 +339,7 @@
 #' par(mfrow = c(1, 1))
 #'
 #'
-#' ## ========================================================================
 #' ## Example 2: Comparing Distribution Families
-#' ## ========================================================================
 #'
 #' # Create comparison plot
 #' x <- seq(0.001, 0.999, length.out = 500)
@@ -387,9 +381,7 @@
 #' par(mfrow = c(1, 1))
 #'
 #'
-#' ## ========================================================================
 #' ## Example 3: Maximum Likelihood Estimation
-#' ## ========================================================================
 #'
 #' # Generate data from Kumaraswamy distribution
 #' set.seed(2024)
@@ -450,9 +442,7 @@
 #' grid(col = "gray80", lty = 2)
 #'
 #'
-#' ## ========================================================================
 #' ## Example 4: Model Selection Using Information Criteria
-#' ## ========================================================================
 #'
 #' # Generate data from Exponentiated Kumaraswamy
 #' set.seed(456)
@@ -516,9 +506,7 @@
 #' cat("Best model by BIC:", comparison$Model[which.min(comparison$BIC)], "\n")
 #'
 #'
-#' ## ========================================================================
 #' ## Example 5: Performance Comparison
-#' ## ========================================================================
 #'
 #' if (requireNamespace("microbenchmark", quietly = TRUE)) {
 #'   library(microbenchmark)
@@ -540,9 +528,7 @@
 #' }
 #'
 #'
-#' ## ========================================================================
 #' ## Example 6: Verifying Analytical Derivatives
-#' ## ========================================================================
 #'
 #' # Generate small sample
 #' set.seed(999)
@@ -577,7 +563,5 @@
 #' }
 #' }
 #'
-#' @keywords package distribution
-#' @keywords models
-#' @keywords univar
-NULL
+#' @keywords internal
+"_PACKAGE"
