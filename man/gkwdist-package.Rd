@@ -235,9 +235,8 @@ boundary values or becoming numerically unstable.
 
 \examples{
 \donttest{
-## ========================================================================
+
 ## Example 1: Basic Distribution Functions
-## ========================================================================
 
 library(gkwdist)
 
@@ -309,9 +308,7 @@ grid(col = "gray80", lty = 2)
 par(mfrow = c(1, 1))
 
 
-## ========================================================================
 ## Example 2: Comparing Distribution Families
-## ========================================================================
 
 # Create comparison plot
 x <- seq(0.001, 0.999, length.out = 500)
@@ -353,9 +350,7 @@ grid(col = "gray80", lty = 2)
 par(mfrow = c(1, 1))
 
 
-## ========================================================================
 ## Example 3: Maximum Likelihood Estimation
-## ========================================================================
 
 # Generate data from Kumaraswamy distribution
 set.seed(2024)
@@ -416,9 +411,7 @@ legend("topright",
 grid(col = "gray80", lty = 2)
 
 
-## ========================================================================
 ## Example 4: Model Selection Using Information Criteria
-## ========================================================================
 
 # Generate data from Exponentiated Kumaraswamy
 set.seed(456)
@@ -480,67 +473,6 @@ rownames(comparison) <- NULL
 print(comparison)
 cat("\nBest model by AIC:", comparison$Model[1], "\n")
 cat("Best model by BIC:", comparison$Model[which.min(comparison$BIC)], "\n")
-
-
-## ========================================================================
-## Example 5: Performance Comparison
-## ========================================================================
-
-if (requireNamespace("microbenchmark", quietly = TRUE)) {
-  library(microbenchmark)
-
-  # Generate large dataset
-  n <- 10000
-  data <- rkw(n, 2, 3)
-
-  # Compare different approaches
-  benchmark <- microbenchmark(
-    Manual_R = -sum(log(dkw(data, 2, 3))),
-    Cpp_LL = llkw(c(2, 3), data),
-    Cpp_Gradient = grkw(c(2, 3), data),
-    Cpp_Hessian = hskw(c(2, 3), data),
-    times = 100
-  )
-
-  print(benchmark)
-}
-
-
-## ========================================================================
-## Example 6: Verifying Analytical Derivatives
-## ========================================================================
-
-# Generate small sample
-set.seed(999)
-data <- rkw(100, alpha = 2, beta = 3)
-par <- c(2, 3)
-
-# Analytical gradient
-grad_analytical <- grkw(par, data)
-
-# Numerical gradient (for comparison)
-if (requireNamespace("numDeriv", quietly = TRUE)) {
-  grad_numerical <- numDeriv::grad(
-    func = function(p) llkw(p, data),
-    x = par
-  )
-
-  # Compare
-  comparison <- data.frame(
-    Parameter = c("alpha", "beta"),
-    Analytical = grad_analytical,
-    Numerical = grad_numerical,
-    Difference = abs(grad_analytical - grad_numerical)
-  )
-
-  print(comparison, digits = 10)
-
-  # Maximum absolute difference
-  cat(
-    "\nMax absolute difference:",
-    format(max(comparison$Difference), scientific = TRUE), "\n"
-  )
-}
 }
 
 }
