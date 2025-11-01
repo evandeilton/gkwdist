@@ -1,8 +1,8 @@
 Package: gkwdist
 Title: Generalized Kumaraswamy Distribution Family
 Version: 1.0.5
-Authors@R: person(given = "J. E.",
-                  family = "Lopes",
+Authors@R: person(given = "Lopes",
+                  family = "J. E.",
                   role = c("aut", "cre"),
                   email = "evandeilton@gmail.com",
                   comment = c(ORCID = "0009-0007-5887-4084"))
