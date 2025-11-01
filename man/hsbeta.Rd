@@ -58,62 +58,222 @@ The returned matrix is symmetric.
 }
 \examples{
 \donttest{
-# Assuming existence of rbeta_, llbeta, grbeta, hsbeta functions
+## Example 1: Basic Hessian Evaluation
 
-# Generate sample data from a Beta(2, 4) distribution
-# (gamma=2, delta=3 in this parameterization)
+# Generate sample data
 set.seed(123)
-true_par_beta <- c(gamma = 2, delta = 3)
-sample_data_beta <- rbeta_(100, gamma = true_par_beta[1], delta = true_par_beta[2])
-hist(sample_data_beta, breaks = 20, main = "Beta(2, 4) Sample")
+n <- 1000
+true_params <- c(gamma = 2.0, delta = 3.0)
+data <- rbeta_(n, gamma = true_params[1], delta = true_params[2])
 
-# --- Find MLE estimates ---
-start_par_beta <- c(1.5, 2.5)
-mle_result_beta <- stats::optim(par = start_par_beta,
-                               fn = llbeta,
-                               gr = if (exists("grbeta")) grbeta else NULL,
-                               method = "L-BFGS-B",
-                               lower = c(1e-6, 1e-6), # Bounds: gamma>0, delta>=0
-                               hessian = TRUE, # Ask optim for numerical Hessian
-                               data = sample_data_beta)
+# Evaluate Hessian at true parameters
+hess_true <- hsbeta(par = true_params, data = data)
+cat("Hessian matrix at true parameters:\n")
+print(hess_true, digits = 4)
 
-# --- Compare analytical Hessian to numerical Hessian ---
-if (mle_result_beta$convergence == 0 &&
-    requireNamespace("numDeriv", quietly = TRUE) &&
-    exists("hsbeta")) {
+# Check symmetry
+cat("\nSymmetry check (max |H - H^T|):",
+    max(abs(hess_true - t(hess_true))), "\n")
 
-  mle_par_beta <- mle_result_beta$par
-  cat("\nComparing Hessians for Beta at MLE estimates:\n")
 
-  # Numerical Hessian of llbeta
-  num_hess_beta <- numDeriv::hessian(func = llbeta, x = mle_par_beta, data = sample_data_beta)
+## Example 2: Hessian Properties at MLE
 
-  # Analytical Hessian from hsbeta
-  ana_hess_beta <- hsbeta(par = mle_par_beta, data = sample_data_beta)
+# Fit model
+fit <- optim(
+  par = c(1.5, 2.5),
+  fn = llbeta,
+  gr = grbeta,
+  data = data,
+  method = "L-BFGS-B",
+  lower = c(0.01, 0.01),
+  upper = c(100, 100),
+  hessian = TRUE
+)
 
-  cat("Numerical Hessian (Beta):\n")
-  print(round(num_hess_beta, 4))
-  cat("Analytical Hessian (Beta):\n")
-  print(round(ana_hess_beta, 4))
+mle <- fit$par
+names(mle) <- c("gamma", "delta")
 
-  # Check differences
-  cat("Max absolute difference between Beta Hessians:\n")
-  print(max(abs(num_hess_beta - ana_hess_beta)))
+# Hessian at MLE
+hessian_at_mle <- hsbeta(par = mle, data = data)
+cat("\nHessian at MLE:\n")
+print(hessian_at_mle, digits = 4)
 
-  # Optional: Use analytical Hessian for Standard Errors
-  # tryCatch({
-  #   cov_matrix_beta <- solve(ana_hess_beta) # ana_hess_beta is already Hessian of negative LL
-  #   std_errors_beta <- sqrt(diag(cov_matrix_beta))
-  #   cat("Std. Errors from Analytical Beta Hessian:\n")
-  #   print(std_errors_beta)
-  # }, error = function(e) {
-  #   warning("Could not invert analytical Beta Hessian: ", e$message)
-  # })
+# Compare with optim's numerical Hessian
+cat("\nComparison with optim Hessian:\n")
+cat("Max absolute difference:",
+    max(abs(hessian_at_mle - fit$hessian)), "\n")
 
-} else {
-  cat("\nSkipping Beta Hessian comparison.\n")
-  cat("Requires convergence, 'numDeriv' package, and function 'hsbeta'.\n")
+# Eigenvalue analysis
+eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
+cat("\nEigenvalues:\n")
+print(eigenvals)
+
+cat("\nPositive definite:", all(eigenvals > 0), "\n")
+cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
+
+
+## Example 3: Standard Errors and Confidence Intervals
+
+# Observed information matrix
+obs_info <- hessian_at_mle
+
+# Variance-covariance matrix
+vcov_matrix <- solve(obs_info)
+cat("\nVariance-Covariance Matrix:\n")
+print(vcov_matrix, digits = 6)
+
+# Standard errors
+se <- sqrt(diag(vcov_matrix))
+names(se) <- c("gamma", "delta")
+
+# Correlation matrix
+corr_matrix <- cov2cor(vcov_matrix)
+cat("\nCorrelation Matrix:\n")
+print(corr_matrix, digits = 4)
+
+# Confidence intervals
+z_crit <- qnorm(0.975)
+results <- data.frame(
+  Parameter = c("gamma", "delta"),
+  True = true_params,
+  MLE = mle,
+  SE = se,
+  CI_Lower = mle - z_crit * se,
+  CI_Upper = mle + z_crit * se
+)
+print(results, digits = 4)
+
+cat(sprintf("\nMLE corresponds approx to Beta(\%.2f, \%.2f)\n",
+    mle[1], mle[2] + 1))
+cat("True corresponds to Beta(\%.2f, \%.2f)\n",
+    true_params[1], true_params[2] + 1)
+
+
+## Example 4: Determinant and Trace Analysis
+
+# Compute at different points
+test_params <- rbind(
+  c(1.5, 2.5),
+  c(2.0, 3.0),
+  mle,
+  c(2.5, 3.5)
+)
+
+hess_properties <- data.frame(
+  Gamma = numeric(),
+  Delta = numeric(),
+  Determinant = numeric(),
+  Trace = numeric(),
+  Min_Eigenval = numeric(),
+  Max_Eigenval = numeric(),
+  Cond_Number = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in 1:nrow(test_params)) {
+  H <- hsbeta(par = test_params[i, ], data = data)
+  eigs <- eigen(H, only.values = TRUE)$values
+
+  hess_properties <- rbind(hess_properties, data.frame(
+    Gamma = test_params[i, 1],
+    Delta = test_params[i, 2],
+    Determinant = det(H),
+    Trace = sum(diag(H)),
+    Min_Eigenval = min(eigs),
+    Max_Eigenval = max(eigs),
+    Cond_Number = max(eigs) / min(eigs)
+  ))
 }
+
+cat("\nHessian Properties at Different Points:\n")
+print(hess_properties, digits = 4, row.names = FALSE)
+
+
+## Example 5: Curvature Visualization (Gamma vs Delta)
+
+# Create grid around MLE
+gamma_grid <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = 25)
+delta_grid <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = 25)
+gamma_grid <- gamma_grid[gamma_grid > 0]
+delta_grid <- delta_grid[delta_grid > 0]
+
+# Compute curvature measures
+determinant_surface <- matrix(NA, nrow = length(gamma_grid),
+                               ncol = length(delta_grid))
+trace_surface <- matrix(NA, nrow = length(gamma_grid),
+                         ncol = length(delta_grid))
+
+for (i in seq_along(gamma_grid)) {
+  for (j in seq_along(delta_grid)) {
+    H <- hsbeta(c(gamma_grid[i], delta_grid[j]), data)
+    determinant_surface[i, j] <- det(H)
+    trace_surface[i, j] <- sum(diag(H))
+  }
+}
+
+# Plot
+par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+
+contour(gamma_grid, delta_grid, determinant_surface,
+        xlab = expression(gamma), ylab = expression(delta),
+        main = "Hessian Determinant", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+contour(gamma_grid, delta_grid, trace_surface,
+        xlab = expression(gamma), ylab = expression(delta),
+        main = "Hessian Trace", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+
+## Example 6: Confidence Ellipse (Gamma vs Delta)
+
+# Extract 2x2 submatrix (full matrix in this case)
+vcov_2d <- vcov_matrix
+
+# Create confidence ellipse
+theta <- seq(0, 2 * pi, length.out = 100)
+chi2_val <- qchisq(0.95, df = 2)
+
+eig_decomp <- eigen(vcov_2d)
+ellipse <- matrix(NA, nrow = 100, ncol = 2)
+for (i in 1:100) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse[i, ] <- mle + sqrt(chi2_val) *
+    (eig_decomp$vectors \%*\% diag(sqrt(eig_decomp$values)) \%*\% v)
+}
+
+# Marginal confidence intervals
+se_2d <- sqrt(diag(vcov_2d))
+ci_gamma <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
+ci_delta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
+
+# Plot
+par(mar = c(4, 4, 3, 1))
+plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(gamma), ylab = expression(delta),
+     main = "95\% Confidence Ellipse (Gamma vs Delta)", las = 1)
+
+# Add marginal CIs
+abline(v = ci_gamma, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_delta, col = "#808080", lty = 3, lwd = 1.5)
+
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+       pch = c(19, 17, NA, NA),
+       lty = c(NA, NA, 1, 3),
+       lwd = c(NA, NA, 2, 1.5),
+       bty = "n")
+grid(col = "gray90")
 
 }
 

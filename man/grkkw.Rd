@@ -69,68 +69,185 @@ Numerical stability is maintained through careful implementation.
 }
 \examples{
 \donttest{
-# Assuming existence of rkkw, llkkw, grkkw, hskkw functions for kkw
+## Example 1: Basic Gradient Evaluation
 
 # Generate sample data
 set.seed(123)
-true_par_kkw <- c(alpha = 2, beta = 3, delta = 1.5, lambda = 0.5)
-if (exists("rkkw")) {
-  sample_data_kkw <- rkkw(100, alpha = true_par_kkw[1], beta = true_par_kkw[2],
-                         delta = true_par_kkw[3], lambda = true_par_kkw[4])
-} else {
-  sample_data_kkw <- rgkw(100, alpha = true_par_kkw[1], beta = true_par_kkw[2],
-                         gamma = 1, delta = true_par_kkw[3], lambda = true_par_kkw[4])
+n <- 1000
+true_params <- c(alpha = 2.0, beta = 3.0, delta = 1.5, lambda = 2.0)
+data <- rkkw(n, alpha = true_params[1], beta = true_params[2],
+             delta = true_params[3], lambda = true_params[4])
+
+# Evaluate gradient at true parameters
+grad_true <- grkkw(par = true_params, data = data)
+cat("Gradient at true parameters:\n")
+print(grad_true)
+cat("Norm:", sqrt(sum(grad_true^2)), "\n")
+
+# Evaluate at different parameter values
+test_params <- rbind(
+  c(1.5, 2.5, 1.0, 1.5),
+  c(2.0, 3.0, 1.5, 2.0),
+  c(2.5, 3.5, 2.0, 2.5)
+)
+
+grad_norms <- apply(test_params, 1, function(p) {
+  g <- grkkw(p, data)
+  sqrt(sum(g^2))
+})
+
+results <- data.frame(
+  Alpha = test_params[, 1],
+  Beta = test_params[, 2],
+  Delta = test_params[, 3],
+  Lambda = test_params[, 4],
+  Grad_Norm = grad_norms
+)
+print(results, digits = 4)
+
+
+## Example 2: Gradient in Optimization
+
+# Optimization with analytical gradient
+fit_with_grad <- optim(
+  par = c(1.5, 2.5, 1.0, 1.5),
+  fn = llkkw,
+  gr = grkkw,
+  data = data,
+  method = "BFGS",
+  hessian = TRUE,
+  control = list(trace = 0)
+)
+
+# Optimization without gradient
+fit_no_grad <- optim(
+  par = c(1.5, 2.5, 1.0, 1.5),
+  fn = llkkw,
+  data = data,
+  method = "BFGS",
+  hessian = TRUE,
+  control = list(trace = 0)
+)
+
+comparison <- data.frame(
+  Method = c("With Gradient", "Without Gradient"),
+  Alpha = c(fit_with_grad$par[1], fit_no_grad$par[1]),
+  Beta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
+  Delta = c(fit_with_grad$par[3], fit_no_grad$par[3]),
+  Lambda = c(fit_with_grad$par[4], fit_no_grad$par[4]),
+  NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
+  Iterations = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
+)
+print(comparison, digits = 4, row.names = FALSE)
+
+
+## Example 3: Verifying Gradient at MLE
+
+mle <- fit_with_grad$par
+names(mle) <- c("alpha", "beta", "delta", "lambda")
+
+# At MLE, gradient should be approximately zero
+gradient_at_mle <- grkkw(par = mle, data = data)
+cat("\nGradient at MLE:\n")
+print(gradient_at_mle)
+cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
+cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
+
+
+## Example 4: Numerical vs Analytical Gradient
+
+# Manual finite difference gradient
+numerical_gradient <- function(f, x, data, h = 1e-7) {
+  grad <- numeric(length(x))
+  for (i in seq_along(x)) {
+    x_plus <- x_minus <- x
+    x_plus[i] <- x[i] + h
+    x_minus[i] <- x[i] - h
+    grad[i] <- (f(x_plus, data) - f(x_minus, data)) / (2 * h)
+  }
+  return(grad)
 }
 
-# --- Find MLE estimates ---
-start_par_kkw <- c(1.5, 2.5, 1.0, 0.6)
-mle_result_kkw <- stats::optim(par = start_par_kkw,
-                               fn = llkkw,
-                               gr = grkkw, # Use analytical gradient for kkw
-                               method = "BFGS",
-                               hessian = TRUE,
-                               data = sample_data_kkw)
+# Compare at MLE
+grad_analytical <- grkkw(par = mle, data = data)
+grad_numerical <- numerical_gradient(llkkw, mle, data)
 
-# --- Compare analytical gradient to numerical gradient ---
-if (mle_result_kkw$convergence == 0 &&
-    requireNamespace("numDeriv", quietly = TRUE)) {
+comparison_grad <- data.frame(
+  Parameter = c("alpha", "beta", "delta", "lambda"),
+  Analytical = grad_analytical,
+  Numerical = grad_numerical,
+  Abs_Diff = abs(grad_analytical - grad_numerical),
+  Rel_Error = abs(grad_analytical - grad_numerical) /
+              (abs(grad_analytical) + 1e-10)
+)
+print(comparison_grad, digits = 8)
 
-  mle_par_kkw <- mle_result_kkw$par
-  cat("\nComparing Gradients for kkw at MLE estimates:\n")
 
-  # Numerical gradient of llkkw
-  num_grad_kkw <- numDeriv::grad(func = llkkw, x = mle_par_kkw, data = sample_data_kkw)
+## Example 5: Score Test Statistic
 
-  # Analytical gradient from grkkw
-  ana_grad_kkw <- grkkw(par = mle_par_kkw, data = sample_data_kkw)
+# Score test for H0: theta = theta0
+theta0 <- c(1.8, 2.8, 1.3, 1.8)
+score_theta0 <- -grkkw(par = theta0, data = data)
 
-  cat("Numerical Gradient (kkw):\n")
-  print(num_grad_kkw)
-  cat("Analytical Gradient (kkw):\n")
-  print(ana_grad_kkw)
+# Fisher information at theta0
+fisher_info <- hskkw(par = theta0, data = data)
 
-  # Check differences
-  cat("Max absolute difference between kkw gradients:\n")
-  print(max(abs(num_grad_kkw - ana_grad_kkw)))
+# Score test statistic
+score_stat <- t(score_theta0) \%*\% solve(fisher_info) \%*\% score_theta0
+p_value <- pchisq(score_stat, df = 4, lower.tail = FALSE)
 
-} else {
-  cat("\nSkipping kkw gradient comparison.\n")
+cat("\nScore Test:\n")
+cat("H0: alpha=1.8, beta=2.8, delta=1.3, lambda=1.8\n")
+cat("Test statistic:", score_stat, "\n")
+cat("P-value:", format.pval(p_value, digits = 4), "\n")
+
+
+## Example 6: Confidence Ellipse with Gradient Information
+
+# For visualization, use first two parameters (alpha, beta)
+# Observed information
+obs_info <- hskkw(par = mle, data = data)
+vcov_full <- solve(obs_info)
+vcov_2d <- vcov_full[1:2, 1:2]
+
+# Create confidence ellipse
+theta <- seq(0, 2 * pi, length.out = 100)
+chi2_val <- qchisq(0.95, df = 2)
+
+eig_decomp <- eigen(vcov_2d)
+ellipse <- matrix(NA, nrow = 100, ncol = 2)
+for (i in 1:100) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse[i, ] <- mle[1:2] + sqrt(chi2_val) *
+    (eig_decomp$vectors \%*\% diag(sqrt(eig_decomp$values)) \%*\% v)
 }
 
-# --- Optional: Compare with relevant components of GKw gradient ---
-# Requires grgkw function
-if (mle_result_kkw$convergence == 0 && exists("grgkw")) {
-  # Create 5-param vector for grgkw (insert gamma=1)
-  mle_par_gkw_equiv <- c(mle_par_kkw[1:2], gamma = 1.0, mle_par_kkw[3:4])
-  ana_grad_gkw <- grgkw(par = mle_par_gkw_equiv, data = sample_data_kkw)
-  # Extract components corresponding to alpha, beta, delta, lambda
-  ana_grad_gkw_subset <- ana_grad_gkw[c(1, 2, 4, 5)]
+# Marginal confidence intervals
+se_2d <- sqrt(diag(vcov_2d))
+ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
+ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
-  cat("\nComparison with relevant components of GKw gradient:\n")
-  cat("Max absolute difference:\n")
-  print(max(abs(ana_grad_kkw - ana_grad_gkw_subset))) # Should be very small
-}
+# Plot
+par(mar = c(4, 4, 3, 1))
+plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(alpha), ylab = expression(beta),
+     main = "95\% Confidence Region (Alpha vs Beta)", las = 1)
 
+# Add marginal CIs
+abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_beta, col = "#808080", lty = 3, lwd = 1.5)
+
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+       pch = c(19, 17, NA, NA),
+       lty = c(NA, NA, 1, 3),
+       lwd = c(NA, NA, 2, 1.5),
+       bty = "n")
+grid(col = "gray90")
 }
 
 }

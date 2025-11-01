@@ -879,65 +879,363 @@ Rcpp::NumericVector rbkw(
 //'
 //' @examples
 //' \donttest{
-//'
-//' # Generate sample data from a known BKw distribution
+//' ## Example 1: Basic Log-Likelihood Evaluation
+//' 
+//' # Generate sample data
 //' set.seed(2203)
-//' true_par_bkw <- c(alpha = 2.0, beta = 1.5, gamma = 1.5, delta = 0.5)
-//' sample_data_bkw <- rbkw(1000, alpha = true_par_bkw[1], beta = true_par_bkw[2],
-//'                          gamma = true_par_bkw[3], delta = true_par_bkw[4])
-//' hist(sample_data_bkw, breaks = 20, main = "BKw(2, 1.5, 1.5, 0.5) Sample")
-//'
-//' # --- Maximum Likelihood Estimation using optim ---
-//' # Initial parameter guess
-//' start_par_bkw <- c(1.8, 1.2, 1.1, 0.3)
-//'
-//' # Perform optimization (minimizing negative log-likelihood)
-//' mle_result_bkw <- stats::optim(par = start_par_bkw,
-//'                                fn = llbkw, # Use the BKw neg-log-likelihood
-//'                                method = "BFGS", # Needs parameters > 0, consider L-BFGS-B
-//'                                hessian = TRUE,
-//'                                data = sample_data_bkw)
-//'
-//' # Check convergence and results
-//' if (mle_result_bkw$convergence == 0) {
-//'   print("Optimization converged successfully.")
-//'   mle_par_bkw <- mle_result_bkw$par
-//'   print("Estimated BKw parameters:")
-//'   print(mle_par_bkw)
-//'   print("True BKw parameters:")
-//'   print(true_par_bkw)
-//' } else {
-//'   warning("Optimization did not converge!")
-//'   print(mle_result_bkw$message)
+//' n <- 1000
+//' true_params <- c(alpha = 2.0, beta = 1.5, gamma = 1.5, delta = 0.5)
+//' data <- rbkw(n, alpha = true_params[1], beta = true_params[2],
+//'              gamma = true_params[3], delta = true_params[4])
+//' 
+//' # Evaluate negative log-likelihood at true parameters
+//' nll_true <- llbkw(par = true_params, data = data)
+//' cat("Negative log-likelihood at true parameters:", nll_true, "\n")
+//' 
+//' # Evaluate at different parameter values
+//' test_params <- rbind(
+//'   c(1.5, 1.0, 1.0, 0.3),
+//'   c(2.0, 1.5, 1.5, 0.5),
+//'   c(2.5, 2.0, 2.0, 0.7)
+//' )
+//' 
+//' nll_values <- apply(test_params, 1, function(p) llbkw(p, data))
+//' results <- data.frame(
+//'   Alpha = test_params[, 1],
+//'   Beta = test_params[, 2],
+//'   Gamma = test_params[, 3],
+//'   Delta = test_params[, 4],
+//'   NegLogLik = nll_values
+//' )
+//' print(results, digits = 4)
+//' 
+//' 
+//' ## Example 2: Maximum Likelihood Estimation
+//' 
+//' # Optimization using BFGS with no analytical gradient
+//' fit <- optim(
+//'   par = c(0.5, 1, 1.1, 0.3),
+//'   fn = llbkw,
+//'   # gr = grbkw,
+//'   data = data,
+//'   method = "BFGS",
+//'   control = list(maxit = 2000),
+//'   hessian = TRUE
+//' )
+//' 
+//' mle <- fit$par
+//' names(mle) <- c("alpha", "beta", "gamma", "delta")
+//' se <- sqrt(diag(solve(fit$hessian)))
+//' 
+//' results <- data.frame(
+//'   Parameter = c("alpha", "beta", "gamma", "delta"),
+//'   True = true_params,
+//'   MLE = mle,
+//'   SE = se,
+//'   CI_Lower = mle - 1.96 * se,
+//'   CI_Upper = mle + 1.96 * se
+//' )
+//' print(results, digits = 4)
+//' 
+//' cat("\nNegative log-likelihood at MLE:", fit$value, "\n")
+//' cat("AIC:", 2 * fit$value + 2 * length(mle), "\n")
+//' cat("BIC:", 2 * fit$value + length(mle) * log(n), "\n")
+//' 
+//' 
+//' ## Example 3: Comparing Optimization Methods
+//' 
+//' methods <- c("BFGS", "L-BFGS-B", "Nelder-Mead", "CG")
+//' start_params <- c(1.8, 1.2, 1.1, 0.3)
+//' 
+//' comparison <- data.frame(
+//'   Method = character(),
+//'   Alpha = numeric(),
+//'   Beta = numeric(),
+//'   Gamma = numeric(),
+//'   Delta = numeric(),
+//'   NegLogLik = numeric(),
+//'   Convergence = integer(),
+//'   stringsAsFactors = FALSE
+//' )
+//' 
+//' for (method in methods) {
+//'   if (method %in% c("BFGS", "CG")) {
+//'     fit_temp <- optim(
+//'       par = start_params,
+//'       fn = llbkw,
+//'       gr = grbkw,
+//'       data = data,
+//'       method = method
+//'     )
+//'   } else if (method == "L-BFGS-B") {
+//'     fit_temp <- optim(
+//'       par = start_params,
+//'       fn = llbkw,
+//'       gr = grbkw,
+//'       data = data,
+//'       method = method,
+//'       lower = c(0.01, 0.01, 0.01, 0.01),
+//'       upper = c(100, 100, 100, 100)
+//'     )
+//'   } else {
+//'     fit_temp <- optim(
+//'       par = start_params,
+//'       fn = llbkw,
+//'       data = data,
+//'       method = method
+//'     )
+//'   }
+//' 
+//'   comparison <- rbind(comparison, data.frame(
+//'     Method = method,
+//'     Alpha = fit_temp$par[1],
+//'     Beta = fit_temp$par[2],
+//'     Gamma = fit_temp$par[3],
+//'     Delta = fit_temp$par[4],
+//'     NegLogLik = fit_temp$value,
+//'     Convergence = fit_temp$convergence,
+//'     stringsAsFactors = FALSE
+//'   ))
 //' }
-//'
-//' # --- Compare numerical and analytical derivatives (if available) ---
-//' # Requires 'numDeriv' package and analytical functions 'grbkw', 'hsbkw'
-//' if (mle_result_bkw$convergence == 0 &&
-//'     requireNamespace("numDeriv", quietly = TRUE) &&
-//'     exists("grbkw") && exists("hsbkw")) {
-//'
-//'   cat("\nComparing Derivatives at BKw MLE estimates:\n")
-//'
-//'   # Numerical derivatives of llbkw
-//'   num_grad_bkw <- numDeriv::grad(func = llbkw, x = mle_par_bkw, data = sample_data_bkw)
-//'   num_hess_bkw <- numDeriv::hessian(func = llbkw, x = mle_par_bkw, data = sample_data_bkw)
-//'
-//'   # Analytical derivatives (assuming they return derivatives of negative LL)
-//'   ana_grad_bkw <- grbkw(par = mle_par_bkw, data = sample_data_bkw)
-//'   ana_hess_bkw <- hsbkw(par = mle_par_bkw, data = sample_data_bkw)
-//'
-//'   # Check differences
-//'   cat("Max absolute difference between gradients:\n")
-//'   print(max(abs(num_grad_bkw - ana_grad_bkw)))
-//'   cat("Max absolute difference between Hessians:\n")
-//'   print(max(abs(num_hess_bkw - ana_hess_bkw)))
-//'
-//' } else {
-//'    cat("\nSkipping derivative comparison for BKw.\n")
-//'    cat("Requires convergence, 'numDeriv' package and functions 'grbkw', 'hsbkw'.\n")
+//' 
+//' print(comparison, digits = 4, row.names = FALSE)
+//' 
+//' 
+//' ## Example 4: Likelihood Ratio Test
+//' 
+//' # Test H0: delta = 0.5 vs H1: delta free
+//' loglik_full <- -fit$value
+//' 
+//' restricted_ll <- function(params_restricted, data, delta_fixed) {
+//'   llbkw(par = c(params_restricted[1], params_restricted[2],
+//'                 params_restricted[3], delta_fixed), data = data)
 //' }
-//'
+//' 
+//' fit_restricted <- optim(
+//'   par = mle[1:3],
+//'   fn = restricted_ll,
+//'   data = data,
+//'   delta_fixed = 0.5,
+//'   method = "Nelder-Mead"
+//' )
+//' 
+//' loglik_restricted <- -fit_restricted$value
+//' lr_stat <- 2 * (loglik_full - loglik_restricted)
+//' p_value <- pchisq(lr_stat, df = 1, lower.tail = FALSE)
+//' 
+//' cat("LR Statistic:", round(lr_stat, 4), "\n")
+//' cat("P-value:", format.pval(p_value, digits = 4), "\n")
+//' 
+//' 
+//' ## Example 5: Univariate Profile Likelihoods
+//' 
+//' # Profile for alpha
+//' alpha_grid <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = 50)
+//' alpha_grid <- alpha_grid[alpha_grid > 0]
+//' profile_ll_alpha <- numeric(length(alpha_grid))
+//' 
+//' for (i in seq_along(alpha_grid)) {
+//'   profile_fit <- optim(
+//'     par = mle[-1],
+//'     fn = function(p) llbkw(c(alpha_grid[i], p), data),
+//'     method = "Nelder-Mead"
+//'   )
+//'   profile_ll_alpha[i] <- -profile_fit$value
+//' }
+//' 
+//' # Profile for beta
+//' beta_grid <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = 50)
+//' beta_grid <- beta_grid[beta_grid > 0]
+//' profile_ll_beta <- numeric(length(beta_grid))
+//' 
+//' for (i in seq_along(beta_grid)) {
+//'   profile_fit <- optim(
+//'     par = c(mle[1], mle[3], mle[4]),
+//'     fn = function(p) llbkw(c(mle[1], beta_grid[i], p[1], p[2]), data),
+//'     method = "Nelder-Mead"
+//'   )
+//'   profile_ll_beta[i] <- -profile_fit$value
+//' }
+//' 
+//' # Profile for gamma
+//' gamma_grid <- seq(mle[3] - 1.5, mle[3] + 1.5, length.out = 50)
+//' gamma_grid <- gamma_grid[gamma_grid > 0]
+//' profile_ll_gamma <- numeric(length(gamma_grid))
+//' 
+//' for (i in seq_along(gamma_grid)) {
+//'   profile_fit <- optim(
+//'     par = c(mle[1], mle[2], mle[4]),
+//'     fn = function(p) llbkw(c(p[1], mle[2], gamma_grid[i], p[2]), data),
+//'     method = "Nelder-Mead"
+//'   )
+//'   profile_ll_gamma[i] <- -profile_fit$value
+//' }
+//' 
+//' # Profile for delta
+//' delta_grid <- seq(mle[4] - 1.5, mle[4] + 1.5, length.out = 50)
+//' delta_grid <- delta_grid[delta_grid > 0]
+//' profile_ll_delta <- numeric(length(delta_grid))
+//' 
+//' for (i in seq_along(delta_grid)) {
+//'   profile_fit <- optim(
+//'     par = mle[-4],
+//'     fn = function(p) llbkw(c(p[1], p[2], p[3], delta_grid[i]), data),
+//'     method = "Nelder-Mead"
+//'   )
+//'   profile_ll_delta[i] <- -profile_fit$value
+//' }
+//' 
+//' # 95% confidence threshold
+//' chi_crit <- qchisq(0.95, df = 1)
+//' threshold <- max(profile_ll_alpha) - chi_crit / 2
+//' 
+//' # Plot all profiles
+//' par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+//' 
+//' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
+//'      main = expression(paste("Profile: ", alpha)), las = 1)
+//' abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
+//' abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
+//' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+//' legend("topright", legend = c("MLE", "True", "95% CI"),
+//'        col = c("#8B0000", "#006400", "#808080"),
+//'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+//' grid(col = "gray90")
+//' 
+//' plot(beta_grid, profile_ll_beta, type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(beta), ylab = "Profile Log-Likelihood",
+//'      main = expression(paste("Profile: ", beta)), las = 1)
+//' abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
+//' abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
+//' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+//' legend("topright", legend = c("MLE", "True", "95% CI"),
+//'        col = c("#8B0000", "#006400", "#808080"),
+//'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+//' grid(col = "gray90")
+//' 
+//' plot(gamma_grid, profile_ll_gamma, type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(gamma), ylab = "Profile Log-Likelihood",
+//'      main = expression(paste("Profile: ", gamma)), las = 1)
+//' abline(v = mle[3], col = "#8B0000", lty = 2, lwd = 2)
+//' abline(v = true_params[3], col = "#006400", lty = 2, lwd = 2)
+//' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+//' legend("topright", legend = c("MLE", "True", "95% CI"),
+//'        col = c("#8B0000", "#006400", "#808080"),
+//'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+//' grid(col = "gray90")
+//' 
+//' plot(delta_grid, profile_ll_delta, type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(delta), ylab = "Profile Log-Likelihood",
+//'      main = expression(paste("Profile: ", delta)), las = 1)
+//' abline(v = mle[4], col = "#8B0000", lty = 2, lwd = 2)
+//' abline(v = true_params[4], col = "#006400", lty = 2, lwd = 2)
+//' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+//' legend("topright", legend = c("MLE", "True", "95% CI"),
+//'        col = c("#8B0000", "#006400", "#808080"),
+//'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+//' grid(col = "gray90")
+//' 
+//' par(mfrow = c(1, 1))
+//' 
+//' 
+//' ## Example 6: 2D Log-Likelihood Surfaces (Selected pairs)
+//' 
+//' # Create 2D grids with wider range (±1.5)
+//' alpha_2d <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = round(n/25))
+//' beta_2d <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = round(n/25))
+//' gamma_2d <- seq(mle[3] - 1.5, mle[3] + 1.5, length.out = round(n/25))
+//' delta_2d <- seq(mle[4] - 1.5, mle[4] + 1.5, length.out = round(n/25))
+//' 
+//' alpha_2d <- alpha_2d[alpha_2d > 0]
+//' beta_2d <- beta_2d[beta_2d > 0]
+//' gamma_2d <- gamma_2d[gamma_2d > 0]
+//' delta_2d <- delta_2d[delta_2d > 0]
+//' 
+//' # Compute selected log-likelihood surfaces
+//' ll_surface_ab <- matrix(NA, nrow = length(alpha_2d), ncol = length(beta_2d))
+//' ll_surface_ag <- matrix(NA, nrow = length(alpha_2d), ncol = length(gamma_2d))
+//' ll_surface_bd <- matrix(NA, nrow = length(beta_2d), ncol = length(delta_2d))
+//' 
+//' # Alpha vs Beta
+//' for (i in seq_along(alpha_2d)) {
+//'   for (j in seq_along(beta_2d)) {
+//'     ll_surface_ab[i, j] <- -llbkw(c(alpha_2d[i], beta_2d[j], mle[3], mle[4]), data)
+//'   }
+//' }
+//' 
+//' # Alpha vs Gamma
+//' for (i in seq_along(alpha_2d)) {
+//'   for (j in seq_along(gamma_2d)) {
+//'     ll_surface_ag[i, j] <- -llbkw(c(alpha_2d[i], mle[2], gamma_2d[j], mle[4]), data)
+//'   }
+//' }
+//' 
+//' # Beta vs Delta
+//' for (i in seq_along(beta_2d)) {
+//'   for (j in seq_along(delta_2d)) {
+//'     ll_surface_bd[i, j] <- -llbkw(c(mle[1], beta_2d[i], mle[3], delta_2d[j]), data)
+//'   }
+//' }
+//' 
+//' # Confidence region levels
+//' max_ll_ab <- max(ll_surface_ab, na.rm = TRUE)
+//' max_ll_ag <- max(ll_surface_ag, na.rm = TRUE)
+//' max_ll_bd <- max(ll_surface_bd, na.rm = TRUE)
+//' 
+//' levels_95_ab <- max_ll_ab - qchisq(0.95, df = 2) / 2
+//' levels_95_ag <- max_ll_ag - qchisq(0.95, df = 2) / 2
+//' levels_95_bd <- max_ll_bd - qchisq(0.95, df = 2) / 2
+//' 
+//' # Plot selected surfaces side by side
+//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+//' 
+//' # Alpha vs Beta
+//' contour(alpha_2d, beta_2d, ll_surface_ab,
+//'         xlab = expression(alpha), ylab = expression(beta),
+//'         main = "Alpha vs Beta", las = 1,
+//'         levels = seq(min(ll_surface_ab, na.rm = TRUE), max_ll_ab, length.out = 20),
+//'         col = "#2E4057", lwd = 1)
+//' contour(alpha_2d, beta_2d, ll_surface_ab,
+//'         levels = levels_95_ab, col = "#FF6347", lwd = 2.5, lty = 1, add = TRUE)
+//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' # Alpha vs Gamma
+//' contour(alpha_2d, gamma_2d, ll_surface_ag,
+//'         xlab = expression(alpha), ylab = expression(gamma),
+//'         main = "Alpha vs Gamma", las = 1,
+//'         levels = seq(min(ll_surface_ag, na.rm = TRUE), max_ll_ag, length.out = 20),
+//'         col = "#2E4057", lwd = 1)
+//' contour(alpha_2d, gamma_2d, ll_surface_ag,
+//'         levels = levels_95_ag, col = "#FF6347", lwd = 2.5, lty = 1, add = TRUE)
+//' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' # Beta vs Delta
+//' contour(beta_2d, delta_2d, ll_surface_bd,
+//'         xlab = expression(beta), ylab = expression(delta),
+//'         main = "Beta vs Delta", las = 1,
+//'         levels = seq(min(ll_surface_bd, na.rm = TRUE), max_ll_bd, length.out = 20),
+//'         col = "#2E4057", lwd = 1)
+//' contour(beta_2d, delta_2d, ll_surface_bd,
+//'         levels = levels_95_bd, col = "#FF6347", lwd = 2.5, lty = 1, add = TRUE)
+//' points(mle[2], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[2], true_params[4], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' legend("topright",
+//'        legend = c("MLE", "True", "95% CR"),
+//'        col = c("#8B0000", "#006400", "#FF6347"),
+//'        pch = c(19, 17, NA),
+//'        lty = c(NA, NA, 1),
+//'        lwd = c(NA, NA, 2.5),
+//'        bty = "n", cex = 0.8)
+//' 
+//' par(mfrow = c(1, 1))
+//' 
 //' }
 //'
 //' @export
@@ -1140,219 +1438,241 @@ double llbkw(const Rcpp::NumericVector& par,
 //' \code{\link[stats]{optim}},
 //' \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
 //' \code{\link[base]{digamma}}.
-//'
+//' 
 //' @examples
 //' \donttest{
-//' # Assuming existence of rbkw, llbkw, grbkw, hsbkw functions for BKw
-//'
+//' ## Example 1: Basic Gradient Evaluation
+//' 
 //' # Generate sample data
-//' set.seed(123)
-//' true_par_bkw <- c(alpha = 2, beta = 3, gamma = 1, delta = 0.5)
-//' if (exists("rbkw")) {
-//'   sample_data_bkw <- rbkw(100, alpha = true_par_bkw[1], beta = true_par_bkw[2],
-//'                          gamma = true_par_bkw[3], delta = true_par_bkw[4])
-//' } else {
-//'   sample_data_bkw <- rgkw(100, alpha = true_par_bkw[1], beta = true_par_bkw[2],
-//'                          gamma = true_par_bkw[3], delta = true_par_bkw[4], lambda = 1)
+//' set.seed(2203)
+//' n <- 1000
+//' true_params <- c(alpha = 2.0, beta = 1.5, gamma = 1.5, delta = 0.5)
+//' data <- rbkw(n, alpha = true_params[1], beta = true_params[2],
+//'              gamma = true_params[3], delta = true_params[4])
+//' 
+//' # Evaluate gradient at true parameters
+//' grad_true <- grbkw(par = true_params, data = data)
+//' cat("Gradient at true parameters:\n")
+//' print(grad_true)
+//' cat("Norm:", sqrt(sum(grad_true^2)), "\n")
+//' 
+//' # Evaluate at different parameter values
+//' test_params <- rbind(
+//'   c(1.5, 1.0, 1.0, 0.3),
+//'   c(2.0, 1.5, 1.5, 0.5),
+//'   c(2.5, 2.0, 2.0, 0.7)
+//' )
+//' 
+//' grad_norms <- apply(test_params, 1, function(p) {
+//'   g <- grbkw(p, data)
+//'   sqrt(sum(g^2))
+//' })
+//' 
+//' results <- data.frame(
+//'   Alpha = test_params[, 1],
+//'   Beta = test_params[, 2],
+//'   Gamma = test_params[, 3],
+//'   Delta = test_params[, 4],
+//'   Grad_Norm = grad_norms
+//' )
+//' print(results, digits = 4)
+//' 
+//' 
+//' ## Example 2: Gradient in Optimization
+//' 
+//' # Optimization with analytical gradient
+//' fit_with_grad <- optim(
+//'   par = c(1.8, 1.2, 1.1, 0.3),
+//'   fn = llbkw,
+//'   gr = grbkw,
+//'   data = data,
+//'   method = "Nelder-Mead",
+//'   hessian = TRUE,
+//'   control = list(trace = 0)
+//' )
+//' 
+//' # Optimization without gradient
+//' fit_no_grad <- optim(
+//'   par = c(1.8, 1.2, 1.1, 0.3),
+//'   fn = llbkw,
+//'   data = data,
+//'   method = "Nelder-Mead",
+//'   hessian = TRUE,
+//'   control = list(trace = 0)
+//' )
+//' 
+//' comparison <- data.frame(
+//'   Method = c("With Gradient", "Without Gradient"),
+//'   Alpha = c(fit_with_grad$par[1], fit_no_grad$par[1]),
+//'   Beta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
+//'   Gamma = c(fit_with_grad$par[3], fit_no_grad$par[3]),
+//'   Delta = c(fit_with_grad$par[4], fit_no_grad$par[4]),
+//'   NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
+//'   Iterations = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
+//' )
+//' print(comparison, digits = 4, row.names = FALSE)
+//' 
+//' 
+//' ## Example 3: Verifying Gradient at MLE
+//' 
+//' mle <- fit_with_grad$par
+//' names(mle) <- c("alpha", "beta", "gamma", "delta")
+//' 
+//' # At MLE, gradient should be approximately zero
+//' gradient_at_mle <- grbkw(par = mle, data = data)
+//' cat("\nGradient at MLE:\n")
+//' print(gradient_at_mle)
+//' cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
+//' cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
+//' 
+//' 
+//' ## Example 4: Numerical vs Analytical Gradient
+//' 
+//' # Manual finite difference gradient
+//' numerical_gradient <- function(f, x, data, h = 1e-7) {
+//'   grad <- numeric(length(x))
+//'   for (i in seq_along(x)) {
+//'     x_plus <- x_minus <- x
+//'     x_plus[i] <- x[i] + h
+//'     x_minus[i] <- x[i] - h
+//'     grad[i] <- (f(x_plus, data) - f(x_minus, data)) / (2 * h)
+//'   }
+//'   return(grad)
 //' }
-//' hist(sample_data_bkw, breaks = 20, main = "BKw(2, 3, 1, 0.5) Sample")
-//'
-//' # --- Find MLE estimates ---
-//' start_par_bkw <- c(1.5, 2.5, 0.8, 0.3)
-//' mle_result_bkw <- stats::optim(par = start_par_bkw,
-//'                                fn = llbkw,
-//'                                gr = grbkw, # Use analytical gradient for BKw
-//'                                method = "BFGS",
-//'                                hessian = TRUE,
-//'                                data = sample_data_bkw)
-//'
-//' # --- Compare analytical gradient to numerical gradient ---
-//' if (mle_result_bkw$convergence == 0 &&
-//'     requireNamespace("numDeriv", quietly = TRUE)) {
-//'
-//'   mle_par_bkw <- mle_result_bkw$par
-//'   cat("\nComparing Gradients for BKw at MLE estimates:\n")
-//'
-//'   # Numerical gradient of llbkw
-//'   num_grad_bkw <- numDeriv::grad(func = llbkw, x = mle_par_bkw, data = sample_data_bkw)
-//'
-//'   # Analytical gradient from grbkw
-//'   ana_grad_bkw <- grbkw(par = mle_par_bkw, data = sample_data_bkw)
-//'
-//'   cat("Numerical Gradient (BKw):\n")
-//'   print(num_grad_bkw)
-//'   cat("Analytical Gradient (BKw):\n")
-//'   print(ana_grad_bkw)
-//'
-//'   # Check differences
-//'   cat("Max absolute difference between BKw gradients:\n")
-//'   print(max(abs(num_grad_bkw - ana_grad_bkw)))
-//'
-//' } else {
-//'   cat("\nSkipping BKw gradient comparison.\n")
+//' 
+//' # Compare at MLE
+//' grad_analytical <- grbkw(par = mle, data = data)
+//' grad_numerical <- numerical_gradient(llbkw, mle, data)
+//' 
+//' comparison_grad <- data.frame(
+//'   Parameter = c("alpha", "beta", "gamma", "delta"),
+//'   Analytical = grad_analytical,
+//'   Numerical = grad_numerical,
+//'   Abs_Diff = abs(grad_analytical - grad_numerical),
+//'   Rel_Error = abs(grad_analytical - grad_numerical) /
+//'               (abs(grad_analytical) + 1e-10)
+//' )
+//' print(comparison_grad, digits = 8)
+//' 
+//' 
+//' ## Example 5: Score Test Statistic
+//' 
+//' # Score test for H0: theta = theta0
+//' theta0 <- c(1.8, 1.3, 1.2, 0.4)
+//' score_theta0 <- -grbkw(par = theta0, data = data)
+//' 
+//' # Fisher information at theta0
+//' fisher_info <- hsbkw(par = theta0, data = data)
+//' 
+//' # Score test statistic
+//' score_stat <- t(score_theta0) %*% solve(fisher_info) %*% score_theta0
+//' p_value <- pchisq(score_stat, df = 4, lower.tail = FALSE)
+//' 
+//' cat("\nScore Test:\n")
+//' cat("H0: alpha=1.8, beta=1.3, gamma=1.2, delta=0.4\n")
+//' cat("Test statistic:", score_stat, "\n")
+//' cat("P-value:", format.pval(p_value, digits = 4), "\n")
+//' 
+//' 
+//' ## Example 6: Confidence Ellipses (Selected pairs)
+//' 
+//' # Observed information
+//' obs_info <- hsbkw(par = mle, data = data)
+//' vcov_full <- solve(obs_info)
+//' 
+//' # Create confidence ellipses
+//' theta <- seq(0, 2 * pi, length.out = 100)
+//' chi2_val <- qchisq(0.95, df = 2)
+//' 
+//' # Alpha vs Beta ellipse
+//' vcov_ab <- vcov_full[1:2, 1:2]
+//' eig_decomp_ab <- eigen(vcov_ab)
+//' ellipse_ab <- matrix(NA, nrow = 100, ncol = 2)
+//' for (i in 1:100) {
+//'   v <- c(cos(theta[i]), sin(theta[i]))
+//'   ellipse_ab[i, ] <- mle[1:2] + sqrt(chi2_val) *
+//'     (eig_decomp_ab$vectors %*% diag(sqrt(eig_decomp_ab$values)) %*% v)
 //' }
-//'
-//' # --- Optional: Compare with relevant components of GKw gradient ---
-//' # Requires grgkw function
-//' if (mle_result_bkw$convergence == 0 && exists("grgkw")) {
-//'   # Create 5-param vector for grgkw (insert lambda=1)
-//'   mle_par_gkw_equiv <- c(mle_par_bkw[1:4], lambda = 1.0)
-//'   ana_grad_gkw <- grgkw(par = mle_par_gkw_equiv, data = sample_data_bkw)
-//'   # Extract components corresponding to alpha, beta, gamma, delta
-//'   ana_grad_gkw_subset <- ana_grad_gkw[c(1, 2, 3, 4)]
-//'
-//'   cat("\nComparison with relevant components of GKw gradient:\n")
-//'   cat("Max absolute difference:\n")
-//'   print(max(abs(ana_grad_bkw - ana_grad_gkw_subset))) # Should be very small
+//' 
+//' # Alpha vs Gamma ellipse
+//' vcov_ag <- vcov_full[c(1, 3), c(1, 3)]
+//' eig_decomp_ag <- eigen(vcov_ag)
+//' ellipse_ag <- matrix(NA, nrow = 100, ncol = 2)
+//' for (i in 1:100) {
+//'   v <- c(cos(theta[i]), sin(theta[i]))
+//'   ellipse_ag[i, ] <- mle[c(1, 3)] + sqrt(chi2_val) *
+//'     (eig_decomp_ag$vectors %*% diag(sqrt(eig_decomp_ag$values)) %*% v)
 //' }
-//'
+//' 
+//' # Beta vs Delta ellipse
+//' vcov_bd <- vcov_full[c(2, 4), c(2, 4)]
+//' eig_decomp_bd <- eigen(vcov_bd)
+//' ellipse_bd <- matrix(NA, nrow = 100, ncol = 2)
+//' for (i in 1:100) {
+//'   v <- c(cos(theta[i]), sin(theta[i]))
+//'   ellipse_bd[i, ] <- mle[c(2, 4)] + sqrt(chi2_val) *
+//'     (eig_decomp_bd$vectors %*% diag(sqrt(eig_decomp_bd$values)) %*% v)
 //' }
-//'
-//' @export
-//' @title Gradient of the Negative Log-Likelihood for the BKw Distribution
-//' @author Lopes, J. E.
-//' @keywords distribution likelihood optimize gradient
-//'
-//' @description
-//' Computes the gradient vector (vector of first partial derivatives) of the
-//' negative log-likelihood function for the Beta-Kumaraswamy (BKw) distribution
-//' with parameters \code{alpha} (\eqn{\alpha}), \code{beta} (\eqn{\beta}),
-//' \code{gamma} (\eqn{\gamma}), and \code{delta} (\eqn{\delta}). This distribution
-//' is the special case of the Generalized Kumaraswamy (GKw) distribution where
-//' \eqn{\lambda = 1}. The gradient is typically used in optimization algorithms
-//' for maximum likelihood estimation.
-//'
-//' @param par A numeric vector of length 4 containing the distribution parameters
-//'   in the order: \code{alpha} (\eqn{\alpha > 0}), \code{beta} (\eqn{\beta > 0}),
-//'   \code{gamma} (\eqn{\gamma > 0}), \code{delta} (\eqn{\delta \ge 0}).
-//' @param data A numeric vector of observations. All values must be strictly
-//'   between 0 and 1 (exclusive).
-//'
-//' @return Returns a numeric vector of length 4 containing the partial derivatives
-//'   of the negative log-likelihood function \eqn{-\ell(\theta | \mathbf{x})} with
-//'   respect to each parameter:
-//'   \eqn{(-\partial \ell/\partial \alpha, -\partial \ell/\partial \beta, -\partial \ell/\partial \gamma, -\partial \ell/\partial \delta)}.
-//'   Returns a vector of \code{NaN} if any parameter values are invalid according
-//'   to their constraints, or if any value in \code{data} is not in the
-//'   interval (0, 1).
-//'
-//' @details
-//' The components of the gradient vector of the negative log-likelihood
-//' (\eqn{-\nabla \ell(\theta | \mathbf{x})}) for the BKw (\eqn{\lambda=1}) model are:
-//'
-//' \deqn{
-//' -\frac{\partial \ell}{\partial \alpha} = -\frac{n}{\alpha} - \sum_{i=1}^{n}\ln(x_i)
-//' + \sum_{i=1}^{n}\left[x_i^{\alpha} \ln(x_i) \left(\frac{\beta(\delta+1)-1}{v_i} -
-//' \frac{(\gamma-1) \beta v_i^{\beta-1}}{w_i}\right)\right]
-//' }
-//' \deqn{
-//' -\frac{\partial \ell}{\partial \beta} = -\frac{n}{\beta} - (\delta+1)\sum_{i=1}^{n}\ln(v_i)
-//' + \sum_{i=1}^{n}\left[\frac{(\gamma-1) v_i^{\beta} \ln(v_i)}{w_i}\right]
-//' }
-//' \deqn{
-//' -\frac{\partial \ell}{\partial \gamma} = n[\psi(\gamma) - \psi(\gamma+\delta+1)] -
-//' \sum_{i=1}^{n}\ln(w_i)
-//' }
-//' \deqn{
-//' -\frac{\partial \ell}{\partial \delta} = n[\psi(\delta+1) - \psi(\gamma+\delta+1)] -
-//' \beta\sum_{i=1}^{n}\ln(v_i)
-//' }
-//'
-//' where:
-//' \itemize{
-//'   \item \eqn{v_i = 1 - x_i^{\alpha}}
-//'   \item \eqn{w_i = 1 - v_i^{\beta} = 1 - (1-x_i^{\alpha})^{\beta}}
-//'   \item \eqn{\psi(\cdot)} is the digamma function (\code{\link[base]{digamma}}).
-//' }
-//' These formulas represent the derivatives of \eqn{-\ell(\theta)}, consistent with
-//' minimizing the negative log-likelihood. They correspond to the general GKw
-//' gradient (\code{\link{grgkw}}) components for \eqn{\alpha, \beta, \gamma, \delta}
-//' evaluated at \eqn{\lambda=1}. Note that the component for \eqn{\lambda} is omitted.
-//' Numerical stability is maintained through careful implementation.
-//'
-//' @references
-//' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-//' distributions. *Journal of Statistical Computation and Simulation*,
-//'
-//' Kumaraswamy, P. (1980). A generalized probability density function for
-//' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
-//'
-//' (Note: Specific gradient formulas might be derived or sourced from additional references).
-//'
-//' @seealso
-//' \code{\link{grgkw}} (parent distribution gradient),
-//' \code{\link{llbkw}} (negative log-likelihood for BKw),
-//' \code{\link{hsbkw}} (Hessian for BKw, if available),
-//' \code{\link{dbkw}} (density for BKw),
-//' \code{\link[stats]{optim}},
-//' \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
-//' \code{\link[base]{digamma}}.
-//'
-//' @examples
-//' \donttest{
-//' # Assuming existence of rbkw, llbkw, grbkw, hsbkw functions for BKw
-//'
-//' # Generate sample data
-//' set.seed(123)
-//' true_par_bkw <- c(alpha = 2, beta = 3, gamma = 1, delta = 0.5)
-//' if (exists("rbkw")) {
-//'   sample_data_bkw <- rbkw(100, alpha = true_par_bkw[1], beta = true_par_bkw[2],
-//'                          gamma = true_par_bkw[3], delta = true_par_bkw[4])
-//' } else {
-//'   sample_data_bkw <- rgkw(100, alpha = true_par_bkw[1], beta = true_par_bkw[2],
-//'                          gamma = true_par_bkw[3], delta = true_par_bkw[4], lambda = 1)
-//' }
-//' hist(sample_data_bkw, breaks = 20, main = "BKw(2, 3, 1, 0.5) Sample")
-//'
-//' # --- Find MLE estimates ---
-//' start_par_bkw <- c(1.5, 2.5, 0.8, 0.3)
-//' mle_result_bkw <- stats::optim(par = start_par_bkw,
-//'                                fn = llbkw,
-//'                                gr = grbkw, # Use analytical gradient for BKw
-//'                                method = "BFGS",
-//'                                hessian = TRUE,
-//'                                data = sample_data_bkw)
-//'
-//' # --- Compare analytical gradient to numerical gradient ---
-//' if (mle_result_bkw$convergence == 0 &&
-//'     requireNamespace("numDeriv", quietly = TRUE)) {
-//'
-//'   mle_par_bkw <- mle_result_bkw$par
-//'   cat("\nComparing Gradients for BKw at MLE estimates:\n")
-//'
-//'   # Numerical gradient of llbkw
-//'   num_grad_bkw <- numDeriv::grad(func = llbkw, x = mle_par_bkw, data = sample_data_bkw)
-//'
-//'   # Analytical gradient from grbkw
-//'   ana_grad_bkw <- grbkw(par = mle_par_bkw, data = sample_data_bkw)
-//'
-//'   cat("Numerical Gradient (BKw):\n")
-//'   print(num_grad_bkw)
-//'   cat("Analytical Gradient (BKw):\n")
-//'   print(ana_grad_bkw)
-//'
-//'   # Check differences
-//'   cat("Max absolute difference between BKw gradients:\n")
-//'   print(max(abs(num_grad_bkw - ana_grad_bkw)))
-//'
-//' } else {
-//'   cat("\nSkipping BKw gradient comparison.\n")
-//' }
-//'
-//' # --- Optional: Compare with relevant components of GKw gradient ---
-//' # Requires grgkw function
-//' if (mle_result_bkw$convergence == 0 && exists("grgkw")) {
-//'   # Create 5-param vector for grgkw (insert lambda=1)
-//'   mle_par_gkw_equiv <- c(mle_par_bkw[1:4], lambda = 1.0)
-//'   ana_grad_gkw <- grgkw(par = mle_par_gkw_equiv, data = sample_data_bkw)
-//'   # Extract components corresponding to alpha, beta, gamma, delta
-//'   ana_grad_gkw_subset <- ana_grad_gkw[c(1, 2, 3, 4)]
-//'
-//'   cat("\nComparison with relevant components of GKw gradient:\n")
-//'   cat("Max absolute difference:\n")
-//'   print(max(abs(ana_grad_bkw - ana_grad_gkw_subset))) # Should be very small
-//' }
-//'
+//' 
+//' # Marginal confidence intervals
+//' se_ab <- sqrt(diag(vcov_ab))
+//' ci_alpha_ab <- mle[1] + c(-1, 1) * 1.96 * se_ab[1]
+//' ci_beta_ab <- mle[2] + c(-1, 1) * 1.96 * se_ab[2]
+//' 
+//' se_ag <- sqrt(diag(vcov_ag))
+//' ci_alpha_ag <- mle[1] + c(-1, 1) * 1.96 * se_ag[1]
+//' ci_gamma_ag <- mle[3] + c(-1, 1) * 1.96 * se_ag[2]
+//' 
+//' se_bd <- sqrt(diag(vcov_bd))
+//' ci_beta_bd <- mle[2] + c(-1, 1) * 1.96 * se_bd[1]
+//' ci_delta_bd <- mle[4] + c(-1, 1) * 1.96 * se_bd[2]
+//' 
+//' # Plot selected ellipses side by side
+//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+//' 
+//' # Alpha vs Beta
+//' plot(ellipse_ab[, 1], ellipse_ab[, 2], type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(alpha), ylab = expression(beta),
+//'      main = "Alpha vs Beta", las = 1, xlim = range(ellipse_ab[, 1], ci_alpha_ab),
+//'      ylim = range(ellipse_ab[, 2], ci_beta_ab))
+//' abline(v = ci_alpha_ab, col = "#808080", lty = 3, lwd = 1.5)
+//' abline(h = ci_beta_ab, col = "#808080", lty = 3, lwd = 1.5)
+//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' # Alpha vs Gamma
+//' plot(ellipse_ag[, 1], ellipse_ag[, 2], type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(alpha), ylab = expression(gamma),
+//'      main = "Alpha vs Gamma", las = 1, xlim = range(ellipse_ag[, 1], ci_alpha_ag),
+//'      ylim = range(ellipse_ag[, 2], ci_gamma_ag))
+//' abline(v = ci_alpha_ag, col = "#808080", lty = 3, lwd = 1.5)
+//' abline(h = ci_gamma_ag, col = "#808080", lty = 3, lwd = 1.5)
+//' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' # Beta vs Delta
+//' plot(ellipse_bd[, 1], ellipse_bd[, 2], type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(beta), ylab = expression(delta),
+//'      main = "Beta vs Delta", las = 1, xlim = range(ellipse_bd[, 1], ci_beta_bd),
+//'      ylim = range(ellipse_bd[, 2], ci_delta_bd))
+//' abline(v = ci_beta_bd, col = "#808080", lty = 3, lwd = 1.5)
+//' abline(h = ci_delta_bd, col = "#808080", lty = 3, lwd = 1.5)
+//' points(mle[2], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[2], true_params[4], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' legend("topright",
+//'        legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+//'        col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+//'        pch = c(19, 17, NA, NA),
+//'        lty = c(NA, NA, 1, 3),
+//'        lwd = c(NA, NA, 2, 1.5),
+//'        bty = "n", cex = 0.8)
+//' 
+//' par(mfrow = c(1, 1))
+//' 
 //' }
 //'
 //' @export
@@ -1625,67 +1945,344 @@ Rcpp::NumericVector grbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 //'
 //' @examples
 //' \donttest{
-//' # Assuming existence of rbkw, llbkw, grbkw, hsbkw functions for BKw
-//'
+//' ## Example 1: Basic Hessian Evaluation
+//' 
 //' # Generate sample data
-//' set.seed(123)
-//' true_par_bkw <- c(alpha = 2, beta = 3, gamma = 1, delta = 0.5)
-//' if (exists("rbkw")) {
-//'   sample_data_bkw <- rbkw(100, alpha = true_par_bkw[1], beta = true_par_bkw[2],
-//'                          gamma = true_par_bkw[3], delta = true_par_bkw[4])
-//' } else {
-//'   sample_data_bkw <- rgkw(100, alpha = true_par_bkw[1], beta = true_par_bkw[2],
-//'                          gamma = true_par_bkw[3], delta = true_par_bkw[4], lambda = 1)
+//' set.seed(2203)
+//' n <- 1000
+//' true_params <- c(alpha = 2.0, beta = 1.5, gamma = 1.5, delta = 0.5)
+//' data <- rbkw(n, alpha = true_params[1], beta = true_params[2],
+//'              gamma = true_params[3], delta = true_params[4])
+//' 
+//' # Evaluate Hessian at true parameters
+//' hess_true <- hsbkw(par = true_params, data = data)
+//' cat("Hessian matrix at true parameters:\n")
+//' print(hess_true, digits = 4)
+//' 
+//' # Check symmetry
+//' cat("\nSymmetry check (max |H - H^T|):",
+//'     max(abs(hess_true - t(hess_true))), "\n")
+//' 
+//' 
+//' ## Example 2: Hessian Properties at MLE
+//' 
+//' # Fit model
+//' fit <- optim(
+//'   par = c(1.8, 1.2, 1.1, 0.3),
+//'   fn = llbkw,
+//'   gr = grbkw,
+//'   data = data,
+//'   method = "Nelder-Mead",
+//'   hessian = TRUE
+//' )
+//' 
+//' mle <- fit$par
+//' names(mle) <- c("alpha", "beta", "gamma", "delta")
+//' 
+//' # Hessian at MLE
+//' hessian_at_mle <- hsbkw(par = mle, data = data)
+//' cat("\nHessian at MLE:\n")
+//' print(hessian_at_mle, digits = 4)
+//' 
+//' # Compare with optim's numerical Hessian
+//' cat("\nComparison with optim Hessian:\n")
+//' cat("Max absolute difference:",
+//'     max(abs(hessian_at_mle - fit$hessian)), "\n")
+//' 
+//' # Eigenvalue analysis
+//' eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
+//' cat("\nEigenvalues:\n")
+//' print(eigenvals)
+//' 
+//' cat("\nPositive definite:", all(eigenvals > 0), "\n")
+//' cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
+//' 
+//' 
+//' ## Example 3: Standard Errors and Confidence Intervals
+//' 
+//' # Observed information matrix
+//' obs_info <- hessian_at_mle
+//' 
+//' # Variance-covariance matrix
+//' vcov_matrix <- solve(obs_info)
+//' cat("\nVariance-Covariance Matrix:\n")
+//' print(vcov_matrix, digits = 6)
+//' 
+//' # Standard errors
+//' se <- sqrt(diag(vcov_matrix))
+//' names(se) <- c("alpha", "beta", "gamma", "delta")
+//' 
+//' # Correlation matrix
+//' corr_matrix <- cov2cor(vcov_matrix)
+//' cat("\nCorrelation Matrix:\n")
+//' print(corr_matrix, digits = 4)
+//' 
+//' # Confidence intervals
+//' z_crit <- qnorm(0.975)
+//' results <- data.frame(
+//'   Parameter = c("alpha", "beta", "gamma", "delta"),
+//'   True = true_params,
+//'   MLE = mle,
+//'   SE = se,
+//'   CI_Lower = mle - z_crit * se,
+//'   CI_Upper = mle + z_crit * se
+//' )
+//' print(results, digits = 4)
+//' 
+//' 
+//' ## Example 4: Determinant and Trace Analysis
+//' 
+//' # Compute at different points
+//' test_params <- rbind(
+//'   c(1.5, 1.0, 1.0, 0.3),
+//'   c(2.0, 1.5, 1.5, 0.5),
+//'   mle,
+//'   c(2.5, 2.0, 2.0, 0.7)
+//' )
+//' 
+//' hess_properties <- data.frame(
+//'   Alpha = numeric(),
+//'   Beta = numeric(),
+//'   Gamma = numeric(),
+//'   Delta = numeric(),
+//'   Determinant = numeric(),
+//'   Trace = numeric(),
+//'   Min_Eigenval = numeric(),
+//'   Max_Eigenval = numeric(),
+//'   Cond_Number = numeric(),
+//'   stringsAsFactors = FALSE
+//' )
+//' 
+//' for (i in 1:nrow(test_params)) {
+//'   H <- hsbkw(par = test_params[i, ], data = data)
+//'   eigs <- eigen(H, only.values = TRUE)$values
+//' 
+//'   hess_properties <- rbind(hess_properties, data.frame(
+//'     Alpha = test_params[i, 1],
+//'     Beta = test_params[i, 2],
+//'     Gamma = test_params[i, 3],
+//'     Delta = test_params[i, 4],
+//'     Determinant = det(H),
+//'     Trace = sum(diag(H)),
+//'     Min_Eigenval = min(eigs),
+//'     Max_Eigenval = max(eigs),
+//'     Cond_Number = max(eigs) / min(eigs)
+//'   ))
 //' }
-//' hist(sample_data_bkw, breaks = 20, main = "BKw(2, 3, 1, 0.5) Sample")
-//'
-//' # --- Find MLE estimates ---
-//' start_par_bkw <- c(1.5, 2.5, 0.8, 0.3)
-//' mle_result_bkw <- stats::optim(par = start_par_bkw,
-//'                                fn = llbkw,
-//'                                gr = if (exists("grbkw")) grbkw else NULL,
-//'                                method = "BFGS",
-//'                                hessian = TRUE, # Ask optim for numerical Hessian
-//'                                data = sample_data_bkw)
-//'
-//' # --- Compare analytical Hessian to numerical Hessian ---
-//' if (mle_result_bkw$convergence == 0 &&
-//'     requireNamespace("numDeriv", quietly = TRUE) &&
-//'     exists("hsbkw")) {
-//'
-//'   mle_par_bkw <- mle_result_bkw$par
-//'   cat("\nComparing Hessians for BKw at MLE estimates:\n")
-//'
-//'   # Numerical Hessian of llbkw
-//'   num_hess_bkw <- numDeriv::hessian(func = llbkw, x = mle_par_bkw, data = sample_data_bkw)
-//'
-//'   # Analytical Hessian from hsbkw
-//'   ana_hess_bkw <- hsbkw(par = mle_par_bkw, data = sample_data_bkw)
-//'
-//'   cat("Numerical Hessian (BKw):\n")
-//'   print(round(num_hess_bkw, 4))
-//'   cat("Analytical Hessian (BKw):\n")
-//'   print(round(ana_hess_bkw, 4))
-//'
-//'   # Check differences
-//'   cat("Max absolute difference between BKw Hessians:\n")
-//'   print(max(abs(num_hess_bkw - ana_hess_bkw)))
-//'
-//'   # Optional: Use analytical Hessian for Standard Errors
-//'   # tryCatch({
-//'   #   cov_matrix_bkw <- solve(ana_hess_bkw)
-//'   #   std_errors_bkw <- sqrt(diag(cov_matrix_bkw))
-//'   #   cat("Std. Errors from Analytical BKw Hessian:\n")
-//'   #   print(std_errors_bkw)
-//'   # }, error = function(e) {
-//'   #   warning("Could not invert analytical BKw Hessian: ", e$message)
-//'   # })
-//'
-//' } else {
-//'   cat("\nSkipping BKw Hessian comparison.\n")
-//'   cat("Requires convergence, 'numDeriv' package, and function 'hsbkw'.\n")
+//' 
+//' cat("\nHessian Properties at Different Points:\n")
+//' print(hess_properties, digits = 4, row.names = FALSE)
+//' 
+//' 
+//' ## Example 5: Curvature Visualization (Selected pairs)
+//' 
+//' # Create grids around MLE with wider range (±1.5)
+//' alpha_grid <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = 25)
+//' beta_grid <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = 25)
+//' gamma_grid <- seq(mle[3] - 1.5, mle[3] + 1.5, length.out = 25)
+//' delta_grid <- seq(mle[4] - 1.5, mle[4] + 1.5, length.out = 25)
+//' 
+//' alpha_grid <- alpha_grid[alpha_grid > 0]
+//' beta_grid <- beta_grid[beta_grid > 0]
+//' gamma_grid <- gamma_grid[gamma_grid > 0]
+//' delta_grid <- delta_grid[delta_grid > 0]
+//' 
+//' # Compute curvature measures for selected pairs
+//' determinant_surface_ab <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
+//' trace_surface_ab <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
+//' 
+//' determinant_surface_ag <- matrix(NA, nrow = length(alpha_grid), ncol = length(gamma_grid))
+//' trace_surface_ag <- matrix(NA, nrow = length(alpha_grid), ncol = length(gamma_grid))
+//' 
+//' determinant_surface_bd <- matrix(NA, nrow = length(beta_grid), ncol = length(delta_grid))
+//' trace_surface_bd <- matrix(NA, nrow = length(beta_grid), ncol = length(delta_grid))
+//' 
+//' # Alpha vs Beta
+//' for (i in seq_along(alpha_grid)) {
+//'   for (j in seq_along(beta_grid)) {
+//'     H <- hsbkw(c(alpha_grid[i], beta_grid[j], mle[3], mle[4]), data)
+//'     determinant_surface_ab[i, j] <- det(H)
+//'     trace_surface_ab[i, j] <- sum(diag(H))
+//'   }
 //' }
-//'
+//' 
+//' # Alpha vs Gamma
+//' for (i in seq_along(alpha_grid)) {
+//'   for (j in seq_along(gamma_grid)) {
+//'     H <- hsbkw(c(alpha_grid[i], mle[2], gamma_grid[j], mle[4]), data)
+//'     determinant_surface_ag[i, j] <- det(H)
+//'     trace_surface_ag[i, j] <- sum(diag(H))
+//'   }
+//' }
+//' 
+//' # Beta vs Delta
+//' for (i in seq_along(beta_grid)) {
+//'   for (j in seq_along(delta_grid)) {
+//'     H <- hsbkw(c(mle[1], beta_grid[i], mle[3], delta_grid[j]), data)
+//'     determinant_surface_bd[i, j] <- det(H)
+//'     trace_surface_bd[i, j] <- sum(diag(H))
+//'   }
+//' }
+//' 
+//' # Plot selected curvature surfaces
+//' par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+//' 
+//' # Determinant plots
+//' contour(alpha_grid, beta_grid, determinant_surface_ab,
+//'         xlab = expression(alpha), ylab = expression(beta),
+//'         main = "Determinant: Alpha vs Beta", las = 1,
+//'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' contour(alpha_grid, gamma_grid, determinant_surface_ag,
+//'         xlab = expression(alpha), ylab = expression(gamma),
+//'         main = "Determinant: Alpha vs Gamma", las = 1,
+//'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+//' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' contour(beta_grid, delta_grid, determinant_surface_bd,
+//'         xlab = expression(beta), ylab = expression(delta),
+//'         main = "Determinant: Beta vs Delta", las = 1,
+//'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+//' points(mle[2], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[2], true_params[4], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' # Trace plots
+//' contour(alpha_grid, beta_grid, trace_surface_ab,
+//'         xlab = expression(alpha), ylab = expression(beta),
+//'         main = "Trace: Alpha vs Beta", las = 1,
+//'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' contour(alpha_grid, gamma_grid, trace_surface_ag,
+//'         xlab = expression(alpha), ylab = expression(gamma),
+//'         main = "Trace: Alpha vs Gamma", las = 1,
+//'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+//' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' contour(beta_grid, delta_grid, trace_surface_bd,
+//'         xlab = expression(beta), ylab = expression(delta),
+//'         main = "Trace: Beta vs Delta", las = 1,
+//'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+//' points(mle[2], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[2], true_params[4], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' legend("topright",
+//'        legend = c("MLE", "True"),
+//'        col = c("#8B0000", "#006400"),
+//'        pch = c(19, 17),
+//'        bty = "n", cex = 0.8)
+//' 
+//' par(mfrow = c(1, 1))
+//' 
+//' 
+//' ## Example 6: Confidence Ellipses (Selected pairs)
+//' 
+//' # Extract selected 2x2 submatrices
+//' vcov_ab <- vcov_matrix[1:2, 1:2]
+//' vcov_ag <- vcov_matrix[c(1, 3), c(1, 3)]
+//' vcov_bd <- vcov_matrix[c(2, 4), c(2, 4)]
+//' 
+//' # Create confidence ellipses
+//' theta <- seq(0, 2 * pi, length.out = 100)
+//' chi2_val <- qchisq(0.95, df = 2)
+//' 
+//' # Alpha vs Beta ellipse
+//' eig_decomp_ab <- eigen(vcov_ab)
+//' ellipse_ab <- matrix(NA, nrow = 100, ncol = 2)
+//' for (i in 1:100) {
+//'   v <- c(cos(theta[i]), sin(theta[i]))
+//'   ellipse_ab[i, ] <- mle[1:2] + sqrt(chi2_val) *
+//'     (eig_decomp_ab$vectors %*% diag(sqrt(eig_decomp_ab$values)) %*% v)
+//' }
+//' 
+//' # Alpha vs Gamma ellipse
+//' eig_decomp_ag <- eigen(vcov_ag)
+//' ellipse_ag <- matrix(NA, nrow = 100, ncol = 2)
+//' for (i in 1:100) {
+//'   v <- c(cos(theta[i]), sin(theta[i]))
+//'   ellipse_ag[i, ] <- mle[c(1, 3)] + sqrt(chi2_val) *
+//'     (eig_decomp_ag$vectors %*% diag(sqrt(eig_decomp_ag$values)) %*% v)
+//' }
+//' 
+//' # Beta vs Delta ellipse
+//' eig_decomp_bd <- eigen(vcov_bd)
+//' ellipse_bd <- matrix(NA, nrow = 100, ncol = 2)
+//' for (i in 1:100) {
+//'   v <- c(cos(theta[i]), sin(theta[i]))
+//'   ellipse_bd[i, ] <- mle[c(2, 4)] + sqrt(chi2_val) *
+//'     (eig_decomp_bd$vectors %*% diag(sqrt(eig_decomp_bd$values)) %*% v)
+//' }
+//' 
+//' # Marginal confidence intervals
+//' se_ab <- sqrt(diag(vcov_ab))
+//' ci_alpha_ab <- mle[1] + c(-1, 1) * 1.96 * se_ab[1]
+//' ci_beta_ab <- mle[2] + c(-1, 1) * 1.96 * se_ab[2]
+//' 
+//' se_ag <- sqrt(diag(vcov_ag))
+//' ci_alpha_ag <- mle[1] + c(-1, 1) * 1.96 * se_ag[1]
+//' ci_gamma_ag <- mle[3] + c(-1, 1) * 1.96 * se_ag[2]
+//' 
+//' se_bd <- sqrt(diag(vcov_bd))
+//' ci_beta_bd <- mle[2] + c(-1, 1) * 1.96 * se_bd[1]
+//' ci_delta_bd <- mle[4] + c(-1, 1) * 1.96 * se_bd[2]
+//' 
+//' # Plot selected ellipses side by side
+//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+//' 
+//' # Alpha vs Beta
+//' plot(ellipse_ab[, 1], ellipse_ab[, 2], type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(alpha), ylab = expression(beta),
+//'      main = "Alpha vs Beta", las = 1, xlim = range(ellipse_ab[, 1], ci_alpha_ab),
+//'      ylim = range(ellipse_ab[, 2], ci_beta_ab))
+//' abline(v = ci_alpha_ab, col = "#808080", lty = 3, lwd = 1.5)
+//' abline(h = ci_beta_ab, col = "#808080", lty = 3, lwd = 1.5)
+//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' # Alpha vs Gamma
+//' plot(ellipse_ag[, 1], ellipse_ag[, 2], type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(alpha), ylab = expression(gamma),
+//'      main = "Alpha vs Gamma", las = 1, xlim = range(ellipse_ag[, 1], ci_alpha_ag),
+//'      ylim = range(ellipse_ag[, 2], ci_gamma_ag))
+//' abline(v = ci_alpha_ag, col = "#808080", lty = 3, lwd = 1.5)
+//' abline(h = ci_gamma_ag, col = "#808080", lty = 3, lwd = 1.5)
+//' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' # Beta vs Delta
+//' plot(ellipse_bd[, 1], ellipse_bd[, 2], type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(beta), ylab = expression(delta),
+//'      main = "Beta vs Delta", las = 1, xlim = range(ellipse_bd[, 1], ci_beta_bd),
+//'      ylim = range(ellipse_bd[, 2], ci_delta_bd))
+//' abline(v = ci_beta_bd, col = "#808080", lty = 3, lwd = 1.5)
+//' abline(h = ci_delta_bd, col = "#808080", lty = 3, lwd = 1.5)
+//' points(mle[2], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[2], true_params[4], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' legend("topright",
+//'        legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+//'        col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+//'        pch = c(19, 17, NA, NA),
+//'        lty = c(NA, NA, 1, 3),
+//'        lwd = c(NA, NA, 2, 1.5),
+//'        bty = "n", cex = 0.8)
+//' 
+//' par(mfrow = c(1, 1))
+//' 
 //' }
 //'
 //' @export

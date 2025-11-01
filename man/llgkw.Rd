@@ -56,74 +56,456 @@ close to 0 or 1 accurately.
 }
 \examples{
 \donttest{
-# Generate sample data from a known GKw distribution
+## Example 1: Basic Log-Likelihood Evaluation
+
+# Generate sample data
 set.seed(123)
-true_par <- c(alpha = 2, beta = 3, gamma = 1.0, delta = 0.5, lambda = 0.5)
-sample_data <- rgkw(100, alpha = true_par[1], beta = true_par[2],
-                   gamma = true_par[3], delta = true_par[4], lambda = true_par[5])
-hist(sample_data, breaks = 20, main = "Sample GKw Data")
+n <- 1000
+true_params <- c(alpha = 2.0, beta = 3.0, gamma = 1.5, delta = 2.0, lambda = 1.8)
+data <- rgkw(n, alpha = true_params[1], beta = true_params[2],
+             gamma = true_params[3], delta = true_params[4],
+             lambda = true_params[5])
 
-# --- Maximum Likelihood Estimation using optim ---
-# Initial parameter guess (can be crucial)
-start_par <- c(1.5, 2.5, 1.2, 0.3, 0.6)
+# Evaluate negative log-likelihood at true parameters
+nll_true <- llgkw(par = true_params, data = data)
+cat("Negative log-likelihood at true parameters:", nll_true, "\n")
 
-# Perform optimization (minimizing negative log-likelihood)
-# Ensure data is passed correctly to llgkw
-mle_result <- stats::optim(par = start_par,
-                           fn = llgkw,
-                           method = "BFGS", # Method supporting bounds might be safer
-                           hessian = TRUE,
-                           data = sample_data)
+# Evaluate at different parameter values
+test_params <- rbind(
+  c(1.5, 2.5, 1.2, 1.5, 1.5),
+  c(2.0, 3.0, 1.5, 2.0, 1.8),
+  c(2.5, 3.5, 1.8, 2.5, 2.0)
+)
 
-# Check convergence and results
-if (mle_result$convergence == 0) {
-  print("Optimization converged successfully.")
-  mle_par <- mle_result$par
-  print("Estimated parameters:")
-  print(mle_par)
-  print("True parameters:")
-  print(true_par)
+nll_values <- apply(test_params, 1, function(p) llgkw(p, data))
+results <- data.frame(
+  Alpha = test_params[, 1],
+  Beta = test_params[, 2],
+  Gamma = test_params[, 3],
+  Delta = test_params[, 4],
+  Lambda = test_params[, 5],
+  NegLogLik = nll_values
+)
+print(results, digits = 4)
 
-  # Standard errors from Hessian (optional)
-  # fisher_info <- solve(mle_result$hessian) # Need positive definite Hessian
-  # std_errors <- sqrt(diag(fisher_info))
-  # print("Approximate Standard Errors:")
-  # print(std_errors)
 
-} else {
-  warning("Optimization did not converge!")
-  print(mle_result$message)
+## Example 2: Maximum Likelihood Estimation
+
+# Optimization using BFGS with analytical gradient
+fit <- optim(
+  par = c(1.5, 2.5, 1.2, 1.5, 1.5),
+  fn = llgkw,
+  gr = grgkw,
+  data = data,
+  method = "BFGS",
+  hessian = TRUE,
+  control = list(maxit = 1000)
+)
+
+mle <- fit$par
+names(mle) <- c("alpha", "beta", "gamma", "delta", "lambda")
+se <- sqrt(diag(solve(fit$hessian)))
+
+results <- data.frame(
+  Parameter = c("alpha", "beta", "gamma", "delta", "lambda"),
+  True = true_params,
+  MLE = mle,
+  SE = se,
+  CI_Lower = mle - 1.96 * se,
+  CI_Upper = mle + 1.96 * se
+)
+print(results, digits = 4)
+
+cat("\nNegative log-likelihood at MLE:", fit$value, "\n")
+cat("AIC:", 2 * fit$value + 2 * length(mle), "\n")
+cat("BIC:", 2 * fit$value + length(mle) * log(n), "\n")
+
+
+## Example 3: Comparing Optimization Methods
+
+methods <- c("BFGS", "Nelder-Mead")
+start_params <- c(1.5, 2.5, 1.2, 1.5, 1.5)
+
+comparison <- data.frame(
+  Method = character(),
+  Alpha = numeric(),
+  Beta = numeric(),
+  Gamma = numeric(),
+  Delta = numeric(),
+  Lambda = numeric(),
+  NegLogLik = numeric(),
+  Convergence = integer(),
+  stringsAsFactors = FALSE
+)
+
+for (method in methods) {
+  if (method == "BFGS") {
+    fit_temp <- optim(
+      par = start_params,
+      fn = llgkw,
+      gr = grgkw,
+      data = data,
+      method = method,
+      control = list(maxit = 1000)
+    )
+  } else if (method == "L-BFGS-B") {
+    fit_temp <- optim(
+      par = start_params,
+      fn = llgkw,
+      gr = grgkw,
+      data = data,
+      method = method,
+      lower = rep(0.001, 5),
+      upper = rep(20, 5),
+      control = list(maxit = 1000)
+    )
+  } else {
+    fit_temp <- optim(
+      par = start_params,
+      fn = llgkw,
+      data = data,
+      method = method,
+      control = list(maxit = 1000)
+    )
+  }
+
+  comparison <- rbind(comparison, data.frame(
+    Method = method,
+    Alpha = fit_temp$par[1],
+    Beta = fit_temp$par[2],
+    Gamma = fit_temp$par[3],
+    Delta = fit_temp$par[4],
+    Lambda = fit_temp$par[5],
+    NegLogLik = fit_temp$value,
+    Convergence = fit_temp$convergence,
+    stringsAsFactors = FALSE
+  ))
 }
 
-# --- Compare numerical and analytical derivatives (if available) ---
-# Requires the 'numDeriv' package and analytical functions 'grgkw', 'hsgkw'
-if (requireNamespace("numDeriv", quietly = TRUE) &&
-    exists("grgkw") && exists("hsgkw") && mle_result$convergence == 0) {
+print(comparison, digits = 4, row.names = FALSE)
 
-  cat("\nComparing Derivatives at MLE estimates:\n")
 
-  # Numerical derivatives
-  num_grad <- numDeriv::grad(func = llgkw, x = mle_par, data = sample_data)
-  num_hess <- numDeriv::hessian(func = llgkw, x = mle_par, data = sample_data)
+## Example 4: Likelihood Ratio Test
 
-  # Analytical derivatives (assuming they exist)
-  # Note: grgkw/hsgkw might compute derivatives of log-likelihood,
-  # while llgkw is negative log-likelihood. Adjust signs if needed.
-  # Assuming grgkw/hsgkw compute derivatives of NEGATIVE log-likelihood here:
-  ana_grad <- grgkw(par = mle_par, data = sample_data)
-  ana_hess <- hsgkw(par = mle_par, data = sample_data)
+# Test H0: gamma = 1.5 vs H1: gamma free
+loglik_full <- -fit$value
 
-  # Check differences (should be small if analytical functions are correct)
-  cat("Difference between numerical and analytical gradient:\n")
-  print(summary(abs(num_grad - ana_grad)))
-
-  cat("Difference between numerical and analytical Hessian:\n")
-  print(summary(abs(num_hess - ana_hess)))
-
-} else {
-   cat("\nSkipping derivative comparison.\n")
-   cat("Requires 'numDeriv' package and functions 'grgkw', 'hsgkw'.\n")
+restricted_ll <- function(params_restricted, data, gamma_fixed) {
+  llgkw(par = c(params_restricted[1], params_restricted[2],
+                gamma_fixed, params_restricted[3], params_restricted[4]),
+        data = data)
 }
+
+fit_restricted <- optim(
+  par = c(mle[1], mle[2], mle[4], mle[5]),
+  fn = restricted_ll,
+  data = data,
+  gamma_fixed = 1.5,
+  method = "Nelder-Mead",
+  control = list(maxit = 1000)
+)
+
+loglik_restricted <- -fit_restricted$value
+lr_stat <- 2 * (loglik_full - loglik_restricted)
+p_value <- pchisq(lr_stat, df = 1, lower.tail = FALSE)
+
+cat("LR Statistic:", round(lr_stat, 4), "\n")
+cat("P-value:", format.pval(p_value, digits = 4), "\n")
+
+
+## Example 5: Univariate Profile Likelihoods
+
+# Profile for alpha
+xd <- 1
+alpha_grid <- seq(mle[1] - xd, mle[1] + xd, length.out = 35)
+alpha_grid <- alpha_grid[alpha_grid > 0]
+profile_ll_alpha <- numeric(length(alpha_grid))
+
+for (i in seq_along(alpha_grid)) {
+  profile_fit <- optim(
+    par = mle[-1],
+    fn = function(p) llgkw(c(alpha_grid[i], p), data),
+    method = "Nelder-Mead",
+    control = list(maxit = 500)
+  )
+  profile_ll_alpha[i] <- -profile_fit$value
+}
+
+# Profile for beta
+beta_grid <- seq(mle[2] - xd, mle[2] + xd, length.out = 35)
+beta_grid <- beta_grid[beta_grid > 0]
+profile_ll_beta <- numeric(length(beta_grid))
+
+for (i in seq_along(beta_grid)) {
+  profile_fit <- optim(
+    par = mle[-2],
+    fn = function(p) llgkw(c(p[1], beta_grid[i], p[2], p[3], p[4]), data),
+    method = "Nelder-Mead",
+    control = list(maxit = 500)
+  )
+  profile_ll_beta[i] <- -profile_fit$value
+}
+
+# Profile for gamma
+gamma_grid <- seq(mle[3] - xd, mle[3] + xd, length.out = 35)
+gamma_grid <- gamma_grid[gamma_grid > 0]
+profile_ll_gamma <- numeric(length(gamma_grid))
+
+for (i in seq_along(gamma_grid)) {
+  profile_fit <- optim(
+    par = mle[-3],
+    fn = function(p) llgkw(c(p[1], p[2], gamma_grid[i], p[3], p[4]), data),
+    method = "Nelder-Mead",
+    control = list(maxit = 500)
+  )
+  profile_ll_gamma[i] <- -profile_fit$value
+}
+
+# Profile for delta
+delta_grid <- seq(mle[4] - xd, mle[4] + xd, length.out = 35)
+delta_grid <- delta_grid[delta_grid > 0]
+profile_ll_delta <- numeric(length(delta_grid))
+
+for (i in seq_along(delta_grid)) {
+  profile_fit <- optim(
+    par = mle[-4],
+    fn = function(p) llgkw(c(p[1], p[2], p[3], delta_grid[i], p[4]), data),
+    method = "Nelder-Mead",
+    control = list(maxit = 500)
+  )
+  profile_ll_delta[i] <- -profile_fit$value
+}
+
+# Profile for lambda
+lambda_grid <- seq(mle[5] - xd, mle[5] + xd, length.out = 35)
+lambda_grid <- lambda_grid[lambda_grid > 0]
+profile_ll_lambda <- numeric(length(lambda_grid))
+
+for (i in seq_along(lambda_grid)) {
+  profile_fit <- optim(
+    par = mle[-5],
+    fn = function(p) llgkw(c(p[1], p[2], p[3], p[4], lambda_grid[i]), data),
+    method = "Nelder-Mead",
+    control = list(maxit = 500)
+  )
+  profile_ll_lambda[i] <- -profile_fit$value
+}
+
+# 95\% confidence threshold
+chi_crit <- qchisq(0.95, df = 1)
+threshold <- max(profile_ll_alpha) - chi_crit / 2
+
+# Plot all profiles
+par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+
+plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(alpha), ylab = "Profile Log-Likelihood",
+     main = expression(paste("Profile: ", alpha)), las = 1)
+abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
+abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
+abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+legend("topright", legend = c("MLE", "True", "95\% CI"),
+       col = c("#8B0000", "#006400", "#808080"),
+       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
+grid(col = "gray90")
+
+plot(beta_grid, profile_ll_beta, type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(beta), ylab = "Profile Log-Likelihood",
+     main = expression(paste("Profile: ", beta)), las = 1)
+abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
+abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
+abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+legend("topright", legend = c("MLE", "True", "95\% CI"),
+       col = c("#8B0000", "#006400", "#808080"),
+       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
+grid(col = "gray90")
+
+plot(gamma_grid, profile_ll_gamma, type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(gamma), ylab = "Profile Log-Likelihood",
+     main = expression(paste("Profile: ", gamma)), las = 1)
+abline(v = mle[3], col = "#8B0000", lty = 2, lwd = 2)
+abline(v = true_params[3], col = "#006400", lty = 2, lwd = 2)
+abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+legend("topright", legend = c("MLE", "True", "95\% CI"),
+       col = c("#8B0000", "#006400", "#808080"),
+       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
+grid(col = "gray90")
+
+plot(delta_grid, profile_ll_delta, type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(delta), ylab = "Profile Log-Likelihood",
+     main = expression(paste("Profile: ", delta)), las = 1)
+abline(v = mle[4], col = "#8B0000", lty = 2, lwd = 2)
+abline(v = true_params[4], col = "#006400", lty = 2, lwd = 2)
+abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+legend("topright", legend = c("MLE", "True", "95\% CI"),
+       col = c("#8B0000", "#006400", "#808080"),
+       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
+grid(col = "gray90")
+
+plot(lambda_grid, profile_ll_lambda, type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(lambda), ylab = "Profile Log-Likelihood",
+     main = expression(paste("Profile: ", lambda)), las = 1)
+abline(v = mle[5], col = "#8B0000", lty = 2, lwd = 2)
+abline(v = true_params[5], col = "#006400", lty = 2, lwd = 2)
+abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+legend("topright", legend = c("MLE", "True", "95\% CI"),
+       col = c("#8B0000", "#006400", "#808080"),
+       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
+grid(col = "gray90")
+
+par(mfrow = c(1, 1))
+
+
+## Example 6: 2D Log-Likelihood Surface (Alpha vs Beta)
+# Plot all profiles
+par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+
+# Create 2D grid
+alpha_2d <- seq(mle[1] - xd, mle[1] + xd, length.out = round(n/4))
+beta_2d <- seq(mle[2] - xd, mle[2] + xd, length.out = round(n/4))
+alpha_2d <- alpha_2d[alpha_2d > 0]
+beta_2d <- beta_2d[beta_2d > 0]
+
+# Compute log-likelihood surface
+ll_surface_ab <- matrix(NA, nrow = length(alpha_2d), ncol = length(beta_2d))
+
+for (i in seq_along(alpha_2d)) {
+  for (j in seq_along(beta_2d)) {
+    ll_surface_ab[i, j] <- llgkw(c(alpha_2d[i], beta_2d[j],
+                                     mle[3], mle[4], mle[5]), data)
+  }
+}
+
+# Confidence region levels
+max_ll_ab <- max(ll_surface_ab, na.rm = TRUE)
+levels_90_ab <- max_ll_ab - qchisq(0.90, df = 2) / 2
+levels_95_ab <- max_ll_ab - qchisq(0.95, df = 2) / 2
+levels_99_ab <- max_ll_ab - qchisq(0.99, df = 2) / 2
+
+# Plot contour
+contour(alpha_2d, beta_2d, ll_surface_ab,
+        xlab = expression(alpha), ylab = expression(beta),
+        main = "2D Log-Likelihood: Alpha vs Beta",
+        levels = seq(min(ll_surface_ab, na.rm = TRUE), max_ll_ab, length.out = 20),
+        col = "#2E4057", las = 1, lwd = 1)
+
+contour(alpha_2d, beta_2d, ll_surface_ab,
+        levels = c(levels_90_ab, levels_95_ab, levels_99_ab),
+        col = c("#FFA07A", "#FF6347", "#8B0000"),
+        lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+        add = TRUE, labcex = 0.8)
+
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
+       col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+       pch = c(19, 17, NA, NA, NA),
+       lty = c(NA, NA, 3, 2, 1),
+       lwd = c(NA, NA, 2, 2.5, 3),
+       bty = "n", cex = 0.8)
+grid(col = "gray90")
+
+
+## Example 7: 2D Log-Likelihood Surface (Gamma vs Delta)
+
+# Create 2D grid
+gamma_2d <- seq(mle[3] - xd, mle[3] + xd, length.out = round(n/4))
+delta_2d <- seq(mle[4] - xd, mle[4] + xd, length.out = round(n/4))
+gamma_2d <- gamma_2d[gamma_2d > 0]
+delta_2d <- delta_2d[delta_2d > 0]
+
+# Compute log-likelihood surface
+ll_surface_gd <- matrix(NA, nrow = length(gamma_2d), ncol = length(delta_2d))
+
+for (i in seq_along(gamma_2d)) {
+  for (j in seq_along(delta_2d)) {
+    ll_surface_gd[i, j] <- -llgkw(c(mle[1], mle[2], gamma_2d[i],
+                                     delta_2d[j], mle[5]), data)
+  }
+}
+
+# Confidence region levels
+max_ll_gd <- max(ll_surface_gd, na.rm = TRUE)
+levels_90_gd <- max_ll_gd - qchisq(0.90, df = 2) / 2
+levels_95_gd <- max_ll_gd - qchisq(0.95, df = 2) / 2
+levels_99_gd <- max_ll_gd - qchisq(0.99, df = 2) / 2
+
+# Plot contour
+contour(gamma_2d, delta_2d, ll_surface_gd,
+        xlab = expression(gamma), ylab = expression(delta),
+        main = "2D Log-Likelihood: Gamma vs Delta",
+        levels = seq(min(ll_surface_gd, na.rm = TRUE), max_ll_gd, length.out = 20),
+        col = "#2E4057", las = 1, lwd = 1)
+
+contour(gamma_2d, delta_2d, ll_surface_gd,
+        levels = c(levels_90_gd, levels_95_gd, levels_99_gd),
+        col = c("#FFA07A", "#FF6347", "#8B0000"),
+        lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+        add = TRUE, labcex = 0.8)
+
+points(mle[3], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[3], true_params[4], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
+       col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+       pch = c(19, 17, NA, NA, NA),
+       lty = c(NA, NA, 3, 2, 1),
+       lwd = c(NA, NA, 2, 2.5, 3),
+       bty = "n", cex = 0.8)
+grid(col = "gray90")
+
+
+## Example 8: 2D Log-Likelihood Surface (Delta vs Lambda)
+
+# Create 2D grid
+delta_2d_2 <- seq(mle[4] - xd, mle[4] + xd, length.out = round(n/30))
+lambda_2d <- seq(mle[5] - xd, mle[5] + xd, length.out = round(n/30))
+delta_2d_2 <- delta_2d_2[delta_2d_2 > 0]
+lambda_2d <- lambda_2d[lambda_2d > 0]
+
+# Compute log-likelihood surface
+ll_surface_dl <- matrix(NA, nrow = length(delta_2d_2), ncol = length(lambda_2d))
+
+for (i in seq_along(delta_2d_2)) {
+  for (j in seq_along(lambda_2d)) {
+    ll_surface_dl[i, j] <- -llgkw(c(mle[1], mle[2], mle[3],
+                                     delta_2d_2[i], lambda_2d[j]), data)
+  }
+}
+
+# Confidence region levels
+max_ll_dl <- max(ll_surface_dl, na.rm = TRUE)
+levels_90_dl <- max_ll_dl - qchisq(0.90, df = 2) / 2
+levels_95_dl <- max_ll_dl - qchisq(0.95, df = 2) / 2
+levels_99_dl <- max_ll_dl - qchisq(0.99, df = 2) / 2
+
+# Plot contour
+contour(delta_2d_2, lambda_2d, ll_surface_dl,
+        xlab = expression(delta), ylab = expression(lambda),
+        main = "2D Log-Likelihood: Delta vs Lambda",
+        levels = seq(min(ll_surface_dl, na.rm = TRUE), max_ll_dl, length.out = 20),
+        col = "#2E4057", las = 1, lwd = 1)
+
+contour(delta_2d_2, lambda_2d, ll_surface_dl,
+        levels = c(levels_90_dl, levels_95_dl, levels_99_dl),
+        col = c("#FFA07A", "#FF6347", "#8B0000"),
+        lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+        add = TRUE, labcex = 0.8)
+
+points(mle[4], mle[5], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[4], true_params[5], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
+       col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+       pch = c(19, 17, NA, NA, NA),
+       lty = c(NA, NA, 3, 2, 1),
+       lwd = c(NA, NA, 2, 2.5, 3),
+       bty = "n", cex = 0.8)
+grid(col = "gray90")
 
 }
 

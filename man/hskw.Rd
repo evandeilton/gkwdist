@@ -61,61 +61,219 @@ evaluated at \eqn{\gamma=1, \delta=0, \lambda=1}.
 }
 \examples{
 \donttest{
-# Assuming existence of rkw, llkw, grkw, hskw functions for Kw
+## Example 1: Basic Hessian Evaluation
 
 # Generate sample data
 set.seed(123)
-true_par_kw <- c(alpha = 2, beta = 3)
-sample_data_kw <- rkw(100, alpha = true_par_kw[1], beta = true_par_kw[2])
-hist(sample_data_kw, breaks = 20, main = "Kw(2, 3) Sample")
+n <- 1000
+true_params <- c(alpha = 2.5, beta = 3.5)
+data <- rkw(n, alpha = true_params[1], beta = true_params[2])
 
-# --- Find MLE estimates ---
-start_par_kw <- c(1.5, 2.5)
-mle_result_kw <- stats::optim(par = start_par_kw,
-                              fn = llkw,
-                              gr = if (exists("grkw")) grkw else NULL,
-                              method = "L-BFGS-B",
-                              lower = c(1e-6, 1e-6),
-                              hessian = TRUE, # Ask optim for numerical Hessian
-                              data = sample_data_kw)
+# Evaluate Hessian at true parameters
+hess_true <- hskw(par = true_params, data = data)
+cat("Hessian matrix at true parameters:\n")
+print(hess_true, digits = 4)
 
-# --- Compare analytical Hessian to numerical Hessian ---
-if (mle_result_kw$convergence == 0 &&
-    requireNamespace("numDeriv", quietly = TRUE) &&
-    exists("hskw")) {
+# Check symmetry
+cat("\nSymmetry check (max |H - H^T|):",
+    max(abs(hess_true - t(hess_true))), "\n")
 
-  mle_par_kw <- mle_result_kw$par
-  cat("\nComparing Hessians for Kw at MLE estimates:\n")
 
-  # Numerical Hessian of llkw
-  num_hess_kw <- numDeriv::hessian(func = llkw, x = mle_par_kw, data = sample_data_kw)
+## Example 2: Hessian Properties at MLE
 
-  # Analytical Hessian from hskw
-  ana_hess_kw <- hskw(par = mle_par_kw, data = sample_data_kw)
+# Fit model
+fit <- optim(
+  par = c(2, 2),
+  fn = llkw,
+  gr = grkw,
+  data = data,
+  method = "BFGS",
+  hessian = TRUE
+)
 
-  cat("Numerical Hessian (Kw):\n")
-  print(round(num_hess_kw, 4))
-  cat("Analytical Hessian (Kw):\n")
-  print(round(ana_hess_kw, 4))
+mle <- fit$par
+names(mle) <- c("alpha", "beta")
 
-  # Check differences
-  cat("Max absolute difference between Kw Hessians:\n")
-  print(max(abs(num_hess_kw - ana_hess_kw)))
+# Hessian at MLE
+hessian_at_mle <- hskw(par = mle, data = data)
+cat("\nHessian at MLE:\n")
+print(hessian_at_mle, digits = 4)
 
-  # Optional: Use analytical Hessian for Standard Errors
-  # tryCatch({
-  #   cov_matrix_kw <- solve(ana_hess_kw) # ana_hess_kw is already Hessian of negative LL
-  #   std_errors_kw <- sqrt(diag(cov_matrix_kw))
-  #   cat("Std. Errors from Analytical Kw Hessian:\n")
-  #   print(std_errors_kw)
-  # }, error = function(e) {
-  #   warning("Could not invert analytical Kw Hessian: ", e$message)
-  # })
+# Compare with optim's numerical Hessian
+cat("\nComparison with optim Hessian:\n")
+cat("Max absolute difference:",
+    max(abs(hessian_at_mle - fit$hessian)), "\n")
 
-} else {
-  cat("\nSkipping Kw Hessian comparison.\n")
-  cat("Requires convergence, 'numDeriv' package, and function 'hskw'.\n")
+# Eigenvalue analysis
+eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
+cat("\nEigenvalues:\n")
+print(eigenvals)
+
+cat("\nPositive definite:", all(eigenvals > 0), "\n")
+cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
+
+
+## Example 3: Standard Errors and Confidence Intervals
+
+# Observed information matrix (negative Hessian for neg-loglik)
+obs_info <- hessian_at_mle
+
+# Variance-covariance matrix
+vcov_matrix <- solve(obs_info)
+cat("\nVariance-Covariance Matrix:\n")
+print(vcov_matrix, digits = 6)
+
+# Standard errors
+se <- sqrt(diag(vcov_matrix))
+names(se) <- c("alpha", "beta")
+
+# Correlation matrix
+corr_matrix <- cov2cor(vcov_matrix)
+cat("\nCorrelation Matrix:\n")
+print(corr_matrix, digits = 4)
+
+# Confidence intervals
+z_crit <- qnorm(0.975)
+results <- data.frame(
+  Parameter = c("alpha", "beta"),
+  True = true_params,
+  MLE = mle,
+  SE = se,
+  CI_Lower = mle - z_crit * se,
+  CI_Upper = mle + z_crit * se
+)
+print(results, digits = 4)
+
+
+## Example 4: Determinant and Trace Analysis
+
+# Compute at different points
+test_params <- rbind(
+  c(1.5, 2.5),
+  c(2.0, 3.0),
+  mle,
+  c(3.0, 4.0)
+)
+
+hess_properties <- data.frame(
+  Alpha = numeric(),
+  Beta = numeric(),
+  Determinant = numeric(),
+  Trace = numeric(),
+  Min_Eigenval = numeric(),
+  Max_Eigenval = numeric(),
+  Cond_Number = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in 1:nrow(test_params)) {
+  H <- hskw(par = test_params[i, ], data = data)
+  eigs <- eigen(H, only.values = TRUE)$values
+
+  hess_properties <- rbind(hess_properties, data.frame(
+    Alpha = test_params[i, 1],
+    Beta = test_params[i, 2],
+    Determinant = det(H),
+    Trace = sum(diag(H)),
+    Min_Eigenval = min(eigs),
+    Max_Eigenval = max(eigs),
+    Cond_Number = max(eigs) / min(eigs)
+  ))
 }
+
+cat("\nHessian Properties at Different Points:\n")
+print(hess_properties, digits = 4, row.names = FALSE)
+
+
+## Example 5: Curvature Visualization
+
+# Create grid around MLE
+alpha_grid <- seq(mle[1] - 0.5, mle[1] + 0.5, length.out = 30)
+beta_grid <- seq(mle[2] - 0.5, mle[2] + 0.5, length.out = 30)
+alpha_grid <- alpha_grid[alpha_grid > 0]
+beta_grid <- beta_grid[beta_grid > 0]
+
+# Compute curvature measures
+determinant_surface <- matrix(NA, nrow = length(alpha_grid),
+                               ncol = length(beta_grid))
+trace_surface <- matrix(NA, nrow = length(alpha_grid),
+                         ncol = length(beta_grid))
+
+for (i in seq_along(alpha_grid)) {
+  for (j in seq_along(beta_grid)) {
+    H <- hskw(c(alpha_grid[i], beta_grid[j]), data)
+    determinant_surface[i, j] <- det(H)
+    trace_surface[i, j] <- sum(diag(H))
+  }
+}
+
+# Plot
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+
+contour(alpha_grid, beta_grid, determinant_surface,
+        xlab = expression(alpha), ylab = expression(beta),
+        main = "Hessian Determinant", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+contour(alpha_grid, beta_grid, trace_surface,
+        xlab = expression(alpha), ylab = expression(beta),
+        main = "Hessian Trace", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+par(mfrow = c(1, 1))
+
+
+## Example 6: Fisher Information and Asymptotic Efficiency
+
+# Observed information (at MLE)
+obs_fisher <- hessian_at_mle
+
+# Asymptotic covariance matrix
+asymp_cov <- solve(obs_fisher)
+
+cat("\nAsymptotic Standard Errors:\n")
+cat("SE(alpha):", sqrt(asymp_cov[1, 1]), "\n")
+cat("SE(beta):", sqrt(asymp_cov[2, 2]), "\n")
+
+# Cramér-Rao Lower Bound
+cat("\nCramér-Rao Lower Bounds:\n")
+cat("CRLB(alpha):", sqrt(asymp_cov[1, 1]), "\n")
+cat("CRLB(beta):", sqrt(asymp_cov[2, 2]), "\n")
+
+# Efficiency ellipse (95\% confidence region)
+theta <- seq(0, 2 * pi, length.out = 100)
+chi2_val <- qchisq(0.95, df = 2)
+
+# Eigendecomposition
+eig_decomp <- eigen(asymp_cov)
+
+# Ellipse points
+ellipse <- matrix(NA, nrow = 100, ncol = 2)
+for (i in 1:100) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse[i, ] <- mle + sqrt(chi2_val) *
+    (eig_decomp$vectors \%*\% diag(sqrt(eig_decomp$values)) \%*\% v)
+}
+
+# Plot confidence ellipse
+par(mar = c(4, 4, 3, 1))
+plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(alpha), ylab = expression(beta),
+     main = "95\% Confidence Ellipse", las = 1)
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+legend("topright",
+       legend = c("MLE", "True", "95\% CR"),
+       col = c("#8B0000", "#006400", "#2E4057"),
+       pch = c(19, 17, NA), lty = c(NA, NA, 1),
+       lwd = c(NA, NA, 2), bty = "n")
+grid(col = "gray90")
 
 }
 

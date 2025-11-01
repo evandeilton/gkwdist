@@ -59,65 +59,266 @@ of the general GKw gradient (\code{\link{grgkw}}) evaluated at \eqn{\gamma=1, \d
 }
 \examples{
 \donttest{
-# Assuming existence of rekw, llekw, grekw, hsekw functions for EKw
+## Example 1: Basic Gradient Evaluation
 
 # Generate sample data
 set.seed(123)
-true_par_ekw <- c(alpha = 2, beta = 3, lambda = 0.5)
-if (exists("rekw")) {
-  sample_data_ekw <- rekw(100, alpha = true_par_ekw[1], beta = true_par_ekw[2],
-                          lambda = true_par_ekw[3])
-} else {
-  sample_data_ekw <- rgkw(100, alpha = true_par_ekw[1], beta = true_par_ekw[2],
-                          gamma = 1, delta = 0, lambda = true_par_ekw[3])
+n <- 1000
+true_params <- c(alpha = 2.5, beta = 3.5, lambda = 2.0)
+data <- rekw(n, alpha = true_params[1], beta = true_params[2],
+             lambda = true_params[3])
+
+# Evaluate gradient at true parameters
+grad_true <- grekw(par = true_params, data = data)
+cat("Gradient at true parameters:\n")
+print(grad_true)
+cat("Norm:", sqrt(sum(grad_true^2)), "\n")
+
+# Evaluate at different parameter values
+test_params <- rbind(
+  c(2.0, 3.0, 1.5),
+  c(2.5, 3.5, 2.0),
+  c(3.0, 4.0, 2.5)
+)
+
+grad_norms <- apply(test_params, 1, function(p) {
+  g <- grekw(p, data)
+  sqrt(sum(g^2))
+})
+
+results <- data.frame(
+  Alpha = test_params[, 1],
+  Beta = test_params[, 2],
+  Lambda = test_params[, 3],
+  Grad_Norm = grad_norms
+)
+print(results, digits = 4)
+
+
+## Example 2: Gradient in Optimization
+
+# Optimization with analytical gradient
+fit_with_grad <- optim(
+  par = c(2, 3, 1.5),
+  fn = llekw,
+  gr = grekw,
+  data = data,
+  method = "BFGS",
+  hessian = TRUE,
+  control = list(trace = 0)
+)
+
+# Optimization without gradient
+fit_no_grad <- optim(
+  par = c(2, 3, 1.5),
+  fn = llekw,
+  data = data,
+  method = "BFGS",
+  hessian = TRUE,
+  control = list(trace = 0)
+)
+
+comparison <- data.frame(
+  Method = c("With Gradient", "Without Gradient"),
+  Alpha = c(fit_with_grad$par[1], fit_no_grad$par[1]),
+  Beta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
+  Lambda = c(fit_with_grad$par[3], fit_no_grad$par[3]),
+  NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
+  Iterations = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
+)
+print(comparison, digits = 4, row.names = FALSE)
+
+
+## Example 3: Verifying Gradient at MLE
+
+mle <- fit_with_grad$par
+names(mle) <- c("alpha", "beta", "lambda")
+
+# At MLE, gradient should be approximately zero
+gradient_at_mle <- grekw(par = mle, data = data)
+cat("\nGradient at MLE:\n")
+print(gradient_at_mle)
+cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
+cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
+
+
+## Example 4: Numerical vs Analytical Gradient
+
+# Manual finite difference gradient
+numerical_gradient <- function(f, x, data, h = 1e-7) {
+  grad <- numeric(length(x))
+  for (i in seq_along(x)) {
+    x_plus <- x_minus <- x
+    x_plus[i] <- x[i] + h
+    x_minus[i] <- x[i] - h
+    grad[i] <- (f(x_plus, data) - f(x_minus, data)) / (2 * h)
+  }
+  return(grad)
 }
-hist(sample_data_ekw, breaks = 20, main = "EKw(2, 3, 0.5) Sample")
 
-# --- Find MLE estimates ---
-start_par_ekw <- c(1.5, 2.5, 0.8)
-mle_result_ekw <- stats::optim(par = start_par_ekw,
-                               fn = llekw,
-                               gr = grekw, # Use analytical gradient for EKw
-                               method = "BFGS",
-                               hessian = TRUE,
-                               data = sample_data_ekw)
+# Compare at MLE
+grad_analytical <- grekw(par = mle, data = data)
+grad_numerical <- numerical_gradient(llekw, mle, data)
 
-# --- Compare analytical gradient to numerical gradient ---
-if (mle_result_ekw$convergence == 0 &&
-    requireNamespace("numDeriv", quietly = TRUE)) {
+comparison_grad <- data.frame(
+  Parameter = c("alpha", "beta", "lambda"),
+  Analytical = grad_analytical,
+  Numerical = grad_numerical,
+  Abs_Diff = abs(grad_analytical - grad_numerical),
+  Rel_Error = abs(grad_analytical - grad_numerical) /
+              (abs(grad_analytical) + 1e-10)
+)
+print(comparison_grad, digits = 8)
 
-  mle_par_ekw <- mle_result_ekw$par
-  cat("\nComparing Gradients for EKw at MLE estimates:\n")
 
-  # Numerical gradient of llekw
-  num_grad_ekw <- numDeriv::grad(func = llekw, x = mle_par_ekw, data = sample_data_ekw)
+## Example 5: Score Test Statistic
 
-  # Analytical gradient from grekw
-  ana_grad_ekw <- grekw(par = mle_par_ekw, data = sample_data_ekw)
+# Score test for H0: theta = theta0
+theta0 <- c(2.2, 3.2, 1.8)
+score_theta0 <- -grekw(par = theta0, data = data)
 
-  cat("Numerical Gradient (EKw):\n")
-  print(num_grad_ekw)
-  cat("Analytical Gradient (EKw):\n")
-  print(ana_grad_ekw)
+# Fisher information at theta0
+fisher_info <- hsekw(par = theta0, data = data)
 
-  # Check differences
-  cat("Max absolute difference between EKw gradients:\n")
-  print(max(abs(num_grad_ekw - ana_grad_ekw)))
+# Score test statistic
+score_stat <- t(score_theta0) \%*\% solve(fisher_info) \%*\% score_theta0
+p_value <- pchisq(score_stat, df = 3, lower.tail = FALSE)
 
-} else {
-  cat("\nSkipping EKw gradient comparison.\n")
+cat("\nScore Test:\n")
+cat("H0: alpha=2.2, beta=3.2, lambda=1.8\n")
+cat("Test statistic:", score_stat, "\n")
+cat("P-value:", format.pval(p_value, digits = 4), "\n")
+
+
+## Example 6: Confidence Ellipse (Alpha vs Beta)
+
+# Observed information
+obs_info <- hsekw(par = mle, data = data)
+vcov_full <- solve(obs_info)
+vcov_2d <- vcov_full[1:2, 1:2]
+
+# Create confidence ellipse
+theta <- seq(0, 2 * pi, length.out = 100)
+chi2_val <- qchisq(0.95, df = 2)
+
+eig_decomp <- eigen(vcov_2d)
+ellipse <- matrix(NA, nrow = 100, ncol = 2)
+for (i in 1:100) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse[i, ] <- mle[1:2] + sqrt(chi2_val) *
+    (eig_decomp$vectors \%*\% diag(sqrt(eig_decomp$values)) \%*\% v)
 }
 
-# Example with Hessian comparison (if hsekw exists)
-if (mle_result_ekw$convergence == 0 &&
-    requireNamespace("numDeriv", quietly = TRUE) && exists("hsekw")) {
+# Marginal confidence intervals
+se_2d <- sqrt(diag(vcov_2d))
+ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
+ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
-  num_hess_ekw <- numDeriv::hessian(func = llekw, x = mle_par_ekw, data = sample_data_ekw)
-  ana_hess_ekw <- hsekw(par = mle_par_ekw, data = sample_data_ekw)
-  cat("\nMax absolute difference between EKw Hessians:\n")
-  print(max(abs(num_hess_ekw - ana_hess_ekw)))
+# Plot
+par(mar = c(4, 4, 3, 1))
+plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(alpha), ylab = expression(beta),
+     main = "95\% Confidence Region (Alpha vs Beta)", las = 1)
 
+# Add marginal CIs
+abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_beta, col = "#808080", lty = 3, lwd = 1.5)
+
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+       pch = c(19, 17, NA, NA),
+       lty = c(NA, NA, 1, 3),
+       lwd = c(NA, NA, 2, 1.5),
+       bty = "n")
+grid(col = "gray90")
+
+
+## Example 7: Confidence Ellipse (Alpha vs Lambda)
+
+# Extract 2x2 submatrix for alpha and lambda
+vcov_2d_al <- vcov_full[c(1, 3), c(1, 3)]
+
+# Create confidence ellipse
+eig_decomp_al <- eigen(vcov_2d_al)
+ellipse_al <- matrix(NA, nrow = 100, ncol = 2)
+for (i in 1:100) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse_al[i, ] <- mle[c(1, 3)] + sqrt(chi2_val) *
+    (eig_decomp_al$vectors \%*\% diag(sqrt(eig_decomp_al$values)) \%*\% v)
 }
+
+# Marginal confidence intervals
+se_2d_al <- sqrt(diag(vcov_2d_al))
+ci_alpha_2 <- mle[1] + c(-1, 1) * 1.96 * se_2d_al[1]
+ci_lambda <- mle[3] + c(-1, 1) * 1.96 * se_2d_al[2]
+
+# Plot
+par(mar = c(4, 4, 3, 1))
+plot(ellipse_al[, 1], ellipse_al[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(alpha), ylab = expression(lambda),
+     main = "95\% Confidence Region (Alpha vs Lambda)", las = 1)
+
+# Add marginal CIs
+abline(v = ci_alpha_2, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_lambda, col = "#808080", lty = 3, lwd = 1.5)
+
+points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+       pch = c(19, 17, NA, NA),
+       lty = c(NA, NA, 1, 3),
+       lwd = c(NA, NA, 2, 1.5),
+       bty = "n")
+grid(col = "gray90")
+
+
+## Example 8: Confidence Ellipse (Beta vs Lambda)
+
+# Extract 2x2 submatrix for beta and lambda
+vcov_2d_bl <- vcov_full[2:3, 2:3]
+
+# Create confidence ellipse
+eig_decomp_bl <- eigen(vcov_2d_bl)
+ellipse_bl <- matrix(NA, nrow = 100, ncol = 2)
+for (i in 1:100) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse_bl[i, ] <- mle[2:3] + sqrt(chi2_val) *
+    (eig_decomp_bl$vectors \%*\% diag(sqrt(eig_decomp_bl$values)) \%*\% v)
+}
+
+# Marginal confidence intervals
+se_2d_bl <- sqrt(diag(vcov_2d_bl))
+ci_beta_2 <- mle[2] + c(-1, 1) * 1.96 * se_2d_bl[1]
+ci_lambda_2 <- mle[3] + c(-1, 1) * 1.96 * se_2d_bl[2]
+
+# Plot
+par(mar = c(4, 4, 3, 1))
+plot(ellipse_bl[, 1], ellipse_bl[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(beta), ylab = expression(lambda),
+     main = "95\% Confidence Region (Beta vs Lambda)", las = 1)
+
+# Add marginal CIs
+abline(v = ci_beta_2, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_lambda_2, col = "#808080", lty = 3, lwd = 1.5)
+
+points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+       pch = c(19, 17, NA, NA),
+       lty = c(NA, NA, 1, 3),
+       lwd = c(NA, NA, 2, 1.5),
+       bty = "n")
+grid(col = "gray90")
 
 }
 

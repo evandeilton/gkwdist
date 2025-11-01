@@ -53,61 +53,182 @@ Note the parameterization: the standard Beta shape parameters are \eqn{\gamma} a
 }
 \examples{
 \donttest{
-# Assuming existence of rbeta_, llbeta, grbeta, hsbeta functions
+## Example 1: Basic Gradient Evaluation
 
-# Generate sample data from a Beta(2, 4) distribution
-# (gamma=2, delta=3 in this parameterization)
+# Generate sample data
 set.seed(123)
-true_par_beta <- c(gamma = 2, delta = 3)
-sample_data_beta <- rbeta_(100, gamma = true_par_beta[1], delta = true_par_beta[2])
-hist(sample_data_beta, breaks = 20, main = "Beta(2, 4) Sample")
+n <- 1000
+true_params <- c(gamma = 2.0, delta = 3.0)
+data <- rbeta_(n, gamma = true_params[1], delta = true_params[2])
 
-# --- Find MLE estimates ---
-start_par_beta <- c(1.5, 2.5)
-mle_result_beta <- stats::optim(par = start_par_beta,
-                               fn = llbeta,
-                               gr = grbeta, # Use analytical gradient
-                               method = "L-BFGS-B",
-                               lower = c(1e-6, 1e-6), # Bounds: gamma>0, delta>=0
-                               hessian = TRUE,
-                               data = sample_data_beta)
+# Evaluate gradient at true parameters
+grad_true <- grbeta(par = true_params, data = data)
+cat("Gradient at true parameters:\n")
+print(grad_true)
+cat("Norm:", sqrt(sum(grad_true^2)), "\n")
 
-# --- Compare analytical gradient to numerical gradient ---
-if (mle_result_beta$convergence == 0 &&
-    requireNamespace("numDeriv", quietly = TRUE)) {
+# Evaluate at different parameter values
+test_params <- rbind(
+  c(1.5, 2.5),
+  c(2.0, 3.0),
+  c(2.5, 3.5)
+)
 
-  mle_par_beta <- mle_result_beta$par
-  cat("\nComparing Gradients for Beta at MLE estimates:\n")
+grad_norms <- apply(test_params, 1, function(p) {
+  g <- grbeta(p, data)
+  sqrt(sum(g^2))
+})
 
-  # Numerical gradient of llbeta
-  num_grad_beta <- numDeriv::grad(func = llbeta, x = mle_par_beta, data = sample_data_beta)
+results <- data.frame(
+  Gamma = test_params[, 1],
+  Delta = test_params[, 2],
+  Grad_Norm = grad_norms
+)
+print(results, digits = 4)
 
-  # Analytical gradient from grbeta
-  ana_grad_beta <- grbeta(par = mle_par_beta, data = sample_data_beta)
 
-  cat("Numerical Gradient (Beta):\n")
-  print(num_grad_beta)
-  cat("Analytical Gradient (Beta):\n")
-  print(ana_grad_beta)
+## Example 2: Gradient in Optimization
 
-  # Check differences
-  cat("Max absolute difference between Beta gradients:\n")
-  print(max(abs(num_grad_beta - ana_grad_beta)))
+# Optimization with analytical gradient
+fit_with_grad <- optim(
+  par = c(1.5, 2.5),
+  fn = llbeta,
+  gr = grbeta,
+  data = data,
+  method = "L-BFGS-B",
+  lower = c(0.01, 0.01),
+  upper = c(100, 100),
+  hessian = TRUE,
+  control = list(trace = 0)
+)
 
-} else {
-  cat("\nSkipping Beta gradient comparison.\n")
+# Optimization without gradient
+fit_no_grad <- optim(
+  par = c(1.5, 2.5),
+  fn = llbeta,
+  data = data,
+  method = "L-BFGS-B",
+  lower = c(0.01, 0.01),
+  upper = c(100, 100),
+  hessian = TRUE,
+  control = list(trace = 0)
+)
+
+comparison <- data.frame(
+  Method = c("With Gradient", "Without Gradient"),
+  Gamma = c(fit_with_grad$par[1], fit_no_grad$par[1]),
+  Delta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
+  NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
+  Iterations = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
+)
+print(comparison, digits = 4, row.names = FALSE)
+
+
+## Example 3: Verifying Gradient at MLE
+
+mle <- fit_with_grad$par
+names(mle) <- c("gamma", "delta")
+
+# At MLE, gradient should be approximately zero
+gradient_at_mle <- grbeta(par = mle, data = data)
+cat("\nGradient at MLE:\n")
+print(gradient_at_mle)
+cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
+cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
+
+
+## Example 4: Numerical vs Analytical Gradient
+
+# Manual finite difference gradient
+numerical_gradient <- function(f, x, data, h = 1e-7) {
+  grad <- numeric(length(x))
+  for (i in seq_along(x)) {
+    x_plus <- x_minus <- x
+    x_plus[i] <- x[i] + h
+    x_minus[i] <- x[i] - h
+    grad[i] <- (f(x_plus, data) - f(x_minus, data)) / (2 * h)
+  }
+  return(grad)
 }
 
-# Example with Hessian comparison (if hsbeta exists)
-if (mle_result_beta$convergence == 0 &&
-    requireNamespace("numDeriv", quietly = TRUE) && exists("hsbeta")) {
+# Compare at MLE
+grad_analytical <- grbeta(par = mle, data = data)
+grad_numerical <- numerical_gradient(llbeta, mle, data)
 
-  num_hess_beta <- numDeriv::hessian(func = llbeta, x = mle_par_beta, data = sample_data_beta)
-  ana_hess_beta <- hsbeta(par = mle_par_beta, data = sample_data_beta)
-  cat("\nMax absolute difference between Beta Hessians:\n")
-  print(max(abs(num_hess_beta - ana_hess_beta)))
+comparison_grad <- data.frame(
+  Parameter = c("gamma", "delta"),
+  Analytical = grad_analytical,
+  Numerical = grad_numerical,
+  Abs_Diff = abs(grad_analytical - grad_numerical),
+  Rel_Error = abs(grad_analytical - grad_numerical) /
+              (abs(grad_analytical) + 1e-10)
+)
+print(comparison_grad, digits = 8)
 
+
+## Example 5: Score Test Statistic
+
+# Score test for H0: theta = theta0
+theta0 <- c(1.8, 2.8)
+score_theta0 <- -grbeta(par = theta0, data = data)
+
+# Fisher information at theta0
+fisher_info <- hsbeta(par = theta0, data = data)
+
+# Score test statistic
+score_stat <- t(score_theta0) \%*\% solve(fisher_info) \%*\% score_theta0
+p_value <- pchisq(score_stat, df = 2, lower.tail = FALSE)
+
+cat("\nScore Test:\n")
+cat("H0: gamma=1.8, delta=2.8\n")
+cat("Test statistic:", score_stat, "\n")
+cat("P-value:", format.pval(p_value, digits = 4), "\n")
+
+
+## Example 6: Confidence Ellipse (Gamma vs Delta)
+
+# Observed information
+obs_info <- hsbeta(par = mle, data = data)
+vcov_full <- solve(obs_info)
+
+# Create confidence ellipse
+theta <- seq(0, 2 * pi, length.out = 100)
+chi2_val <- qchisq(0.95, df = 2)
+
+eig_decomp <- eigen(vcov_full)
+ellipse <- matrix(NA, nrow = 100, ncol = 2)
+for (i in 1:100) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse[i, ] <- mle + sqrt(chi2_val) *
+    (eig_decomp$vectors \%*\% diag(sqrt(eig_decomp$values)) \%*\% v)
 }
+
+# Marginal confidence intervals
+se_2d <- sqrt(diag(vcov_full))
+ci_gamma <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
+ci_delta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
+
+# Plot
+par(mar = c(4, 4, 3, 1))
+plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(gamma), ylab = expression(delta),
+     main = "95\% Confidence Region (Gamma vs Delta)", las = 1)
+
+# Add marginal CIs
+abline(v = ci_gamma, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_delta, col = "#808080", lty = 3, lwd = 1.5)
+
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+       pch = c(19, 17, NA, NA),
+       lty = c(NA, NA, 1, 3),
+       lwd = c(NA, NA, 2, 1.5),
+       bty = "n")
+grid(col = "gray90")
 
 }
 

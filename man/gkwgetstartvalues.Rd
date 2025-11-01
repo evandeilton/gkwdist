@@ -57,7 +57,7 @@ The function will issue warnings for empty input vectors, sample sizes less than
 (unreliable estimation), or failure to find valid parameter estimates (returns defaults).
 }
 \examples{
-\dontrun{
+\donttest{
 # Generate sample data from Beta distribution
 set.seed(123)
 x <- rbeta(100, shape1 = 2, shape2 = 3)

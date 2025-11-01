@@ -1,3 +1,25 @@
+# gkwdist 1.0.5
+
+## Documentation Improvements
+
+* **Enhanced Examples for Likelihood Functions**: All `ll*`, `gr*`, and `hs*` functions now include comprehensive examples demonstrating:
+  - Maximum likelihood estimation with analytical gradients
+  - Univariate profile likelihoods with confidence thresholds
+  - 2D likelihood surfaces with confidence regions (90%, 95%, 99%)
+  - Confidence ellipses with marginal intervals for parameter pairs
+  - Numerical vs analytical derivative verification
+  - Likelihood ratio tests and score tests
+
+* **Professional Visualization Standards**: 
+  - Consistent color scheme across all examples
+  - Grid-adaptive algorithms for computational efficiency
+  - Base R only - no external dependencies required
+
+* **Complete Coverage**: Enhanced documentation for all distribution families (Kw, EKw, KKw, GKw) covering 2 to 5 parameters
+
+* **Theoretical References**: Documentation cites foundational work by Carrasco et al. (2010), Jones (2009), Kumaraswamy (1980), and standard inference theory from Casella & Berger (2002)
+
+
 # gkwdist 1.0.3
 * **README.md**: Fix typos and faill link
   - Fix zzz.R file by removing useless texts

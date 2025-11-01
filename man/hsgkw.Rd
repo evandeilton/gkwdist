@@ -63,67 +63,318 @@ efficiency, typically using C++.
 }
 \examples{
 \donttest{
-# Generate sample data from a known GKw distribution
-set.seed(123)
-true_par <- c(alpha = 2, beta = 3, gamma = 1.0, delta = 0.5, lambda = 0.5)
-sample_data <- rgkw(100, alpha = true_par[1], beta = true_par[2],
-                   gamma = true_par[3], delta = true_par[4], lambda = true_par[5])
+## Example 1: Basic Hessian Evaluation
 
-# --- Find MLE estimates (e.g., using optim) ---
-start_par <- c(1.5, 2.5, 1.2, 0.3, 0.6) # Initial guess
-mle_result <- stats::optim(par = start_par,
-                           fn = llgkw,
-                           method = "BFGS",
-                           hessian = TRUE, # Ask optim for numerical Hessian
-                           data = sample_data)
+# Generate sample data
+set.seed(2323)
+n <- 1000
+true_params <- c(alpha = 1.5, beta = 2.0, gamma = 0.8, delta = 1.2, lambda = 0.5)
+data <- rgkw(n, alpha = true_params[1], beta = true_params[2],
+             gamma = true_params[3], delta = true_params[4],
+             lambda = true_params[5])
 
-if (mle_result$convergence == 0) {
-  mle_par <- mle_result$par
-  print("MLE parameters found:")
-  print(mle_par)
+# Evaluate Hessian at true parameters
+hess_true <- hsgkw(par = true_params, data = data)
+cat("Hessian matrix at true parameters:\n")
+print(hess_true, digits = 4)
 
-  # --- Compare analytical Hessian to numerical Hessian ---
-  # Requires the 'numDeriv' package
-  if (requireNamespace("numDeriv", quietly = TRUE)) {
+# Check symmetry
+cat("\nSymmetry check (max |H - H^T|):",
+    max(abs(hess_true - t(hess_true))), "\n")
 
-    cat("\nComparing Hessians at MLE estimates:\n")
 
-    # Numerical Hessian from numDeriv applied to negative LL function
-    num_hess <- numDeriv::hessian(func = llgkw, x = mle_par, data = sample_data)
+## Example 2: Hessian Properties at MLE
 
-    # Analytical Hessian (output of hsgkw)
-    ana_hess <- hsgkw(par = mle_par, data = sample_data)
+# Fit model
+fit <- optim(
+  par = c(1.2, 2.0, 0.5, 1.5, 0.2),
+  fn = llgkw,
+  gr = grgkw,
+  data = data,
+  method = "Nelder-Mead",
+  hessian = TRUE,
+  control = list(
+    maxit = 2000,
+    factr = 1e-15,
+    pgtol = 1e-15,
+    trace = FALSE
+    )
+)
 
-    cat("Numerical Hessian (from numDeriv):\n")
-    print(round(num_hess, 4))
-    cat("Analytical Hessian (from hsgkw):\n")
-    print(round(ana_hess, 4))
+mle <- fit$par
+names(mle) <- c("alpha", "beta", "gamma", "delta", "lambda")
 
-    # Check differences (should be small)
-    cat("Max absolute difference between Hessians:\n")
-    print(max(abs(num_hess - ana_hess)))
+# Hessian at MLE
+hessian_at_mle <- hsgkw(par = mle, data = data)
+cat("\nHessian at MLE:\n")
+print(hessian_at_mle, digits = 4)
 
-    # Optional: Use analytical Hessian to estimate standard errors
-    # Ensure Hessian is positive definite before inverting
-    # fisher_info_analytic <- ana_hess # Hessian of negative LL
-    # tryCatch({
-    #   cov_matrix <- solve(fisher_info_analytic)
-    #   std_errors <- sqrt(diag(cov_matrix))
-    #   cat("Std. Errors from Analytical Hessian:\n")
-    #   print(std_errors)
-    # }, error = function(e) {
-    #   warning("Could not invert analytical Hessian to get standard errors: ", e$message)
-    # })
+# Compare with optim's numerical Hessian
+cat("\nComparison with optim Hessian:\n")
+cat("Max absolute difference:",
+    max(abs(hessian_at_mle - fit$hessian)), "\n")
 
-  } else {
-    cat("\nSkipping Hessian comparison (requires 'numDeriv' package).\n")
+# Eigenvalue analysis
+eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
+cat("\nEigenvalues:\n")
+print(eigenvals)
+
+cat("\nPositive definite:", all(eigenvals > 0), "\n")
+cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
+
+
+## Example 3: Standard Errors and Confidence Intervals
+
+# Observed information matrix
+obs_info <- hessian_at_mle
+
+# Variance-covariance matrix
+vcov_matrix <- solve(obs_info)
+cat("\nVariance-Covariance Matrix:\n")
+print(vcov_matrix, digits = 6)
+
+# Standard errors
+se <- sqrt(diag(vcov_matrix))
+names(se) <- c("alpha", "beta", "gamma", "delta", "lambda")
+
+# Correlation matrix
+corr_matrix <- cov2cor(vcov_matrix)
+cat("\nCorrelation Matrix:\n")
+print(corr_matrix, digits = 4)
+
+# Confidence intervals
+z_crit <- qnorm(0.975)
+results <- data.frame(
+  Parameter = c("alpha", "beta", "gamma", "delta", "lambda"),
+  True = true_params,
+  MLE = mle,
+  SE = se,
+  CI_Lower = mle - z_crit * se,
+  CI_Upper = mle + z_crit * se
+)
+print(results, digits = 4)
+
+
+## Example 4: Determinant and Trace Analysis
+
+# Compute at different points
+test_params <- rbind(
+  c(1.5, 2.5, 1.2, 1.5, 1.5),
+  c(2.0, 3.0, 1.5, 2.0, 1.8),
+  mle,
+  c(2.5, 3.5, 1.8, 2.5, 2.0)
+)
+
+hess_properties <- data.frame(
+  Alpha = numeric(),
+  Beta = numeric(),
+  Gamma = numeric(),
+  Delta = numeric(),
+  Lambda = numeric(),
+  Determinant = numeric(),
+  Trace = numeric(),
+  Min_Eigenval = numeric(),
+  Max_Eigenval = numeric(),
+  Cond_Number = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in 1:nrow(test_params)) {
+  H <- hsgkw(par = test_params[i, ], data = data)
+  eigs <- eigen(H, only.values = TRUE)$values
+
+  hess_properties <- rbind(hess_properties, data.frame(
+    Alpha = test_params[i, 1],
+    Beta = test_params[i, 2],
+    Gamma = test_params[i, 3],
+    Delta = test_params[i, 4],
+    Lambda = test_params[i, 5],
+    Determinant = det(H),
+    Trace = sum(diag(H)),
+    Min_Eigenval = min(eigs),
+    Max_Eigenval = max(eigs),
+    Cond_Number = max(eigs) / min(eigs)
+  ))
+}
+
+cat("\nHessian Properties at Different Points:\n")
+print(hess_properties, digits = 4, row.names = FALSE)
+
+
+## Example 5: Curvature Visualization (Alpha vs Beta)
+
+xd <- 2
+# Create grid around MLE
+alpha_grid <- seq(mle[1] - xd, mle[1] + xd, length.out = round(n/4))
+beta_grid <- seq(mle[2] - xd, mle[2] + xd, length.out = round(n/4))
+alpha_grid <- alpha_grid[alpha_grid > 0]
+beta_grid <- beta_grid[beta_grid > 0]
+
+# Compute curvature measures
+determinant_surface <- matrix(NA, nrow = length(alpha_grid),
+                               ncol = length(beta_grid))
+trace_surface <- matrix(NA, nrow = length(alpha_grid),
+                         ncol = length(beta_grid))
+
+for (i in seq_along(alpha_grid)) {
+  for (j in seq_along(beta_grid)) {
+    H <- hsgkw(c(alpha_grid[i], beta_grid[j], mle[3], mle[4], mle[5]), data)
+    determinant_surface[i, j] <- det(H)
+    trace_surface[i, j] <- sum(diag(H))
   }
-} else {
-  warning("Optimization did not converge. Hessian comparison skipped.")
 }
 
+# Plot
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+
+contour(alpha_grid, beta_grid, determinant_surface,
+        xlab = expression(alpha), ylab = expression(beta),
+        main = "Hessian Determinant", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+contour(alpha_grid, beta_grid, trace_surface,
+        xlab = expression(alpha), ylab = expression(beta),
+        main = "Hessian Trace", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+par(mfrow = c(1, 1))
+
+
+## Example 6: Confidence Ellipse (Alpha vs Beta)
+
+# Extract 2x2 submatrix for alpha and beta
+vcov_2d <- vcov_matrix[1:2, 1:2]
+
+# Create confidence ellipse
+theta <- seq(0, 2 * pi, length.out = round(n/4))
+chi2_val <- qchisq(0.95, df = 2)
+
+eig_decomp <- eigen(vcov_2d)
+ellipse <- matrix(NA, nrow = round(n/4), ncol = 2)
+for (i in 1:round(n/4)) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse[i, ] <- mle[1:2] + sqrt(chi2_val) *
+    (eig_decomp$vectors \%*\% diag(sqrt(eig_decomp$values)) \%*\% v)
 }
 
+# Marginal confidence intervals
+se_2d <- sqrt(diag(vcov_2d))
+ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
+ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
+
+# Plot
+par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(alpha), ylab = expression(beta),
+     main = "95\% Confidence Ellipse (Alpha vs Beta)", las = 1)
+
+# Add marginal CIs
+abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_beta, col = "#808080", lty = 3, lwd = 1.5)
+
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+       pch = c(19, 17, NA, NA),
+       lty = c(NA, NA, 1, 3),
+       lwd = c(NA, NA, 2, 1.5),
+       bty = "n")
+grid(col = "gray90")
+
+
+## Example 7: Confidence Ellipse (Gamma vs Delta)
+
+# Extract 2x2 submatrix for gamma and delta
+vcov_2d_gd <- vcov_matrix[3:4, 3:4]
+
+# Create confidence ellipse
+eig_decomp_gd <- eigen(vcov_2d_gd)
+ellipse_gd <- matrix(NA, nrow = round(n/4), ncol = 2)
+for (i in 1:round(n/4)) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse_gd[i, ] <- mle[3:4] + sqrt(chi2_val) *
+    (eig_decomp_gd$vectors \%*\% diag(sqrt(eig_decomp_gd$values)) \%*\% v)
+}
+
+# Marginal confidence intervals
+se_2d_gd <- sqrt(diag(vcov_2d_gd))
+ci_gamma <- mle[3] + c(-1, 1) * 1.96 * se_2d_gd[1]
+ci_delta <- mle[4] + c(-1, 1) * 1.96 * se_2d_gd[2]
+
+# Plot
+# par(mar = c(4, 4, 3, 1))
+plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(gamma), ylab = expression(delta),
+     main = "95\% Confidence Ellipse (Gamma vs Delta)", las = 1)
+
+# Add marginal CIs
+abline(v = ci_gamma, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_delta, col = "#808080", lty = 3, lwd = 1.5)
+
+points(mle[3], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[3], true_params[4], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+       pch = c(19, 17, NA, NA),
+       lty = c(NA, NA, 1, 3),
+       lwd = c(NA, NA, 2, 1.5),
+       bty = "n")
+grid(col = "gray90")
+
+
+## Example 8: Confidence Ellipse (Delta vs Lambda)
+
+# Extract 2x2 submatrix for delta and lambda
+vcov_2d_dl <- vcov_matrix[4:5, 4:5]
+
+# Create confidence ellipse
+eig_decomp_dl <- eigen(vcov_2d_dl)
+ellipse_dl <- matrix(NA, nrow = round(n/4), ncol = 2)
+for (i in 1:round(n/4)) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse_dl[i, ] <- mle[4:5] + sqrt(chi2_val) *
+    (eig_decomp_dl$vectors \%*\% diag(sqrt(eig_decomp_dl$values)) \%*\% v)
+}
+
+# Marginal confidence intervals
+se_2d_dl <- sqrt(diag(vcov_2d_dl))
+ci_delta_2 <- mle[4] + c(-1, 1) * 1.96 * se_2d_dl[1]
+ci_lambda <- mle[5] + c(-1, 1) * 1.96 * se_2d_dl[2]
+
+# Plot
+par(mar = c(4, 4, 3, 1))
+plot(ellipse_dl[, 1], ellipse_dl[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(delta), ylab = expression(lambda),
+     main = "95\% Confidence Ellipse (Delta vs Lambda)", las = 1)
+
+# Add marginal CIs
+abline(v = ci_delta_2, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_lambda, col = "#808080", lty = 3, lwd = 1.5)
+
+points(mle[4], mle[5], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[4], true_params[5], pch = 17, col = "#006400", cex = 1.5)
+
+legend("topright",
+       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+       pch = c(19, 17, NA, NA),
+       lty = c(NA, NA, 1, 3),
+       lwd = c(NA, NA, 2, 1.5),
+       bty = "n")
+grid(col = "gray90")
+
+}
 }
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized

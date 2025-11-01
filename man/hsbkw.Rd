@@ -61,66 +61,343 @@ evaluated at \eqn{\lambda=1}. The exact analytical formulas are implemented dire
 }
 \examples{
 \donttest{
-# Assuming existence of rbkw, llbkw, grbkw, hsbkw functions for BKw
+## Example 1: Basic Hessian Evaluation
 
 # Generate sample data
-set.seed(123)
-true_par_bkw <- c(alpha = 2, beta = 3, gamma = 1, delta = 0.5)
-if (exists("rbkw")) {
-  sample_data_bkw <- rbkw(100, alpha = true_par_bkw[1], beta = true_par_bkw[2],
-                         gamma = true_par_bkw[3], delta = true_par_bkw[4])
-} else {
-  sample_data_bkw <- rgkw(100, alpha = true_par_bkw[1], beta = true_par_bkw[2],
-                         gamma = true_par_bkw[3], delta = true_par_bkw[4], lambda = 1)
+set.seed(2203)
+n <- 1000
+true_params <- c(alpha = 2.0, beta = 1.5, gamma = 1.5, delta = 0.5)
+data <- rbkw(n, alpha = true_params[1], beta = true_params[2],
+             gamma = true_params[3], delta = true_params[4])
+
+# Evaluate Hessian at true parameters
+hess_true <- hsbkw(par = true_params, data = data)
+cat("Hessian matrix at true parameters:\n")
+print(hess_true, digits = 4)
+
+# Check symmetry
+cat("\nSymmetry check (max |H - H^T|):",
+    max(abs(hess_true - t(hess_true))), "\n")
+
+
+## Example 2: Hessian Properties at MLE
+
+# Fit model
+fit <- optim(
+  par = c(1.8, 1.2, 1.1, 0.3),
+  fn = llbkw,
+  gr = grbkw,
+  data = data,
+  method = "Nelder-Mead",
+  hessian = TRUE
+)
+
+mle <- fit$par
+names(mle) <- c("alpha", "beta", "gamma", "delta")
+
+# Hessian at MLE
+hessian_at_mle <- hsbkw(par = mle, data = data)
+cat("\nHessian at MLE:\n")
+print(hessian_at_mle, digits = 4)
+
+# Compare with optim's numerical Hessian
+cat("\nComparison with optim Hessian:\n")
+cat("Max absolute difference:",
+    max(abs(hessian_at_mle - fit$hessian)), "\n")
+
+# Eigenvalue analysis
+eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
+cat("\nEigenvalues:\n")
+print(eigenvals)
+
+cat("\nPositive definite:", all(eigenvals > 0), "\n")
+cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
+
+
+## Example 3: Standard Errors and Confidence Intervals
+
+# Observed information matrix
+obs_info <- hessian_at_mle
+
+# Variance-covariance matrix
+vcov_matrix <- solve(obs_info)
+cat("\nVariance-Covariance Matrix:\n")
+print(vcov_matrix, digits = 6)
+
+# Standard errors
+se <- sqrt(diag(vcov_matrix))
+names(se) <- c("alpha", "beta", "gamma", "delta")
+
+# Correlation matrix
+corr_matrix <- cov2cor(vcov_matrix)
+cat("\nCorrelation Matrix:\n")
+print(corr_matrix, digits = 4)
+
+# Confidence intervals
+z_crit <- qnorm(0.975)
+results <- data.frame(
+  Parameter = c("alpha", "beta", "gamma", "delta"),
+  True = true_params,
+  MLE = mle,
+  SE = se,
+  CI_Lower = mle - z_crit * se,
+  CI_Upper = mle + z_crit * se
+)
+print(results, digits = 4)
+
+
+## Example 4: Determinant and Trace Analysis
+
+# Compute at different points
+test_params <- rbind(
+  c(1.5, 1.0, 1.0, 0.3),
+  c(2.0, 1.5, 1.5, 0.5),
+  mle,
+  c(2.5, 2.0, 2.0, 0.7)
+)
+
+hess_properties <- data.frame(
+  Alpha = numeric(),
+  Beta = numeric(),
+  Gamma = numeric(),
+  Delta = numeric(),
+  Determinant = numeric(),
+  Trace = numeric(),
+  Min_Eigenval = numeric(),
+  Max_Eigenval = numeric(),
+  Cond_Number = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in 1:nrow(test_params)) {
+  H <- hsbkw(par = test_params[i, ], data = data)
+  eigs <- eigen(H, only.values = TRUE)$values
+
+  hess_properties <- rbind(hess_properties, data.frame(
+    Alpha = test_params[i, 1],
+    Beta = test_params[i, 2],
+    Gamma = test_params[i, 3],
+    Delta = test_params[i, 4],
+    Determinant = det(H),
+    Trace = sum(diag(H)),
+    Min_Eigenval = min(eigs),
+    Max_Eigenval = max(eigs),
+    Cond_Number = max(eigs) / min(eigs)
+  ))
 }
-hist(sample_data_bkw, breaks = 20, main = "BKw(2, 3, 1, 0.5) Sample")
 
-# --- Find MLE estimates ---
-start_par_bkw <- c(1.5, 2.5, 0.8, 0.3)
-mle_result_bkw <- stats::optim(par = start_par_bkw,
-                               fn = llbkw,
-                               gr = if (exists("grbkw")) grbkw else NULL,
-                               method = "BFGS",
-                               hessian = TRUE, # Ask optim for numerical Hessian
-                               data = sample_data_bkw)
+cat("\nHessian Properties at Different Points:\n")
+print(hess_properties, digits = 4, row.names = FALSE)
 
-# --- Compare analytical Hessian to numerical Hessian ---
-if (mle_result_bkw$convergence == 0 &&
-    requireNamespace("numDeriv", quietly = TRUE) &&
-    exists("hsbkw")) {
 
-  mle_par_bkw <- mle_result_bkw$par
-  cat("\nComparing Hessians for BKw at MLE estimates:\n")
+## Example 5: Curvature Visualization (Selected pairs)
 
-  # Numerical Hessian of llbkw
-  num_hess_bkw <- numDeriv::hessian(func = llbkw, x = mle_par_bkw, data = sample_data_bkw)
+# Create grids around MLE with wider range (±1.5)
+alpha_grid <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = 25)
+beta_grid <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = 25)
+gamma_grid <- seq(mle[3] - 1.5, mle[3] + 1.5, length.out = 25)
+delta_grid <- seq(mle[4] - 1.5, mle[4] + 1.5, length.out = 25)
 
-  # Analytical Hessian from hsbkw
-  ana_hess_bkw <- hsbkw(par = mle_par_bkw, data = sample_data_bkw)
+alpha_grid <- alpha_grid[alpha_grid > 0]
+beta_grid <- beta_grid[beta_grid > 0]
+gamma_grid <- gamma_grid[gamma_grid > 0]
+delta_grid <- delta_grid[delta_grid > 0]
 
-  cat("Numerical Hessian (BKw):\n")
-  print(round(num_hess_bkw, 4))
-  cat("Analytical Hessian (BKw):\n")
-  print(round(ana_hess_bkw, 4))
+# Compute curvature measures for selected pairs
+determinant_surface_ab <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
+trace_surface_ab <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
 
-  # Check differences
-  cat("Max absolute difference between BKw Hessians:\n")
-  print(max(abs(num_hess_bkw - ana_hess_bkw)))
+determinant_surface_ag <- matrix(NA, nrow = length(alpha_grid), ncol = length(gamma_grid))
+trace_surface_ag <- matrix(NA, nrow = length(alpha_grid), ncol = length(gamma_grid))
 
-  # Optional: Use analytical Hessian for Standard Errors
-  # tryCatch({
-  #   cov_matrix_bkw <- solve(ana_hess_bkw)
-  #   std_errors_bkw <- sqrt(diag(cov_matrix_bkw))
-  #   cat("Std. Errors from Analytical BKw Hessian:\n")
-  #   print(std_errors_bkw)
-  # }, error = function(e) {
-  #   warning("Could not invert analytical BKw Hessian: ", e$message)
-  # })
+determinant_surface_bd <- matrix(NA, nrow = length(beta_grid), ncol = length(delta_grid))
+trace_surface_bd <- matrix(NA, nrow = length(beta_grid), ncol = length(delta_grid))
 
-} else {
-  cat("\nSkipping BKw Hessian comparison.\n")
-  cat("Requires convergence, 'numDeriv' package, and function 'hsbkw'.\n")
+# Alpha vs Beta
+for (i in seq_along(alpha_grid)) {
+  for (j in seq_along(beta_grid)) {
+    H <- hsbkw(c(alpha_grid[i], beta_grid[j], mle[3], mle[4]), data)
+    determinant_surface_ab[i, j] <- det(H)
+    trace_surface_ab[i, j] <- sum(diag(H))
+  }
 }
+
+# Alpha vs Gamma
+for (i in seq_along(alpha_grid)) {
+  for (j in seq_along(gamma_grid)) {
+    H <- hsbkw(c(alpha_grid[i], mle[2], gamma_grid[j], mle[4]), data)
+    determinant_surface_ag[i, j] <- det(H)
+    trace_surface_ag[i, j] <- sum(diag(H))
+  }
+}
+
+# Beta vs Delta
+for (i in seq_along(beta_grid)) {
+  for (j in seq_along(delta_grid)) {
+    H <- hsbkw(c(mle[1], beta_grid[i], mle[3], delta_grid[j]), data)
+    determinant_surface_bd[i, j] <- det(H)
+    trace_surface_bd[i, j] <- sum(diag(H))
+  }
+}
+
+# Plot selected curvature surfaces
+par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+
+# Determinant plots
+contour(alpha_grid, beta_grid, determinant_surface_ab,
+        xlab = expression(alpha), ylab = expression(beta),
+        main = "Determinant: Alpha vs Beta", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+contour(alpha_grid, gamma_grid, determinant_surface_ag,
+        xlab = expression(alpha), ylab = expression(gamma),
+        main = "Determinant: Alpha vs Gamma", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+contour(beta_grid, delta_grid, determinant_surface_bd,
+        xlab = expression(beta), ylab = expression(delta),
+        main = "Determinant: Beta vs Delta", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[2], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[2], true_params[4], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+# Trace plots
+contour(alpha_grid, beta_grid, trace_surface_ab,
+        xlab = expression(alpha), ylab = expression(beta),
+        main = "Trace: Alpha vs Beta", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+contour(alpha_grid, gamma_grid, trace_surface_ag,
+        xlab = expression(alpha), ylab = expression(gamma),
+        main = "Trace: Alpha vs Gamma", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+contour(beta_grid, delta_grid, trace_surface_bd,
+        xlab = expression(beta), ylab = expression(delta),
+        main = "Trace: Beta vs Delta", las = 1,
+        col = "#2E4057", lwd = 1.5, nlevels = 15)
+points(mle[2], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[2], true_params[4], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+legend("topright",
+       legend = c("MLE", "True"),
+       col = c("#8B0000", "#006400"),
+       pch = c(19, 17),
+       bty = "n", cex = 0.8)
+
+par(mfrow = c(1, 1))
+
+
+## Example 6: Confidence Ellipses (Selected pairs)
+
+# Extract selected 2x2 submatrices
+vcov_ab <- vcov_matrix[1:2, 1:2]
+vcov_ag <- vcov_matrix[c(1, 3), c(1, 3)]
+vcov_bd <- vcov_matrix[c(2, 4), c(2, 4)]
+
+# Create confidence ellipses
+theta <- seq(0, 2 * pi, length.out = 100)
+chi2_val <- qchisq(0.95, df = 2)
+
+# Alpha vs Beta ellipse
+eig_decomp_ab <- eigen(vcov_ab)
+ellipse_ab <- matrix(NA, nrow = 100, ncol = 2)
+for (i in 1:100) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse_ab[i, ] <- mle[1:2] + sqrt(chi2_val) *
+    (eig_decomp_ab$vectors \%*\% diag(sqrt(eig_decomp_ab$values)) \%*\% v)
+}
+
+# Alpha vs Gamma ellipse
+eig_decomp_ag <- eigen(vcov_ag)
+ellipse_ag <- matrix(NA, nrow = 100, ncol = 2)
+for (i in 1:100) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse_ag[i, ] <- mle[c(1, 3)] + sqrt(chi2_val) *
+    (eig_decomp_ag$vectors \%*\% diag(sqrt(eig_decomp_ag$values)) \%*\% v)
+}
+
+# Beta vs Delta ellipse
+eig_decomp_bd <- eigen(vcov_bd)
+ellipse_bd <- matrix(NA, nrow = 100, ncol = 2)
+for (i in 1:100) {
+  v <- c(cos(theta[i]), sin(theta[i]))
+  ellipse_bd[i, ] <- mle[c(2, 4)] + sqrt(chi2_val) *
+    (eig_decomp_bd$vectors \%*\% diag(sqrt(eig_decomp_bd$values)) \%*\% v)
+}
+
+# Marginal confidence intervals
+se_ab <- sqrt(diag(vcov_ab))
+ci_alpha_ab <- mle[1] + c(-1, 1) * 1.96 * se_ab[1]
+ci_beta_ab <- mle[2] + c(-1, 1) * 1.96 * se_ab[2]
+
+se_ag <- sqrt(diag(vcov_ag))
+ci_alpha_ag <- mle[1] + c(-1, 1) * 1.96 * se_ag[1]
+ci_gamma_ag <- mle[3] + c(-1, 1) * 1.96 * se_ag[2]
+
+se_bd <- sqrt(diag(vcov_bd))
+ci_beta_bd <- mle[2] + c(-1, 1) * 1.96 * se_bd[1]
+ci_delta_bd <- mle[4] + c(-1, 1) * 1.96 * se_bd[2]
+
+# Plot selected ellipses side by side
+par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+
+# Alpha vs Beta
+plot(ellipse_ab[, 1], ellipse_ab[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(alpha), ylab = expression(beta),
+     main = "Alpha vs Beta", las = 1, xlim = range(ellipse_ab[, 1], ci_alpha_ab),
+     ylim = range(ellipse_ab[, 2], ci_beta_ab))
+abline(v = ci_alpha_ab, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_beta_ab, col = "#808080", lty = 3, lwd = 1.5)
+points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+# Alpha vs Gamma
+plot(ellipse_ag[, 1], ellipse_ag[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(alpha), ylab = expression(gamma),
+     main = "Alpha vs Gamma", las = 1, xlim = range(ellipse_ag[, 1], ci_alpha_ag),
+     ylim = range(ellipse_ag[, 2], ci_gamma_ag))
+abline(v = ci_alpha_ag, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_gamma_ag, col = "#808080", lty = 3, lwd = 1.5)
+points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+# Beta vs Delta
+plot(ellipse_bd[, 1], ellipse_bd[, 2], type = "l", lwd = 2, col = "#2E4057",
+     xlab = expression(beta), ylab = expression(delta),
+     main = "Beta vs Delta", las = 1, xlim = range(ellipse_bd[, 1], ci_beta_bd),
+     ylim = range(ellipse_bd[, 2], ci_delta_bd))
+abline(v = ci_beta_bd, col = "#808080", lty = 3, lwd = 1.5)
+abline(h = ci_delta_bd, col = "#808080", lty = 3, lwd = 1.5)
+points(mle[2], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
+points(true_params[2], true_params[4], pch = 17, col = "#006400", cex = 1.5)
+grid(col = "gray90")
+
+legend("topright",
+       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+       pch = c(19, 17, NA, NA),
+       lty = c(NA, NA, 1, 3),
+       lwd = c(NA, NA, 2, 1.5),
+       bty = "n", cex = 0.8)
+
+par(mfrow = c(1, 1))
 
 }
 

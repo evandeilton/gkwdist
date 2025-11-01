@@ -70,8 +70,6 @@ print(quantiles)
 # Calculate quantiles for upper tail probabilities P(X > q) = p
 quantiles_upper <- qkw(p_vals, alpha_par, beta_par, lower_tail = FALSE)
 print(quantiles_upper)
-# Check: qkw(p, ..., lt=F) == qkw(1-p, ..., lt=T)
-print(qkw(1 - p_vals, alpha_par, beta_par))
 
 # Calculate quantiles from log probabilities
 log_p_vals <- log(p_vals)

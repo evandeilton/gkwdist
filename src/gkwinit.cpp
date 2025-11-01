@@ -734,7 +734,7 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //' (unreliable estimation), or failure to find valid parameter estimates (returns defaults).
 //'
 //' @examples
-//' \dontrun{
+//' \donttest{
 //' # Generate sample data from Beta distribution
 //' set.seed(123)
 //' x <- rbeta(100, shape1 = 2, shape2 = 3)

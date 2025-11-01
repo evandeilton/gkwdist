@@ -47,63 +47,195 @@ of the general GKw gradient (\code{\link{grgkw}}) evaluated at \eqn{\gamma=1, \d
 }
 \examples{
 \donttest{
-# Assuming existence of rkw, llkw, grkw, hskw functions for Kw
+## Example 1: Basic Gradient Evaluation
 
 # Generate sample data
 set.seed(123)
-true_par_kw <- c(alpha = 2, beta = 3)
-sample_data_kw <- rkw(100, alpha = true_par_kw[1], beta = true_par_kw[2])
-hist(sample_data_kw, breaks = 20, main = "Kw(2, 3) Sample")
+n <- 1000
+true_params <- c(alpha = 2.5, beta = 3.5)
+data <- rkw(n, alpha = true_params[1], beta = true_params[2])
 
-# --- Find MLE estimates ---
-start_par_kw <- c(1.5, 2.5)
-mle_result_kw <- stats::optim(par = start_par_kw,
-                              fn = llkw,
-                              gr = grkw, # Use analytical gradient for Kw
-                              method = "L-BFGS-B", # Recommended for bounds
-                              lower = c(1e-6, 1e-6),
-                              hessian = TRUE,
-                              data = sample_data_kw)
+# Evaluate gradient at true parameters
+grad_true <- grkw(par = true_params, data = data)
+cat("Gradient at true parameters:\n")
+print(grad_true)
+cat("Norm:", sqrt(sum(grad_true^2)), "\n")
 
-# --- Compare analytical gradient to numerical gradient ---
-if (mle_result_kw$convergence == 0 &&
-    requireNamespace("numDeriv", quietly = TRUE)) {
+# Evaluate at different parameter values
+test_params <- rbind(
+  c(1.5, 2.5),
+  c(2.0, 3.0),
+  c(2.5, 3.5),
+  c(3.0, 4.0)
+)
 
-  mle_par_kw <- mle_result_kw$par
-  cat("\nComparing Gradients for Kw at MLE estimates:\n")
+grad_norms <- apply(test_params, 1, function(p) {
+  g <- grkw(p, data)
+  sqrt(sum(g^2))
+})
 
-  # Numerical gradient of llkw
-  num_grad_kw <- numDeriv::grad(func = llkw, x = mle_par_kw, data = sample_data_kw)
+results <- data.frame(
+  Alpha = test_params[, 1],
+  Beta = test_params[, 2],
+  Grad_Norm = grad_norms
+)
+print(results, digits = 4)
 
-  # Analytical gradient from grkw
-  ana_grad_kw <- grkw(par = mle_par_kw, data = sample_data_kw)
 
-  cat("Numerical Gradient (Kw):\n")
-  print(num_grad_kw)
-  cat("Analytical Gradient (Kw):\n")
-  print(ana_grad_kw)
+## Example 2: Gradient in Optimization
 
-  # Check differences
-  cat("Max absolute difference between Kw gradients:\n")
-  print(max(abs(num_grad_kw - ana_grad_kw)))
+# Optimization with analytical gradient
+fit_with_grad <- optim(
+  par = c(2, 2),
+  fn = llkw,
+  gr = grkw,
+  data = data,
+  method = "BFGS",
+  hessian = TRUE,
+  control = list(trace = 0)
+)
 
-} else {
-  cat("\nSkipping Kw gradient comparison.\n")
+# Optimization without gradient
+fit_no_grad <- optim(
+  par = c(2, 2),
+  fn = llkw,
+  data = data,
+  method = "BFGS",
+  hessian = TRUE,
+  control = list(trace = 0)
+)
+
+comparison <- data.frame(
+  Method = c("With Gradient", "Without Gradient"),
+  Alpha = c(fit_with_grad$par[1], fit_no_grad$par[1]),
+  Beta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
+  NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
+  Iterations = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
+)
+print(comparison, digits = 4, row.names = FALSE)
+
+
+## Example 3: Verifying Gradient at MLE
+
+mle <- fit_with_grad$par
+names(mle) <- c("alpha", "beta")
+
+# At MLE, gradient should be approximately zero
+gradient_at_mle <- grkw(par = mle, data = data)
+cat("\nGradient at MLE:\n")
+print(gradient_at_mle)
+cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
+cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
+
+
+## Example 4: Numerical vs Analytical Gradient
+
+# Manual finite difference gradient
+numerical_gradient <- function(f, x, data, h = 1e-7) {
+  grad <- numeric(length(x))
+  for (i in seq_along(x)) {
+    x_plus <- x_minus <- x
+    x_plus[i] <- x[i] + h
+    x_minus[i] <- x[i] - h
+    grad[i] <- (f(x_plus, data) - f(x_minus, data)) / (2 * h)
+  }
+  return(grad)
 }
 
-# Example with Hessian comparison (if hskw exists)
-if (mle_result_kw$convergence == 0 &&
-    requireNamespace("numDeriv", quietly = TRUE) && exists("hskw")) {
+# Compare at several points
+test_points <- rbind(
+  c(1.5, 2.5),
+  c(2.0, 3.0),
+  mle,
+  c(3.0, 4.0)
+)
 
-  num_hess_kw <- numDeriv::hessian(func = llkw, x = mle_par_kw, data = sample_data_kw)
-  ana_hess_kw <- hskw(par = mle_par_kw, data = sample_data_kw)
-  cat("\nMax absolute difference between Kw Hessians:\n")
-  print(max(abs(num_hess_kw - ana_hess_kw)))
-
+cat("\nNumerical vs Analytical Gradient Comparison:\n")
+for (i in 1:nrow(test_points)) {
+  grad_analytical <- grkw(par = test_points[i, ], data = data)
+  grad_numerical <- numerical_gradient(llkw, test_points[i, ], data)
+  
+  cat("\nPoint", i, ": alpha =", test_points[i, 1], 
+      ", beta =", test_points[i, 2], "\n")
+  
+  comparison <- data.frame(
+    Parameter = c("alpha", "beta"),
+    Analytical = grad_analytical,
+    Numerical = grad_numerical,
+    Abs_Diff = abs(grad_analytical - grad_numerical),
+    Rel_Error = abs(grad_analytical - grad_numerical) / 
+                (abs(grad_analytical) + 1e-10)
+  )
+  print(comparison, digits = 8)
 }
 
+
+## Example 5: Gradient Path Visualization
+
+# Create grid
+alpha_grid <- seq(mle[1] - 1, mle[1] + 1, length.out = 20)
+beta_grid <- seq(mle[2] - 1, mle[2] + 1, length.out = 20)
+alpha_grid <- alpha_grid[alpha_grid > 0]
+beta_grid <- beta_grid[beta_grid > 0]
+
+# Compute gradient vectors
+grad_alpha <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
+grad_beta <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
+
+for (i in seq_along(alpha_grid)) {
+  for (j in seq_along(beta_grid)) {
+    g <- grkw(c(alpha_grid[i], beta_grid[j]), data)
+    grad_alpha[i, j] <- -g[1]  # Negative for gradient ascent
+    grad_beta[i, j] <- -g[2]
+  }
 }
 
+# Plot gradient field
+par(mar = c(4, 4, 3, 1))
+plot(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5,
+     xlim = range(alpha_grid), ylim = range(beta_grid),
+     xlab = expression(alpha), ylab = expression(beta),
+     main = "Gradient Vector Field", las = 1)
+
+# Subsample for clearer visualization
+step <- 2
+for (i in seq(1, length(alpha_grid), by = step)) {
+  for (j in seq(1, length(beta_grid), by = step)) {
+    arrows(alpha_grid[i], beta_grid[j],
+           alpha_grid[i] + 0.05 * grad_alpha[i, j],
+           beta_grid[j] + 0.05 * grad_beta[i, j],
+           length = 0.05, col = "#2E4057", lwd = 1)
+  }
+}
+
+points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+legend("topright",
+       legend = c("MLE", "True"),
+       col = c("#8B0000", "#006400"),
+       pch = c(19, 17), bty = "n")
+grid(col = "gray90")
+
+
+## Example 6: Score Test Statistic
+
+# Score test for H0: theta = theta0
+theta0 <- c(2, 3)
+score_theta0 <- -grkw(par = theta0, data = data)  # Score is negative gradient
+
+# Fisher information at theta0 (using Hessian)
+fisher_info <- hskw(par = theta0, data = data)
+
+# Score test statistic
+score_stat <- t(score_theta0) \%*\% solve(fisher_info) \%*\% score_theta0
+p_value <- pchisq(score_stat, df = 2, lower.tail = FALSE)
+
+cat("\nScore Test:\n")
+cat("H0: alpha = 2, beta = 3\n")
+cat("Score vector:", score_theta0, "\n")
+cat("Test statistic:", score_stat, "\n")
+cat("P-value:", format.pval(p_value, digits = 4), "\n")
+
+}
 }
 \references{
 Kumaraswamy, P. (1980). A generalized probability density function for

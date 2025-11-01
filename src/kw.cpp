@@ -428,8 +428,6 @@ Rcpp::NumericVector pkw(
 //' # Calculate quantiles for upper tail probabilities P(X > q) = p
 //' quantiles_upper <- qkw(p_vals, alpha_par, beta_par, lower_tail = FALSE)
 //' print(quantiles_upper)
-//' # Check: qkw(p, ..., lt=F) == qkw(1-p, ..., lt=T)
-//' print(qkw(1 - p_vals, alpha_par, beta_par))
 //'
 //' # Calculate quantiles from log probabilities
 //' log_p_vals <- log(p_vals)
@@ -731,67 +729,372 @@ Rcpp::NumericVector rkw(
 //'
 //' @examples
 //' \donttest{
-//' # Assuming existence of rkw, grkw, hskw functions for Kw distribution
-//'
-//' # Generate sample data from a known Kw distribution
+//' ## Example 1: Maximum Likelihood Estimation with Analytical Gradient
+//' 
+//' # Generate sample data
 //' set.seed(123)
-//' true_par_kw <- c(alpha = 2, beta = 3)
-//' sample_data_kw <- rkw(100, alpha = true_par_kw[1], beta = true_par_kw[2])
-//' hist(sample_data_kw, breaks = 20, main = "Kw(2, 3) Sample")
-//'
-//' # --- Maximum Likelihood Estimation using optim ---
-//' # Initial parameter guess
-//' start_par_kw <- c(1.5, 2.5)
-//'
-//' # Perform optimization (minimizing negative log-likelihood)
-//' # Use method="L-BFGS-B" for box constraints (params > 0)
-//' mle_result_kw <- stats::optim(par = start_par_kw,
-//'                               fn = llkw, # Use the Kw neg-log-likelihood
-//'                               method = "L-BFGS-B",
-//'                               lower = c(1e-6, 1e-6), # Lower bounds > 0
-//'                               hessian = TRUE,
-//'                               data = sample_data_kw)
-//'
-//' # Check convergence and results
-//' if (mle_result_kw$convergence == 0) {
-//'   print("Optimization converged successfully.")
-//'   mle_par_kw <- mle_result_kw$par
-//'   print("Estimated Kw parameters:")
-//'   print(mle_par_kw)
-//'   print("True Kw parameters:")
-//'   print(true_par_kw)
-//' } else {
-//'   warning("Optimization did not converge!")
-//'   print(mle_result_kw$message)
+//' n <- 1000
+//' true_params <- c(alpha = 2.5, beta = 3.5)
+//' data <- rkw(n, alpha = true_params[1], beta = true_params[2])
+//' 
+//' # Optimization using BFGS with analytical gradient
+//' fit <- optim(
+//'   par = c(2, 2),
+//'   fn = llkw,
+//'   gr = grkw,
+//'   data = data,
+//'   method = "BFGS",
+//'   hessian = TRUE
+//' )
+//' 
+//' # Extract results
+//' mle <- fit$par
+//' names(mle) <- c("alpha", "beta")
+//' se <- sqrt(diag(solve(fit$hessian)))
+//' ci_lower <- mle - 1.96 * se
+//' ci_upper <- mle + 1.96 * se
+//' 
+//' # Summary table
+//' results <- data.frame(
+//'   Parameter = c("alpha", "beta"),
+//'   True = true_params,
+//'   MLE = mle,
+//'   SE = se,
+//'   CI_Lower = ci_lower,
+//'   CI_Upper = ci_upper
+//' )
+//' print(results, digits = 4)
+//' 
+//' ## Example 2: Verifying Gradient at MLE
+//' 
+//' # At MLE, gradient should be approximately zero
+//' gradient_at_mle <- grkw(par = mle, data = data)
+//' print(gradient_at_mle)
+//' cat("Max absolute score:", max(abs(gradient_at_mle)), "\n")
+//' 
+//' ## Example 3: Checking Hessian Properties
+//' 
+//' # Hessian at MLE
+//' hessian_at_mle <- hskw(par = mle, data = data)
+//' print(hessian_at_mle, digits = 4)
+//' 
+//' # Check positive definiteness via eigenvalues
+//' eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
+//' print(eigenvals)
+//' all(eigenvals > 0)
+//' 
+//' # Condition number
+//' cond_number <- max(eigenvals) / min(eigenvals)
+//' cat("Condition number:", format(cond_number, scientific = TRUE), "\n")
+//' 
+//' ## Example 4: Comparing Optimization Methods
+//' 
+//' methods <- c("BFGS", "L-BFGS-B", "Nelder-Mead", "CG")
+//' start_params <- c(2, 2)
+//' 
+//' comparison <- data.frame(
+//'   Method = character(),
+//'   Alpha_Est = numeric(),
+//'   Beta_Est = numeric(),
+//'   NegLogLik = numeric(),
+//'   Convergence = integer(),
+//'   stringsAsFactors = FALSE
+//' )
+//' 
+//' for (method in methods) {
+//'   if (method %in% c("BFGS", "CG")) {
+//'     fit_temp <- optim(
+//'       par = start_params,
+//'       fn = llkw,
+//'       gr = grkw,
+//'       data = data,
+//'       method = method
+//'     )
+//'   } else if (method == "L-BFGS-B") {
+//'     fit_temp <- optim(
+//'       par = start_params,
+//'       fn = llkw,
+//'       gr = grkw,
+//'       data = data,
+//'       method = method,
+//'       lower = c(0.01, 0.01),
+//'       upper = c(100, 100)
+//'     )
+//'   } else {
+//'     fit_temp <- optim(
+//'       par = start_params,
+//'       fn = llkw,
+//'       data = data,
+//'       method = method
+//'     )
+//'   }
+//'   
+//'   comparison <- rbind(comparison, data.frame(
+//'     Method = method,
+//'     Alpha_Est = fit_temp$par[1],
+//'     Beta_Est = fit_temp$par[2],
+//'     NegLogLik = fit_temp$value,
+//'     Convergence = fit_temp$convergence,
+//'     stringsAsFactors = FALSE
+//'   ))
 //' }
-//'
-//' # --- Compare numerical and analytical derivatives (if available) ---
-//' # Requires 'numDeriv' package and analytical functions 'grkw', 'hskw'
-//' if (mle_result_kw$convergence == 0 &&
-//'     requireNamespace("numDeriv", quietly = TRUE) &&
-//'     exists("grkw") && exists("hskw")) {
-//'
-//'   cat("\nComparing Derivatives at Kw MLE estimates:\n")
-//'
-//'   # Numerical derivatives of llkw
-//'   num_grad_kw <- numDeriv::grad(func = llkw, x = mle_par_kw, data = sample_data_kw)
-//'   num_hess_kw <- numDeriv::hessian(func = llkw, x = mle_par_kw, data = sample_data_kw)
-//'
-//'   # Analytical derivatives (assuming they return derivatives of negative LL)
-//'   ana_grad_kw <- grkw(par = mle_par_kw, data = sample_data_kw)
-//'   ana_hess_kw <- hskw(par = mle_par_kw, data = sample_data_kw)
-//'
-//'   # Check differences
-//'   cat("Max absolute difference between gradients:\n")
-//'   print(max(abs(num_grad_kw - ana_grad_kw)))
-//'   cat("Max absolute difference between Hessians:\n")
-//'   print(max(abs(num_hess_kw - ana_hess_kw)))
-//'
-//' } else {
-//'    cat("\nSkipping derivative comparison for Kw.\n")
-//'    cat("Requires convergence, 'numDeriv' package and functions 'grkw', 'hskw'.\n")
+//' 
+//' print(comparison, digits = 4, row.names = FALSE)
+//' 
+//' ## Example 5: Likelihood Ratio Test
+//' 
+//' # Test H0: beta = 3 vs H1: beta free
+//' loglik_full <- -fit$value
+//' 
+//' # Restricted model: fix beta = 3
+//' restricted_ll <- function(alpha, data, beta_fixed) {
+//'   llkw(par = c(alpha, beta_fixed), data = data)
 //' }
-//'
+//' 
+//' fit_restricted <- optimize(
+//'   f = restricted_ll,
+//'   interval = c(0.1, 10),
+//'   data = data,
+//'   beta_fixed = 3,
+//'   maximum = FALSE
+//' )
+//' 
+//' loglik_restricted <- -fit_restricted$objective
+//' lr_stat <- 2 * (loglik_full - loglik_restricted)
+//' p_value <- pchisq(lr_stat, df = 1, lower.tail = FALSE)
+//' 
+//' cat("LR Statistic:", round(lr_stat, 4), "\n")
+//' cat("P-value:", format.pval(p_value, digits = 4), "\n")
+//' 
+//' ## Example 6: Univariate Profile Likelihoods
+//' 
+//' # Grid for alpha
+//' alpha_grid <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = 50)
+//' alpha_grid <- alpha_grid[alpha_grid > 0]
+//' profile_ll_alpha <- numeric(length(alpha_grid))
+//' 
+//' for (i in seq_along(alpha_grid)) {
+//'   profile_fit <- optimize(
+//'     f = function(beta) llkw(c(alpha_grid[i], beta), data),
+//'     interval = c(0.1, 10),
+//'     maximum = FALSE
+//'   )
+//'   profile_ll_alpha[i] <- -profile_fit$objective
+//' }
+//' 
+//' # Grid for beta
+//' beta_grid <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = 50)
+//' beta_grid <- beta_grid[beta_grid > 0]
+//' profile_ll_beta <- numeric(length(beta_grid))
+//' 
+//' for (i in seq_along(beta_grid)) {
+//'   profile_fit <- optimize(
+//'     f = function(alpha) llkw(c(alpha, beta_grid[i]), data),
+//'     interval = c(0.1, 10),
+//'     maximum = FALSE
+//'   )
+//'   profile_ll_beta[i] <- -profile_fit$objective
+//' }
+//' 
+//' # 95% confidence threshold
+//' chi_crit <- qchisq(0.95, df = 1)
+//' threshold <- max(profile_ll_alpha) - chi_crit / 2
+//' 
+//' # Plot side by side
+//' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+//' 
+//' # Profile for alpha
+//' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
+//'      main = expression(paste("Profile Likelihood: ", alpha)), las = 1)
+//' abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
+//' abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
+//' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+//' legend("topright",
+//'        legend = c("MLE", "True", "95% CI"),
+//'        col = c("#8B0000", "#006400", "#808080"),
+//'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+//' grid(col = "gray90")
+//' 
+//' # Profile for beta
+//' plot(beta_grid, profile_ll_beta, type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(beta), ylab = "Profile Log-Likelihood",
+//'      main = expression(paste("Profile Likelihood: ", beta)), las = 1)
+//' abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
+//' abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
+//' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
+//' legend("topright",
+//'        legend = c("MLE", "True", "95% CI"),
+//'        col = c("#8B0000", "#006400", "#808080"),
+//'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+//' grid(col = "gray90")
+//' 
+//' par(mfrow = c(1, 1))
+//' 
+//' ## Example 7: 2D Profile Likelihood Surface
+//' 
+//' # Create 2D grid
+//' alpha_2d <- seq(mle[1] - 1, mle[1] + 1, length.out = round(n/4))
+//' beta_2d <- seq(mle[2] - 1, mle[2] + 1, length.out = round(n/4))
+//' alpha_2d <- alpha_2d[alpha_2d > 0]
+//' beta_2d <- beta_2d[beta_2d > 0]
+//' 
+//' # Compute log-likelihood surface
+//' ll_surface <- matrix(NA, nrow = length(alpha_2d), ncol = length(beta_2d))
+//' 
+//' for (i in seq_along(alpha_2d)) {
+//'   for (j in seq_along(beta_2d)) {
+//'     ll_surface[i, j] <- -llkw(c(alpha_2d[i], beta_2d[j]), data)
+//'   }
+//' }
+//' 
+//' # Confidence region levels
+//' max_ll <- max(ll_surface, na.rm = TRUE)
+//' levels_90 <- max_ll - qchisq(0.90, df = 2) / 2
+//' levels_95 <- max_ll - qchisq(0.95, df = 2) / 2
+//' levels_99 <- max_ll - qchisq(0.99, df = 2) / 2
+//' 
+//' # Plot contour
+//' contour(alpha_2d, beta_2d, ll_surface,
+//'         xlab = expression(alpha), ylab = expression(beta),
+//'         main = "2D Profile Log-Likelihood",
+//'         levels = seq(min(ll_surface, na.rm = TRUE), max_ll, length.out = round(n/4)),
+//'         col = "#2E4057", las = 1, lwd = 1)
+//' 
+//' # Add confidence region contours
+//' contour(alpha_2d, beta_2d, ll_surface,
+//'         levels = c(levels_90, levels_95, levels_99),
+//'         col = c("#FFA07A", "#FF6347", "#8B0000"),
+//'         lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+//'         add = TRUE, labcex = 0.8)
+//' 
+//' # Mark points
+//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' 
+//' legend("topright",
+//'        legend = c("MLE", "True", "90% CR", "95% CR", "99% CR"),
+//'        col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+//'        pch = c(19, 17, NA, NA, NA),
+//'        lty = c(NA, NA, 3, 2, 1),
+//'        lwd = c(NA, NA, 2, 2.5, 3),
+//'        bty = "n", cex = 0.8)
+//' grid(col = "gray90")
+//' 
+//' ## Example 8: Combined View - Profiles with 2D Surface
+//' 
+//' par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+//' 
+//' # Top left: Profile for alpha
+//' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
+//'      main = expression(paste("Profile: ", alpha)), las = 1)
+//' abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
+//' abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
+//' abline(h = threshold, col = "#808080", lty = 3)
+//' grid(col = "gray90")
+//' 
+//' # Top right: Profile for beta
+//' plot(beta_grid, profile_ll_beta, type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(beta), ylab = "Profile Log-Likelihood",
+//'      main = expression(paste("Profile: ", beta)), las = 1)
+//' abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
+//' abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
+//' abline(h = threshold, col = "#808080", lty = 3)
+//' grid(col = "gray90")
+//' 
+//' # Bottom left: 2D contour
+//' contour(alpha_2d, beta_2d, ll_surface,
+//'         xlab = expression(alpha), ylab = expression(beta),
+//'         main = "2D Log-Likelihood Surface",
+//'         levels = seq(min(ll_surface, na.rm = TRUE), max_ll, length.out = 15),
+//'         col = "#2E4057", las = 1, lwd = 1)
+//' contour(alpha_2d, beta_2d, ll_surface,
+//'         levels = c(levels_95),
+//'         col = "#8B0000", lwd = 2.5, add = TRUE)
+//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' par(mfrow = c(1, 1))
+//' 
+//' ## Example 9: Numerical Gradient Verification
+//' 
+//' # Manual finite difference gradient
+//' numerical_gradient <- function(f, x, data, h = 1e-7) {
+//'   grad <- numeric(length(x))
+//'   for (i in seq_along(x)) {
+//'     x_plus <- x_minus <- x
+//'     x_plus[i] <- x[i] + h
+//'     x_minus[i] <- x[i] - h
+//'     grad[i] <- (f(x_plus, data) - f(x_minus, data)) / (2 * h)
+//'   }
+//'   return(grad)
+//' }
+//' 
+//' # Compare
+//' grad_analytical <- grkw(par = mle, data = data)
+//' grad_numerical <- numerical_gradient(llkw, mle, data)
+//' 
+//' comparison_grad <- data.frame(
+//'   Parameter = c("alpha", "beta"),
+//'   Analytical = grad_analytical,
+//'   Numerical = grad_numerical,
+//'   Difference = abs(grad_analytical - grad_numerical)
+//' )
+//' print(comparison_grad, digits = 8)
+//' 
+//' ## Example 10: Bootstrap Confidence Intervals
+//' 
+//' n_boot <- round(n/4)
+//' boot_estimates <- matrix(NA, nrow = n_boot, ncol = 2)
+//' 
+//' set.seed(456)
+//' for (b in 1:n_boot) {
+//'   boot_data <- rkw(n, alpha = mle[1], beta = mle[2])
+//'   boot_fit <- optim(
+//'     par = mle,
+//'     fn = llkw,
+//'     gr = grkw,
+//'     data = boot_data,
+//'     method = "BFGS",
+//'     control = list(maxit = 500)
+//'   )
+//'   if (boot_fit$convergence == 0) {
+//'     boot_estimates[b, ] <- boot_fit$par
+//'   }
+//' }
+//' 
+//' boot_estimates <- boot_estimates[complete.cases(boot_estimates), ]
+//' boot_ci <- apply(boot_estimates, 2, quantile, probs = c(0.025, 0.975))
+//' colnames(boot_ci) <- c("alpha", "beta")
+//' 
+//' print(t(boot_ci), digits = 4)
+//' 
+//' # Plot bootstrap distributions
+//' par(mfrow = c(1, 2))
+//' 
+//' hist(boot_estimates[, 1], breaks = 20, col = "#87CEEB", border = "white",
+//'      main = expression(paste("Bootstrap: ", hat(alpha))),
+//'      xlab = expression(hat(alpha)), las = 1)
+//' abline(v = mle[1], col = "#8B0000", lwd = 2)
+//' abline(v = true_params[1], col = "#006400", lwd = 2, lty = 2)
+//' abline(v = boot_ci[, 1], col = "#2E4057", lwd = 2, lty = 3)
+//' legend("topright", legend = c("MLE", "True", "95% CI"),
+//'        col = c("#8B0000", "#006400", "#2E4057"),
+//'        lwd = 2, lty = c(1, 2, 3), bty = "n")
+//' 
+//' hist(boot_estimates[, 2], breaks = 20, col = "#FFA07A", border = "white",
+//'      main = expression(paste("Bootstrap: ", hat(beta))),
+//'      xlab = expression(hat(beta)), las = 1)
+//' abline(v = mle[2], col = "#8B0000", lwd = 2)
+//' abline(v = true_params[2], col = "#006400", lwd = 2, lty = 2)
+//' abline(v = boot_ci[, 2], col = "#2E4057", lwd = 2, lty = 3)
+//' legend("topright", legend = c("MLE", "True", "95% CI"),
+//'        col = c("#8B0000", "#006400", "#2E4057"),
+//'        lwd = 2, lty = c(1, 2, 3), bty = "n")
+//' 
+//' par(mfrow = c(1, 1))
+//' 
 //' }
 //'
 //' @export
@@ -896,63 +1199,195 @@ double llkw(const Rcpp::NumericVector& par,
 //'
 //' @examples
 //' \donttest{
-//' # Assuming existence of rkw, llkw, grkw, hskw functions for Kw
-//'
+//' ## Example 1: Basic Gradient Evaluation
+//' 
 //' # Generate sample data
 //' set.seed(123)
-//' true_par_kw <- c(alpha = 2, beta = 3)
-//' sample_data_kw <- rkw(100, alpha = true_par_kw[1], beta = true_par_kw[2])
-//' hist(sample_data_kw, breaks = 20, main = "Kw(2, 3) Sample")
-//'
-//' # --- Find MLE estimates ---
-//' start_par_kw <- c(1.5, 2.5)
-//' mle_result_kw <- stats::optim(par = start_par_kw,
-//'                               fn = llkw,
-//'                               gr = grkw, # Use analytical gradient for Kw
-//'                               method = "L-BFGS-B", # Recommended for bounds
-//'                               lower = c(1e-6, 1e-6),
-//'                               hessian = TRUE,
-//'                               data = sample_data_kw)
-//'
-//' # --- Compare analytical gradient to numerical gradient ---
-//' if (mle_result_kw$convergence == 0 &&
-//'     requireNamespace("numDeriv", quietly = TRUE)) {
-//'
-//'   mle_par_kw <- mle_result_kw$par
-//'   cat("\nComparing Gradients for Kw at MLE estimates:\n")
-//'
-//'   # Numerical gradient of llkw
-//'   num_grad_kw <- numDeriv::grad(func = llkw, x = mle_par_kw, data = sample_data_kw)
-//'
-//'   # Analytical gradient from grkw
-//'   ana_grad_kw <- grkw(par = mle_par_kw, data = sample_data_kw)
-//'
-//'   cat("Numerical Gradient (Kw):\n")
-//'   print(num_grad_kw)
-//'   cat("Analytical Gradient (Kw):\n")
-//'   print(ana_grad_kw)
-//'
-//'   # Check differences
-//'   cat("Max absolute difference between Kw gradients:\n")
-//'   print(max(abs(num_grad_kw - ana_grad_kw)))
-//'
-//' } else {
-//'   cat("\nSkipping Kw gradient comparison.\n")
+//' n <- 1000
+//' true_params <- c(alpha = 2.5, beta = 3.5)
+//' data <- rkw(n, alpha = true_params[1], beta = true_params[2])
+//' 
+//' # Evaluate gradient at true parameters
+//' grad_true <- grkw(par = true_params, data = data)
+//' cat("Gradient at true parameters:\n")
+//' print(grad_true)
+//' cat("Norm:", sqrt(sum(grad_true^2)), "\n")
+//' 
+//' # Evaluate at different parameter values
+//' test_params <- rbind(
+//'   c(1.5, 2.5),
+//'   c(2.0, 3.0),
+//'   c(2.5, 3.5),
+//'   c(3.0, 4.0)
+//' )
+//' 
+//' grad_norms <- apply(test_params, 1, function(p) {
+//'   g <- grkw(p, data)
+//'   sqrt(sum(g^2))
+//' })
+//' 
+//' results <- data.frame(
+//'   Alpha = test_params[, 1],
+//'   Beta = test_params[, 2],
+//'   Grad_Norm = grad_norms
+//' )
+//' print(results, digits = 4)
+//' 
+//' 
+//' ## Example 2: Gradient in Optimization
+//' 
+//' # Optimization with analytical gradient
+//' fit_with_grad <- optim(
+//'   par = c(2, 2),
+//'   fn = llkw,
+//'   gr = grkw,
+//'   data = data,
+//'   method = "BFGS",
+//'   hessian = TRUE,
+//'   control = list(trace = 0)
+//' )
+//' 
+//' # Optimization without gradient
+//' fit_no_grad <- optim(
+//'   par = c(2, 2),
+//'   fn = llkw,
+//'   data = data,
+//'   method = "BFGS",
+//'   hessian = TRUE,
+//'   control = list(trace = 0)
+//' )
+//' 
+//' comparison <- data.frame(
+//'   Method = c("With Gradient", "Without Gradient"),
+//'   Alpha = c(fit_with_grad$par[1], fit_no_grad$par[1]),
+//'   Beta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
+//'   NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
+//'   Iterations = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
+//' )
+//' print(comparison, digits = 4, row.names = FALSE)
+//' 
+//' 
+//' ## Example 3: Verifying Gradient at MLE
+//' 
+//' mle <- fit_with_grad$par
+//' names(mle) <- c("alpha", "beta")
+//' 
+//' # At MLE, gradient should be approximately zero
+//' gradient_at_mle <- grkw(par = mle, data = data)
+//' cat("\nGradient at MLE:\n")
+//' print(gradient_at_mle)
+//' cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
+//' cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
+//' 
+//' 
+//' ## Example 4: Numerical vs Analytical Gradient
+//' 
+//' # Manual finite difference gradient
+//' numerical_gradient <- function(f, x, data, h = 1e-7) {
+//'   grad <- numeric(length(x))
+//'   for (i in seq_along(x)) {
+//'     x_plus <- x_minus <- x
+//'     x_plus[i] <- x[i] + h
+//'     x_minus[i] <- x[i] - h
+//'     grad[i] <- (f(x_plus, data) - f(x_minus, data)) / (2 * h)
+//'   }
+//'   return(grad)
 //' }
-//'
-//' # Example with Hessian comparison (if hskw exists)
-//' if (mle_result_kw$convergence == 0 &&
-//'     requireNamespace("numDeriv", quietly = TRUE) && exists("hskw")) {
-//'
-//'   num_hess_kw <- numDeriv::hessian(func = llkw, x = mle_par_kw, data = sample_data_kw)
-//'   ana_hess_kw <- hskw(par = mle_par_kw, data = sample_data_kw)
-//'   cat("\nMax absolute difference between Kw Hessians:\n")
-//'   print(max(abs(num_hess_kw - ana_hess_kw)))
-//'
+//' 
+//' # Compare at several points
+//' test_points <- rbind(
+//'   c(1.5, 2.5),
+//'   c(2.0, 3.0),
+//'   mle,
+//'   c(3.0, 4.0)
+//' )
+//' 
+//' cat("\nNumerical vs Analytical Gradient Comparison:\n")
+//' for (i in 1:nrow(test_points)) {
+//'   grad_analytical <- grkw(par = test_points[i, ], data = data)
+//'   grad_numerical <- numerical_gradient(llkw, test_points[i, ], data)
+//'   
+//'   cat("\nPoint", i, ": alpha =", test_points[i, 1], 
+//'       ", beta =", test_points[i, 2], "\n")
+//'   
+//'   comparison <- data.frame(
+//'     Parameter = c("alpha", "beta"),
+//'     Analytical = grad_analytical,
+//'     Numerical = grad_numerical,
+//'     Abs_Diff = abs(grad_analytical - grad_numerical),
+//'     Rel_Error = abs(grad_analytical - grad_numerical) / 
+//'                 (abs(grad_analytical) + 1e-10)
+//'   )
+//'   print(comparison, digits = 8)
 //' }
-//'
+//' 
+//' 
+//' ## Example 5: Gradient Path Visualization
+//' 
+//' # Create grid
+//' alpha_grid <- seq(mle[1] - 1, mle[1] + 1, length.out = 20)
+//' beta_grid <- seq(mle[2] - 1, mle[2] + 1, length.out = 20)
+//' alpha_grid <- alpha_grid[alpha_grid > 0]
+//' beta_grid <- beta_grid[beta_grid > 0]
+//' 
+//' # Compute gradient vectors
+//' grad_alpha <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
+//' grad_beta <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
+//' 
+//' for (i in seq_along(alpha_grid)) {
+//'   for (j in seq_along(beta_grid)) {
+//'     g <- grkw(c(alpha_grid[i], beta_grid[j]), data)
+//'     grad_alpha[i, j] <- -g[1]  # Negative for gradient ascent
+//'     grad_beta[i, j] <- -g[2]
+//'   }
 //' }
-//'
+//' 
+//' # Plot gradient field
+//' par(mar = c(4, 4, 3, 1))
+//' plot(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5,
+//'      xlim = range(alpha_grid), ylim = range(beta_grid),
+//'      xlab = expression(alpha), ylab = expression(beta),
+//'      main = "Gradient Vector Field", las = 1)
+//' 
+//' # Subsample for clearer visualization
+//' step <- 2
+//' for (i in seq(1, length(alpha_grid), by = step)) {
+//'   for (j in seq(1, length(beta_grid), by = step)) {
+//'     arrows(alpha_grid[i], beta_grid[j],
+//'            alpha_grid[i] + 0.05 * grad_alpha[i, j],
+//'            beta_grid[j] + 0.05 * grad_beta[i, j],
+//'            length = 0.05, col = "#2E4057", lwd = 1)
+//'   }
+//' }
+//' 
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' legend("topright",
+//'        legend = c("MLE", "True"),
+//'        col = c("#8B0000", "#006400"),
+//'        pch = c(19, 17), bty = "n")
+//' grid(col = "gray90")
+//' 
+//' 
+//' ## Example 6: Score Test Statistic
+//' 
+//' # Score test for H0: theta = theta0
+//' theta0 <- c(2, 3)
+//' score_theta0 <- -grkw(par = theta0, data = data)  # Score is negative gradient
+//' 
+//' # Fisher information at theta0 (using Hessian)
+//' fisher_info <- hskw(par = theta0, data = data)
+//' 
+//' # Score test statistic
+//' score_stat <- t(score_theta0) %*% solve(fisher_info) %*% score_theta0
+//' p_value <- pchisq(score_stat, df = 2, lower.tail = FALSE)
+//' 
+//' cat("\nScore Test:\n")
+//' cat("H0: alpha = 2, beta = 3\n")
+//' cat("Score vector:", score_theta0, "\n")
+//' cat("Test statistic:", score_stat, "\n")
+//' cat("P-value:", format.pval(p_value, digits = 4), "\n")
+//' 
+//' }
 //' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
@@ -1089,62 +1524,220 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //'
 //' @examples
 //' \donttest{
-//' # Assuming existence of rkw, llkw, grkw, hskw functions for Kw
-//'
+//' ## Example 1: Basic Hessian Evaluation
+//' 
 //' # Generate sample data
 //' set.seed(123)
-//' true_par_kw <- c(alpha = 2, beta = 3)
-//' sample_data_kw <- rkw(100, alpha = true_par_kw[1], beta = true_par_kw[2])
-//' hist(sample_data_kw, breaks = 20, main = "Kw(2, 3) Sample")
-//'
-//' # --- Find MLE estimates ---
-//' start_par_kw <- c(1.5, 2.5)
-//' mle_result_kw <- stats::optim(par = start_par_kw,
-//'                               fn = llkw,
-//'                               gr = if (exists("grkw")) grkw else NULL,
-//'                               method = "L-BFGS-B",
-//'                               lower = c(1e-6, 1e-6),
-//'                               hessian = TRUE, # Ask optim for numerical Hessian
-//'                               data = sample_data_kw)
-//'
-//' # --- Compare analytical Hessian to numerical Hessian ---
-//' if (mle_result_kw$convergence == 0 &&
-//'     requireNamespace("numDeriv", quietly = TRUE) &&
-//'     exists("hskw")) {
-//'
-//'   mle_par_kw <- mle_result_kw$par
-//'   cat("\nComparing Hessians for Kw at MLE estimates:\n")
-//'
-//'   # Numerical Hessian of llkw
-//'   num_hess_kw <- numDeriv::hessian(func = llkw, x = mle_par_kw, data = sample_data_kw)
-//'
-//'   # Analytical Hessian from hskw
-//'   ana_hess_kw <- hskw(par = mle_par_kw, data = sample_data_kw)
-//'
-//'   cat("Numerical Hessian (Kw):\n")
-//'   print(round(num_hess_kw, 4))
-//'   cat("Analytical Hessian (Kw):\n")
-//'   print(round(ana_hess_kw, 4))
-//'
-//'   # Check differences
-//'   cat("Max absolute difference between Kw Hessians:\n")
-//'   print(max(abs(num_hess_kw - ana_hess_kw)))
-//'
-//'   # Optional: Use analytical Hessian for Standard Errors
-//'   # tryCatch({
-//'   #   cov_matrix_kw <- solve(ana_hess_kw) # ana_hess_kw is already Hessian of negative LL
-//'   #   std_errors_kw <- sqrt(diag(cov_matrix_kw))
-//'   #   cat("Std. Errors from Analytical Kw Hessian:\n")
-//'   #   print(std_errors_kw)
-//'   # }, error = function(e) {
-//'   #   warning("Could not invert analytical Kw Hessian: ", e$message)
-//'   # })
-//'
-//' } else {
-//'   cat("\nSkipping Kw Hessian comparison.\n")
-//'   cat("Requires convergence, 'numDeriv' package, and function 'hskw'.\n")
+//' n <- 1000
+//' true_params <- c(alpha = 2.5, beta = 3.5)
+//' data <- rkw(n, alpha = true_params[1], beta = true_params[2])
+//' 
+//' # Evaluate Hessian at true parameters
+//' hess_true <- hskw(par = true_params, data = data)
+//' cat("Hessian matrix at true parameters:\n")
+//' print(hess_true, digits = 4)
+//' 
+//' # Check symmetry
+//' cat("\nSymmetry check (max |H - H^T|):",
+//'     max(abs(hess_true - t(hess_true))), "\n")
+//' 
+//' 
+//' ## Example 2: Hessian Properties at MLE
+//' 
+//' # Fit model
+//' fit <- optim(
+//'   par = c(2, 2),
+//'   fn = llkw,
+//'   gr = grkw,
+//'   data = data,
+//'   method = "BFGS",
+//'   hessian = TRUE
+//' )
+//' 
+//' mle <- fit$par
+//' names(mle) <- c("alpha", "beta")
+//' 
+//' # Hessian at MLE
+//' hessian_at_mle <- hskw(par = mle, data = data)
+//' cat("\nHessian at MLE:\n")
+//' print(hessian_at_mle, digits = 4)
+//' 
+//' # Compare with optim's numerical Hessian
+//' cat("\nComparison with optim Hessian:\n")
+//' cat("Max absolute difference:",
+//'     max(abs(hessian_at_mle - fit$hessian)), "\n")
+//' 
+//' # Eigenvalue analysis
+//' eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
+//' cat("\nEigenvalues:\n")
+//' print(eigenvals)
+//' 
+//' cat("\nPositive definite:", all(eigenvals > 0), "\n")
+//' cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
+//' 
+//' 
+//' ## Example 3: Standard Errors and Confidence Intervals
+//' 
+//' # Observed information matrix (negative Hessian for neg-loglik)
+//' obs_info <- hessian_at_mle
+//' 
+//' # Variance-covariance matrix
+//' vcov_matrix <- solve(obs_info)
+//' cat("\nVariance-Covariance Matrix:\n")
+//' print(vcov_matrix, digits = 6)
+//' 
+//' # Standard errors
+//' se <- sqrt(diag(vcov_matrix))
+//' names(se) <- c("alpha", "beta")
+//' 
+//' # Correlation matrix
+//' corr_matrix <- cov2cor(vcov_matrix)
+//' cat("\nCorrelation Matrix:\n")
+//' print(corr_matrix, digits = 4)
+//' 
+//' # Confidence intervals
+//' z_crit <- qnorm(0.975)
+//' results <- data.frame(
+//'   Parameter = c("alpha", "beta"),
+//'   True = true_params,
+//'   MLE = mle,
+//'   SE = se,
+//'   CI_Lower = mle - z_crit * se,
+//'   CI_Upper = mle + z_crit * se
+//' )
+//' print(results, digits = 4)
+//' 
+//' 
+//' ## Example 4: Determinant and Trace Analysis
+//' 
+//' # Compute at different points
+//' test_params <- rbind(
+//'   c(1.5, 2.5),
+//'   c(2.0, 3.0),
+//'   mle,
+//'   c(3.0, 4.0)
+//' )
+//' 
+//' hess_properties <- data.frame(
+//'   Alpha = numeric(),
+//'   Beta = numeric(),
+//'   Determinant = numeric(),
+//'   Trace = numeric(),
+//'   Min_Eigenval = numeric(),
+//'   Max_Eigenval = numeric(),
+//'   Cond_Number = numeric(),
+//'   stringsAsFactors = FALSE
+//' )
+//' 
+//' for (i in 1:nrow(test_params)) {
+//'   H <- hskw(par = test_params[i, ], data = data)
+//'   eigs <- eigen(H, only.values = TRUE)$values
+//' 
+//'   hess_properties <- rbind(hess_properties, data.frame(
+//'     Alpha = test_params[i, 1],
+//'     Beta = test_params[i, 2],
+//'     Determinant = det(H),
+//'     Trace = sum(diag(H)),
+//'     Min_Eigenval = min(eigs),
+//'     Max_Eigenval = max(eigs),
+//'     Cond_Number = max(eigs) / min(eigs)
+//'   ))
 //' }
-//'
+//' 
+//' cat("\nHessian Properties at Different Points:\n")
+//' print(hess_properties, digits = 4, row.names = FALSE)
+//' 
+//' 
+//' ## Example 5: Curvature Visualization
+//' 
+//' # Create grid around MLE
+//' alpha_grid <- seq(mle[1] - 0.5, mle[1] + 0.5, length.out = 30)
+//' beta_grid <- seq(mle[2] - 0.5, mle[2] + 0.5, length.out = 30)
+//' alpha_grid <- alpha_grid[alpha_grid > 0]
+//' beta_grid <- beta_grid[beta_grid > 0]
+//' 
+//' # Compute curvature measures
+//' determinant_surface <- matrix(NA, nrow = length(alpha_grid),
+//'                                ncol = length(beta_grid))
+//' trace_surface <- matrix(NA, nrow = length(alpha_grid),
+//'                          ncol = length(beta_grid))
+//' 
+//' for (i in seq_along(alpha_grid)) {
+//'   for (j in seq_along(beta_grid)) {
+//'     H <- hskw(c(alpha_grid[i], beta_grid[j]), data)
+//'     determinant_surface[i, j] <- det(H)
+//'     trace_surface[i, j] <- sum(diag(H))
+//'   }
+//' }
+//' 
+//' # Plot
+//' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+//' 
+//' contour(alpha_grid, beta_grid, determinant_surface,
+//'         xlab = expression(alpha), ylab = expression(beta),
+//'         main = "Hessian Determinant", las = 1,
+//'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' contour(alpha_grid, beta_grid, trace_surface,
+//'         xlab = expression(alpha), ylab = expression(beta),
+//'         main = "Hessian Trace", las = 1,
+//'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' grid(col = "gray90")
+//' 
+//' par(mfrow = c(1, 1))
+//' 
+//' 
+//' ## Example 6: Fisher Information and Asymptotic Efficiency
+//' 
+//' # Observed information (at MLE)
+//' obs_fisher <- hessian_at_mle
+//' 
+//' # Asymptotic covariance matrix
+//' asymp_cov <- solve(obs_fisher)
+//' 
+//' cat("\nAsymptotic Standard Errors:\n")
+//' cat("SE(alpha):", sqrt(asymp_cov[1, 1]), "\n")
+//' cat("SE(beta):", sqrt(asymp_cov[2, 2]), "\n")
+//' 
+//' # Cramér-Rao Lower Bound
+//' cat("\nCramér-Rao Lower Bounds:\n")
+//' cat("CRLB(alpha):", sqrt(asymp_cov[1, 1]), "\n")
+//' cat("CRLB(beta):", sqrt(asymp_cov[2, 2]), "\n")
+//' 
+//' # Efficiency ellipse (95% confidence region)
+//' theta <- seq(0, 2 * pi, length.out = 100)
+//' chi2_val <- qchisq(0.95, df = 2)
+//' 
+//' # Eigendecomposition
+//' eig_decomp <- eigen(asymp_cov)
+//' 
+//' # Ellipse points
+//' ellipse <- matrix(NA, nrow = 100, ncol = 2)
+//' for (i in 1:100) {
+//'   v <- c(cos(theta[i]), sin(theta[i]))
+//'   ellipse[i, ] <- mle + sqrt(chi2_val) *
+//'     (eig_decomp$vectors %*% diag(sqrt(eig_decomp$values)) %*% v)
+//' }
+//' 
+//' # Plot confidence ellipse
+//' par(mar = c(4, 4, 3, 1))
+//' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
+//'      xlab = expression(alpha), ylab = expression(beta),
+//'      main = "95% Confidence Ellipse", las = 1)
+//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+//' legend("topright",
+//'        legend = c("MLE", "True", "95% CR"),
+//'        col = c("#8B0000", "#006400", "#2E4057"),
+//'        pch = c(19, 17, NA), lty = c(NA, NA, 1),
+//'        lwd = c(NA, NA, 2), bty = "n")
+//' grid(col = "gray90")
+//' 
 //' }
 //'
 //' @export

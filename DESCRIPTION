@@ -1,14 +1,17 @@
 Package: gkwdist
 Title: Generalized Kumaraswamy Distribution Family
-Version: 1.0.4
+Version: 1.0.5
 Authors@R: person(given = "J. E.",
                   family = "Lopes",
                   role = c("aut", "cre"),
                   email = "evandeilton@gmail.com",
                   comment = c(ORCID = "0009-0007-5887-4084"))
 Description: Implements the five-parameter Generalized Kumaraswamy (GKw) 
-    distribution and its seven nested sub-families for modeling bounded 
-    continuous data on the unit interval (0,1). Provides density, distribution, 
+    distribution proposed by Carrasco, Ferrari and Cordeiro (2010) 
+    <arXiv:1004.0911> and its seven nested sub-families for modeling bounded 
+    continuous data on the unit interval (0,1). The GKw distribution extends 
+    the Kumaraswamy distribution described by Jones (2009) 
+    <doi:10.1016/j.stamet.2008.04.001>. Provides density, distribution, 
     quantile, and random generation functions, along with analytical 
     log-likelihood, gradient, and Hessian functions implemented in 'C++' via 
     'RcppArmadillo' for maximum computational efficiency. Suitable for modeling 
