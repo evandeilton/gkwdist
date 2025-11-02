@@ -1,3 +1,5 @@
+# gkwdist 1.0.7
+
 # gkwdist 1.0.5
 
 ## Documentation Improvements

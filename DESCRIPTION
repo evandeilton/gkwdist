@@ -1,13 +1,13 @@
 Package: gkwdist
-Title: Generalized Kumaraswamy Distribution Family
-Version: 1.0.6
-Authors@R: person(given = "Lopes",
-                  family = "J. E.",
-                  role = c("aut", "cre"),
-                  email = "evandeilton@gmail.com",
-                  comment = c(ORCID = "0009-0007-5887-4084"))
+Title: Generalized 'Kumaraswamy' Distribution Family
+Version: 1.0.8
+Authors@R: c(person(given = "José Evandeilton",
+                    family = "Lopes",
+                    role = c("aut", "cre"),
+                    email = "evandeilton@gmail.com",
+                    comment = c(ORCID = "0009-0007-5887-4084")))
 Description: Implements the five-parameter Generalized 'Kumaraswamy' ('GKw') 
-    distribution proposed by Carrasco, Ferrari and Cordeiro (2010) 
+    distribution proposed by 'Carrasco, Ferrari and Cordeiro (2010)' 
     <doi:10.48550/arXiv.1004.0911> and its seven nested sub-families for 
     modeling bounded continuous data on the unit interval (0,1). The 'GKw' 
     distribution extends the 'Kumaraswamy' distribution described by Jones (2009) 
@@ -16,7 +16,7 @@ Description: Implements the five-parameter Generalized 'Kumaraswamy' ('GKw')
     log-likelihood, gradient, and Hessian functions implemented in 'C++' via 
     'RcppArmadillo' for maximum computational efficiency. Suitable for modeling 
     proportions, rates, percentages, and indices exhibiting complex features 
-    such as bimodality, asymmetry, or heavy tails not adequately captured by 
+    such as 'bimodality', asymmetry, or heavy tails not adequately captured by 
     standard distributions like 'Beta' or 'Kumaraswamy'.
 License: MIT + file LICENSE
 URL: https://github.com/evandeilton/gkwdist, https://evandeilton.github.io/gkwdist/
