@@ -95,7 +95,7 @@ where $B_z(a,b) = \int_0^z t^{a-1}(1-t)^{b-1}dt$.
 
 **PDF:**
 
-$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma\lambda-1} \left\{1-[1-(1-x^\alpha)^\beta]^\lambda\right\}^{\delta-1}$$
+$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma\lambda-1} \left\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right\}^{\delta-1}$$
 
 **CDF:**
 
@@ -115,13 +115,13 @@ Numerical integration or simulation methods required.
 
 **PDF:**
 
-$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma-1} \left\{1-[1-(1-x^\alpha)^\beta]\right\}^{\delta-1}$$
+$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma-1} \left\{1-\left[1-(1-x^\alpha)^\beta\right]\right\}^{\delta-1}$$
 
 Simplifying:
 
-$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma-1} (1-x^\alpha)^{\beta(\delta-1)}$$
+$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma-1} (1-x^\alpha)^{\beta(\delta-1)}$$
 
-$$= \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta\delta-1} [1-(1-x^\alpha)^\beta]^{\gamma-1}$$
+$$= \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta\delta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma-1}$$
 
 **CDF:**
 
@@ -143,11 +143,11 @@ $$x = \left[1-\left(1-I_u^{-1}(\gamma, \delta)\right)^{1/\beta}\right]^{1/\alpha
 
 **PDF:**
 
-$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\lambda-1} \left\{1-[1-(1-x^\alpha)^\beta]^\lambda\right\}^{\delta-1}$$
+$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta \right]^{\lambda-1} \left\{1-\left[1-(1-x^\alpha)^\beta \right]^\lambda\right\}^{\delta-1}$$
 
 **CDF:**
 
-$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \left\{1-[1-(1-x^\alpha)^\beta]^\lambda\right\}^\delta$$
+$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \left\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right\}^\delta$$
 
 **Quantile (closed-form):**
 
@@ -163,11 +163,11 @@ $$Q_{\text{KKw}}(p; \alpha, \beta, \delta, \lambda) = \left[1 - \left(1 - \left[
 
 **PDF:**
 
-$$f_{\text{EKw}}(x; \alpha, \beta, \lambda) = \lambda \alpha \beta \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\lambda-1}$$
+$$f_{\text{EKw}}(x; \alpha, \beta, \lambda) = \lambda \alpha \beta \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta \right]^{\lambda-1}$$
 
 **CDF:**
 
-$$F_{\text{EKw}}(x; \alpha, \beta, \lambda) = [1-(1-x^\alpha)^\beta]^\lambda$$
+$$F_{\text{EKw}}(x; \alpha, \beta, \lambda) = \left[1-(1-x^\alpha)^\beta \right]^\lambda$$
 
 **Quantile (closed-form):**
 
@@ -196,7 +196,7 @@ $$F_{\text{MC}}(x; \gamma, \delta, \lambda) = I_{x^\lambda}(\gamma, \delta)$$
 
 **Quantile:**
 
-$$Q_{\text{MC}}(p; \gamma, \delta, \lambda) = [I_p^{-1}(\gamma, \delta)]^{1/\lambda}$$
+$$Q_{\text{MC}}(p; \gamma, \delta, \lambda) = \left[I_p^{-1}(\gamma, \delta)\right]^{1/\lambda}$$
 
 where $I_p^{-1}(\gamma, \delta)$ is the inverse regularized incomplete
 beta function (quantile function of the Beta distribution).
@@ -224,7 +224,7 @@ $$F_{\text{Kw}}(x; \alpha, \beta) = 1 - (1-x^\alpha)^\beta$$
 
 **Quantile (closed-form):**
 
-$$Q_{\text{Kw}}(p; \alpha, \beta) = [1-(1-p)^{1/\beta}]^{1/\alpha}$$
+$$Q_{\text{Kw}}(p; \alpha, \beta) = \left[1-(1-p)^{1/\beta} \right]^{1/\alpha}$$
 
 **Moments:**
 
