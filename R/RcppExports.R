@@ -5451,7 +5451,7 @@ llekw <- function(par, data) {
 #' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
+#' par(mfrow = c(1,3), mar = c(4, 4, 3, 1))
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(beta),
 #'      main = "95% Confidence Region (Alpha vs Beta)", las = 1)
