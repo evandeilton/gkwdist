@@ -221,8 +221,8 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span>, digits <span class="op">=</span> <span class="fl">4</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            Method Alpha  Beta  Gamma Delta Lambda NegLogLik Iterations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     With Gradient 1.349 3.626 0.3486 1.254  13.31    -704.3        363</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Without Gradient 1.190 3.262 0.3825 1.480  14.10    -704.3        403</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     With Gradient 1.205 3.288 0.3823 1.462  13.88    -704.3        386</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Without Gradient 1.256 3.386 0.3747 1.403  13.43    -704.3        367</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 3: Verifying Gradient at MLE</span></span></span>
@@ -236,11 +236,11 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gradient at MLE:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.123066970 -0.002843102 -0.020414284  0.033724568 -0.004658634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.040704813  0.024508274  0.007276465  0.017706753 -0.010821899</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max absolute component:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute component: 0.123067 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute component: 0.04070481 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Gradient norm:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gradient norm: 0.129342 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gradient norm: 0.05235577 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 4: Numerical vs Analytical Gradient</span></span></span>
@@ -271,11 +271,11 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison_grad</span>, digits <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter    Analytical     Numerical      Abs_Diff     Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha  0.1230669702  0.1230688440 1.8738061e-06 1.5225905e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -0.0028431022 -0.0028438762 7.7406409e-07 2.7226037e-04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     gamma -0.0204142837 -0.0204079242 6.3594175e-06 3.1151803e-04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4     delta  0.0337245677  0.0337212214 3.3462955e-06 9.9224267e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5    lambda -0.0046586339 -0.0046577497 8.8416197e-07 1.8978996e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha -0.0407048130 -0.0407061407 1.3276474e-06 3.2616473e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta  0.0245082736  0.0245046294 3.6441642e-06 1.4869118e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     gamma  0.0072764653  0.0072782314 1.7660659e-06 2.4270931e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     delta  0.0177067532  0.0177067250 2.8273547e-08 1.5967663e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    lambda -0.0108218991 -0.0108224185 5.1944308e-07 4.7999253e-05</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 5: Score Test Statistic</span></span></span>
