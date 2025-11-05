@@ -732,6 +732,8 @@ Rcpp::NumericVector rbeta_(
 //' \donttest{
 //' ## Example 1: Basic Log-Likelihood Evaluation
 //' 
+//' par_ <- par()
+//' 
 //' # Generate sample data
 //' set.seed(123)
 //' n <- 1000
@@ -987,6 +989,8 @@ Rcpp::NumericVector rbeta_(
 //'        bty = "n", cex = 0.8)
 //' grid(col = "gray90")
 //' 
+//' par(par_)
+//' 
 //' }
 //'
 //' @export
@@ -1099,6 +1103,8 @@ double llbeta(const Rcpp::NumericVector& par,
 //' @examples
 //' \donttest{
 //' ## Example 1: Basic Gradient Evaluation
+//' 
+//' par_ <- par()
 //' 
 //' # Generate sample data
 //' set.seed(123)
@@ -1275,6 +1281,8 @@ double llbeta(const Rcpp::NumericVector& par,
 //'        bty = "n")
 //' grid(col = "gray90")
 //' 
+//' par(par_)
+//' 
 //' }
 //'
 //' @export
@@ -1397,6 +1405,8 @@ Rcpp::NumericVector grbeta(const Rcpp::NumericVector& par,
 //' @examples
 //' \donttest{
 //' ## Example 1: Basic Hessian Evaluation
+//' 
+//' par_ <- par()
 //' 
 //' # Generate sample data
 //' set.seed(123)
@@ -1612,6 +1622,8 @@ Rcpp::NumericVector grbeta(const Rcpp::NumericVector& par,
 //'        lwd = c(NA, NA, 2, 1.5),
 //'        bty = "n")
 //' grid(col = "gray90")
+//' 
+//' par(par_)
 //' 
 //' }
 //'

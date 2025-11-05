@@ -1093,7 +1093,7 @@ Rcpp::NumericVector rkw(
 //'        col = c("#8B0000", "#006400", "#2E4057"),
 //'        lwd = 2, lty = c(1, 2, 3), bty = "n")
 //' 
-//' par(mfrow = c(1, 1))
+//' par(par_)
 //' 
 //' }
 //'
@@ -1200,6 +1200,8 @@ double llkw(const Rcpp::NumericVector& par,
 //' @examples
 //' \donttest{
 //' ## Example 1: Basic Gradient Evaluation
+//' 
+//' par_ <- par()
 //' 
 //' # Generate sample data
 //' set.seed(123)
@@ -1387,6 +1389,8 @@ double llkw(const Rcpp::NumericVector& par,
 //' cat("Test statistic:", score_stat, "\n")
 //' cat("P-value:", format.pval(p_value, digits = 4), "\n")
 //' 
+//' par(par_)
+//' 
 //' }
 //' @export
 // [[Rcpp::export]]
@@ -1525,6 +1529,8 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //' @examples
 //' \donttest{
 //' ## Example 1: Basic Hessian Evaluation
+//'
+//' par_ <- par()
 //' 
 //' # Generate sample data
 //' set.seed(123)
@@ -1540,7 +1546,6 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //' # Check symmetry
 //' cat("\nSymmetry check (max |H - H^T|):",
 //'     max(abs(hess_true - t(hess_true))), "\n")
-//' 
 //' 
 //' ## Example 2: Hessian Properties at MLE
 //' 
@@ -1607,7 +1612,6 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //' )
 //' print(results, digits = 4)
 //' 
-//' 
 //' ## Example 4: Determinant and Trace Analysis
 //' 
 //' # Compute at different points
@@ -1646,7 +1650,6 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //' 
 //' cat("\nHessian Properties at Different Points:\n")
 //' print(hess_properties, digits = 4, row.names = FALSE)
-//' 
 //' 
 //' ## Example 5: Curvature Visualization
 //' 
@@ -1737,6 +1740,8 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //'        pch = c(19, 17, NA), lty = c(NA, NA, 1),
 //'        lwd = c(NA, NA, 2), bty = "n")
 //' grid(col = "gray90")
+//' 
+//' par(par_)
 //' 
 //' }
 //'

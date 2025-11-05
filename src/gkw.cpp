@@ -1569,6 +1569,8 @@ Rcpp::NumericVector rgkw(
 //' \donttest{
 //' ## Example 1: Basic Log-Likelihood Evaluation
 //' 
+//' par_ <- par()
+//' 
 //' # Generate sample data
 //' set.seed(123)
 //' n <- 1000
@@ -2018,6 +2020,8 @@ Rcpp::NumericVector rgkw(
 //'        bty = "n", cex = 0.8)
 //' grid(col = "gray90")
 //' 
+//' par(par_)
+//' 
 //' }
 //'
 //' @export
@@ -2242,6 +2246,8 @@ double llgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 //' \donttest{
 //' ## Example 1: Basic Gradient Evaluation
 //' 
+//' par_ <- par()
+//' 
 //' # Generate sample data
 //' set.seed(123)
 //' n <- 1000
@@ -2465,6 +2471,8 @@ double llgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 //' grid(col = "gray90")
 //' 
 //' }
+//' 
+//' par(par_)
 //'
 //' @export
 // [[Rcpp::export]]
@@ -2777,6 +2785,8 @@ Rcpp::NumericVector grgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 //' \donttest{
 //' ## Example 1: Basic Hessian Evaluation
 //' 
+//' par_ <- par()
+//' 
 //' # Generate sample data
 //' set.seed(2323)
 //' n <- 1000
@@ -3085,6 +3095,8 @@ Rcpp::NumericVector grgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 //'        lwd = c(NA, NA, 2, 1.5),
 //'        bty = "n")
 //' grid(col = "gray90")
+//' 
+//' par(par_)
 //' 
 //' }
 //' @export
