@@ -1666,9 +1666,9 @@ double llekw(const Rcpp::NumericVector& par,
 //'        bty = "n")
 //' grid(col = "gray90")
 //' 
-//' }
-//' 
 //' par(par_)
+//' 
+//' }
 //'
 //' @export
 // [[Rcpp::export]]

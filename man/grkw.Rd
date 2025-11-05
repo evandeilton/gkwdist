@@ -49,6 +49,8 @@ of the general GKw gradient (\code{\link{grgkw}}) evaluated at \eqn{\gamma=1, \d
 \donttest{
 ## Example 1: Basic Gradient Evaluation
 
+par_ <- par()
+
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -234,6 +236,8 @@ cat("H0: alpha = 2, beta = 3\n")
 cat("Score vector:", score_theta0, "\n")
 cat("Test statistic:", score_stat, "\n")
 cat("P-value:", format.pval(p_value, digits = 4), "\n")
+
+par(par_)
 
 }
 }

@@ -65,6 +65,8 @@ efficiency, typically using C++.
 \donttest{
 ## Example 1: Basic Hessian Evaluation
 
+par_ <- par()
+
 # Generate sample data
 set.seed(2323)
 n <- 1000
@@ -373,6 +375,8 @@ legend("topright",
        lwd = c(NA, NA, 2, 1.5),
        bty = "n")
 grid(col = "gray90")
+
+par(par_)
 
 }
 }

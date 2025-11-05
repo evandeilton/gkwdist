@@ -51,6 +51,8 @@ Numerical stability is maintained, including using the log-gamma function
 \donttest{
 ## Example 1: Basic Log-Likelihood Evaluation
 
+par_ <- par()
+
 # Generate sample data with more stable parameters
 set.seed(123)
 n <- 1000
@@ -373,7 +375,7 @@ legend("topright",
        lwd = c(NA, NA, 2.5),
        bty = "n", cex = 0.8)
 
-par(mfrow = c(1, 1))
+par(par_)
 
 }
 

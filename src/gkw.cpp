@@ -2470,9 +2470,10 @@ double llgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 //'        bty = "n")
 //' grid(col = "gray90")
 //' 
+//' par(par_)
+//' 
 //' }
 //' 
-//' par(par_)
 //'
 //' @export
 // [[Rcpp::export]]

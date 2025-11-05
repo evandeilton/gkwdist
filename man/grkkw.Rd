@@ -71,6 +71,8 @@ Numerical stability is maintained through careful implementation.
 \donttest{
 ## Example 1: Basic Gradient Evaluation
 
+par_ <- par()
+
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -248,6 +250,9 @@ legend("topright",
        lwd = c(NA, NA, 2, 1.5),
        bty = "n")
 grid(col = "gray90")
+
+par(par_)
+
 }
 
 }

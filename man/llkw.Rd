@@ -48,6 +48,8 @@ It is equivalent to the negative log-likelihood of the GKw distribution
 \donttest{
 ## Example 1: Maximum Likelihood Estimation with Analytical Gradient
 
+par_ <- par()
+
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -410,7 +412,7 @@ legend("topright", legend = c("MLE", "True", "95\% CI"),
        col = c("#8B0000", "#006400", "#2E4057"),
        lwd = 2, lty = c(1, 2, 3), bty = "n")
 
-par(mfrow = c(1, 1))
+par(par_)
 
 }
 

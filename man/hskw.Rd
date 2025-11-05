@@ -63,6 +63,8 @@ evaluated at \eqn{\gamma=1, \delta=0, \lambda=1}.
 \donttest{
 ## Example 1: Basic Hessian Evaluation
 
+par_ <- par()
+
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -77,7 +79,6 @@ print(hess_true, digits = 4)
 # Check symmetry
 cat("\nSymmetry check (max |H - H^T|):",
     max(abs(hess_true - t(hess_true))), "\n")
-
 
 ## Example 2: Hessian Properties at MLE
 
@@ -144,7 +145,6 @@ results <- data.frame(
 )
 print(results, digits = 4)
 
-
 ## Example 4: Determinant and Trace Analysis
 
 # Compute at different points
@@ -183,7 +183,6 @@ for (i in 1:nrow(test_params)) {
 
 cat("\nHessian Properties at Different Points:\n")
 print(hess_properties, digits = 4, row.names = FALSE)
-
 
 ## Example 5: Curvature Visualization
 
@@ -274,6 +273,8 @@ legend("topright",
        pch = c(19, 17, NA), lty = c(NA, NA, 1),
        lwd = c(NA, NA, 2), bty = "n")
 grid(col = "gray90")
+
+par(par_)
 
 }
 

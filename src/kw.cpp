@@ -731,6 +731,8 @@ Rcpp::NumericVector rkw(
 //' \donttest{
 //' ## Example 1: Maximum Likelihood Estimation with Analytical Gradient
 //' 
+//' par_ <- par()
+//' 
 //' # Generate sample data
 //' set.seed(123)
 //' n <- 1000

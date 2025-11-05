@@ -509,6 +509,8 @@ rbeta_ <- function(n, gamma, delta) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
+#' par_ <- par()
+#' 
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
@@ -764,6 +766,8 @@ rbeta_ <- function(n, gamma, delta) {
 #'        bty = "n", cex = 0.8)
 #' grid(col = "gray90")
 #' 
+#' par(par_)
+#' 
 #' }
 #'
 #' @export
@@ -838,6 +842,8 @@ llbeta <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -1014,6 +1020,8 @@ llbeta <- function(par, data) {
 #'        bty = "n")
 #' grid(col = "gray90")
 #' 
+#' par(par_)
+#' 
 #' }
 #'
 #' @export
@@ -1093,6 +1101,8 @@ grbeta <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -1308,6 +1318,8 @@ grbeta <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
+#' 
+#' par(par_)
 #' 
 #' }
 #'
@@ -1818,6 +1830,8 @@ rbkw <- function(n, alpha, beta, gamma, delta) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
+#' par_ <- par()
+#' 
 #' # Generate sample data
 #' set.seed(2203)
 #' n <- 1000
@@ -2171,7 +2185,7 @@ rbkw <- function(n, alpha, beta, gamma, delta) {
 #'        lwd = c(NA, NA, 2.5),
 #'        bty = "n", cex = 0.8)
 #' 
-#' par(mfrow = c(1, 1))
+#' par(par_)
 #' 
 #' }
 #'
@@ -2262,6 +2276,8 @@ llbkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(2203)
@@ -2491,7 +2507,7 @@ llbkw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n", cex = 0.8)
 #' 
-#' par(mfrow = c(1, 1))
+#' par(par_)
 #' 
 #' }
 #'
@@ -2574,6 +2590,8 @@ grbkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(2203)
@@ -2909,7 +2927,7 @@ grbkw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n", cex = 0.8)
 #' 
-#' par(mfrow = c(1, 1))
+#' par(par_)
 #' 
 #' }
 #'
@@ -3441,6 +3459,8 @@ rmc <- function(n, gamma, delta, lambda) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
+#' par_ <- par()
+#' 
 #' # Generate sample data with more stable parameters
 #' set.seed(123)
 #' n <- 1000
@@ -3763,7 +3783,7 @@ rmc <- function(n, gamma, delta, lambda) {
 #'        lwd = c(NA, NA, 2.5),
 #'        bty = "n", cex = 0.8)
 #' 
-#' par(mfrow = c(1, 1))
+#' par(par_)
 #' 
 #' }
 #'
@@ -3841,154 +3861,9 @@ llmc <- function(par, data) {
 #'
 #' @examples
 #' \donttest{
-#' # Assuming existence of rmc, llmc, grmc, hsmc functions for Mc distribution
-#'
-#' # Generate sample data
-#' set.seed(123)
-#' true_par_mc <- c(gamma = 2, delta = 3, lambda = 0.5)
-#' sample_data_mc <- rmc(100, gamma = true_par_mc[1], delta = true_par_mc[2],
-#'                       lambda = true_par_mc[3])
-#' hist(sample_data_mc, breaks = 20, main = "Mc(2, 3, 0.5) Sample")
-#'
-#' # --- Find MLE estimates ---
-#' start_par_mc <- c(1.5, 2.5, 0.8)
-#' mle_result_mc <- stats::optim(par = start_par_mc,
-#'                               fn = llmc,
-#'                               gr = grmc, # Use analytical gradient for Mc
-#'                               method = "BFGS",
-#'                               hessian = TRUE,
-#'                               data = sample_data_mc)
-#'
-#' # --- Compare analytical gradient to numerical gradient ---
-#' if (mle_result_mc$convergence == 0 &&
-#'     requireNamespace("numDeriv", quietly = TRUE)) {
-#'
-#'   mle_par_mc <- mle_result_mc$par
-#'   cat("\nComparing Gradients for Mc at MLE estimates:\n")
-#'
-#'   # Numerical gradient of llmc
-#'   num_grad_mc <- numDeriv::grad(func = llmc, x = mle_par_mc, data = sample_data_mc)
-#'
-#'   # Analytical gradient from grmc
-#'   ana_grad_mc <- grmc(par = mle_par_mc, data = sample_data_mc)
-#'
-#'   cat("Numerical Gradient (Mc):\n")
-#'   print(num_grad_mc)
-#'   cat("Analytical Gradient (Mc):\n")
-#'   print(ana_grad_mc)
-#'
-#'   # Check differences
-#'   cat("Max absolute difference between Mc gradients:\n")
-#'   print(max(abs(num_grad_mc - ana_grad_mc)))
-#'
-#' } else {
-#'   cat("\nSkipping Mc gradient comparison.\n")
-#' }
-#'
-#' # Example with Hessian comparison (if hsmc exists)
-#' if (mle_result_mc$convergence == 0 &&
-#'     requireNamespace("numDeriv", quietly = TRUE) && exists("hsmc")) {
-#'
-#'   num_hess_mc <- numDeriv::hessian(func = llmc, x = mle_par_mc, data = sample_data_mc)
-#'   ana_hess_mc <- hsmc(par = mle_par_mc, data = sample_data_mc)
-#'   cat("\nMax absolute difference between Mc Hessians:\n")
-#'   print(max(abs(num_hess_mc - ana_hess_mc)))
-#'
-#' }
-#'
-#' }
-#'
-#' @export
-grmc <- function(par, data) {
-    .Call(`_gkwdist_grmc`, par, data)
-}
-
-#' @title Hessian Matrix of the Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution
-#' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize hessian mcdonald
-#'
-#' @description
-#' Computes the analytic 3x3 Hessian matrix (matrix of second partial derivatives)
-#' of the negative log-likelihood function for the McDonald (Mc) distribution
-#' (also known as Beta Power) with parameters \code{gamma} (\eqn{\gamma}),
-#' \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}). This distribution
-#' is the special case of the Generalized Kumaraswamy (GKw) distribution where
-#' \eqn{\alpha = 1} and \eqn{\beta = 1}. The Hessian is useful for estimating
-#' standard errors and in optimization algorithms.
-#'
-#' @param par A numeric vector of length 3 containing the distribution parameters
-#'   in the order: \code{gamma} (\eqn{\gamma > 0}), \code{delta} (\eqn{\delta \ge 0}),
-#'   \code{lambda} (\eqn{\lambda > 0}).
-#' @param data A numeric vector of observations. All values must be strictly
-#'   between 0 and 1 (exclusive).
-#'
-#' @return Returns a 3x3 numeric matrix representing the Hessian matrix of the
-#'   negative log-likelihood function, \eqn{-\partial^2 \ell / (\partial \theta_i \partial \theta_j)},
-#'   where \eqn{\theta = (\gamma, \delta, \lambda)}.
-#'   Returns a 3x3 matrix populated with \code{NaN} if any parameter values are
-#'   invalid according to their constraints, or if any value in \code{data} is
-#'   not in the interval (0, 1).
-#'
-#' @details
-#' This function calculates the analytic second partial derivatives of the
-#' negative log-likelihood function (\eqn{-\ell(\theta|\mathbf{x})}).
-#' The components are based on the second derivatives of the log-likelihood \eqn{\ell}
-#' (derived from the PDF in \code{\link{dmc}}).
-#'
-#' **Note:** The formulas below represent the second derivatives of the positive
-#' log-likelihood (\eqn{\ell}). The function returns the **negative** of these values.
-#' Users should verify these formulas independently if using for critical applications.
-#'
-#' \deqn{
-#' \frac{\partial^2 \ell}{\partial \gamma^2} = -n[\psi'(\gamma) - \psi'(\gamma+\delta+1)]
-#' }
-#' \deqn{
-#' \frac{\partial^2 \ell}{\partial \gamma \partial \delta} = -n\psi'(\gamma+\delta+1)
-#' }
-#' \deqn{
-#' \frac{\partial^2 \ell}{\partial \gamma \partial \lambda} = \sum_{i=1}^{n}\ln(x_i)
-#' }
-#' \deqn{
-#' \frac{\partial^2 \ell}{\partial \delta^2} = -n[\psi'(\delta+1) - \psi'(\gamma+\delta+1)]
-#' }
-#' \deqn{
-#' \frac{\partial^2 \ell}{\partial \delta \partial \lambda} = -\sum_{i=1}^{n}\frac{x_i^{\lambda}\ln(x_i)}{1-x_i^{\lambda}}
-#' }
-#' \deqn{
-#' \frac{\partial^2 \ell}{\partial \lambda^2} = -\frac{n}{\lambda^2} -
-#' \delta\sum_{i=1}^{n}\frac{x_i^{\lambda}[\ln(x_i)]^2}{(1-x_i^{\lambda})^2}
-#' }
-#'
-#' where \eqn{\psi'(\cdot)} is the trigamma function (\code{\link[base]{trigamma}}).
-#' (*Note: The formula for \eqn{\partial^2 \ell / \partial \lambda^2} provided in the source
-#' comment was different and potentially related to the expected information matrix;
-#' the formula shown here is derived from the gradient provided earlier. Verification
-#' is recommended.*)
-#'
-#' The returned matrix is symmetric, with rows/columns corresponding to
-#' \eqn{\gamma, \delta, \lambda}.
-#'
-#' @references
-#' McDonald, J. B. (1984). Some generalized functions for the size distribution
-#' of income. *Econometrica*, 52(3), 647-663.
-#'
-#' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*,
-#'
-#' (Note: Specific Hessian formulas might be derived or sourced from additional references).
-#'
-#' @seealso
-#' \code{\link{hsgkw}} (parent distribution Hessian),
-#' \code{\link{llmc}} (negative log-likelihood for Mc),
-#' \code{\link{grmc}} (gradient for Mc, if available),
-#' \code{\link{dmc}} (density for Mc),
-#' \code{\link[stats]{optim}},
-#' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),
-#' \code{\link[base]{trigamma}}.
-#'
-#' @examples
-#' \donttest{
-#' ## Example 1: Basic Hessian Evaluation
+#' ## Example 1: Basic Examples
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data with more stable parameters
 #' set.seed(123)
@@ -4320,7 +4195,435 @@ grmc <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n", cex = 0.8)
 #' 
+#' par(par_)
+#' 
+#' }
+#'
+#' @export
+grmc <- function(par, data) {
+    .Call(`_gkwdist_grmc`, par, data)
+}
+
+#' @title Hessian Matrix of the Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution
+#' @author Lopes, J. E.
+#' @keywords distribution likelihood optimize hessian mcdonald
+#'
+#' @description
+#' Computes the analytic 3x3 Hessian matrix (matrix of second partial derivatives)
+#' of the negative log-likelihood function for the McDonald (Mc) distribution
+#' (also known as Beta Power) with parameters \code{gamma} (\eqn{\gamma}),
+#' \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}). This distribution
+#' is the special case of the Generalized Kumaraswamy (GKw) distribution where
+#' \eqn{\alpha = 1} and \eqn{\beta = 1}. The Hessian is useful for estimating
+#' standard errors and in optimization algorithms.
+#'
+#' @param par A numeric vector of length 3 containing the distribution parameters
+#'   in the order: \code{gamma} (\eqn{\gamma > 0}), \code{delta} (\eqn{\delta \ge 0}),
+#'   \code{lambda} (\eqn{\lambda > 0}).
+#' @param data A numeric vector of observations. All values must be strictly
+#'   between 0 and 1 (exclusive).
+#'
+#' @return Returns a 3x3 numeric matrix representing the Hessian matrix of the
+#'   negative log-likelihood function, \eqn{-\partial^2 \ell / (\partial \theta_i \partial \theta_j)},
+#'   where \eqn{\theta = (\gamma, \delta, \lambda)}.
+#'   Returns a 3x3 matrix populated with \code{NaN} if any parameter values are
+#'   invalid according to their constraints, or if any value in \code{data} is
+#'   not in the interval (0, 1).
+#'
+#' @details
+#' This function calculates the analytic second partial derivatives of the
+#' negative log-likelihood function (\eqn{-\ell(\theta|\mathbf{x})}).
+#' The components are based on the second derivatives of the log-likelihood \eqn{\ell}
+#' (derived from the PDF in \code{\link{dmc}}).
+#'
+#' **Note:** The formulas below represent the second derivatives of the positive
+#' log-likelihood (\eqn{\ell}). The function returns the **negative** of these values.
+#' Users should verify these formulas independently if using for critical applications.
+#'
+#' \deqn{
+#' \frac{\partial^2 \ell}{\partial \gamma^2} = -n[\psi'(\gamma) - \psi'(\gamma+\delta+1)]
+#' }
+#' \deqn{
+#' \frac{\partial^2 \ell}{\partial \gamma \partial \delta} = -n\psi'(\gamma+\delta+1)
+#' }
+#' \deqn{
+#' \frac{\partial^2 \ell}{\partial \gamma \partial \lambda} = \sum_{i=1}^{n}\ln(x_i)
+#' }
+#' \deqn{
+#' \frac{\partial^2 \ell}{\partial \delta^2} = -n[\psi'(\delta+1) - \psi'(\gamma+\delta+1)]
+#' }
+#' \deqn{
+#' \frac{\partial^2 \ell}{\partial \delta \partial \lambda} = -\sum_{i=1}^{n}\frac{x_i^{\lambda}\ln(x_i)}{1-x_i^{\lambda}}
+#' }
+#' \deqn{
+#' \frac{\partial^2 \ell}{\partial \lambda^2} = -\frac{n}{\lambda^2} -
+#' \delta\sum_{i=1}^{n}\frac{x_i^{\lambda}[\ln(x_i)]^2}{(1-x_i^{\lambda})^2}
+#' }
+#'
+#' where \eqn{\psi'(\cdot)} is the trigamma function (\code{\link[base]{trigamma}}).
+#' (*Note: The formula for \eqn{\partial^2 \ell / \partial \lambda^2} provided in the source
+#' comment was different and potentially related to the expected information matrix;
+#' the formula shown here is derived from the gradient provided earlier. Verification
+#' is recommended.*)
+#'
+#' The returned matrix is symmetric, with rows/columns corresponding to
+#' \eqn{\gamma, \delta, \lambda}.
+#'
+#' @references
+#' McDonald, J. B. (1984). Some generalized functions for the size distribution
+#' of income. *Econometrica*, 52(3), 647-663.
+#'
+#' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#'
+#' (Note: Specific Hessian formulas might be derived or sourced from additional references).
+#'
+#' @seealso
+#' \code{\link{hsgkw}} (parent distribution Hessian),
+#' \code{\link{llmc}} (negative log-likelihood for Mc),
+#' \code{\link{grmc}} (gradient for Mc, if available),
+#' \code{\link{dmc}} (density for Mc),
+#' \code{\link[stats]{optim}},
+#' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),
+#' \code{\link[base]{trigamma}}.
+#'
+#' @examples
+#' \donttest{
+#' ## Example 1: Basic Hessian Evaluation
+#' 
+#' par_ <- par()
+#' 
+#' # Generate sample data with more stable parameters
+#' set.seed(123)
+#' n <- 1000
+#' true_params <- c(gamma = 2.0, delta = 2.5, lambda = 1.5)
+#' data <- rmc(n, gamma = true_params[1], delta = true_params[2],
+#'             lambda = true_params[3])
+#' 
+#' # Evaluate Hessian at true parameters
+#' hess_true <- hsmc(par = true_params, data = data)
+#' cat("Hessian matrix at true parameters:\n")
+#' print(hess_true, digits = 4)
+#' 
+#' # Check symmetry
+#' cat("\nSymmetry check (max |H - H^T|):",
+#'     max(abs(hess_true - t(hess_true))), "\n")
+#' 
+#' 
+#' ## Example 2: Hessian Properties at MLE
+#' 
+#' # Fit model
+#' fit <- optim(
+#'   par = c(1.5, 2.0, 1.0),
+#'   fn = llmc,
+#'   gr = grmc,
+#'   data = data,
+#'   method = "BFGS",
+#'   hessian = TRUE
+#' )
+#' 
+#' mle <- fit$par
+#' names(mle) <- c("gamma", "delta", "lambda")
+#' 
+#' # Hessian at MLE
+#' hessian_at_mle <- hsmc(par = mle, data = data)
+#' cat("\nHessian at MLE:\n")
+#' print(hessian_at_mle, digits = 4)
+#' 
+#' # Compare with optim's numerical Hessian
+#' cat("\nComparison with optim Hessian:\n")
+#' cat("Max absolute difference:",
+#'     max(abs(hessian_at_mle - fit$hessian)), "\n")
+#' 
+#' # Eigenvalue analysis
+#' eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
+#' cat("\nEigenvalues:\n")
+#' print(eigenvals)
+#' 
+#' cat("\nPositive definite:", all(eigenvals > 0), "\n")
+#' cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
+#' 
+#' 
+#' ## Example 3: Standard Errors and Confidence Intervals
+#' 
+#' # Observed information matrix
+#' obs_info <- hessian_at_mle
+#' 
+#' # Variance-covariance matrix
+#' vcov_matrix <- solve(obs_info)
+#' cat("\nVariance-Covariance Matrix:\n")
+#' print(vcov_matrix, digits = 6)
+#' 
+#' # Standard errors
+#' se <- sqrt(diag(vcov_matrix))
+#' names(se) <- c("gamma", "delta", "lambda")
+#' 
+#' # Correlation matrix
+#' corr_matrix <- cov2cor(vcov_matrix)
+#' cat("\nCorrelation Matrix:\n")
+#' print(corr_matrix, digits = 4)
+#' 
+#' # Confidence intervals
+#' z_crit <- qnorm(0.975)
+#' results <- data.frame(
+#'   Parameter = c("gamma", "delta", "lambda"),
+#'   True = true_params,
+#'   MLE = mle,
+#'   SE = se,
+#'   CI_Lower = mle - z_crit * se,
+#'   CI_Upper = mle + z_crit * se
+#' )
+#' print(results, digits = 4)
+#' 
+#' 
+#' ## Example 4: Determinant and Trace Analysis
+#' 
+#' # Compute at different points
+#' test_params <- rbind(
+#'   c(1.5, 2.0, 1.0),
+#'   c(2.0, 2.5, 1.5),
+#'   mle,
+#'   c(2.5, 3.0, 2.0)
+#' )
+#' 
+#' hess_properties <- data.frame(
+#'   Gamma = numeric(),
+#'   Delta = numeric(),
+#'   Lambda = numeric(),
+#'   Determinant = numeric(),
+#'   Trace = numeric(),
+#'   Min_Eigenval = numeric(),
+#'   Max_Eigenval = numeric(),
+#'   Cond_Number = numeric(),
+#'   stringsAsFactors = FALSE
+#' )
+#' 
+#' for (i in 1:nrow(test_params)) {
+#'   H <- hsmc(par = test_params[i, ], data = data)
+#'   eigs <- eigen(H, only.values = TRUE)$values
+#' 
+#'   hess_properties <- rbind(hess_properties, data.frame(
+#'     Gamma = test_params[i, 1],
+#'     Delta = test_params[i, 2],
+#'     Lambda = test_params[i, 3],
+#'     Determinant = det(H),
+#'     Trace = sum(diag(H)),
+#'     Min_Eigenval = min(eigs),
+#'     Max_Eigenval = max(eigs),
+#'     Cond_Number = max(eigs) / min(eigs)
+#'   ))
+#' }
+#' 
+#' cat("\nHessian Properties at Different Points:\n")
+#' print(hess_properties, digits = 4, row.names = FALSE)
+#' 
+#' 
+#' ## Example 5: Curvature Visualization (All pairs side by side)
+#' 
+#' # Create grids around MLE with wider range (±1.5)
+#' gamma_grid <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = 25)
+#' delta_grid <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = 25)
+#' lambda_grid <- seq(mle[3] - 1.5, mle[3] + 1.5, length.out = 25)
+#' 
+#' gamma_grid <- gamma_grid[gamma_grid > 0]
+#' delta_grid <- delta_grid[delta_grid > 0]
+#' lambda_grid <- lambda_grid[lambda_grid > 0]
+#' 
+#' # Compute curvature measures for all pairs
+#' determinant_surface_gd <- matrix(NA, nrow = length(gamma_grid), ncol = length(delta_grid))
+#' trace_surface_gd <- matrix(NA, nrow = length(gamma_grid), ncol = length(delta_grid))
+#' 
+#' determinant_surface_gl <- matrix(NA, nrow = length(gamma_grid), ncol = length(lambda_grid))
+#' trace_surface_gl <- matrix(NA, nrow = length(gamma_grid), ncol = length(lambda_grid))
+#' 
+#' determinant_surface_dl <- matrix(NA, nrow = length(delta_grid), ncol = length(lambda_grid))
+#' trace_surface_dl <- matrix(NA, nrow = length(delta_grid), ncol = length(lambda_grid))
+#' 
+#' # Gamma vs Delta
+#' for (i in seq_along(gamma_grid)) {
+#'   for (j in seq_along(delta_grid)) {
+#'     H <- hsmc(c(gamma_grid[i], delta_grid[j], mle[3]), data)
+#'     determinant_surface_gd[i, j] <- det(H)
+#'     trace_surface_gd[i, j] <- sum(diag(H))
+#'   }
+#' }
+#' 
+#' # Gamma vs Lambda
+#' for (i in seq_along(gamma_grid)) {
+#'   for (j in seq_along(lambda_grid)) {
+#'     H <- hsmc(c(gamma_grid[i], mle[2], lambda_grid[j]), data)
+#'     determinant_surface_gl[i, j] <- det(H)
+#'     trace_surface_gl[i, j] <- sum(diag(H))
+#'   }
+#' }
+#' 
+#' # Delta vs Lambda
+#' for (i in seq_along(delta_grid)) {
+#'   for (j in seq_along(lambda_grid)) {
+#'     H <- hsmc(c(mle[1], delta_grid[i], lambda_grid[j]), data)
+#'     determinant_surface_dl[i, j] <- det(H)
+#'     trace_surface_dl[i, j] <- sum(diag(H))
+#'   }
+#' }
+#' 
+#' # Plot all curvature surfaces side by side
+#' par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+#' 
+#' # Determinant plots
+#' contour(gamma_grid, delta_grid, determinant_surface_gd,
+#'         xlab = expression(gamma), ylab = expression(delta),
+#'         main = "Determinant: Gamma vs Delta", las = 1,
+#'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+#' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+#' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+#' grid(col = "gray90")
+#' 
+#' contour(gamma_grid, lambda_grid, determinant_surface_gl,
+#'         xlab = expression(gamma), ylab = expression(lambda),
+#'         main = "Determinant: Gamma vs Lambda", las = 1,
+#'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+#' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+#' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+#' grid(col = "gray90")
+#' 
+#' contour(delta_grid, lambda_grid, determinant_surface_dl,
+#'         xlab = expression(delta), ylab = expression(lambda),
+#'         main = "Determinant: Delta vs Lambda", las = 1,
+#'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+#' points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+#' points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+#' grid(col = "gray90")
+#' 
+#' # Trace plots
+#' contour(gamma_grid, delta_grid, trace_surface_gd,
+#'         xlab = expression(gamma), ylab = expression(delta),
+#'         main = "Trace: Gamma vs Delta", las = 1,
+#'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+#' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+#' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+#' grid(col = "gray90")
+#' 
+#' contour(gamma_grid, lambda_grid, trace_surface_gl,
+#'         xlab = expression(gamma), ylab = expression(lambda),
+#'         main = "Trace: Gamma vs Lambda", las = 1,
+#'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+#' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+#' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+#' grid(col = "gray90")
+#' 
+#' contour(delta_grid, lambda_grid, trace_surface_dl,
+#'         xlab = expression(delta), ylab = expression(lambda),
+#'         main = "Trace: Delta vs Lambda", las = 1,
+#'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+#' points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+#' points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+#' grid(col = "gray90")
+#' 
+#' legend("topright",
+#'        legend = c("MLE", "True"),
+#'        col = c("#8B0000", "#006400"),
+#'        pch = c(19, 17),
+#'        bty = "n", cex = 0.8)
+#' 
 #' par(mfrow = c(1, 1))
+#' 
+#' 
+#' ## Example 6: Confidence Ellipses (All pairs side by side)
+#' 
+#' # Extract all 2x2 submatrices
+#' vcov_gd <- vcov_matrix[1:2, 1:2]
+#' vcov_gl <- vcov_matrix[c(1, 3), c(1, 3)]
+#' vcov_dl <- vcov_matrix[2:3, 2:3]
+#' 
+#' # Create confidence ellipses
+#' theta <- seq(0, 2 * pi, length.out = 100)
+#' chi2_val <- qchisq(0.95, df = 2)
+#' 
+#' # Gamma vs Delta ellipse
+#' eig_decomp_gd <- eigen(vcov_gd)
+#' ellipse_gd <- matrix(NA, nrow = 100, ncol = 2)
+#' for (i in 1:100) {
+#'   v <- c(cos(theta[i]), sin(theta[i]))
+#'   ellipse_gd[i, ] <- mle[1:2] + sqrt(chi2_val) *
+#'     (eig_decomp_gd$vectors %*% diag(sqrt(eig_decomp_gd$values)) %*% v)
+#' }
+#' 
+#' # Gamma vs Lambda ellipse
+#' eig_decomp_gl <- eigen(vcov_gl)
+#' ellipse_gl <- matrix(NA, nrow = 100, ncol = 2)
+#' for (i in 1:100) {
+#'   v <- c(cos(theta[i]), sin(theta[i]))
+#'   ellipse_gl[i, ] <- mle[c(1, 3)] + sqrt(chi2_val) *
+#'     (eig_decomp_gl$vectors %*% diag(sqrt(eig_decomp_gl$values)) %*% v)
+#' }
+#' 
+#' # Delta vs Lambda ellipse
+#' eig_decomp_dl <- eigen(vcov_dl)
+#' ellipse_dl <- matrix(NA, nrow = 100, ncol = 2)
+#' for (i in 1:100) {
+#'   v <- c(cos(theta[i]), sin(theta[i]))
+#'   ellipse_dl[i, ] <- mle[2:3] + sqrt(chi2_val) *
+#'     (eig_decomp_dl$vectors %*% diag(sqrt(eig_decomp_dl$values)) %*% v)
+#' }
+#' 
+#' # Marginal confidence intervals
+#' se_gd <- sqrt(diag(vcov_gd))
+#' ci_gamma_gd <- mle[1] + c(-1, 1) * 1.96 * se_gd[1]
+#' ci_delta_gd <- mle[2] + c(-1, 1) * 1.96 * se_gd[2]
+#' 
+#' se_gl <- sqrt(diag(vcov_gl))
+#' ci_gamma_gl <- mle[1] + c(-1, 1) * 1.96 * se_gl[1]
+#' ci_lambda_gl <- mle[3] + c(-1, 1) * 1.96 * se_gl[2]
+#' 
+#' se_dl <- sqrt(diag(vcov_dl))
+#' ci_delta_dl <- mle[2] + c(-1, 1) * 1.96 * se_dl[1]
+#' ci_lambda_dl <- mle[3] + c(-1, 1) * 1.96 * se_dl[2]
+#' 
+#' # Plot all three ellipses side by side
+#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+#' 
+#' # Gamma vs Delta
+#' plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
+#'      xlab = expression(gamma), ylab = expression(delta),
+#'      main = "Gamma vs Delta", las = 1, xlim = range(ellipse_gd[, 1], ci_gamma_gd),
+#'      ylim = range(ellipse_gd[, 2], ci_delta_gd))
+#' abline(v = ci_gamma_gd, col = "#808080", lty = 3, lwd = 1.5)
+#' abline(h = ci_delta_gd, col = "#808080", lty = 3, lwd = 1.5)
+#' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
+#' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
+#' grid(col = "gray90")
+#' 
+#' # Gamma vs Lambda
+#' plot(ellipse_gl[, 1], ellipse_gl[, 2], type = "l", lwd = 2, col = "#2E4057",
+#'      xlab = expression(gamma), ylab = expression(lambda),
+#'      main = "Gamma vs Lambda", las = 1, xlim = range(ellipse_gl[, 1], ci_gamma_gl),
+#'      ylim = range(ellipse_gl[, 2], ci_lambda_gl))
+#' abline(v = ci_gamma_gl, col = "#808080", lty = 3, lwd = 1.5)
+#' abline(h = ci_lambda_gl, col = "#808080", lty = 3, lwd = 1.5)
+#' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+#' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+#' grid(col = "gray90")
+#' 
+#' # Delta vs Lambda
+#' plot(ellipse_dl[, 1], ellipse_dl[, 2], type = "l", lwd = 2, col = "#2E4057",
+#'      xlab = expression(delta), ylab = expression(lambda),
+#'      main = "Delta vs Lambda", las = 1, xlim = range(ellipse_dl[, 1], ci_delta_dl),
+#'      ylim = range(ellipse_dl[, 2], ci_lambda_dl))
+#' abline(v = ci_delta_dl, col = "#808080", lty = 3, lwd = 1.5)
+#' abline(h = ci_lambda_dl, col = "#808080", lty = 3, lwd = 1.5)
+#' points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
+#' points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
+#' grid(col = "gray90")
+#' 
+#' legend("topright",
+#'        legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+#'        col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+#'        pch = c(19, 17, NA, NA),
+#'        lty = c(NA, NA, 1, 3),
+#'        lwd = c(NA, NA, 2, 1.5),
+#'        bty = "n", cex = 0.8)
+#' 
+#' par(par_)
 #' 
 #' }
 #'
@@ -4835,6 +5138,8 @@ rekw <- function(n, alpha, beta, lambda) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
+#' par_ <- par()
+#' 
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
@@ -5212,6 +5517,8 @@ rekw <- function(n, alpha, beta, lambda) {
 #'        bty = "n", cex = 0.8)
 #' grid(col = "gray90")
 #' 
+#' par(par_)
+#' 
 #' }
 #'
 #' @export
@@ -5296,6 +5603,8 @@ llekw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -5556,6 +5865,8 @@ llekw <- function(par, data) {
 #'        bty = "n")
 #' grid(col = "gray90")
 #' 
+#' par(par_)
+#' 
 #' }
 #'
 #' @export
@@ -5641,6 +5952,8 @@ grekw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -5937,6 +6250,8 @@ grekw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
+#' 
+#' par(par_)
 #' 
 #' }
 #'
@@ -6443,6 +6758,8 @@ rgkw <- function(n, alpha, beta, gamma, delta, lambda) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
+#' par_ <- par()
+#' 
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
@@ -6892,6 +7209,8 @@ rgkw <- function(n, alpha, beta, gamma, delta, lambda) {
 #'        bty = "n", cex = 0.8)
 #' grid(col = "gray90")
 #' 
+#' par(par_)
+#' 
 #' }
 #'
 #' @export
@@ -6982,6 +7301,8 @@ llgkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -7142,7 +7463,7 @@ llgkw <- function(par, data) {
 #' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
+#' par(mfrow = c(1,2), mar = c(4, 4, 3, 1))
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(beta),
 #'      main = "95% Confidence Region (Alpha vs Beta)", las = 1)
@@ -7205,7 +7526,10 @@ llgkw <- function(par, data) {
 #'        bty = "n")
 #' grid(col = "gray90")
 #' 
+#' par(par_)
+#' 
 #' }
+#' 
 #'
 #' @export
 grgkw <- function(par, data) {
@@ -7284,6 +7608,8 @@ grgkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(2323)
@@ -7593,6 +7919,8 @@ grgkw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
+#' 
+#' par(par_)
 #' 
 #' }
 #' @export
@@ -8170,6 +8498,8 @@ rkkw <- function(n, alpha, beta, delta, lambda) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
+#' par_ <- par()
+#' 
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
@@ -8525,6 +8855,9 @@ rkkw <- function(n, alpha, beta, delta, lambda) {
 #'        lwd = c(NA, NA, 2, 2.5, 3),
 #'        bty = "n", cex = 0.8)
 #' grid(col = "gray90")
+#' 
+#' par(par_)
+#' 
 #'}
 #'
 #' @export
@@ -8611,6 +8944,8 @@ llkkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -8789,6 +9124,9 @@ llkkw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
+#' 
+#' par(par_)
+#' 
 #'}
 #'
 #' @export
@@ -8868,6 +9206,8 @@ grkkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -9125,6 +9465,8 @@ grkkw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
+#' 
+#' par(par_)
 #' 
 #' }
 #' @export
@@ -9592,6 +9934,8 @@ rkw <- function(n, alpha, beta) {
 #' \donttest{
 #' ## Example 1: Maximum Likelihood Estimation with Analytical Gradient
 #' 
+#' par_ <- par()
+#' 
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
@@ -9954,7 +10298,7 @@ rkw <- function(n, alpha, beta) {
 #'        col = c("#8B0000", "#006400", "#2E4057"),
 #'        lwd = 2, lty = c(1, 2, 3), bty = "n")
 #' 
-#' par(mfrow = c(1, 1))
+#' par(par_)
 #' 
 #' }
 #'
@@ -10024,6 +10368,8 @@ llkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
+#' 
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -10211,6 +10557,8 @@ llkw <- function(par, data) {
 #' cat("Test statistic:", score_stat, "\n")
 #' cat("P-value:", format.pval(p_value, digits = 4), "\n")
 #' 
+#' par(par_)
+#' 
 #' }
 #' @export
 grkw <- function(par, data) {
@@ -10292,6 +10640,8 @@ grkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
+#'
+#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -10307,7 +10657,6 @@ grkw <- function(par, data) {
 #' # Check symmetry
 #' cat("\nSymmetry check (max |H - H^T|):",
 #'     max(abs(hess_true - t(hess_true))), "\n")
-#' 
 #' 
 #' ## Example 2: Hessian Properties at MLE
 #' 
@@ -10374,7 +10723,6 @@ grkw <- function(par, data) {
 #' )
 #' print(results, digits = 4)
 #' 
-#' 
 #' ## Example 4: Determinant and Trace Analysis
 #' 
 #' # Compute at different points
@@ -10413,7 +10761,6 @@ grkw <- function(par, data) {
 #' 
 #' cat("\nHessian Properties at Different Points:\n")
 #' print(hess_properties, digits = 4, row.names = FALSE)
-#' 
 #' 
 #' ## Example 5: Curvature Visualization
 #' 
@@ -10504,6 +10851,8 @@ grkw <- function(par, data) {
 #'        pch = c(19, 17, NA), lty = c(NA, NA, 1),
 #'        lwd = c(NA, NA, 2), bty = "n")
 #' grid(col = "gray90")
+#' 
+#' par(par_)
 #' 
 #' }
 #'
