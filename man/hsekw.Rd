@@ -62,8 +62,6 @@ evaluated at \eqn{\gamma=1, \delta=0}. The exact analytical formulas are impleme
 \donttest{
 ## Example 1: Basic Hessian Evaluation
 
-par_ <- par()
-
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -212,7 +210,6 @@ for (i in seq_along(alpha_grid)) {
 }
 
 # Plot
-par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 
 contour(alpha_grid, beta_grid, determinant_surface,
         xlab = expression(alpha), ylab = expression(beta),
@@ -229,10 +226,8 @@ contour(alpha_grid, beta_grid, trace_surface,
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
-par(mfrow = c(1,1))
 
 ## Example 6: Confidence Ellipse (Alpha vs Beta)
-par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 
 # Extract 2x2 submatrix for alpha and beta
 vcov_2d <- vcov_matrix[1:2, 1:2]
@@ -255,7 +250,7 @@ ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
 ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
 # Plot
-# par(mar = c(4, 4, 3, 1))
+
 plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(alpha), ylab = expression(beta),
      main = "95\% Confidence Ellipse (Alpha vs Beta)", las = 1)
@@ -297,7 +292,7 @@ ci_alpha_2 <- mle[1] + c(-1, 1) * 1.96 * se_2d_al[1]
 ci_lambda <- mle[3] + c(-1, 1) * 1.96 * se_2d_al[2]
 
 # Plot
-par(mar = c(4, 4, 3, 1))
+
 plot(ellipse_al[, 1], ellipse_al[, 2], type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(alpha), ylab = expression(lambda),
      main = "95\% Confidence Ellipse (Alpha vs Lambda)", las = 1)
@@ -339,7 +334,7 @@ ci_beta_2 <- mle[2] + c(-1, 1) * 1.96 * se_2d_bl[1]
 ci_lambda_2 <- mle[3] + c(-1, 1) * 1.96 * se_2d_bl[2]
 
 # Plot
-par(mar = c(4, 4, 3, 1))
+
 plot(ellipse_bl[, 1], ellipse_bl[, 2], type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(beta), ylab = expression(lambda),
      main = "95\% Confidence Ellipse (Beta vs Lambda)", las = 1)
@@ -359,8 +354,6 @@ legend("topright",
        lwd = c(NA, NA, 2, 1.5),
        bty = "n")
 grid(col = "gray90")
-
-par(par_)
 
 }
 

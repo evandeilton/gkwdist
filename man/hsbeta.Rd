@@ -60,8 +60,6 @@ The returned matrix is symmetric.
 \donttest{
 ## Example 1: Basic Hessian Evaluation
 
-par_ <- par()
-
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -214,7 +212,6 @@ for (i in seq_along(gamma_grid)) {
 }
 
 # Plot
-par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 
 contour(gamma_grid, delta_grid, determinant_surface,
         xlab = expression(gamma), ylab = expression(delta),
@@ -256,7 +253,7 @@ ci_gamma <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
 ci_delta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
 # Plot
-par(mar = c(4, 4, 3, 1))
+
 plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(gamma), ylab = expression(delta),
      main = "95\% Confidence Ellipse (Gamma vs Delta)", las = 1)
@@ -276,8 +273,6 @@ legend("topright",
        lwd = c(NA, NA, 2, 1.5),
        bty = "n")
 grid(col = "gray90")
-
-par(par_)
 
 }
 

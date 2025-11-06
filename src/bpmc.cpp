@@ -803,8 +803,6 @@ Rcpp::NumericVector rmc(
 //' \donttest{
 //' ## Example 1: Basic Log-Likelihood Evaluation
 //' 
-//' par_ <- par()
-//' 
 //' # Generate sample data with more stable parameters
 //' set.seed(123)
 //' n <- 1000
@@ -996,7 +994,6 @@ Rcpp::NumericVector rmc(
 //' threshold <- max(profile_ll_gamma) - chi_crit / 2
 //' 
 //' # Plot all profiles
-//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 //' 
 //' plot(gamma_grid, profile_ll_gamma, type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(gamma), ylab = "Profile Log-Likelihood",
@@ -1030,9 +1027,6 @@ Rcpp::NumericVector rmc(
 //'        col = c("#8B0000", "#006400", "#808080"),
 //'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 //' grid(col = "gray90")
-//' 
-//' par(mfrow = c(1, 1))
-//' 
 //' 
 //' ## Example 6: 2D Log-Likelihood Surfaces (All pairs side by side)
 //' 
@@ -1080,8 +1074,7 @@ Rcpp::NumericVector rmc(
 //' levels_95_gl <- max_ll_gl - qchisq(0.95, df = 2) / 2
 //' levels_95_dl <- max_ll_dl - qchisq(0.95, df = 2) / 2
 //' 
-//' # Plot all three surfaces side by side
-//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+//' # Plot 
 //' 
 //' # Gamma vs Delta
 //' contour(gamma_2d, delta_2d, ll_surface_gd,
@@ -1126,8 +1119,6 @@ Rcpp::NumericVector rmc(
 //'        lty = c(NA, NA, 1),
 //'        lwd = c(NA, NA, 2.5),
 //'        bty = "n", cex = 0.8)
-//' 
-//' par(par_)
 //' 
 //' }
 //'
@@ -1300,8 +1291,6 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 //' @examples
 //' \donttest{
 //' ## Example 1: Basic Examples
-//' 
-//' par_ <- par()
 //' 
 //' # Generate sample data with more stable parameters
 //' set.seed(123)
@@ -1476,8 +1465,7 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 //'   }
 //' }
 //' 
-//' # Plot all curvature surfaces side by side
-//' par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+//' # Plot 
 //' 
 //' # Determinant plots
 //' contour(gamma_grid, delta_grid, determinant_surface_gd,
@@ -1535,8 +1523,6 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 //'        pch = c(19, 17),
 //'        bty = "n", cex = 0.8)
 //' 
-//' par(mfrow = c(1, 1))
-//' 
 //' 
 //' ## Example 6: Confidence Ellipses (All pairs side by side)
 //' 
@@ -1589,8 +1575,7 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 //' ci_delta_dl <- mle[2] + c(-1, 1) * 1.96 * se_dl[1]
 //' ci_lambda_dl <- mle[3] + c(-1, 1) * 1.96 * se_dl[2]
 //' 
-//' # Plot all three ellipses side by side
-//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+//' # Plot 
 //' 
 //' # Gamma vs Delta
 //' plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
@@ -1632,8 +1617,6 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 //'        lty = c(NA, NA, 1, 3),
 //'        lwd = c(NA, NA, 2, 1.5),
 //'        bty = "n", cex = 0.8)
-//' 
-//' par(par_)
 //' 
 //' }
 //'
@@ -1838,8 +1821,6 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //' \donttest{
 //' ## Example 1: Basic Hessian Evaluation
 //' 
-//' par_ <- par()
-//' 
 //' # Generate sample data with more stable parameters
 //' set.seed(123)
 //' n <- 1000
@@ -2013,8 +1994,7 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //'   }
 //' }
 //' 
-//' # Plot all curvature surfaces side by side
-//' par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+//' # Plot 
 //' 
 //' # Determinant plots
 //' contour(gamma_grid, delta_grid, determinant_surface_gd,
@@ -2072,9 +2052,6 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //'        pch = c(19, 17),
 //'        bty = "n", cex = 0.8)
 //' 
-//' par(mfrow = c(1, 1))
-//' 
-//' 
 //' ## Example 6: Confidence Ellipses (All pairs side by side)
 //' 
 //' # Extract all 2x2 submatrices
@@ -2126,8 +2103,7 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //' ci_delta_dl <- mle[2] + c(-1, 1) * 1.96 * se_dl[1]
 //' ci_lambda_dl <- mle[3] + c(-1, 1) * 1.96 * se_dl[2]
 //' 
-//' # Plot all three ellipses side by side
-//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+//' # Plot
 //' 
 //' # Gamma vs Delta
 //' plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
@@ -2169,8 +2145,6 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //'        lty = c(NA, NA, 1, 3),
 //'        lwd = c(NA, NA, 2, 1.5),
 //'        bty = "n", cex = 0.8)
-//' 
-//' par(par_)
 //' 
 //' }
 //'

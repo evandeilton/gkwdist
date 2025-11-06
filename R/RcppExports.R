@@ -509,8 +509,6 @@ rbeta_ <- function(n, gamma, delta) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
-#' par_ <- par()
-#' 
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
@@ -689,8 +687,7 @@ rbeta_ <- function(n, gamma, delta) {
 #' chi_crit <- qchisq(0.95, df = 1)
 #' threshold <- max(profile_ll_gamma) - chi_crit / 2
 #' 
-#' # Plot all profiles
-#' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+#' # Plot 
 #' 
 #' plot(gamma_grid, profile_ll_gamma, type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(gamma), ylab = "Profile Log-Likelihood",
@@ -713,8 +710,6 @@ rbeta_ <- function(n, gamma, delta) {
 #'        col = c("#8B0000", "#006400", "#808080"),
 #'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 #' grid(col = "gray90")
-#' 
-#' par(mfrow = c(1, 1))
 #' 
 #' 
 #' ## Example 6: 2D Log-Likelihood Surface (Gamma vs Delta)
@@ -741,7 +736,7 @@ rbeta_ <- function(n, gamma, delta) {
 #' levels_99_gd <- max_ll_gd - qchisq(0.99, df = 2) / 2
 #' 
 #' # Plot contour
-#' par(mar = c(4, 4, 3, 1))
+#' 
 #' contour(gamma_2d, delta_2d, ll_surface_gd,
 #'         xlab = expression(gamma), ylab = expression(delta),
 #'         main = "2D Log-Likelihood: Gamma vs Delta",
@@ -765,8 +760,6 @@ rbeta_ <- function(n, gamma, delta) {
 #'        lwd = c(NA, NA, 2, 2.5, 3),
 #'        bty = "n", cex = 0.8)
 #' grid(col = "gray90")
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -842,8 +835,6 @@ llbeta <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
-#' 
-#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -999,7 +990,7 @@ llbeta <- function(par, data) {
 #' ci_delta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
+#'
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(gamma), ylab = expression(delta),
 #'      main = "95% Confidence Region (Gamma vs Delta)", las = 1)
@@ -1019,8 +1010,6 @@ llbeta <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -1101,8 +1090,6 @@ grbeta <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
-#' 
-#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -1256,7 +1243,6 @@ grbeta <- function(par, data) {
 #' }
 #' 
 #' # Plot
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 #' 
 #' contour(gamma_grid, delta_grid, determinant_surface,
 #'         xlab = expression(gamma), ylab = expression(delta),
@@ -1298,7 +1284,7 @@ grbeta <- function(par, data) {
 #' ci_delta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
+#'
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(gamma), ylab = expression(delta),
 #'      main = "95% Confidence Ellipse (Gamma vs Delta)", las = 1)
@@ -1318,8 +1304,6 @@ grbeta <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -1829,9 +1813,6 @@ rbkw <- function(n, alpha, beta, gamma, delta) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
-#' 
-#' par_ <- par()
-#' 
 #' # Generate sample data
 #' set.seed(2203)
 #' n <- 1000
@@ -2041,7 +2022,6 @@ rbkw <- function(n, alpha, beta, gamma, delta) {
 #' threshold <- max(profile_ll_alpha) - chi_crit / 2
 #' 
 #' # Plot all profiles
-#' par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
 #' 
 #' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
@@ -2086,8 +2066,6 @@ rbkw <- function(n, alpha, beta, gamma, delta) {
 #'        col = c("#8B0000", "#006400", "#808080"),
 #'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 #' grid(col = "gray90")
-#' 
-#' par(mfrow = c(1, 1))
 #' 
 #' 
 #' ## Example 6: 2D Log-Likelihood Surfaces (Selected pairs)
@@ -2138,8 +2116,7 @@ rbkw <- function(n, alpha, beta, gamma, delta) {
 #' levels_95_ag <- max_ll_ag - qchisq(0.95, df = 2) / 2
 #' levels_95_bd <- max_ll_bd - qchisq(0.95, df = 2) / 2
 #' 
-#' # Plot selected surfaces side by side
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+#' # Plot selected surfaces 
 #' 
 #' # Alpha vs Beta
 #' contour(alpha_2d, beta_2d, ll_surface_ab,
@@ -2184,8 +2161,6 @@ rbkw <- function(n, alpha, beta, gamma, delta) {
 #'        lty = c(NA, NA, 1),
 #'        lwd = c(NA, NA, 2.5),
 #'        bty = "n", cex = 0.8)
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -2276,9 +2251,6 @@ llbkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
-#' 
-#' par_ <- par()
-#' 
 #' # Generate sample data
 #' set.seed(2203)
 #' n <- 1000
@@ -2463,8 +2435,7 @@ llbkw <- function(par, data) {
 #' ci_beta_bd <- mle[2] + c(-1, 1) * 1.96 * se_bd[1]
 #' ci_delta_bd <- mle[4] + c(-1, 1) * 1.96 * se_bd[2]
 #' 
-#' # Plot selected ellipses side by side
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+#' # Plot selected ellipses
 #' 
 #' # Alpha vs Beta
 #' plot(ellipse_ab[, 1], ellipse_ab[, 2], type = "l", lwd = 2, col = "#2E4057",
@@ -2506,8 +2477,6 @@ llbkw <- function(par, data) {
 #'        lty = c(NA, NA, 1, 3),
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n", cex = 0.8)
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -2590,9 +2559,6 @@ grbkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
-#' 
-#' par_ <- par()
-#' 
 #' # Generate sample data
 #' set.seed(2203)
 #' n <- 1000
@@ -2771,7 +2737,6 @@ grbkw <- function(par, data) {
 #' }
 #' 
 #' # Plot selected curvature surfaces
-#' par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
 #' 
 #' # Determinant plots
 #' contour(alpha_grid, beta_grid, determinant_surface_ab,
@@ -2829,8 +2794,6 @@ grbkw <- function(par, data) {
 #'        pch = c(19, 17),
 #'        bty = "n", cex = 0.8)
 #' 
-#' par(mfrow = c(1, 1))
-#' 
 #' 
 #' ## Example 6: Confidence Ellipses (Selected pairs)
 #' 
@@ -2884,7 +2847,6 @@ grbkw <- function(par, data) {
 #' ci_delta_bd <- mle[4] + c(-1, 1) * 1.96 * se_bd[2]
 #' 
 #' # Plot selected ellipses side by side
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 #' 
 #' # Alpha vs Beta
 #' plot(ellipse_ab[, 1], ellipse_ab[, 2], type = "l", lwd = 2, col = "#2E4057",
@@ -2926,8 +2888,6 @@ grbkw <- function(par, data) {
 #'        lty = c(NA, NA, 1, 3),
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n", cex = 0.8)
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -3459,8 +3419,6 @@ rmc <- function(n, gamma, delta, lambda) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
-#' par_ <- par()
-#' 
 #' # Generate sample data with more stable parameters
 #' set.seed(123)
 #' n <- 1000
@@ -3652,7 +3610,6 @@ rmc <- function(n, gamma, delta, lambda) {
 #' threshold <- max(profile_ll_gamma) - chi_crit / 2
 #' 
 #' # Plot all profiles
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 #' 
 #' plot(gamma_grid, profile_ll_gamma, type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(gamma), ylab = "Profile Log-Likelihood",
@@ -3686,9 +3643,6 @@ rmc <- function(n, gamma, delta, lambda) {
 #'        col = c("#8B0000", "#006400", "#808080"),
 #'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 #' grid(col = "gray90")
-#' 
-#' par(mfrow = c(1, 1))
-#' 
 #' 
 #' ## Example 6: 2D Log-Likelihood Surfaces (All pairs side by side)
 #' 
@@ -3736,8 +3690,7 @@ rmc <- function(n, gamma, delta, lambda) {
 #' levels_95_gl <- max_ll_gl - qchisq(0.95, df = 2) / 2
 #' levels_95_dl <- max_ll_dl - qchisq(0.95, df = 2) / 2
 #' 
-#' # Plot all three surfaces side by side
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+#' # Plot 
 #' 
 #' # Gamma vs Delta
 #' contour(gamma_2d, delta_2d, ll_surface_gd,
@@ -3782,8 +3735,6 @@ rmc <- function(n, gamma, delta, lambda) {
 #'        lty = c(NA, NA, 1),
 #'        lwd = c(NA, NA, 2.5),
 #'        bty = "n", cex = 0.8)
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -3862,8 +3813,6 @@ llmc <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Examples
-#' 
-#' par_ <- par()
 #' 
 #' # Generate sample data with more stable parameters
 #' set.seed(123)
@@ -4038,8 +3987,7 @@ llmc <- function(par, data) {
 #'   }
 #' }
 #' 
-#' # Plot all curvature surfaces side by side
-#' par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+#' # Plot 
 #' 
 #' # Determinant plots
 #' contour(gamma_grid, delta_grid, determinant_surface_gd,
@@ -4097,8 +4045,6 @@ llmc <- function(par, data) {
 #'        pch = c(19, 17),
 #'        bty = "n", cex = 0.8)
 #' 
-#' par(mfrow = c(1, 1))
-#' 
 #' 
 #' ## Example 6: Confidence Ellipses (All pairs side by side)
 #' 
@@ -4151,8 +4097,7 @@ llmc <- function(par, data) {
 #' ci_delta_dl <- mle[2] + c(-1, 1) * 1.96 * se_dl[1]
 #' ci_lambda_dl <- mle[3] + c(-1, 1) * 1.96 * se_dl[2]
 #' 
-#' # Plot all three ellipses side by side
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+#' # Plot 
 #' 
 #' # Gamma vs Delta
 #' plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
@@ -4194,8 +4139,6 @@ llmc <- function(par, data) {
 #'        lty = c(NA, NA, 1, 3),
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n", cex = 0.8)
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -4291,8 +4234,6 @@ grmc <- function(par, data) {
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
 #' 
-#' par_ <- par()
-#' 
 #' # Generate sample data with more stable parameters
 #' set.seed(123)
 #' n <- 1000
@@ -4466,8 +4407,7 @@ grmc <- function(par, data) {
 #'   }
 #' }
 #' 
-#' # Plot all curvature surfaces side by side
-#' par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+#' # Plot 
 #' 
 #' # Determinant plots
 #' contour(gamma_grid, delta_grid, determinant_surface_gd,
@@ -4525,9 +4465,6 @@ grmc <- function(par, data) {
 #'        pch = c(19, 17),
 #'        bty = "n", cex = 0.8)
 #' 
-#' par(mfrow = c(1, 1))
-#' 
-#' 
 #' ## Example 6: Confidence Ellipses (All pairs side by side)
 #' 
 #' # Extract all 2x2 submatrices
@@ -4579,8 +4516,7 @@ grmc <- function(par, data) {
 #' ci_delta_dl <- mle[2] + c(-1, 1) * 1.96 * se_dl[1]
 #' ci_lambda_dl <- mle[3] + c(-1, 1) * 1.96 * se_dl[2]
 #' 
-#' # Plot all three ellipses side by side
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+#' # Plot
 #' 
 #' # Gamma vs Delta
 #' plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
@@ -4622,8 +4558,6 @@ grmc <- function(par, data) {
 #'        lty = c(NA, NA, 1, 3),
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n", cex = 0.8)
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -5138,8 +5072,6 @@ rekw <- function(n, alpha, beta, lambda) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
-#' par_ <- par()
-#' 
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
@@ -5331,7 +5263,6 @@ rekw <- function(n, alpha, beta, lambda) {
 #' threshold <- max(profile_ll_alpha) - chi_crit / 2
 #' 
 #' # Plot all profiles
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 #' 
 #' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
@@ -5366,12 +5297,8 @@ rekw <- function(n, alpha, beta, lambda) {
 #'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 #' grid(col = "gray90")
 #' 
-#' par(mfrow = c(1, 1))
-#' 
 #' 
 #' ## Example 6: 2D Log-Likelihood Surface (Alpha vs Beta)
-#' 
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 #' 
 #' # Create 2D grid
 #' alpha_2d <- seq(mle[1] - 0.8, mle[1] + 0.8, length.out = round(n/25))
@@ -5517,8 +5444,6 @@ rekw <- function(n, alpha, beta, lambda) {
 #'        bty = "n", cex = 0.8)
 #' grid(col = "gray90")
 #' 
-#' par(par_)
-#' 
 #' }
 #'
 #' @export
@@ -5603,8 +5528,6 @@ llekw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
-#' 
-#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -5760,7 +5683,7 @@ llekw <- function(par, data) {
 #' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 #' 
 #' # Plot
-#' par(mfrow = c(1,3), mar = c(4, 4, 3, 1))
+#' 
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(beta),
 #'      main = "95% Confidence Region (Alpha vs Beta)", las = 1)
@@ -5802,7 +5725,7 @@ llekw <- function(par, data) {
 #' ci_lambda <- mle[3] + c(-1, 1) * 1.96 * se_2d_al[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
+#' 
 #' plot(ellipse_al[, 1], ellipse_al[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(lambda),
 #'      main = "95% Confidence Region (Alpha vs Lambda)", las = 1)
@@ -5844,7 +5767,7 @@ llekw <- function(par, data) {
 #' ci_lambda_2 <- mle[3] + c(-1, 1) * 1.96 * se_2d_bl[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
+#'
 #' plot(ellipse_bl[, 1], ellipse_bl[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(beta), ylab = expression(lambda),
 #'      main = "95% Confidence Region (Beta vs Lambda)", las = 1)
@@ -5864,8 +5787,6 @@ llekw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -5952,8 +5873,6 @@ grekw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
-#' 
-#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -6103,8 +6022,7 @@ grekw <- function(par, data) {
 #' }
 #' 
 #' # Plot
-#' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
-#' 
+#'
 #' contour(alpha_grid, beta_grid, determinant_surface,
 #'         xlab = expression(alpha), ylab = expression(beta),
 #'         main = "Hessian Determinant", las = 1,
@@ -6120,10 +6038,8 @@ grekw <- function(par, data) {
 #' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 #' grid(col = "gray90")
-#' par(mfrow = c(1,1))
 #' 
 #' ## Example 6: Confidence Ellipse (Alpha vs Beta)
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 #' 
 #' # Extract 2x2 submatrix for alpha and beta
 #' vcov_2d <- vcov_matrix[1:2, 1:2]
@@ -6146,7 +6062,7 @@ grekw <- function(par, data) {
 #' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 #' 
 #' # Plot
-#' # par(mar = c(4, 4, 3, 1))
+#' 
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(beta),
 #'      main = "95% Confidence Ellipse (Alpha vs Beta)", las = 1)
@@ -6188,7 +6104,7 @@ grekw <- function(par, data) {
 #' ci_lambda <- mle[3] + c(-1, 1) * 1.96 * se_2d_al[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
+#' 
 #' plot(ellipse_al[, 1], ellipse_al[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(lambda),
 #'      main = "95% Confidence Ellipse (Alpha vs Lambda)", las = 1)
@@ -6230,7 +6146,7 @@ grekw <- function(par, data) {
 #' ci_lambda_2 <- mle[3] + c(-1, 1) * 1.96 * se_2d_bl[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
+#'
 #' plot(ellipse_bl[, 1], ellipse_bl[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(beta), ylab = expression(lambda),
 #'      main = "95% Confidence Ellipse (Beta vs Lambda)", las = 1)
@@ -6250,8 +6166,6 @@ grekw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -6758,8 +6672,6 @@ rgkw <- function(n, alpha, beta, gamma, delta, lambda) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
-#' par_ <- par()
-#' 
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
@@ -6998,7 +6910,6 @@ rgkw <- function(n, alpha, beta, gamma, delta, lambda) {
 #' threshold <- max(profile_ll_alpha) - chi_crit / 2
 #' 
 #' # Plot all profiles
-#' par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
 #' 
 #' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
@@ -7055,12 +6966,9 @@ rgkw <- function(n, alpha, beta, gamma, delta, lambda) {
 #'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
 #' grid(col = "gray90")
 #' 
-#' par(mfrow = c(1, 1))
-#' 
 #' 
 #' ## Example 6: 2D Log-Likelihood Surface (Alpha vs Beta)
 #' # Plot all profiles
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 #' 
 #' # Create 2D grid
 #' alpha_2d <- seq(mle[1] - xd, mle[1] + xd, length.out = round(n/4))
@@ -7209,8 +7117,6 @@ rgkw <- function(n, alpha, beta, gamma, delta, lambda) {
 #'        bty = "n", cex = 0.8)
 #' grid(col = "gray90")
 #' 
-#' par(par_)
-#' 
 #' }
 #'
 #' @export
@@ -7302,7 +7208,6 @@ llgkw <- function(par, data) {
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
 #' 
-#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -7463,7 +7368,6 @@ llgkw <- function(par, data) {
 #' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 #' 
 #' # Plot
-#' par(mfrow = c(1,2), mar = c(4, 4, 3, 1))
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(beta),
 #'      main = "95% Confidence Region (Alpha vs Beta)", las = 1)
@@ -7505,7 +7409,6 @@ llgkw <- function(par, data) {
 #' ci_delta <- mle[4] + c(-1, 1) * 1.96 * se_2d_gd[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
 #' plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(gamma), ylab = expression(delta),
 #'      main = "95% Confidence Region (Gamma vs Delta)", las = 1)
@@ -7525,8 +7428,6 @@ llgkw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
-#' 
-#' par(par_)
 #' 
 #' }
 #' 
@@ -7608,8 +7509,6 @@ grgkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
-#' 
-#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(2323)
@@ -7771,7 +7670,6 @@ grgkw <- function(par, data) {
 #' }
 #' 
 #' # Plot
-#' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 #' 
 #' contour(alpha_grid, beta_grid, determinant_surface,
 #'         xlab = expression(alpha), ylab = expression(beta),
@@ -7788,8 +7686,6 @@ grgkw <- function(par, data) {
 #' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 #' grid(col = "gray90")
-#' 
-#' par(mfrow = c(1, 1))
 #' 
 #' 
 #' ## Example 6: Confidence Ellipse (Alpha vs Beta)
@@ -7815,7 +7711,6 @@ grgkw <- function(par, data) {
 #' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 #' 
 #' # Plot
-#' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(beta),
 #'      main = "95% Confidence Ellipse (Alpha vs Beta)", las = 1)
@@ -7857,7 +7752,6 @@ grgkw <- function(par, data) {
 #' ci_delta <- mle[4] + c(-1, 1) * 1.96 * se_2d_gd[2]
 #' 
 #' # Plot
-#' # par(mar = c(4, 4, 3, 1))
 #' plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(gamma), ylab = expression(delta),
 #'      main = "95% Confidence Ellipse (Gamma vs Delta)", las = 1)
@@ -7899,7 +7793,6 @@ grgkw <- function(par, data) {
 #' ci_lambda <- mle[5] + c(-1, 1) * 1.96 * se_2d_dl[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
 #' plot(ellipse_dl[, 1], ellipse_dl[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(delta), ylab = expression(lambda),
 #'      main = "95% Confidence Ellipse (Delta vs Lambda)", las = 1)
@@ -7919,8 +7812,6 @@ grgkw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
-#' 
-#' par(par_)
 #' 
 #' }
 #' @export
@@ -8498,8 +8389,6 @@ rkkw <- function(n, alpha, beta, delta, lambda) {
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
 #' 
-#' par_ <- par()
-#' 
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
@@ -8708,7 +8597,6 @@ rkkw <- function(n, alpha, beta, delta, lambda) {
 #' threshold <- max(profile_ll_alpha) - chi_crit / 2
 #' 
 #' # Plot all profiles
-#' par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
 #' 
 #' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
@@ -8754,12 +8642,7 @@ rkkw <- function(n, alpha, beta, delta, lambda) {
 #'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.7)
 #' grid(col = "gray90")
 #' 
-#' par(mfrow = c(1, 1))
-#' 
-#' 
 #' ## Example 6: 2D Log-Likelihood Surface (Alpha vs Beta)
-#' 
-#' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 #' 
 #' # Create 2D grid
 #' alpha_2d <- seq(mle[1] - 0.8, mle[1] + 0.8, length.out = round(n/25))
@@ -8855,9 +8738,6 @@ rkkw <- function(n, alpha, beta, delta, lambda) {
 #'        lwd = c(NA, NA, 2, 2.5, 3),
 #'        bty = "n", cex = 0.8)
 #' grid(col = "gray90")
-#' 
-#' par(par_)
-#' 
 #'}
 #'
 #' @export
@@ -8944,8 +8824,6 @@ llkkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
-#' 
-#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -9104,7 +8982,6 @@ llkkw <- function(par, data) {
 #' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(beta),
 #'      main = "95% Confidence Region (Alpha vs Beta)", las = 1)
@@ -9124,9 +9001,6 @@ llkkw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
-#' 
-#' par(par_)
-#' 
 #'}
 #'
 #' @export
@@ -9206,8 +9080,6 @@ grkkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
-#' 
-#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -9359,7 +9231,6 @@ grkkw <- function(par, data) {
 #' }
 #' 
 #' # Plot
-#' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 #' 
 #' contour(alpha_grid, beta_grid, determinant_surface,
 #'         xlab = expression(alpha), ylab = expression(beta),
@@ -9376,9 +9247,6 @@ grkkw <- function(par, data) {
 #' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 #' grid(col = "gray90")
-#' 
-#' par(mfrow = c(1, 1))
-#' 
 #' 
 #' ## Example 6: Confidence Ellipse (Alpha vs Beta)
 #' 
@@ -9403,7 +9271,6 @@ grkkw <- function(par, data) {
 #' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(beta),
 #'      main = "95% Confidence Ellipse (Alpha vs Beta)", las = 1)
@@ -9445,7 +9312,6 @@ grkkw <- function(par, data) {
 #' ci_lambda <- mle[4] + c(-1, 1) * 1.96 * se_2d_dl[2]
 #' 
 #' # Plot
-#' par(mar = c(4, 4, 3, 1))
 #' plot(ellipse_dl[, 1], ellipse_dl[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(delta), ylab = expression(lambda),
 #'      main = "95% Confidence Ellipse (Delta vs Lambda)", las = 1)
@@ -9465,8 +9331,6 @@ grkkw <- function(par, data) {
 #'        lwd = c(NA, NA, 2, 1.5),
 #'        bty = "n")
 #' grid(col = "gray90")
-#' 
-#' par(par_)
 #' 
 #' }
 #' @export
@@ -9934,8 +9798,6 @@ rkw <- function(n, alpha, beta) {
 #' \donttest{
 #' ## Example 1: Maximum Likelihood Estimation with Analytical Gradient
 #' 
-#' par_ <- par()
-#' 
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
@@ -10105,8 +9967,7 @@ rkw <- function(n, alpha, beta) {
 #' chi_crit <- qchisq(0.95, df = 1)
 #' threshold <- max(profile_ll_alpha) - chi_crit / 2
 #' 
-#' # Plot side by side
-#' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+#' # Plot 
 #' 
 #' # Profile for alpha
 #' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
@@ -10133,8 +9994,6 @@ rkw <- function(n, alpha, beta) {
 #'        col = c("#8B0000", "#006400", "#808080"),
 #'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 #' grid(col = "gray90")
-#' 
-#' par(mfrow = c(1, 1))
 #' 
 #' ## Example 7: 2D Profile Likelihood Surface
 #' 
@@ -10188,8 +10047,6 @@ rkw <- function(n, alpha, beta) {
 #' 
 #' ## Example 8: Combined View - Profiles with 2D Surface
 #' 
-#' par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
-#' 
 #' # Top left: Profile for alpha
 #' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
@@ -10220,7 +10077,6 @@ rkw <- function(n, alpha, beta) {
 #' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 #' grid(col = "gray90")
-#' par(mfrow = c(1, 1))
 #' 
 #' ## Example 9: Numerical Gradient Verification
 #' 
@@ -10276,7 +10132,6 @@ rkw <- function(n, alpha, beta) {
 #' print(t(boot_ci), digits = 4)
 #' 
 #' # Plot bootstrap distributions
-#' par(mfrow = c(1, 2))
 #' 
 #' hist(boot_estimates[, 1], breaks = 20, col = "#87CEEB", border = "white",
 #'      main = expression(paste("Bootstrap: ", hat(alpha))),
@@ -10297,8 +10152,6 @@ rkw <- function(n, alpha, beta) {
 #' legend("topright", legend = c("MLE", "True", "95% CI"),
 #'        col = c("#8B0000", "#006400", "#2E4057"),
 #'        lwd = 2, lty = c(1, 2, 3), bty = "n")
-#' 
-#' par(par_)
 #' 
 #' }
 #'
@@ -10368,8 +10221,6 @@ llkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
-#' 
-#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -10513,7 +10364,7 @@ llkw <- function(par, data) {
 #' }
 #' 
 #' # Plot gradient field
-#' par(mar = c(4, 4, 3, 1))
+#' 
 #' plot(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5,
 #'      xlim = range(alpha_grid), ylim = range(beta_grid),
 #'      xlab = expression(alpha), ylab = expression(beta),
@@ -10556,8 +10407,6 @@ llkw <- function(par, data) {
 #' cat("Score vector:", score_theta0, "\n")
 #' cat("Test statistic:", score_stat, "\n")
 #' cat("P-value:", format.pval(p_value, digits = 4), "\n")
-#' 
-#' par(par_)
 #' 
 #' }
 #' @export
@@ -10640,8 +10489,6 @@ grkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
-#'
-#' par_ <- par()
 #' 
 #' # Generate sample data
 #' set.seed(123)
@@ -10785,7 +10632,6 @@ grkw <- function(par, data) {
 #' }
 #' 
 #' # Plot
-#' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 #' 
 #' contour(alpha_grid, beta_grid, determinant_surface,
 #'         xlab = expression(alpha), ylab = expression(beta),
@@ -10802,9 +10648,6 @@ grkw <- function(par, data) {
 #' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 #' grid(col = "gray90")
-#' 
-#' par(mfrow = c(1, 1))
-#' 
 #' 
 #' ## Example 6: Fisher Information and Asymptotic Efficiency
 #' 
@@ -10839,7 +10682,7 @@ grkw <- function(par, data) {
 #' }
 #' 
 #' # Plot confidence ellipse
-#' par(mar = c(4, 4, 3, 1))
+#' 
 #' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 #'      xlab = expression(alpha), ylab = expression(beta),
 #'      main = "95% Confidence Ellipse", las = 1)
@@ -10851,8 +10694,6 @@ grkw <- function(par, data) {
 #'        pch = c(19, 17, NA), lty = c(NA, NA, 1),
 #'        lwd = c(NA, NA, 2), bty = "n")
 #' grid(col = "gray90")
-#' 
-#' par(par_)
 #' 
 #' }
 #'

@@ -732,8 +732,6 @@ Rcpp::NumericVector rbeta_(
 //' \donttest{
 //' ## Example 1: Basic Log-Likelihood Evaluation
 //' 
-//' par_ <- par()
-//' 
 //' # Generate sample data
 //' set.seed(123)
 //' n <- 1000
@@ -912,8 +910,7 @@ Rcpp::NumericVector rbeta_(
 //' chi_crit <- qchisq(0.95, df = 1)
 //' threshold <- max(profile_ll_gamma) - chi_crit / 2
 //' 
-//' # Plot all profiles
-//' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+//' # Plot 
 //' 
 //' plot(gamma_grid, profile_ll_gamma, type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(gamma), ylab = "Profile Log-Likelihood",
@@ -936,8 +933,6 @@ Rcpp::NumericVector rbeta_(
 //'        col = c("#8B0000", "#006400", "#808080"),
 //'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 //' grid(col = "gray90")
-//' 
-//' par(mfrow = c(1, 1))
 //' 
 //' 
 //' ## Example 6: 2D Log-Likelihood Surface (Gamma vs Delta)
@@ -964,7 +959,7 @@ Rcpp::NumericVector rbeta_(
 //' levels_99_gd <- max_ll_gd - qchisq(0.99, df = 2) / 2
 //' 
 //' # Plot contour
-//' par(mar = c(4, 4, 3, 1))
+//' 
 //' contour(gamma_2d, delta_2d, ll_surface_gd,
 //'         xlab = expression(gamma), ylab = expression(delta),
 //'         main = "2D Log-Likelihood: Gamma vs Delta",
@@ -988,8 +983,6 @@ Rcpp::NumericVector rbeta_(
 //'        lwd = c(NA, NA, 2, 2.5, 3),
 //'        bty = "n", cex = 0.8)
 //' grid(col = "gray90")
-//' 
-//' par(par_)
 //' 
 //' }
 //'
@@ -1103,8 +1096,6 @@ double llbeta(const Rcpp::NumericVector& par,
 //' @examples
 //' \donttest{
 //' ## Example 1: Basic Gradient Evaluation
-//' 
-//' par_ <- par()
 //' 
 //' # Generate sample data
 //' set.seed(123)
@@ -1260,7 +1251,7 @@ double llbeta(const Rcpp::NumericVector& par,
 //' ci_delta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 //' 
 //' # Plot
-//' par(mar = c(4, 4, 3, 1))
+//'
 //' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(gamma), ylab = expression(delta),
 //'      main = "95% Confidence Region (Gamma vs Delta)", las = 1)
@@ -1280,8 +1271,6 @@ double llbeta(const Rcpp::NumericVector& par,
 //'        lwd = c(NA, NA, 2, 1.5),
 //'        bty = "n")
 //' grid(col = "gray90")
-//' 
-//' par(par_)
 //' 
 //' }
 //'
@@ -1405,8 +1394,6 @@ Rcpp::NumericVector grbeta(const Rcpp::NumericVector& par,
 //' @examples
 //' \donttest{
 //' ## Example 1: Basic Hessian Evaluation
-//' 
-//' par_ <- par()
 //' 
 //' # Generate sample data
 //' set.seed(123)
@@ -1560,7 +1547,6 @@ Rcpp::NumericVector grbeta(const Rcpp::NumericVector& par,
 //' }
 //' 
 //' # Plot
-//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 //' 
 //' contour(gamma_grid, delta_grid, determinant_surface,
 //'         xlab = expression(gamma), ylab = expression(delta),
@@ -1602,7 +1588,7 @@ Rcpp::NumericVector grbeta(const Rcpp::NumericVector& par,
 //' ci_delta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 //' 
 //' # Plot
-//' par(mar = c(4, 4, 3, 1))
+//'
 //' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(gamma), ylab = expression(delta),
 //'      main = "95% Confidence Ellipse (Gamma vs Delta)", las = 1)
@@ -1622,8 +1608,6 @@ Rcpp::NumericVector grbeta(const Rcpp::NumericVector& par,
 //'        lwd = c(NA, NA, 2, 1.5),
 //'        bty = "n")
 //' grid(col = "gray90")
-//' 
-//' par(par_)
 //' 
 //' }
 //'

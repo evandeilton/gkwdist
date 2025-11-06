@@ -58,8 +58,6 @@ close to 0 or 1 accurately.
 \donttest{
 ## Example 1: Basic Log-Likelihood Evaluation
 
-par_ <- par()
-
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -298,7 +296,6 @@ chi_crit <- qchisq(0.95, df = 1)
 threshold <- max(profile_ll_alpha) - chi_crit / 2
 
 # Plot all profiles
-par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
 
 plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
@@ -355,12 +352,9 @@ legend("topright", legend = c("MLE", "True", "95\% CI"),
        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
 grid(col = "gray90")
 
-par(mfrow = c(1, 1))
-
 
 ## Example 6: 2D Log-Likelihood Surface (Alpha vs Beta)
 # Plot all profiles
-par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 
 # Create 2D grid
 alpha_2d <- seq(mle[1] - xd, mle[1] + xd, length.out = round(n/4))
@@ -508,8 +502,6 @@ legend("topright",
        lwd = c(NA, NA, 2, 2.5, 3),
        bty = "n", cex = 0.8)
 grid(col = "gray90")
-
-par(par_)
 
 }
 

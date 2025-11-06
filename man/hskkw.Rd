@@ -63,8 +63,6 @@ evaluated at \eqn{\gamma=1}. The exact analytical formulas are implemented direc
 \donttest{
 ## Example 1: Basic Hessian Evaluation
 
-par_ <- par()
-
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -215,7 +213,6 @@ for (i in seq_along(alpha_grid)) {
 }
 
 # Plot
-par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 
 contour(alpha_grid, beta_grid, determinant_surface,
         xlab = expression(alpha), ylab = expression(beta),
@@ -232,9 +229,6 @@ contour(alpha_grid, beta_grid, trace_surface,
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
-
-par(mfrow = c(1, 1))
-
 
 ## Example 6: Confidence Ellipse (Alpha vs Beta)
 
@@ -259,7 +253,6 @@ ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
 ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
 # Plot
-par(mar = c(4, 4, 3, 1))
 plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(alpha), ylab = expression(beta),
      main = "95\% Confidence Ellipse (Alpha vs Beta)", las = 1)
@@ -301,7 +294,6 @@ ci_delta <- mle[3] + c(-1, 1) * 1.96 * se_2d_dl[1]
 ci_lambda <- mle[4] + c(-1, 1) * 1.96 * se_2d_dl[2]
 
 # Plot
-par(mar = c(4, 4, 3, 1))
 plot(ellipse_dl[, 1], ellipse_dl[, 2], type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(delta), ylab = expression(lambda),
      main = "95\% Confidence Ellipse (Delta vs Lambda)", las = 1)
@@ -321,8 +313,6 @@ legend("topright",
        lwd = c(NA, NA, 2, 1.5),
        bty = "n")
 grid(col = "gray90")
-
-par(par_)
 
 }
 }

@@ -48,8 +48,6 @@ It is equivalent to the negative log-likelihood of the GKw distribution
 \donttest{
 ## Example 1: Maximum Likelihood Estimation with Analytical Gradient
 
-par_ <- par()
-
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -219,8 +217,7 @@ for (i in seq_along(beta_grid)) {
 chi_crit <- qchisq(0.95, df = 1)
 threshold <- max(profile_ll_alpha) - chi_crit / 2
 
-# Plot side by side
-par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+# Plot 
 
 # Profile for alpha
 plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
@@ -247,8 +244,6 @@ legend("topright",
        col = c("#8B0000", "#006400", "#808080"),
        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 grid(col = "gray90")
-
-par(mfrow = c(1, 1))
 
 ## Example 7: 2D Profile Likelihood Surface
 
@@ -302,8 +297,6 @@ grid(col = "gray90")
 
 ## Example 8: Combined View - Profiles with 2D Surface
 
-par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
-
 # Top left: Profile for alpha
 plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
@@ -334,7 +327,6 @@ contour(alpha_2d, beta_2d, ll_surface,
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
-par(mfrow = c(1, 1))
 
 ## Example 9: Numerical Gradient Verification
 
@@ -390,7 +382,6 @@ colnames(boot_ci) <- c("alpha", "beta")
 print(t(boot_ci), digits = 4)
 
 # Plot bootstrap distributions
-par(mfrow = c(1, 2))
 
 hist(boot_estimates[, 1], breaks = 20, col = "#87CEEB", border = "white",
      main = expression(paste("Bootstrap: ", hat(alpha))),
@@ -411,8 +402,6 @@ abline(v = boot_ci[, 2], col = "#2E4057", lwd = 2, lty = 3)
 legend("topright", legend = c("MLE", "True", "95\% CI"),
        col = c("#8B0000", "#006400", "#2E4057"),
        lwd = 2, lty = c(1, 2, 3), bty = "n")
-
-par(par_)
 
 }
 

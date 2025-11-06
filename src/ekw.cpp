@@ -824,8 +824,6 @@ Rcpp::NumericVector rekw(
 //' \donttest{
 //' ## Example 1: Basic Log-Likelihood Evaluation
 //' 
-//' par_ <- par()
-//' 
 //' # Generate sample data
 //' set.seed(123)
 //' n <- 1000
@@ -1017,7 +1015,6 @@ Rcpp::NumericVector rekw(
 //' threshold <- max(profile_ll_alpha) - chi_crit / 2
 //' 
 //' # Plot all profiles
-//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 //' 
 //' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
@@ -1052,12 +1049,8 @@ Rcpp::NumericVector rekw(
 //'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 //' grid(col = "gray90")
 //' 
-//' par(mfrow = c(1, 1))
-//' 
 //' 
 //' ## Example 6: 2D Log-Likelihood Surface (Alpha vs Beta)
-//' 
-//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 //' 
 //' # Create 2D grid
 //' alpha_2d <- seq(mle[1] - 0.8, mle[1] + 0.8, length.out = round(n/25))
@@ -1202,8 +1195,6 @@ Rcpp::NumericVector rekw(
 //'        lwd = c(NA, NA, 2, 2.5, 3),
 //'        bty = "n", cex = 0.8)
 //' grid(col = "gray90")
-//' 
-//' par(par_)
 //' 
 //' }
 //'
@@ -1405,8 +1396,6 @@ double llekw(const Rcpp::NumericVector& par,
 //' \donttest{
 //' ## Example 1: Basic Gradient Evaluation
 //' 
-//' par_ <- par()
-//' 
 //' # Generate sample data
 //' set.seed(123)
 //' n <- 1000
@@ -1561,7 +1550,7 @@ double llekw(const Rcpp::NumericVector& par,
 //' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 //' 
 //' # Plot
-//' par(mfrow = c(1,3), mar = c(4, 4, 3, 1))
+//' 
 //' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(alpha), ylab = expression(beta),
 //'      main = "95% Confidence Region (Alpha vs Beta)", las = 1)
@@ -1603,7 +1592,7 @@ double llekw(const Rcpp::NumericVector& par,
 //' ci_lambda <- mle[3] + c(-1, 1) * 1.96 * se_2d_al[2]
 //' 
 //' # Plot
-//' par(mar = c(4, 4, 3, 1))
+//' 
 //' plot(ellipse_al[, 1], ellipse_al[, 2], type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(alpha), ylab = expression(lambda),
 //'      main = "95% Confidence Region (Alpha vs Lambda)", las = 1)
@@ -1645,7 +1634,7 @@ double llekw(const Rcpp::NumericVector& par,
 //' ci_lambda_2 <- mle[3] + c(-1, 1) * 1.96 * se_2d_bl[2]
 //' 
 //' # Plot
-//' par(mar = c(4, 4, 3, 1))
+//'
 //' plot(ellipse_bl[, 1], ellipse_bl[, 2], type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(beta), ylab = expression(lambda),
 //'      main = "95% Confidence Region (Beta vs Lambda)", las = 1)
@@ -1665,8 +1654,6 @@ double llekw(const Rcpp::NumericVector& par,
 //'        lwd = c(NA, NA, 2, 1.5),
 //'        bty = "n")
 //' grid(col = "gray90")
-//' 
-//' par(par_)
 //' 
 //' }
 //'
@@ -1883,8 +1870,6 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 //' \donttest{
 //' ## Example 1: Basic Hessian Evaluation
 //' 
-//' par_ <- par()
-//' 
 //' # Generate sample data
 //' set.seed(123)
 //' n <- 1000
@@ -2033,8 +2018,7 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 //' }
 //' 
 //' # Plot
-//' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
-//' 
+//'
 //' contour(alpha_grid, beta_grid, determinant_surface,
 //'         xlab = expression(alpha), ylab = expression(beta),
 //'         main = "Hessian Determinant", las = 1,
@@ -2050,10 +2034,8 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 //' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 //' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 //' grid(col = "gray90")
-//' par(mfrow = c(1,1))
 //' 
 //' ## Example 6: Confidence Ellipse (Alpha vs Beta)
-//' par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 //' 
 //' # Extract 2x2 submatrix for alpha and beta
 //' vcov_2d <- vcov_matrix[1:2, 1:2]
@@ -2076,7 +2058,7 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 //' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 //' 
 //' # Plot
-//' # par(mar = c(4, 4, 3, 1))
+//' 
 //' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(alpha), ylab = expression(beta),
 //'      main = "95% Confidence Ellipse (Alpha vs Beta)", las = 1)
@@ -2118,7 +2100,7 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 //' ci_lambda <- mle[3] + c(-1, 1) * 1.96 * se_2d_al[2]
 //' 
 //' # Plot
-//' par(mar = c(4, 4, 3, 1))
+//' 
 //' plot(ellipse_al[, 1], ellipse_al[, 2], type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(alpha), ylab = expression(lambda),
 //'      main = "95% Confidence Ellipse (Alpha vs Lambda)", las = 1)
@@ -2160,7 +2142,7 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 //' ci_lambda_2 <- mle[3] + c(-1, 1) * 1.96 * se_2d_bl[2]
 //' 
 //' # Plot
-//' par(mar = c(4, 4, 3, 1))
+//'
 //' plot(ellipse_bl[, 1], ellipse_bl[, 2], type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(beta), ylab = expression(lambda),
 //'      main = "95% Confidence Ellipse (Beta vs Lambda)", las = 1)
@@ -2180,8 +2162,6 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 //'        lwd = c(NA, NA, 2, 1.5),
 //'        bty = "n")
 //' grid(col = "gray90")
-//' 
-//' par(par_)
 //' 
 //' }
 //'

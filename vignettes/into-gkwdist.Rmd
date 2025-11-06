@@ -108,8 +108,6 @@ random_sample <- rkw(1000, alpha, beta)
 
 ## Visualization
 ```{r plot_basic, fig.height=6, fig.width=7}
-par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
-
 # PDF
 plot(x, density,
   type = "l", lwd = 2, col = "#2E4057",
@@ -145,8 +143,6 @@ plot(theoretical_q, empirical_q,
 )
 abline(0, 1, col = "#8B0000", lwd = 2, lty = 2)
 grid(col = "gray90")
-
-par(mfrow = c(1, 1))
 ```
 
 ---
@@ -387,7 +383,6 @@ for (i in seq_along(alpha_grid)) {
 }
 
 # Plot
-par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 
 # Profile likelihood
 chi_crit <- qchisq(0.95, df = 1)
@@ -434,8 +429,6 @@ legend("topright",
   lwd = c(NA, 2, 3, 3), bty = "n", cex = 0.8
 )
 grid(col = "gray90")
-
-par(mfrow = c(1, 1))
 ```
 
 ## Confidence Regions

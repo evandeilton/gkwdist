@@ -69,9 +69,6 @@ Numerical stability is maintained through careful implementation.
 \examples{
 \donttest{
 ## Example 1: Basic Gradient Evaluation
-
-par_ <- par()
-
 # Generate sample data
 set.seed(2203)
 n <- 1000
@@ -256,8 +253,7 @@ se_bd <- sqrt(diag(vcov_bd))
 ci_beta_bd <- mle[2] + c(-1, 1) * 1.96 * se_bd[1]
 ci_delta_bd <- mle[4] + c(-1, 1) * 1.96 * se_bd[2]
 
-# Plot selected ellipses side by side
-par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+# Plot selected ellipses
 
 # Alpha vs Beta
 plot(ellipse_ab[, 1], ellipse_ab[, 2], type = "l", lwd = 2, col = "#2E4057",
@@ -299,8 +295,6 @@ legend("topright",
        lty = c(NA, NA, 1, 3),
        lwd = c(NA, NA, 2, 1.5),
        bty = "n", cex = 0.8)
-
-par(par_)
 
 }
 

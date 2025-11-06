@@ -731,8 +731,6 @@ Rcpp::NumericVector rkw(
 //' \donttest{
 //' ## Example 1: Maximum Likelihood Estimation with Analytical Gradient
 //' 
-//' par_ <- par()
-//' 
 //' # Generate sample data
 //' set.seed(123)
 //' n <- 1000
@@ -902,8 +900,7 @@ Rcpp::NumericVector rkw(
 //' chi_crit <- qchisq(0.95, df = 1)
 //' threshold <- max(profile_ll_alpha) - chi_crit / 2
 //' 
-//' # Plot side by side
-//' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+//' # Plot 
 //' 
 //' # Profile for alpha
 //' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
@@ -930,8 +927,6 @@ Rcpp::NumericVector rkw(
 //'        col = c("#8B0000", "#006400", "#808080"),
 //'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 //' grid(col = "gray90")
-//' 
-//' par(mfrow = c(1, 1))
 //' 
 //' ## Example 7: 2D Profile Likelihood Surface
 //' 
@@ -985,8 +980,6 @@ Rcpp::NumericVector rkw(
 //' 
 //' ## Example 8: Combined View - Profiles with 2D Surface
 //' 
-//' par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
-//' 
 //' # Top left: Profile for alpha
 //' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
@@ -1017,7 +1010,6 @@ Rcpp::NumericVector rkw(
 //' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 //' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 //' grid(col = "gray90")
-//' par(mfrow = c(1, 1))
 //' 
 //' ## Example 9: Numerical Gradient Verification
 //' 
@@ -1073,7 +1065,6 @@ Rcpp::NumericVector rkw(
 //' print(t(boot_ci), digits = 4)
 //' 
 //' # Plot bootstrap distributions
-//' par(mfrow = c(1, 2))
 //' 
 //' hist(boot_estimates[, 1], breaks = 20, col = "#87CEEB", border = "white",
 //'      main = expression(paste("Bootstrap: ", hat(alpha))),
@@ -1094,8 +1085,6 @@ Rcpp::NumericVector rkw(
 //' legend("topright", legend = c("MLE", "True", "95% CI"),
 //'        col = c("#8B0000", "#006400", "#2E4057"),
 //'        lwd = 2, lty = c(1, 2, 3), bty = "n")
-//' 
-//' par(par_)
 //' 
 //' }
 //'
@@ -1202,8 +1191,6 @@ double llkw(const Rcpp::NumericVector& par,
 //' @examples
 //' \donttest{
 //' ## Example 1: Basic Gradient Evaluation
-//' 
-//' par_ <- par()
 //' 
 //' # Generate sample data
 //' set.seed(123)
@@ -1347,7 +1334,7 @@ double llkw(const Rcpp::NumericVector& par,
 //' }
 //' 
 //' # Plot gradient field
-//' par(mar = c(4, 4, 3, 1))
+//' 
 //' plot(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5,
 //'      xlim = range(alpha_grid), ylim = range(beta_grid),
 //'      xlab = expression(alpha), ylab = expression(beta),
@@ -1390,8 +1377,6 @@ double llkw(const Rcpp::NumericVector& par,
 //' cat("Score vector:", score_theta0, "\n")
 //' cat("Test statistic:", score_stat, "\n")
 //' cat("P-value:", format.pval(p_value, digits = 4), "\n")
-//' 
-//' par(par_)
 //' 
 //' }
 //' @export
@@ -1531,8 +1516,6 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //' @examples
 //' \donttest{
 //' ## Example 1: Basic Hessian Evaluation
-//'
-//' par_ <- par()
 //' 
 //' # Generate sample data
 //' set.seed(123)
@@ -1676,7 +1659,6 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //' }
 //' 
 //' # Plot
-//' par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 //' 
 //' contour(alpha_grid, beta_grid, determinant_surface,
 //'         xlab = expression(alpha), ylab = expression(beta),
@@ -1693,9 +1675,6 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 //' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 //' grid(col = "gray90")
-//' 
-//' par(mfrow = c(1, 1))
-//' 
 //' 
 //' ## Example 6: Fisher Information and Asymptotic Efficiency
 //' 
@@ -1730,7 +1709,7 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //' }
 //' 
 //' # Plot confidence ellipse
-//' par(mar = c(4, 4, 3, 1))
+//' 
 //' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
 //'      xlab = expression(alpha), ylab = expression(beta),
 //'      main = "95% Confidence Ellipse", las = 1)
@@ -1742,8 +1721,6 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
 //'        pch = c(19, 17, NA), lty = c(NA, NA, 1),
 //'        lwd = c(NA, NA, 2), bty = "n")
 //' grid(col = "gray90")
-//' 
-//' par(par_)
 //' 
 //' }
 //'

@@ -74,8 +74,6 @@ The returned matrix is symmetric, with rows/columns corresponding to
 \donttest{
 ## Example 1: Basic Hessian Evaluation
 
-par_ <- par()
-
 # Generate sample data with more stable parameters
 set.seed(123)
 n <- 1000
@@ -249,8 +247,7 @@ for (i in seq_along(delta_grid)) {
   }
 }
 
-# Plot all curvature surfaces side by side
-par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+# Plot 
 
 # Determinant plots
 contour(gamma_grid, delta_grid, determinant_surface_gd,
@@ -308,9 +305,6 @@ legend("topright",
        pch = c(19, 17),
        bty = "n", cex = 0.8)
 
-par(mfrow = c(1, 1))
-
-
 ## Example 6: Confidence Ellipses (All pairs side by side)
 
 # Extract all 2x2 submatrices
@@ -362,8 +356,7 @@ se_dl <- sqrt(diag(vcov_dl))
 ci_delta_dl <- mle[2] + c(-1, 1) * 1.96 * se_dl[1]
 ci_lambda_dl <- mle[3] + c(-1, 1) * 1.96 * se_dl[2]
 
-# Plot all three ellipses side by side
-par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+# Plot
 
 # Gamma vs Delta
 plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
@@ -405,8 +398,6 @@ legend("topright",
        lty = c(NA, NA, 1, 3),
        lwd = c(NA, NA, 2, 1.5),
        bty = "n", cex = 0.8)
-
-par(par_)
 
 }
 

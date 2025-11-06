@@ -71,8 +71,6 @@ Numerical stability is maintained through careful implementation.
 \donttest{
 ## Example 1: Basic Gradient Evaluation
 
-par_ <- par()
-
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -230,7 +228,6 @@ ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
 ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
 # Plot
-par(mar = c(4, 4, 3, 1))
 plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(alpha), ylab = expression(beta),
      main = "95\% Confidence Region (Alpha vs Beta)", las = 1)
@@ -250,9 +247,6 @@ legend("topright",
        lwd = c(NA, NA, 2, 1.5),
        bty = "n")
 grid(col = "gray90")
-
-par(par_)
-
 }
 
 }

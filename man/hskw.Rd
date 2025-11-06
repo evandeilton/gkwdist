@@ -63,8 +63,6 @@ evaluated at \eqn{\gamma=1, \delta=0, \lambda=1}.
 \donttest{
 ## Example 1: Basic Hessian Evaluation
 
-par_ <- par()
-
 # Generate sample data
 set.seed(123)
 n <- 1000
@@ -207,7 +205,6 @@ for (i in seq_along(alpha_grid)) {
 }
 
 # Plot
-par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 
 contour(alpha_grid, beta_grid, determinant_surface,
         xlab = expression(alpha), ylab = expression(beta),
@@ -224,9 +221,6 @@ contour(alpha_grid, beta_grid, trace_surface,
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
-
-par(mfrow = c(1, 1))
-
 
 ## Example 6: Fisher Information and Asymptotic Efficiency
 
@@ -261,7 +255,7 @@ for (i in 1:100) {
 }
 
 # Plot confidence ellipse
-par(mar = c(4, 4, 3, 1))
+
 plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(alpha), ylab = expression(beta),
      main = "95\% Confidence Ellipse", las = 1)
@@ -273,8 +267,6 @@ legend("topright",
        pch = c(19, 17, NA), lty = c(NA, NA, 1),
        lwd = c(NA, NA, 2), bty = "n")
 grid(col = "gray90")
-
-par(par_)
 
 }
 

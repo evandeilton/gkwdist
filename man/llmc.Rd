@@ -51,8 +51,6 @@ Numerical stability is maintained, including using the log-gamma function
 \donttest{
 ## Example 1: Basic Log-Likelihood Evaluation
 
-par_ <- par()
-
 # Generate sample data with more stable parameters
 set.seed(123)
 n <- 1000
@@ -244,7 +242,6 @@ chi_crit <- qchisq(0.95, df = 1)
 threshold <- max(profile_ll_gamma) - chi_crit / 2
 
 # Plot all profiles
-par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
 
 plot(gamma_grid, profile_ll_gamma, type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(gamma), ylab = "Profile Log-Likelihood",
@@ -278,9 +275,6 @@ legend("topright", legend = c("MLE", "True", "95\% CI"),
        col = c("#8B0000", "#006400", "#808080"),
        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 grid(col = "gray90")
-
-par(mfrow = c(1, 1))
-
 
 ## Example 6: 2D Log-Likelihood Surfaces (All pairs side by side)
 
@@ -328,8 +322,7 @@ levels_95_gd <- max_ll_gd - qchisq(0.95, df = 2) / 2
 levels_95_gl <- max_ll_gl - qchisq(0.95, df = 2) / 2
 levels_95_dl <- max_ll_dl - qchisq(0.95, df = 2) / 2
 
-# Plot all three surfaces side by side
-par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+# Plot 
 
 # Gamma vs Delta
 contour(gamma_2d, delta_2d, ll_surface_gd,
@@ -374,8 +367,6 @@ legend("topright",
        lty = c(NA, NA, 1),
        lwd = c(NA, NA, 2.5),
        bty = "n", cex = 0.8)
-
-par(par_)
 
 }
 

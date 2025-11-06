@@ -54,9 +54,6 @@ Numerical stability is maintained similarly to \code{\link{llgkw}}.
 \examples{
 \donttest{
 ## Example 1: Basic Log-Likelihood Evaluation
-
-par_ <- par()
-
 # Generate sample data
 set.seed(2203)
 n <- 1000
@@ -266,7 +263,6 @@ chi_crit <- qchisq(0.95, df = 1)
 threshold <- max(profile_ll_alpha) - chi_crit / 2
 
 # Plot all profiles
-par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
 
 plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
@@ -311,8 +307,6 @@ legend("topright", legend = c("MLE", "True", "95\% CI"),
        col = c("#8B0000", "#006400", "#808080"),
        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
 grid(col = "gray90")
-
-par(mfrow = c(1, 1))
 
 
 ## Example 6: 2D Log-Likelihood Surfaces (Selected pairs)
@@ -363,8 +357,7 @@ levels_95_ab <- max_ll_ab - qchisq(0.95, df = 2) / 2
 levels_95_ag <- max_ll_ag - qchisq(0.95, df = 2) / 2
 levels_95_bd <- max_ll_bd - qchisq(0.95, df = 2) / 2
 
-# Plot selected surfaces side by side
-par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+# Plot selected surfaces 
 
 # Alpha vs Beta
 contour(alpha_2d, beta_2d, ll_surface_ab,
@@ -409,8 +402,6 @@ legend("topright",
        lty = c(NA, NA, 1),
        lwd = c(NA, NA, 2.5),
        bty = "n", cex = 0.8)
-
-par(par_)
 
 }
 
