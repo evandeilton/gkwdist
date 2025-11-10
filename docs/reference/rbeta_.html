@@ -19,7 +19,7 @@ of the Generalized Kumaraswamy (GKw) distribution where \(\alpha = 1\),
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -138,43 +138,51 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-in"><span><span class="va">shape2</span> <span class="op">&lt;-</span> <span class="va">delta_par</span> <span class="op">+</span> <span class="fl">1</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">x_sample</span> <span class="op">&lt;-</span> <span class="fu">rbeta_</span><span class="op">(</span><span class="fl">1000</span>, gamma <span class="op">=</span> <span class="va">gamma_par</span>, delta <span class="op">=</span> <span class="va">delta_par</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">x_sample</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.007135 0.190328 0.306978 0.335931 0.466661 0.886553 </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'x_sample' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare with stats::rbeta</span></span></span>
 <span class="r-in"><span><span class="va">x_sample_stats</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">rbeta</a></span><span class="op">(</span><span class="fl">1000</span>, shape1 <span class="op">=</span> <span class="va">shape1</span>, shape2 <span class="op">=</span> <span class="va">shape2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Visually compare histograms or QQ-plots</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">x_sample</span>, main<span class="op">=</span><span class="st">"rbeta_ Sample"</span>, freq<span class="op">=</span><span class="cn">FALSE</span>, breaks<span class="op">=</span><span class="fl">30</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'x_sample' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/curve.html" class="external-link">curve</a></span><span class="op">(</span><span class="fu"><a href="dbeta_.html">dbeta_</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gamma_par</span>, <span class="va">delta_par</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span>, col<span class="op">=</span><span class="st">"red"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="rbeta_-1.png" alt="" width="700" height="433"></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir = ll, enclos = parent.frame()):</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">x_sample_stats</span>, main<span class="op">=</span><span class="st">"stats::rbeta Sample"</span>, freq<span class="op">=</span><span class="cn">FALSE</span>, breaks<span class="op">=</span><span class="fl">30</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/curve.html" class="external-link">curve</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">dbeta</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">shape1</span>, <span class="va">shape2</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span>, col<span class="op">=</span><span class="st">"blue"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="rbeta_-2.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="rbeta_-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># Compare summary stats (should be similar due to randomness)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">x_sample</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'x_sample' not found</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">x_sample_stats</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.007135 0.190328 0.306978 0.335931 0.466661 0.886553 </span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">x_sample_stats</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.01034 0.19696 0.31440 0.33723 0.45535 0.84423 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare summary stats with rgkw(alpha=1, beta=1, lambda=1)</span></span></span>
 <span class="r-in"><span><span class="va">x_sample_gkw</span> <span class="op">&lt;-</span> <span class="fu"><a href="rgkw.html">rgkw</a></span><span class="op">(</span><span class="fl">1000</span>, alpha <span class="op">=</span> <span class="fl">1.0</span>, beta <span class="op">=</span> <span class="fl">1.0</span>, gamma <span class="op">=</span> <span class="va">gamma_par</span>,</span></span>
 <span class="r-in"><span>                     delta <span class="op">=</span> <span class="va">delta_par</span>, lambda <span class="op">=</span> <span class="fl">1.0</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Summary stats for rgkw(a=1,b=1,l=1) sample:"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Summary stats for rgkw(a=1,b=1,l=1) sample:"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">x_sample_gkw</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.004943 0.189179 0.313707 0.328485 0.445345 0.892626 </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'x_sample_gkw' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare summary stats with rmc(lambda=1)</span></span></span>
 <span class="r-in"><span><span class="va">x_sample_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="rmc.html">rmc</a></span><span class="op">(</span><span class="fl">1000</span>, gamma <span class="op">=</span> <span class="va">gamma_par</span>, delta <span class="op">=</span> <span class="va">delta_par</span>, lambda <span class="op">=</span> <span class="fl">1.0</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Summary stats for rmc(l=1) sample:"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Summary stats for rmc(l=1) sample:"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">x_sample_mc</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.00105 0.19221 0.31254 0.33300 0.45504 0.91894 </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'x_sample_mc' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

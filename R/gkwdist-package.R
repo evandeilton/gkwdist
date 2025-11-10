@@ -266,7 +266,6 @@
 #'
 #' @examples
 #' \donttest{
-#'
 #' ## Example 1: Basic Distribution Functions
 #'
 #' library(gkwdist)
@@ -295,9 +294,6 @@
 #' # Generate random sample
 #' set.seed(123)
 #' sample <- rgkw(1000, alpha, beta, gamma, delta, lambda)
-#'
-#' # Visualization
-#' par(mfrow = c(2, 2), mar = c(4, 4, 2, 1))
 #'
 #' # PDF
 #' plot(x, dens,
@@ -336,15 +332,10 @@
 #' abline(0, 1, col = "red", lwd = 2, lty = 2)
 #' grid(col = "gray80", lty = 2)
 #'
-#' par(mfrow = c(1, 1))
-#'
-#'
 #' ## Example 2: Comparing Distribution Families
 #'
 #' # Create comparison plot
 #' x <- seq(0.001, 0.999, length.out = 500)
-#'
-#' par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
 #'
 #' # GKw (5 parameters) - most flexible
 #' plot(x, dgkw(x, 2, 3, 1.5, 2, 1.2),
@@ -377,8 +368,6 @@
 #'   xlab = "x", ylab = "Density", las = 1, ylim = c(0, 3)
 #' )
 #' grid(col = "gray80", lty = 2)
-#'
-#' par(mfrow = c(1, 1))
 #'
 #'
 #' ## Example 3: Maximum Likelihood Estimation
