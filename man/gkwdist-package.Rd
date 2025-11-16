@@ -266,26 +266,26 @@ sample <- rgkw(1000, alpha, beta, gamma, delta, lambda)
 
 # PDF
 plot(x, dens,
-     type = "l", lwd = 2, col = "darkblue",
-     main = "GKw Probability Density Function",
-     xlab = "x", ylab = "f(x)", las = 1
+  type = "l", lwd = 2, col = "darkblue",
+  main = "GKw Probability Density Function",
+  xlab = "x", ylab = "f(x)", las = 1
 )
 grid(col = "gray80", lty = 2)
 
 # CDF
 plot(x, cdf,
-     type = "l", lwd = 2, col = "darkred",
-     main = "GKw Cumulative Distribution Function",
-     xlab = "x", ylab = "F(x)", las = 1
+  type = "l", lwd = 2, col = "darkred",
+  main = "GKw Cumulative Distribution Function",
+  xlab = "x", ylab = "F(x)", las = 1
 )
 grid(col = "gray80", lty = 2)
 
 # Histogram of random sample
 hist(sample,
-     breaks = 30, probability = TRUE,
-     col = "lightblue", border = "white",
-     main = "Random Sample from GKw",
-     xlab = "x", ylab = "Density", las = 1
+  breaks = 30, probability = TRUE,
+  col = "lightblue", border = "white",
+  main = "Random Sample from GKw",
+  xlab = "x", ylab = "Density", las = 1
 )
 lines(x, dens, col = "darkblue", lwd = 2)
 grid(col = "gray80", lty = 2)
@@ -294,9 +294,9 @@ grid(col = "gray80", lty = 2)
 theoretical <- qgkw(ppoints(length(sample)), alpha, beta, gamma, delta, lambda)
 empirical <- sort(sample)
 plot(theoretical, empirical,
-     pch = 19, col = rgb(0, 0, 1, 0.3),
-     main = "Q-Q Plot",
-     xlab = "Theoretical Quantiles", ylab = "Sample Quantiles", las = 1
+  pch = 19, col = rgb(0, 0, 1, 0.3),
+  main = "Q-Q Plot",
+  xlab = "Theoretical Quantiles", ylab = "Sample Quantiles", las = 1
 )
 abline(0, 1, col = "red", lwd = 2, lty = 2)
 grid(col = "gray80", lty = 2)
@@ -308,33 +308,33 @@ x <- seq(0.001, 0.999, length.out = 500)
 
 # GKw (5 parameters) - most flexible
 plot(x, dgkw(x, 2, 3, 1.5, 2, 1.2),
-     type = "l", lwd = 2, col = "black",
-     main = "GKw Distribution (5 params)",
-     xlab = "x", ylab = "Density", las = 1, ylim = c(0, 3)
+  type = "l", lwd = 2, col = "black",
+  main = "GKw Distribution (5 params)",
+  xlab = "x", ylab = "Density", las = 1, ylim = c(0, 3)
 )
 grid(col = "gray80", lty = 2)
 
 # BKw (4 parameters)
 plot(x, dbkw(x, 2, 3, 1.5, 2),
-     type = "l", lwd = 2, col = "darkgreen",
-     main = "BKw Distribution (4 params)",
-     xlab = "x", ylab = "Density", las = 1, ylim = c(0, 3)
+  type = "l", lwd = 2, col = "darkgreen",
+  main = "BKw Distribution (4 params)",
+  xlab = "x", ylab = "Density", las = 1, ylim = c(0, 3)
 )
 grid(col = "gray80", lty = 2)
 
 # EKw (3 parameters)
 plot(x, dekw(x, 2, 3, 1.5),
-     type = "l", lwd = 2, col = "darkred",
-     main = "EKw Distribution (3 params)",
-     xlab = "x", ylab = "Density", las = 1, ylim = c(0, 3)
+  type = "l", lwd = 2, col = "darkred",
+  main = "EKw Distribution (3 params)",
+  xlab = "x", ylab = "Density", las = 1, ylim = c(0, 3)
 )
 grid(col = "gray80", lty = 2)
 
 # Kw (2 parameters) - base distribution
 plot(x, dkw(x, 2, 3),
-     type = "l", lwd = 2, col = "darkblue",
-     main = "Kw Distribution (2 params)",
-     xlab = "x", ylab = "Density", las = 1, ylim = c(0, 3)
+  type = "l", lwd = 2, col = "darkblue",
+  main = "Kw Distribution (2 params)",
+  xlab = "x", ylab = "Density", las = 1, ylim = c(0, 3)
 )
 grid(col = "gray80", lty = 2)
 
@@ -384,18 +384,18 @@ fitted_dens <- dkw(x_grid, mle[1], mle[2])
 true_dens <- dkw(x_grid, true_alpha, true_beta)
 
 hist(data,
-     breaks = 40, probability = TRUE,
-     col = "lightgray", border = "white",
-     main = "Kumaraswamy Distribution Fit",
-     xlab = "Data", ylab = "Density", las = 1
+  breaks = 40, probability = TRUE,
+  col = "lightgray", border = "white",
+  main = "Kumaraswamy Distribution Fit",
+  xlab = "Data", ylab = "Density", las = 1
 )
 lines(x_grid, fitted_dens, col = "red", lwd = 2, lty = 1)
 lines(x_grid, true_dens, col = "blue", lwd = 2, lty = 2)
 legend("topright",
-       legend = c("Data", "Fitted", "True"),
-       col = c("gray", "red", "blue"),
-       lwd = c(8, 2, 2), lty = c(1, 1, 2),
-       bty = "n"
+  legend = c("Data", "Fitted", "True"),
+  col = c("gray", "red", "blue"),
+  lwd = c(8, 2, 2), lty = c(1, 1, 2),
+  bty = "n"
 )
 grid(col = "gray80", lty = 2)
 
@@ -439,11 +439,11 @@ models <- list(
 results <- lapply(names(models), function(name) {
   m <- models[[name]]
   fit <- optim(par = m$start, fn = m$ll, gr = m$gr, method = "BFGS")
-  
+
   loglik <- -fit$value
   aic <- -2 * loglik + 2 * m$k
   bic <- -2 * loglik + m$k * log(n)
-  
+
   data.frame(
     Model = name,
     k = m$k,
