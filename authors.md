@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/evandeilton/gkwdist/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/evandeilton/gkwdist/blob/v1.0.10/inst/CITATION)
 
 Lopes, J.E. (2025). gkwdist: Generalized Kumaraswamy Distribution
 Family. R package version 1.0.8. https://github.com/evandeilton/gkwdist
