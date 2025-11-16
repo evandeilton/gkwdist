@@ -1,6 +1,6 @@
 Package: gkwdist
 Title: Generalized Kumaraswamy Distribution Family
-Version: 1.0.10
+Version: 1.0.10.9000
 Authors@R: c(person(given = "José Evandeilton",
                     family = "Lopes",
                     role = c("aut", "cre"),
