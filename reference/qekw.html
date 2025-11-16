@@ -43,7 +43,7 @@ is a special case of the Generalized Kumaraswamy (GKw) distribution where
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Quantile Function of the Exponentiated Kumaraswamy (EKw) Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
       <div class="d-none name"><code>qekw.Rd</code></div>
     </div>
 
@@ -153,47 +153,70 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Calculate quantiles</span></span></span>
 <span class="r-in"><span><span class="va">quantiles</span> <span class="op">&lt;-</span> <span class="fu">qekw</span><span class="op">(</span><span class="va">p_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">lambda_par</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">quantiles</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.2787375 0.5311017 0.7695287</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'quantiles' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Calculate quantiles for upper tail probabilities P(X &gt; q) = p</span></span></span>
 <span class="r-in"><span><span class="va">quantiles_upper</span> <span class="op">&lt;-</span> <span class="fu">qekw</span><span class="op">(</span><span class="va">p_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">lambda_par</span>,</span></span>
 <span class="r-in"><span>                        lower_tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">quantiles_upper</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7695287 0.5311017 0.2787375</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'quantiles_upper' not found</span>
 <span class="r-in"><span><span class="co"># Check: qekw(p, ..., lt=F) == qekw(1-p, ..., lt=T)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">qekw</span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">p_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">lambda_par</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7695287 0.5311017 0.2787375</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in print(qekw(1 - p_vals, alpha_par, beta_par, lambda_par)):</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Calculate quantiles from log probabilities</span></span></span>
 <span class="r-in"><span><span class="va">log_p_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">p_vals</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">quantiles_logp</span> <span class="op">&lt;-</span> <span class="fu">qekw</span><span class="op">(</span><span class="va">log_p_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">lambda_par</span>,</span></span>
 <span class="r-in"><span>                       log_p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">quantiles_logp</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.2787375 0.5311017 0.7695287</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'quantiles_logp' not found</span>
 <span class="r-in"><span><span class="co"># Check: should match original quantiles</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">quantiles</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.2787375 0.5311017 0.7695287</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'quantiles' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare with qgkw setting gamma = 1, delta = 0</span></span></span>
 <span class="r-in"><span><span class="va">quantiles_gkw</span> <span class="op">&lt;-</span> <span class="fu"><a href="qgkw.html">qgkw</a></span><span class="op">(</span><span class="va">p_vals</span>, alpha <span class="op">=</span> <span class="va">alpha_par</span>, beta <span class="op">=</span> <span class="va">beta_par</span>,</span></span>
 <span class="r-in"><span>                     gamma <span class="op">=</span> <span class="fl">1.0</span>, delta <span class="op">=</span> <span class="fl">0.0</span>, lambda <span class="op">=</span> <span class="va">lambda_par</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Max difference:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">quantiles</span> <span class="op">-</span> <span class="va">quantiles_gkw</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># Should be near zero</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Max difference: 1.11022302462516e-16"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'quantiles' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Verify inverse relationship with pekw</span></span></span>
 <span class="r-in"><span><span class="va">p_check</span> <span class="op">&lt;-</span> <span class="fl">0.75</span></span></span>
 <span class="r-in"><span><span class="va">q_calc</span> <span class="op">&lt;-</span> <span class="fu">qekw</span><span class="op">(</span><span class="va">p_check</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">lambda_par</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="va">p_recalc</span> <span class="op">&lt;-</span> <span class="fu"><a href="pekw.html">pekw</a></span><span class="op">(</span><span class="va">q_calc</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">lambda_par</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Original p:"</span>, <span class="va">p_check</span>, <span class="st">" Recalculated p:"</span>, <span class="va">p_recalc</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Original p: 0.75  Recalculated p: 0.75"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'p_recalc' not found</span>
 <span class="r-in"><span><span class="co"># abs(p_check - p_recalc) &lt; 1e-9 # Should be TRUE</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Boundary conditions</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">qekw</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">lambda_par</span><span class="op">)</span><span class="op">)</span> <span class="co"># Should be 0, 1</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 1</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in print(qekw(c(0, 1), alpha_par, beta_par, lambda_par)):</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">qekw</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>, <span class="fl">0</span><span class="op">)</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">lambda_par</span>, log_p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="co"># Should be 0, 1</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 1</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in print(qekw(c(-Inf, 0), alpha_par, beta_par, lambda_par, log_p = TRUE)):</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
@@ -207,7 +230,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>
