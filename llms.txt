@@ -93,7 +93,7 @@ where $B_{z}(a,b) = \int_{0}^{z}t^{a - 1}(1 - t)^{b - 1}dt$.
 
 **PDF:**
 
-$$f_{\text{GKw}}(x;\alpha,\beta,\gamma,\delta,\lambda) = \frac{\lambda\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\gamma\lambda - 1}\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda}\}^{\delta - 1}$$
+$$f_{\text{GKw}}(x;\alpha,\beta,\gamma,\delta,\lambda) = \frac{\lambda\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\gamma\lambda - 1}\left\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda} \right\}^{\delta - 1}$$
 
 **CDF:**
 
@@ -113,7 +113,7 @@ Numerical integration or simulation methods required.
 
 **PDF:**
 
-$$f_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = \frac{\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\gamma - 1}\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack\}^{\delta - 1}$$
+$$f_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = \frac{\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\gamma - 1}\left\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack \right\}^{\delta - 1}$$
 
 Simplifying:
 
@@ -141,11 +141,11 @@ $$x = \left\lbrack 1 - \left( 1 - I_{u}^{- 1}(\gamma,\delta) \right)^{1/\beta} \
 
 **PDF:**
 
-$$f_{\text{KKw}}(x;\alpha,\beta,\delta,\lambda) = \alpha\beta\delta\lambda\, x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda - 1}\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda}\}^{\delta - 1}$$
+$$f_{\text{KKw}}(x;\alpha,\beta,\delta,\lambda) = \alpha\beta\delta\lambda\, x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda - 1}\left\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda} \right\}^{\delta - 1}$$
 
 **CDF:**
 
-$$F_{\text{KKw}}(x;\alpha,\beta,\delta,\lambda) = 1 - \{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda}\}^{\delta}$$
+$$F_{\text{KKw}}(x;\alpha,\beta,\delta,\lambda) = 1 - \left\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda} \right\}^{\delta}$$
 
 **Quantile (closed-form):**
 
@@ -173,7 +173,7 @@ $$Q_{\text{EKw}}(p;\alpha,\beta,\lambda) = \left\lbrack 1 - \left( 1 - p^{1/\lam
 
 **Moments:**
 
-$${\mathbb{E}}\left( X^{r} \right) = \lambda\sum\limits_{k = 0}^{\infty}\frac{( - 1)^{k}\left( \frac{\lambda}{k + 1} \right)}{k + 1} \cdot \beta B\left( 1 + \frac{r}{\alpha},(k + 1)\beta \right)$$
+$${\mathbb{E}}\left( X^{r} \right) = \lambda\sum\limits_{k = 0}^{\infty}\frac{( - 1)^{k}\left( \frac{\lambda}{k + 1} \right)}{k + 1} \cdot \beta\, B\left( 1 + \frac{r}{\alpha},(k + 1)\beta \right)$$
 
 where the binomial coefficient is generalized:
 $\left( \frac{\lambda}{k + 1} \right) = \frac{\lambda(\lambda - 1)\cdots(\lambda - k)}{(k + 1)!}$.
@@ -226,7 +226,7 @@ $$Q_{\text{Kw}}(p;\alpha,\beta) = \left\lbrack 1 - (1 - p)^{1/\beta} \right\rbra
 
 **Moments:**
 
-$${\mathbb{E}}\left( X^{r} \right) = \beta B\left( 1 + \frac{r}{\alpha},\beta \right) = \frac{\beta\,\Gamma(1 + r/\alpha)\,\Gamma(\beta)}{\Gamma(1 + r/\alpha + \beta)}$$
+$${\mathbb{E}}\left( X^{r} \right) = \beta\, B\left( 1 + \frac{r}{\alpha},\beta \right) = \frac{\beta\,\Gamma(1 + r/\alpha)\,\Gamma(\beta)}{\Gamma(1 + r/\alpha + \beta)}$$
 
 which is valid for $r/\alpha > - 1$.
 
@@ -259,7 +259,7 @@ $$Q_{\text{Beta}}(p;\gamma,\delta) = I_{p}^{- 1}(\gamma,\delta)$$
 
 **Moments:**
 
-$${\mathbb{E}}\left( X^{r} \right) = \frac{B(\gamma + r,\delta)}{B(\gamma,\delta)} = \frac{\Gamma(\gamma + r)\,\Gamma(\delta)\,\Gamma(\gamma + \delta)}{\Gamma(\gamma)\,\Gamma(\gamma + \delta + r)\,\Gamma(\delta)}$$
+$${\mathbb{E}}\left( X^{r} \right) = \frac{B(\gamma + r,\delta)}{B(\gamma,\delta)} = \frac{\Gamma(\gamma + r)\,\Gamma(\gamma + \delta)}{\Gamma(\gamma)\,\Gamma(\gamma + \delta + r)}$$
 
 $${\mathbb{E}}(X) = \frac{\gamma}{\gamma + \delta}$$
 
