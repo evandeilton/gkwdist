@@ -13,7 +13,7 @@ errors of maximum likelihood estimates or in optimization algorithms."></head><b
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,7 @@ errors of maximum likelihood estimates or in optimization algorithms."></head><b
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Hessian Matrix of the Negative Log-Likelihood for the GKw Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
       <div class="d-none name"><code>hsgkw.Rd</code></div>
     </div>
 
@@ -138,24 +138,24 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="rgkw.html">rgkw</a></span><span class="op">(</span><span class="va">n</span>, alpha <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, beta <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span></span>
 <span class="r-in"><span>             gamma <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, delta <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span>,</span></span>
 <span class="r-in"><span>             lambda <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Evaluate Hessian at true parameters</span></span></span>
 <span class="r-in"><span><span class="va">hess_true</span> <span class="op">&lt;-</span> <span class="fu">hsgkw</span><span class="op">(</span>par <span class="op">=</span> <span class="va">true_params</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Hessian matrix at true parameters:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Hessian matrix at true parameters:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hess_true</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'hess_true' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        [,1]    [,2]   [,3]   [,4]   [,5]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 1151.3 -223.17 1494.9 -363.7 2991.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -223.2   81.76 -232.3  118.9 -503.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 1494.9 -232.35 1904.5 -394.9 3895.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] -363.7  118.90 -394.9  178.0 -838.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 2991.8 -503.54 3895.1 -838.3 7494.0</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Check symmetry</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nSymmetry check (max |H - H^T|):"</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">hess_true</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">hess_true</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'hess_true' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Symmetry check (max |H - H^T|): 0 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 2: Hessian Properties at MLE</span></span></span>
@@ -175,25 +175,22 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>    trace <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in optim(par = c(1.2, 2, 0.5, 1.5, 0.2), fn = llgkw, gr = grgkw,     data = data, method = "Nelder-Mead", hessian = TRUE, control = list(maxit = 2000,         factr = 1e-15, pgtol = 1e-15, trace = FALSE)):</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">mle</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="va">par</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'fit' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mle</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta"</span>, <span class="st">"gamma"</span>, <span class="st">"delta"</span>, <span class="st">"lambda"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Hessian at MLE</span></span></span>
 <span class="r-in"><span><span class="va">hessian_at_mle</span> <span class="op">&lt;-</span> <span class="fu">hsgkw</span><span class="op">(</span>par <span class="op">=</span> <span class="va">mle</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nHessian at MLE:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Hessian at MLE:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hessian_at_mle</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'hessian_at_mle' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        [,1]    [,2]    [,3]    [,4]    [,5]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 1015.9 -127.58  819.93  -604.1  4306.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -127.6   31.57  -80.71   119.0  -433.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  819.9  -80.71  700.52  -420.2  3656.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] -604.1  118.96 -420.20   486.9 -2238.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 4306.7 -433.11 3655.96 -2238.2 19117.5</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare with optim's numerical Hessian</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nComparison with optim Hessian:\n"</span><span class="op">)</span></span></span>
@@ -201,52 +198,57 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-out co"><span class="r-pr">#&gt;</span> Comparison with optim Hessian:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max absolute difference:"</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">hessian_at_mle</span> <span class="op">-</span> <span class="va">fit</span><span class="op">$</span><span class="va">hessian</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'hessian_at_mle' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute difference: 0.2576065 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Eigenvalue analysis</span></span></span>
 <span class="r-in"><span><span class="va">eigenvals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">hessian_at_mle</span>, only.values <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">values</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'hessian_at_mle' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nEigenvalues:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Eigenvalues:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">eigenvals</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'eigenvals' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.106856e+04 2.806373e+02 1.660194e+00 9.013023e-01 6.584820e-01</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nPositive definite:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">eigenvals</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'eigenvals' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Positive definite: TRUE </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Condition number:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">eigenvals</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">eigenvals</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'eigenvals' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Condition number: 31995.65 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 3: Standard Errors and Confidence Intervals</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Observed information matrix</span></span></span>
 <span class="r-in"><span><span class="va">obs_info</span> <span class="op">&lt;-</span> <span class="va">hessian_at_mle</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'hessian_at_mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Variance-covariance matrix</span></span></span>
 <span class="r-in"><span><span class="va">vcov_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">obs_info</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'obs_info' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nVariance-Covariance Matrix:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variance-Covariance Matrix:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">vcov_matrix</span>, digits <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_matrix' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]       [,2]       [,3]       [,4]       [,5]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.7976392 -0.2111590  0.0877811  0.4153406 -0.1526331</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.2111590  1.0707453  0.2160549 -0.4263221 -0.0194034</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  0.0877811  0.2160549  0.9776437 -0.0606497 -0.2089422</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  0.4153406 -0.4263221 -0.0606497  0.3204520 -0.0541086</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] -0.1526331 -0.0194034 -0.2089422 -0.0541086  0.0676199</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Standard errors</span></span></span>
 <span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">vcov_matrix</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_matrix' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta"</span>, <span class="st">"gamma"</span>, <span class="st">"delta"</span>, <span class="st">"lambda"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'se' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Correlation matrix</span></span></span>
 <span class="r-in"><span><span class="va">corr_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cov2cor</a></span><span class="op">(</span><span class="va">vcov_matrix</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_matrix' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nCorrelation Matrix:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Correlation Matrix:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">corr_matrix</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'corr_matrix' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         [,1]     [,2]    [,3]    [,4]     [,5]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  1.0000 -0.22849  0.0994  0.8215 -0.65722</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.2285  1.00000  0.2112 -0.7278 -0.07211</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  0.0994  0.21117  1.0000 -0.1084 -0.81264</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  0.8215 -0.72780 -0.1084  1.0000 -0.36758</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] -0.6572 -0.07211 -0.8126 -0.3676  1.00000</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Confidence intervals</span></span></span>
 <span class="r-in"><span><span class="va">z_crit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">qnorm</a></span><span class="op">(</span><span class="fl">0.975</span><span class="op">)</span></span></span>
@@ -258,9 +260,13 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>  CI_Lower <span class="op">=</span> <span class="va">mle</span> <span class="op">-</span> <span class="va">z_crit</span> <span class="op">*</span> <span class="va">se</span>,</span></span>
 <span class="r-in"><span>  CI_Upper <span class="op">=</span> <span class="va">mle</span> <span class="op">+</span> <span class="va">z_crit</span> <span class="op">*</span> <span class="va">se</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'results' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        Parameter True    MLE     SE CI_Lower CI_Upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alpha      alpha  1.5 1.5556 0.8931  -0.1948   3.3061</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> beta        beta  2.0 3.1089 1.0348   1.0808   5.1370</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gamma      gamma  0.8 1.3114 0.9888  -0.6265   3.2494</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> delta      delta  1.2 0.5344 0.5661  -0.5751   1.6439</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> lambda    lambda  0.5 0.2778 0.2600  -0.2319   0.7875</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 4: Determinant and Trace Analysis</span></span></span>
@@ -272,7 +278,6 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>  <span class="va">mle</span>,</span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2.5</span>, <span class="fl">3.5</span>, <span class="fl">1.8</span>, <span class="fl">2.5</span>, <span class="fl">2.0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">hess_properties</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  Alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
@@ -305,15 +310,21 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>    Cond_Number <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">eigs</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">eigs</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'test_params' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nHessian Properties at Different Points:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Hessian Properties at Different Points:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hess_properties</span>, digits <span class="op">=</span> <span class="fl">4</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] Alpha        Beta         Gamma        Delta        Lambda      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] Determinant  Trace        Min_Eigenval Max_Eigenval Cond_Number </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;0 rows&gt; (or 0-length row.names)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Alpha  Beta Gamma  Delta Lambda Determinant Trace Min_Eigenval Max_Eigenval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1.500 2.500 1.200 1.5000 1.5000   3.379e+15  3357   -3370.0013         8989</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2.000 3.000 1.500 2.0000 1.8000   8.321e+15  2282   -4797.5735        10666</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1.556 3.109 1.311 0.5344 0.2778   5.826e+06 21352       0.6585        21069</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2.500 3.500 1.800 2.5000 2.0000   1.311e+16  1729   -6018.0703        12386</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Cond_Number</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       -2.667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       -2.223</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    31995.650</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       -2.058</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 5: Curvature Visualization (Alpha vs Beta)</span></span></span>
@@ -321,21 +332,15 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="va">xd</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
 <span class="r-in"><span><span class="co"># Create grid around MLE</span></span></span>
 <span class="r-in"><span><span class="va">alpha_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="va">mle</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="va">xd</span>, <span class="va">mle</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="va">xd</span>, length.out <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n</span><span class="op">/</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="va">beta_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="va">mle</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="va">xd</span>, <span class="va">mle</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">+</span> <span class="va">xd</span>, length.out <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n</span><span class="op">/</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="va">alpha_grid</span> <span class="op">&lt;-</span> <span class="va">alpha_grid</span><span class="op">[</span><span class="va">alpha_grid</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'alpha_grid' not found</span>
 <span class="r-in"><span><span class="va">beta_grid</span> <span class="op">&lt;-</span> <span class="va">beta_grid</span><span class="op">[</span><span class="va">beta_grid</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'beta_grid' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compute curvature measures</span></span></span>
 <span class="r-in"><span><span class="va">determinant_surface</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">alpha_grid</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                               ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">beta_grid</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'alpha_grid' not found</span>
 <span class="r-in"><span><span class="va">trace_surface</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">alpha_grid</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                         ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">beta_grid</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'alpha_grid' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">alpha_grid</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="kw">for</span> <span class="op">(</span><span class="va">j</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">beta_grid</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
@@ -344,7 +349,6 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>    <span class="va">trace_surface</span><span class="op">[</span><span class="va">i</span>, <span class="va">j</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">H</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'alpha_grid' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot</span></span></span>
 <span class="r-in"><span></span></span>
@@ -352,73 +356,53 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>        xlab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">alpha</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">beta</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        main <span class="op">=</span> <span class="st">"Hessian Determinant"</span>, las <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>        col <span class="op">=</span> <span class="st">"#2E4057"</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, nlevels <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'alpha_grid' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">mle</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">mle</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="st">"#8B0000"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">true_params</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">true_params</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">17</span>, col <span class="op">=</span> <span class="st">"#006400"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot.xy(xy.coords(x, y), type = type, ...):</span> plot.new has not been called yet</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/grid.html" class="external-link">grid</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"gray90"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...):</span> plot.new has not been called yet</span>
+<span class="r-plt img"><img src="hsgkw-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/contour.html" class="external-link">contour</a></span><span class="op">(</span><span class="va">alpha_grid</span>, <span class="va">beta_grid</span>, <span class="va">trace_surface</span>,</span></span>
 <span class="r-in"><span>        xlab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">alpha</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">beta</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        main <span class="op">=</span> <span class="st">"Hessian Trace"</span>, las <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>        col <span class="op">=</span> <span class="st">"#2E4057"</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, nlevels <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'alpha_grid' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">mle</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">mle</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="st">"#8B0000"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">true_params</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">true_params</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">17</span>, col <span class="op">=</span> <span class="st">"#006400"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot.xy(xy.coords(x, y), type = type, ...):</span> plot.new has not been called yet</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/grid.html" class="external-link">grid</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"gray90"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...):</span> plot.new has not been called yet</span>
+<span class="r-plt img"><img src="hsgkw-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 6: Confidence Ellipse (Alpha vs Beta)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Extract 2x2 submatrix for alpha and beta</span></span></span>
 <span class="r-in"><span><span class="va">vcov_2d</span> <span class="op">&lt;-</span> <span class="va">vcov_matrix</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_matrix' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create confidence ellipse</span></span></span>
 <span class="r-in"><span><span class="va">theta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span>, length.out <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n</span><span class="op">/</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">chi2_val</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">qchisq</a></span><span class="op">(</span><span class="fl">0.95</span>, df <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">eig_decomp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_2d</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_2d' not found</span>
 <span class="r-in"><span><span class="va">ellipse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n</span><span class="op">/</span><span class="fl">4</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n</span><span class="op">/</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">ellipse</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">chi2_val</span><span class="op">)</span> <span class="op">*</span></span></span>
 <span class="r-in"><span>    <span class="op">(</span><span class="va">eig_decomp</span><span class="op">$</span><span class="va">vectors</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">eig_decomp</span><span class="op">$</span><span class="va">values</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">v</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Marginal confidence intervals</span></span></span>
 <span class="r-in"><span><span class="va">se_2d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">vcov_2d</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_2d' not found</span>
 <span class="r-in"><span><span class="va">ci_alpha</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">se_2d</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="va">ci_beta</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">se_2d</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ellipse</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="va">ellipse</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"l"</span>, lwd <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="st">"#2E4057"</span>,</span></span>
 <span class="r-in"><span>     xlab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">alpha</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">beta</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>     main <span class="op">=</span> <span class="st">"95% Confidence Ellipse (Alpha vs Beta)"</span>, las <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to min; returning Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to max; returning -Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to min; returning Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to max; returning -Inf</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot.window(...):</span> need finite 'xlim' values</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add marginal CIs</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="va">ci_alpha</span>, col <span class="op">=</span> <span class="st">"#808080"</span>, lty <span class="op">=</span> <span class="fl">3</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ci_alpha' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="va">ci_beta</span>, col <span class="op">=</span> <span class="st">"#808080"</span>, lty <span class="op">=</span> <span class="fl">3</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ci_beta' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">mle</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">mle</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="st">"#8B0000"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">true_params</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">true_params</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">17</span>, col <span class="op">=</span> <span class="st">"#006400"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>,</span></span>
@@ -429,51 +413,38 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>       lwd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span>, <span class="fl">2</span>, <span class="fl">1.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>       bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/grid.html" class="external-link">grid</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"gray90"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="hsgkw-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 7: Confidence Ellipse (Gamma vs Delta)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Extract 2x2 submatrix for gamma and delta</span></span></span>
 <span class="r-in"><span><span class="va">vcov_2d_gd</span> <span class="op">&lt;-</span> <span class="va">vcov_matrix</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_matrix' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create confidence ellipse</span></span></span>
 <span class="r-in"><span><span class="va">eig_decomp_gd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_2d_gd</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_2d_gd' not found</span>
 <span class="r-in"><span><span class="va">ellipse_gd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n</span><span class="op">/</span><span class="fl">4</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n</span><span class="op">/</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">ellipse_gd</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">chi2_val</span><span class="op">)</span> <span class="op">*</span></span></span>
 <span class="r-in"><span>    <span class="op">(</span><span class="va">eig_decomp_gd</span><span class="op">$</span><span class="va">vectors</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">eig_decomp_gd</span><span class="op">$</span><span class="va">values</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">v</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Marginal confidence intervals</span></span></span>
 <span class="r-in"><span><span class="va">se_2d_gd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">vcov_2d_gd</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_2d_gd' not found</span>
 <span class="r-in"><span><span class="va">ci_gamma</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">se_2d_gd</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="va">ci_delta</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">se_2d_gd</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ellipse_gd</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="va">ellipse_gd</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"l"</span>, lwd <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="st">"#2E4057"</span>,</span></span>
 <span class="r-in"><span>     xlab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">gamma</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>     main <span class="op">=</span> <span class="st">"95% Confidence Ellipse (Gamma vs Delta)"</span>, las <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to min; returning Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to max; returning -Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to min; returning Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to max; returning -Inf</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot.window(...):</span> need finite 'xlim' values</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add marginal CIs</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="va">ci_gamma</span>, col <span class="op">=</span> <span class="st">"#808080"</span>, lty <span class="op">=</span> <span class="fl">3</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ci_gamma' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="va">ci_delta</span>, col <span class="op">=</span> <span class="st">"#808080"</span>, lty <span class="op">=</span> <span class="fl">3</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ci_delta' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">mle</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="va">mle</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="st">"#8B0000"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">true_params</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="va">true_params</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">17</span>, col <span class="op">=</span> <span class="st">"#006400"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>,</span></span>
@@ -484,51 +455,38 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>       lwd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span>, <span class="fl">2</span>, <span class="fl">1.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>       bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/grid.html" class="external-link">grid</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"gray90"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="hsgkw-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 8: Confidence Ellipse (Delta vs Lambda)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Extract 2x2 submatrix for delta and lambda</span></span></span>
 <span class="r-in"><span><span class="va">vcov_2d_dl</span> <span class="op">&lt;-</span> <span class="va">vcov_matrix</span><span class="op">[</span><span class="fl">4</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_matrix' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create confidence ellipse</span></span></span>
 <span class="r-in"><span><span class="va">eig_decomp_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_2d_dl</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_2d_dl' not found</span>
 <span class="r-in"><span><span class="va">ellipse_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n</span><span class="op">/</span><span class="fl">4</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n</span><span class="op">/</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">ellipse_dl</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">4</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">chi2_val</span><span class="op">)</span> <span class="op">*</span></span></span>
 <span class="r-in"><span>    <span class="op">(</span><span class="va">eig_decomp_dl</span><span class="op">$</span><span class="va">vectors</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">eig_decomp_dl</span><span class="op">$</span><span class="va">values</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">v</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Marginal confidence intervals</span></span></span>
 <span class="r-in"><span><span class="va">se_2d_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">vcov_2d_dl</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_2d_dl' not found</span>
 <span class="r-in"><span><span class="va">ci_delta_2</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">se_2d_dl</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="va">ci_lambda</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">se_2d_dl</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ellipse_dl</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="va">ellipse_dl</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"l"</span>, lwd <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="st">"#2E4057"</span>,</span></span>
 <span class="r-in"><span>     xlab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">lambda</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>     main <span class="op">=</span> <span class="st">"95% Confidence Ellipse (Delta vs Lambda)"</span>, las <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to min; returning Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to max; returning -Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to min; returning Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to max; returning -Inf</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot.window(...):</span> need finite 'xlim' values</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add marginal CIs</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="va">ci_delta_2</span>, col <span class="op">=</span> <span class="st">"#808080"</span>, lty <span class="op">=</span> <span class="fl">3</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ci_delta_2' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="va">ci_lambda</span>, col <span class="op">=</span> <span class="st">"#808080"</span>, lty <span class="op">=</span> <span class="fl">3</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ci_lambda' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">mle</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span>, <span class="va">mle</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="st">"#8B0000"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">true_params</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span>, <span class="va">true_params</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">17</span>, col <span class="op">=</span> <span class="st">"#006400"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>,</span></span>
@@ -539,6 +497,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>       lwd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span>, <span class="fl">2</span>, <span class="fl">1.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>       bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/grid.html" class="external-link">grid</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"gray90"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="hsgkw-5.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
@@ -552,7 +511,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

@@ -19,7 +19,7 @@ optimization algorithms for maximum likelihood estimation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,7 +45,7 @@ optimization algorithms for maximum likelihood estimation."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Gradient of the Negative Log-Likelihood for the kkw Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
       <div class="d-none name"><code>grkkw.Rd</code></div>
     </div>
 
@@ -152,19 +152,15 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="va">true_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">2.0</span>, beta <span class="op">=</span> <span class="fl">3.0</span>, delta <span class="op">=</span> <span class="fl">1.5</span>, lambda <span class="op">=</span> <span class="fl">2.0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="rkkw.html">rkkw</a></span><span class="op">(</span><span class="va">n</span>, alpha <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, beta <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span></span>
 <span class="r-in"><span>             delta <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, lambda <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Evaluate gradient at true parameters</span></span></span>
 <span class="r-in"><span><span class="va">grad_true</span> <span class="op">&lt;-</span> <span class="fu">grkkw</span><span class="op">(</span>par <span class="op">=</span> <span class="va">true_params</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Gradient at true parameters:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gradient at true parameters:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">grad_true</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'grad_true' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 11.766117 -6.438008 -5.538257  5.937580</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Norm:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">grad_true</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'grad_true' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Norm: 15.67854 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Evaluate at different parameter values</span></span></span>
 <span class="r-in"><span><span class="va">test_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span></span>
@@ -177,9 +173,6 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>  <span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">grkkw</span><span class="op">(</span><span class="va">p</span>, <span class="va">data</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">g</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in FUN(newX[, i], ...):</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  Alpha <span class="op">=</span> <span class="va">test_params</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span></span>
@@ -188,9 +181,11 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>  Lambda <span class="op">=</span> <span class="va">test_params</span><span class="op">[</span>, <span class="fl">4</span><span class="op">]</span>,</span></span>
 <span class="r-in"><span>  Grad_Norm <span class="op">=</span> <span class="va">grad_norms</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'grad_norms' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'results' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Alpha Beta Delta Lambda Grad_Norm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1.5  2.5   1.0    1.5    910.71</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   2.0  3.0   1.5    2.0     15.68</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   2.5  3.5   2.0    2.5    896.28</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 2: Gradient in Optimization</span></span></span>
@@ -205,9 +200,6 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>  hessian <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trace <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in optim(par = c(1.5, 2.5, 1, 1.5), fn = llkkw, gr = grkkw, data = data,     method = "BFGS", hessian = TRUE, control = list(trace = 0)):</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Optimization without gradient</span></span></span>
 <span class="r-in"><span><span class="va">fit_no_grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span><span class="op">(</span></span></span>
@@ -218,8 +210,6 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>  hessian <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trace <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in (function (par) fn(par, ...))(c(1.5, 2.5, 1, 1.5)):</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"With Gradient"</span>, <span class="st">"Without Gradient"</span><span class="op">)</span>,</span></span>
@@ -230,32 +220,28 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>  NegLogLik <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_with_grad</span><span class="op">$</span><span class="va">value</span>, <span class="va">fit_no_grad</span><span class="op">$</span><span class="va">value</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  Iterations <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_with_grad</span><span class="op">$</span><span class="va">counts</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">fit_no_grad</span><span class="op">$</span><span class="va">counts</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'fit_with_grad' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span>, digits <span class="op">=</span> <span class="fl">4</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'comparison' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Method Alpha  Beta  Delta Lambda NegLogLik Iterations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     With Gradient 2.304 3.610 1.2222  1.705    -586.5        113</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Without Gradient 2.495 4.544 0.8006  1.570    -586.5        213</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 3: Verifying Gradient at MLE</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">mle</span> <span class="op">&lt;-</span> <span class="va">fit_with_grad</span><span class="op">$</span><span class="va">par</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'fit_with_grad' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mle</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta"</span>, <span class="st">"delta"</span>, <span class="st">"lambda"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># At MLE, gradient should be approximately zero</span></span></span>
 <span class="r-in"><span><span class="va">gradient_at_mle</span> <span class="op">&lt;-</span> <span class="fu">grkkw</span><span class="op">(</span>par <span class="op">=</span> <span class="va">mle</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nGradient at MLE:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gradient at MLE:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'gradient_at_mle' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.05693999 -0.03217987 -0.03422936  0.04666259</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max absolute component:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'gradient_at_mle' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute component: 0.05693999 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Gradient norm:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'gradient_at_mle' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gradient norm: 0.08733128 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 4: Numerical vs Analytical Gradient</span></span></span>
@@ -274,11 +260,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare at MLE</span></span></span>
 <span class="r-in"><span><span class="va">grad_analytical</span> <span class="op">&lt;-</span> <span class="fu">grkkw</span><span class="op">(</span>par <span class="op">=</span> <span class="va">mle</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="va">grad_numerical</span> <span class="op">&lt;-</span> <span class="fu">numerical_gradient</span><span class="op">(</span><span class="va">llkkw</span>, <span class="va">mle</span>, <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">comparison_grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  Parameter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta"</span>, <span class="st">"delta"</span>, <span class="st">"lambda"</span><span class="op">)</span>,</span></span>
@@ -288,9 +270,12 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>  Rel_Error <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">grad_analytical</span> <span class="op">-</span> <span class="va">grad_numerical</span><span class="op">)</span> <span class="op">/</span></span></span>
 <span class="r-in"><span>              <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">grad_analytical</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e-10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'grad_analytical' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison_grad</span>, digits <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'comparison_grad' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter   Analytical    Numerical      Abs_Diff     Rel_Error</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha  0.056939988  0.056946874 6.8854030e-06 1.2092386e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -0.032179868 -0.032188154 8.2867859e-06 2.5751461e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     delta -0.034229365 -0.034231107 1.7418460e-06 5.0887477e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    lambda  0.046662594  0.046659352 3.2420501e-06 6.9478566e-05</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 5: Score Test Statistic</span></span></span>
@@ -298,20 +283,13 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="co"># Score test for H0: theta = theta0</span></span></span>
 <span class="r-in"><span><span class="va">theta0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.8</span>, <span class="fl">2.8</span>, <span class="fl">1.3</span>, <span class="fl">1.8</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">score_theta0</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu">grkkw</span><span class="op">(</span>par <span class="op">=</span> <span class="va">theta0</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Fisher information at theta0</span></span></span>
 <span class="r-in"><span><span class="va">fisher_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="hskkw.html">hskkw</a></span><span class="op">(</span>par <span class="op">=</span> <span class="va">theta0</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Score test statistic</span></span></span>
 <span class="r-in"><span><span class="va">score_stat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">score_theta0</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">fisher_info</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">score_theta0</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'score_theta0' not found</span>
 <span class="r-in"><span><span class="va">p_value</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">pchisq</a></span><span class="op">(</span><span class="va">score_stat</span>, df <span class="op">=</span> <span class="fl">4</span>, lower.tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'score_stat' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nScore Test:\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -319,9 +297,9 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"H0: alpha=1.8, beta=2.8, delta=1.3, lambda=1.8\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> H0: alpha=1.8, beta=2.8, delta=1.3, lambda=1.8</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Test statistic:"</span>, <span class="va">score_stat</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'score_stat' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Test statistic: 65.77351 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"P-value:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.pval.html" class="external-link">format.pval</a></span><span class="op">(</span><span class="va">p_value</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'p_value' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> P-value: 1.768e-13 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 6: Confidence Ellipse with Gradient Information</span></span></span>
@@ -329,55 +307,36 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="co"># For visualization, use first two parameters (alpha, beta)</span></span></span>
 <span class="r-in"><span><span class="co"># Observed information</span></span></span>
 <span class="r-in"><span><span class="va">obs_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="hskkw.html">hskkw</a></span><span class="op">(</span>par <span class="op">=</span> <span class="va">mle</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="va">vcov_full</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">obs_info</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'obs_info' not found</span>
 <span class="r-in"><span><span class="va">vcov_2d</span> <span class="op">&lt;-</span> <span class="va">vcov_full</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_full' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create confidence ellipse</span></span></span>
 <span class="r-in"><span><span class="va">theta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">chi2_val</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">qchisq</a></span><span class="op">(</span><span class="fl">0.95</span>, df <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">eig_decomp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_2d</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_2d' not found</span>
 <span class="r-in"><span><span class="va">ellipse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fl">100</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">ellipse</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">chi2_val</span><span class="op">)</span> <span class="op">*</span></span></span>
 <span class="r-in"><span>    <span class="op">(</span><span class="va">eig_decomp</span><span class="op">$</span><span class="va">vectors</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">eig_decomp</span><span class="op">$</span><span class="va">values</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">v</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Marginal confidence intervals</span></span></span>
 <span class="r-in"><span><span class="va">se_2d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">vcov_2d</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'vcov_2d' not found</span>
 <span class="r-in"><span><span class="va">ci_alpha</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">se_2d</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="va">ci_beta</span> <span class="op">&lt;-</span> <span class="va">mle</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">se_2d</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ellipse</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="va">ellipse</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"l"</span>, lwd <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="st">"#2E4057"</span>,</span></span>
 <span class="r-in"><span>     xlab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">alpha</span><span class="op">)</span>, ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">beta</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>     main <span class="op">=</span> <span class="st">"95% Confidence Region (Alpha vs Beta)"</span>, las <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to min; returning Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to max; returning -Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to min; returning Inf</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no non-missing arguments to max; returning -Inf</span>
-<span class="r-plt img"><img src="grkkw-1.png" alt="" width="700" height="433"></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot.window(...):</span> need finite 'xlim' values</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add marginal CIs</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="va">ci_alpha</span>, col <span class="op">=</span> <span class="st">"#808080"</span>, lty <span class="op">=</span> <span class="fl">3</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ci_alpha' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="va">ci_beta</span>, col <span class="op">=</span> <span class="st">"#808080"</span>, lty <span class="op">=</span> <span class="fl">3</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ci_beta' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">mle</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">mle</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="st">"#8B0000"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mle' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">true_params</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">true_params</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">17</span>, col <span class="op">=</span> <span class="st">"#006400"</span>, cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>,</span></span>
@@ -388,6 +347,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>       lwd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span>, <span class="fl">2</span>, <span class="fl">1.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>       bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/grid.html" class="external-link">grid</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"gray90"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="grkkw-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
@@ -401,7 +361,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

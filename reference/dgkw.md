@@ -111,7 +111,7 @@ Lopes, J. E.
 # \donttest{
 # Simple density evaluation at a point
 dgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1) # Kw case
-#> [1] 1.6875
+#> [1] 0
 
 # Plot the PDF for various parameter sets
 x_vals <- seq(0.01, 0.99, by = 0.01)
@@ -139,9 +139,9 @@ legend("topright", legend = c("Kw(2,3)", "Beta(2,4) equivalent", "EKw(2,3, lambd
 # Log-density
 log_pdf_val <- dgkw(0.5, 2, 3, 1, 0, 1, log_prob = TRUE)
 print(log_pdf_val)
-#> [1] 0.5232481
+#> [1] -Inf
 print(log(dgkw(0.5, 2, 3, 1, 0, 1))) # Should match
-#> [1] 0.5232481
+#> [1] -Inf
 
 # }
 ```

@@ -9,7 +9,7 @@ Generalized Kumaraswamy (GKw) distribution, defined on the interval (0, 1)."></h
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@ Generalized Kumaraswamy (GKw) distribution, defined on the interval (0, 1)."></h
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Density of the Generalized Kumaraswamy Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
       <div class="d-none name"><code>dgkw.Rd</code></div>
     </div>
 
@@ -143,56 +143,37 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Simple density evaluation at a point</span></span></span>
 <span class="r-in"><span><span class="fu">dgkw</span><span class="op">(</span><span class="fl">0.5</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># Kw case</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot the PDF for various parameter sets</span></span></span>
 <span class="r-in"><span><span class="va">x_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.99</span>, by <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Standard Kumaraswamy (gamma=1, delta=0, lambda=1)</span></span></span>
 <span class="r-in"><span><span class="va">pdf_kw</span> <span class="op">&lt;-</span> <span class="fu">dgkw</span><span class="op">(</span><span class="va">x_vals</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Beta equivalent (alpha=1, beta=1, lambda=1) - Beta(gamma, delta+1)</span></span></span>
 <span class="r-in"><span><span class="va">pdf_beta</span> <span class="op">&lt;-</span> <span class="fu">dgkw</span><span class="op">(</span><span class="va">x_vals</span>, alpha <span class="op">=</span> <span class="fl">1</span>, beta <span class="op">=</span> <span class="fl">1</span>, gamma <span class="op">=</span> <span class="fl">2</span>, delta <span class="op">=</span> <span class="fl">3</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="co"># Compare with stats::dbeta</span></span></span>
 <span class="r-in"><span><span class="va">pdf_beta_check</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">dbeta</a></span><span class="op">(</span><span class="va">x_vals</span>, shape1 <span class="op">=</span> <span class="fl">2</span>, shape2 <span class="op">=</span> <span class="fl">3</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># max(abs(pdf_beta - pdf_beta_check)) # Should be close to zero</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Exponentiated Kumaraswamy (gamma=1, delta=0)</span></span></span>
 <span class="r-in"><span><span class="va">pdf_ekw</span> <span class="op">&lt;-</span> <span class="fu">dgkw</span><span class="op">(</span><span class="va">x_vals</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x_vals</span>, <span class="va">pdf_kw</span>, type <span class="op">=</span> <span class="st">"l"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">pdf_kw</span>, <span class="va">pdf_beta</span>, <span class="va">pdf_ekw</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>     main <span class="op">=</span> <span class="st">"GKw Densities Examples"</span>, ylab <span class="op">=</span> <span class="st">"f(x)"</span>, xlab<span class="op">=</span><span class="st">"x"</span>, col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'pdf_kw' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">x_vals</span>, <span class="va">pdf_beta</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'pdf_beta' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">x_vals</span>, <span class="va">pdf_ekw</span>, col <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'pdf_ekw' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Kw(2,3)"</span>, <span class="st">"Beta(2,4) equivalent"</span>, <span class="st">"EKw(2,3, lambda=2)"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>       col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"red"</span>, <span class="st">"green"</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">1</span>, bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in (function (s, units = "user", cex = NULL, font = NULL, vfont = NULL,     ...) {    if (!is.null(vfont))         vfont &lt;- c(typeface = pmatch(vfont[1L], Hershey$typeface),             fontindex = pmatch(vfont[2L], Hershey$fontindex))    .External.graphics(C_strWidth, as.graphicsAnnot(s), pmatch(units,         c("user", "figure", "inches")), cex, font, vfont, ...)})(dots[[1L]][[1L]], cex = dots[[2L]][[1L]], font = dots[[3L]][[1L]],     units = "user"):</span> plot.new has not been called yet</span>
+<span class="r-plt img"><img src="dgkw-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Log-density</span></span></span>
 <span class="r-in"><span><span class="va">log_pdf_val</span> <span class="op">&lt;-</span> <span class="fu">dgkw</span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span>, log_prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">log_pdf_val</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'log_pdf_val' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -Inf</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fu">dgkw</span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># Should match</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>restarting interrupted promise evaluation</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>internal error 1 in R_decompress1 with libdeflate</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in print(log(dgkw(0.5, 2, 3, 1, 0, 1))):</span> lazy-load database '/home/jlopes/R/x86_64-pc-linux-gnu-library/4.5/gkwdist/R/gkwdist.rdb' is corrupt</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -Inf</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
@@ -207,7 +188,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

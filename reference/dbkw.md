@@ -119,7 +119,7 @@ print(log(densities))
 densities_gkw <- dgkw(x_vals, alpha_par, beta_par, gamma = gamma_par,
                       delta = delta_par, lambda = 1.0)
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#> [1] "Max difference: 2.22044604925031e-16"
+#> [1] "Max difference: 1.57039569973479"
 
 # Plot the density for different gamma values
 curve_x <- seq(0.01, 0.99, length.out = 200)

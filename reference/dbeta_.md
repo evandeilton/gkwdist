@@ -116,7 +116,7 @@ print(paste("Max difference vs stats::dbeta:", max(abs(densities - densities_sta
 densities_gkw <- dgkw(x_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
                       delta = delta_par, lambda = 1.0)
 print(paste("Max difference vs dgkw:", max(abs(densities - densities_gkw))))
-#> [1] "Max difference vs dgkw: 0"
+#> [1] "Max difference vs dgkw: 2.048"
 
 # Compare with dmc setting lambda=1
 densities_mc <- dmc(x_vals, gamma = gamma_par, delta = delta_par, lambda = 1.0)
