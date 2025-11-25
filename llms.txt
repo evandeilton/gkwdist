@@ -744,7 +744,7 @@ citation("gkwdist")
 ``` bibtex
 @Manual{gkwdist2025,
   title  = {gkwdist: Generalized Kumaraswamy Distribution Family},
-  author = {J. E. Lopes},
+  author = {José Eevandeilton Lopes},
   year   = {2025},
   note   = {R package},
   url    = {https://github.com/evandeilton/gkwdist}
@@ -966,3 +966,6 @@ Log-likelihood, gradient, and Hessian
 
 - [Introduction to gkwdist: Generalized Kumaraswamy Distribution
   Family](https://evandeilton.github.io/gkwdist/articles/into-gkwdist.md):
+- [On the Statistical Properties and Computational Inference of the
+  Generalized Kumaraswamy Distribution
+  Family](https://evandeilton.github.io/gkwdist/articles/theory-gkwdist.md):
