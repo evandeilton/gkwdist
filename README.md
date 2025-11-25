@@ -744,7 +744,7 @@ citation("gkwdist")
 ``` bibtex
 @Manual{gkwdist2025,
   title  = {gkwdist: Generalized Kumaraswamy Distribution Family},
-  author = {José Eevandeilton Lopes},
+  author = {José Evandeilton Lopes},
   year   = {2025},
   note   = {R package},
   url    = {https://github.com/evandeilton/gkwdist}
