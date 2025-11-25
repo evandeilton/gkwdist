@@ -1,6 +1,6 @@
 ---
 title: "Introduction to gkwdist: Generalized Kumaraswamy Distribution Family"
-author: "J. E. Lopes"
+author: "José Evandeilton Lopes"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
