@@ -95,13 +95,11 @@ where $B_z(a,b) = \int_0^z t^{a-1}(1-t)^{b-1}dt$.
 
 **PDF:**
 
-$$f_{\text{GKw}}(x) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} w^{\gamma\lambda-1} (1-w^\lambda)^{\delta-1}$$
-
-where $w = 1-(1-x^\alpha)^\beta$.
+$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left(1-(1-x^\alpha)^\beta\right)^{\gamma\lambda-1} \left(1-\left(1-(1-x^\alpha)^\beta\right)^\lambda\right)^{\delta-1}$$
 
 **CDF:**
 
-$$F_{\text{GKw}}(x) = I_{w^\lambda}(\gamma, \delta)$$
+$$F_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = I_{\left(1-(1-x^\alpha)^\beta\right)^\lambda}(\gamma, \delta)$$
 
 **Quantile:** Numerical inversion of the CDF via root-finding
 algorithms.
@@ -117,15 +115,23 @@ Numerical integration or simulation methods required.
 
 **PDF:**
 
-$$f_{\text{BKw}}(x) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta\delta-1} w^{\gamma-1}$$
+$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left(1-(1-x^\alpha)^\beta\right)^{\gamma-1} \left(1-\left(1-(1-x^\alpha)^\beta\right)\right)^{\delta-1}$$
 
-where $w = 1-(1-x^\alpha)^\beta$.
+Simplifying:
+
+$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left(1-(1-x^\alpha)^\beta\right)^{\gamma-1} (1-x^\alpha)^{\beta(\delta-1)}$$
+
+$$= \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta\delta-1} \left(1-(1-x^\alpha)^\beta\right)^{\gamma-1}$$
 
 **CDF:**
 
-$$F_{\text{BKw}}(x) = I_{w}(\gamma, \delta)$$
+$$F_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = I_{1-(1-x^\alpha)^\beta}(\gamma, \delta)$$
 
-**Quantile:** Numerical inversion via root-finding.
+**Quantile:** Numerical inversion via root-finding. For the inverse:
+
+$$u = I_y(\gamma, \delta) \quad \text{where} \quad y = 1-(1-x^\alpha)^\beta$$
+
+Solving for $x$:
 
 $$x = \left(1-\left(1-I_u^{-1}(\gamma, \delta)\right)^{1/\beta}\right)^{1/\alpha}$$
 
@@ -137,17 +143,15 @@ $$x = \left(1-\left(1-I_u^{-1}(\gamma, \delta)\right)^{1/\beta}\right)^{1/\alpha
 
 **PDF:**
 
-$$f_{\text{KKw}}(x) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} w^{\lambda-1} (1-w^\lambda)^{\delta-1}$$
-
-where $w = 1-(1-x^\alpha)^\beta$.
+$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left(1-(1-x^\alpha)^\beta\right)^{\lambda-1} \left(1-\left(1-(1-x^\alpha)^\beta\right)^\lambda\right)^{\delta-1}$$
 
 **CDF:**
 
-$$F_{\text{KKw}}(x) = 1 - (1-w^\lambda)^\delta$$
+$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \left(1-\left(1-(1-x^\alpha)^\beta\right)^\lambda\right)^\delta$$
 
 **Quantile (closed-form):**
 
-$$Q_{\text{KKw}}(p) = \left(1 - \left(1 - \left(1-(1-p)^{1/\delta}\right)^{1/\lambda}\right)^{1/\beta}\right)^{1/\alpha}$$
+$$Q_{\text{KKw}}(p; \alpha, \beta, \delta, \lambda) = \left(1 - \left(1 - \left(1-(1-p)^{1/\delta}\right)^{1/\lambda}\right)^{1/\beta}\right)^{1/\alpha}$$
 
 **Moments:** Analytical expressions not available in closed form.
 
@@ -159,15 +163,15 @@ $$Q_{\text{KKw}}(p) = \left(1 - \left(1 - \left(1-(1-p)^{1/\delta}\right)^{1/\la
 
 **PDF:**
 
-$$f_{\text{EKw}}(x) = \lambda \alpha \beta \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left(1-(1-x^\alpha)^\beta \right)^{\lambda-1}$$
+$$f_{\text{EKw}}(x; \alpha, \beta, \lambda) = \lambda \alpha \beta \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left(1-(1-x^\alpha)^\beta\right)^{\lambda-1}$$
 
 **CDF:**
 
-$$F_{\text{EKw}}(x) = \left(1-(1-x^\alpha)^\beta \right)^\lambda$$
+$$F_{\text{EKw}}(x; \alpha, \beta, \lambda) = \left(1-(1-x^\alpha)^\beta\right)^\lambda$$
 
 **Quantile (closed-form):**
 
-$$Q_{\text{EKw}}(p) = \left(1-\left(1-p^{1/\lambda}\right)^{1/\beta}\right)^{1/\alpha}$$
+$$Q_{\text{EKw}}(p; \alpha, \beta, \lambda) = \left(1-\left(1-p^{1/\lambda}\right)^{1/\beta}\right)^{1/\alpha}$$
 
 **Moments:**
 
@@ -184,15 +188,15 @@ $\binom{\lambda}{k+1} = \frac{\lambda(\lambda-1)\cdots(\lambda-k)}{(k+1)!}$.
 
 **PDF:**
 
-$$f_{\text{MC}}(x) = \frac{\lambda}{B(\gamma, \delta)} x^{\gamma\lambda-1} (1-x^\lambda)^{\delta-1}$$
+$$f_{\text{MC}}(x; \gamma, \delta, \lambda) = \frac{\lambda}{B(\gamma, \delta)} x^{\gamma\lambda-1} (1-x^\lambda)^{\delta-1}$$
 
 **CDF:**
 
-$$F_{\text{MC}}(x) = I_{x^\lambda}(\gamma, \delta)$$
+$$F_{\text{MC}}(x; \gamma, \delta, \lambda) = I_{x^\lambda}(\gamma, \delta)$$
 
 **Quantile:**
 
-$$Q_{\text{MC}}(p) = \left(I_p^{-1}(\gamma, \delta)\right)^{1/\lambda}$$
+$$Q_{\text{MC}}(p; \gamma, \delta, \lambda) = \left(I_p^{-1}(\gamma, \delta)\right)^{1/\lambda}$$
 
 where $I_p^{-1}(\gamma, \delta)$ is the inverse regularized incomplete
 beta function (quantile function of the Beta distribution).
@@ -212,15 +216,15 @@ $\gamma = \delta = \lambda = 1$
 
 **PDF:**
 
-$$f_{\text{Kw}}(x) = \alpha \beta \, x^{\alpha-1} (1-x^\alpha)^{\beta-1}$$
+$$f_{\text{Kw}}(x; \alpha, \beta) = \alpha \beta \, x^{\alpha-1} (1-x^\alpha)^{\beta-1}$$
 
 **CDF:**
 
-$$F_{\text{Kw}}(x) = 1 - (1-x^\alpha)^\beta$$
+$$F_{\text{Kw}}(x; \alpha, \beta) = 1 - (1-x^\alpha)^\beta$$
 
 **Quantile (closed-form):**
 
-$$Q_{\text{Kw}}(p) = \left(1-(1-p)^{1/\beta} \right)^{1/\alpha}$$
+$$Q_{\text{Kw}}(p; \alpha, \beta) = \left(1-(1-p)^{1/\beta}\right)^{1/\alpha}$$
 
 **Moments:**
 
@@ -245,15 +249,15 @@ $\alpha = \beta = \lambda = 1$
 
 **PDF:**
 
-$$f_{\text{Beta}}(x) = \frac{1}{B(\gamma, \delta)} x^{\gamma-1} (1-x)^{\delta-1}$$
+$$f_{\text{Beta}}(x; \gamma, \delta) = \frac{1}{B(\gamma, \delta)} x^{\gamma-1} (1-x)^{\delta-1}$$
 
 **CDF:**
 
-$$F_{\text{Beta}}(x) = I_x(\gamma, \delta)$$
+$$F_{\text{Beta}}(x; \gamma, \delta) = I_x(\gamma, \delta)$$
 
 **Quantile:**
 
-$$Q_{\text{Beta}}(p) = I_p^{-1}(\gamma, \delta)$$
+$$Q_{\text{Beta}}(p; \gamma, \delta) = I_p^{-1}(\gamma, \delta)$$
 
 **Moments:**
 
