@@ -95,7 +95,9 @@ where $B_z(a,b) = \int_0^z t^{a-1}(1-t)^{b-1}dt$.
 
 **PDF:**
 
-$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma\lambda-1} \left\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right\}^{\delta-1}$$
+<!-- $$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma\lambda-1} \left\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right\}^{\delta-1}$$ -->
+
+$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma\lambda-1} \bigl\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\bigr\}^{\delta-1}$$
 
 **CDF:**
 
@@ -115,7 +117,9 @@ Numerical integration or simulation methods required.
 
 **PDF:**
 
-$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma-1} \left\{1-\left[1-(1-x^\alpha)^\beta\right]\right\}^{\delta-1}$$
+<!-- $$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma-1} \left\{1-\left[1-(1-x^\alpha)^\beta\right]\right\}^{\delta-1}$$ -->
+
+$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma-1} \bigl\{1-\left[1-(1-x^\alpha)^\beta\right]\bigr\}^{\delta-1}$$
 
 Simplifying:
 
@@ -143,11 +147,15 @@ $$x = \left[1-\left(1-I_u^{-1}(\gamma, \delta)\right)^{1/\beta}\right]^{1/\alpha
 
 **PDF:**
 
-$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta \right]^{\lambda-1} \left\{1-\left[1-(1-x^\alpha)^\beta \right]^\lambda\right\}^{\delta-1}$$
+<!-- $$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta \right]^{\lambda-1} \left\{1-\left[1-(1-x^\alpha)^\beta \right]^\lambda\right\}^{\delta-1}$$ -->
+
+$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \alpha \beta \delta \lambda \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta \right]^{\lambda-1} \bigl\{1-\left[1-(1-x^\alpha)^\beta \right]^\lambda\bigr\}^{\delta-1}$$
 
 **CDF:**
 
-$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \left\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right\}^\delta$$
+<!-- $$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \left\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right\}^\delta$$ -->
+
+$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \bigl\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\bigr\}^\delta$$
 
 **Quantile (closed-form):**
 
