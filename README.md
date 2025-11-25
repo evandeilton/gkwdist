@@ -753,7 +753,7 @@ citation("gkwdist")
 
 ## Author
 
-**J. E. Lopes**  
+**José Evandeilton Lopes**  
 LEG - Laboratory of Statistics and Geoinformation  
 PPGMNE - Graduate Program in Numerical Methods in Engineering  
 Federal University of Paraná (UFPR), Brazil  
