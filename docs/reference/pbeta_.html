@@ -17,7 +17,7 @@ and shape2 = delta + 1."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,7 @@ and shape2 = delta + 1."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>CDF of the Beta Distribution (gamma, delta+1 Parameterization)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/beta.R" class="external-link"><code>R/beta.R</code></a></small>
       <div class="d-none name"><code>pbeta_.Rd</code></div>
     </div>
 
@@ -59,7 +59,7 @@ and <code>shape2 = delta + 1</code>.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pbeta_</span><span class="op">(</span><span class="va">q</span>, <span class="va">gamma</span>, <span class="va">delta</span>, lower_tail <span class="op">=</span> <span class="cn">TRUE</span>, log_p <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pbeta_</span><span class="op">(</span><span class="va">q</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lower.tail <span class="op">=</span> <span class="cn">TRUE</span>, log.p <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -81,12 +81,12 @@ scalar or a vector. Default: 1.0.</p></dd>
 Default: 0.0 (leading to <code>shape2 = 1</code>).</p></dd>
 
 
-<dt id="arg-lower-tail">lower_tail<a class="anchor" aria-label="anchor" href="#arg-lower-tail"></a></dt>
+<dt id="arg-lower-tail">lower.tail<a class="anchor" aria-label="anchor" href="#arg-lower-tail"></a></dt>
 <dd><p>Logical; if <code>TRUE</code> (default), probabilities are
 \(P(X \le q)\), otherwise, \(P(X &gt; q)\).</p></dd>
 
 
-<dt id="arg-log-p">log_p<a class="anchor" aria-label="anchor" href="#arg-log-p"></a></dt>
+<dt id="arg-log-p">log.p<a class="anchor" aria-label="anchor" href="#arg-log-p"></a></dt>
 <dd><p>Logical; if <code>TRUE</code>, probabilities \(p\) are given as
 \(\log(p)\). Default: <code>FALSE</code>.</p></dd>
 
@@ -94,11 +94,11 @@ Default: 0.0 (leading to <code>shape2 = 1</code>).</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A vector of probabilities, \(F(q)\), or their logarithms/complements
-depending on <code>lower_tail</code> and <code>log_p</code>. The length of the result
+depending on <code>lower.tail</code> and <code>log.p</code>. The length of the result
 is determined by the recycling rule applied to the arguments (<code>q</code>,
 <code>gamma</code>, <code>delta</code>). Returns <code>0</code> (or <code>-Inf</code> if
-<code>log_p = TRUE</code>) for <code>q &lt;= 0</code> and <code>1</code> (or <code>0</code> if
-<code>log_p = TRUE</code>) for <code>q &gt;= 1</code>. Returns <code>NaN</code> for invalid
+<code>log.p = TRUE</code>) for <code>q &lt;= 0</code> and <code>1</code> (or <code>0</code> if
+<code>log.p = TRUE</code>) for <code>q &gt;= 1</code>. Returns <code>NaN</code> for invalid
 parameters.</p>
     </div>
     <div class="section level2">
@@ -106,7 +106,7 @@ parameters.</p>
     <p>This function computes the CDF of a Beta distribution with parameters
 <code>shape1 = gamma</code> and <code>shape2 = delta + 1</code>. It is equivalent to
 calling <code>stats::pbeta(q, shape1 = gamma, shape2 = delta + 1,
-lower.tail = lower_tail, log.p = log_p)</code>.</p>
+lower.tail = lower.tail, log.p = log.p)</code>.</p>
 <p>This distribution arises as a special case of the five-parameter
 Generalized Kumaraswamy (GKw) distribution (<code><a href="pgkw.html">pgkw</a></code>) obtained
 by setting \(\alpha = 1\), \(\beta = 1\), and \(\lambda = 1\).
@@ -167,15 +167,15 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Max difference vs pmc: 0"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Calculate upper tail P(X &gt; q)</span></span></span>
-<span class="r-in"><span><span class="va">probs_upper</span> <span class="op">&lt;-</span> <span class="fu">pbeta_</span><span class="op">(</span><span class="va">q_vals</span>, <span class="va">gamma_par</span>, <span class="va">delta_par</span>, lower_tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">probs_upper</span> <span class="op">&lt;-</span> <span class="fu">pbeta_</span><span class="op">(</span><span class="va">q_vals</span>, <span class="va">gamma_par</span>, <span class="va">delta_par</span>, lower.tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">probs_upper</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.73728 0.18750 0.00672</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">pbeta</a></span><span class="op">(</span><span class="va">q_vals</span>, <span class="va">shape1</span>, <span class="va">shape2</span>, lower.tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.73728 0.18750 0.00672</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Calculate log CDF</span></span></span>
-<span class="r-in"><span><span class="va">log_probs</span> <span class="op">&lt;-</span> <span class="fu">pbeta_</span><span class="op">(</span><span class="va">q_vals</span>, <span class="va">gamma_par</span>, <span class="va">delta_par</span>, log_p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">log_probs</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">log.probs</span> <span class="op">&lt;-</span> <span class="fu">pbeta_</span><span class="op">(</span><span class="va">q_vals</span>, <span class="va">gamma_par</span>, <span class="va">delta_par</span>, log.p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">log.probs</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] -1.336666453 -0.207639365 -0.006742681</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">pbeta</a></span><span class="op">(</span><span class="va">q_vals</span>, <span class="va">shape1</span>, <span class="va">shape2</span>, log.p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] -1.336666453 -0.207639365 -0.006742681</span>

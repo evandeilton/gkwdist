@@ -15,7 +15,7 @@ optimization via maximum likelihood estimation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@ optimization via maximum likelihood estimation."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Gradient of the Negative Log-Likelihood for the Kumaraswamy (Kw) Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/kw.R" class="external-link"><code>R/kw.R</code></a></small>
       <div class="d-none name"><code>grkw.Rd</code></div>
     </div>
 
@@ -265,22 +265,22 @@ with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Point 1 : alpha = 1.5 , beta = 2.5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter Analytical  Numerical      Abs_Diff     Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha -431.55771 -431.55771 1.2864847e-06 2.9810258e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha -431.55771 -431.55771 1.2864846e-06 2.9810256e-09</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta  122.18002  122.18002 7.1891532e-07 5.8840662e-09</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Point 2 : alpha = 2 , beta = 3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter  Analytical   Numerical      Abs_Diff     Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha -170.184879 -170.184880 1.3360205e-06 7.8504066e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha -170.184879 -170.184879 7.6758630e-07 4.5103085e-09</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta   42.661367   42.661367 3.0471102e-07 7.1425518e-09</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Point 3 : alpha = 2.511171 , beta = 3.570812 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter     Analytical      Numerical      Abs_Diff   Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha  2.0717825e-05  2.1600499e-05 8.8267439e-07 0.042604382</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493050e-07 0.057995138</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha  2.0717825e-05  2.3305802e-05 2.5879771e-06 0.124914880</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493044e-07 0.057995133</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Point 4 : alpha = 3 , beta = 4 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter Analytical  Numerical      Abs_Diff     Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha 133.673727 133.673730 2.8540615e-06 2.1350953e-08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha 133.673727 133.673730 2.8540616e-06 2.1350954e-08</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -32.697532 -32.697532 5.1952384e-08 1.5888778e-09</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>

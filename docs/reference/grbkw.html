@@ -19,7 +19,7 @@ for maximum likelihood estimation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,7 @@ for maximum likelihood estimation."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Gradient of the Negative Log-Likelihood for the BKw Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/bkw.R" class="external-link"><code>R/bkw.R</code></a></small>
       <div class="d-none name"><code>grbkw.Rd</code></div>
     </div>
 
@@ -274,9 +274,9 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison_grad</span>, digits <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter  Analytical   Numerical      Abs_Diff     Rel_Error</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha  0.50006808  0.50006093 7.1441844e-06 1.4286424e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -0.14962570 -0.14962154 4.1532289e-06 2.7757458e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     gamma  0.66679761  0.66679576 1.8569186e-06 2.7848309e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4     delta -0.26559804 -0.26560144 3.4024424e-06 1.2810495e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -0.14962570 -0.14961984 5.8585316e-06 3.9154582e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     gamma  0.66679761  0.66679604 1.5727016e-06 2.3585892e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     delta -0.26559804 -0.26560144 3.4024423e-06 1.2810495e-05</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 5: Score Test Statistic</span></span></span>

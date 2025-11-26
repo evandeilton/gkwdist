@@ -17,7 +17,7 @@ special case of the Generalized Kumaraswamy (GKw) distribution where
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,7 @@ special case of the Generalized Kumaraswamy (GKw) distribution where
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Gradient of the Negative Log-Likelihood for the EKw Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/HEAD/R/ekw.R" class="external-link"><code>R/ekw.R</code></a></small>
       <div class="d-none name"><code>grekw.Rd</code></div>
     </div>
 
@@ -227,7 +227,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gradient at MLE:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.067846e-05 8.446125e-06 1.901242e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.067846e-05 8.446126e-06 1.901243e-05</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max absolute component:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute component: 2.067846e-05 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Gradient norm:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
@@ -261,10 +261,10 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>              <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">grad_analytical</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e-10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison_grad</span>, digits <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter    Analytical     Numerical      Abs_Diff   Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha 2.0678456e-05 8.2422957e-06 1.2436161e-05 0.601403713</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta 8.4461253e-06 8.2422957e-06 2.0382958e-07 0.024132624</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3    lambda 1.9012424e-05 1.9326762e-05 3.1433795e-07 0.016533204</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter    Analytical     Numerical      Abs_Diff  Rel_Error</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha 2.0678456e-05 2.6432190e-05 5.7537336e-06 0.27824639</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta 8.4461258e-06 1.6484591e-05 8.0384657e-06 0.95172281</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    lambda 1.9012426e-05 2.4726887e-05 5.7144614e-06 0.30056298</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 5: Score Test Statistic</span></span></span>

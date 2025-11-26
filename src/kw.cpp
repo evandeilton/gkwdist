@@ -1,1789 +1,1201 @@
+/**
+ * @file kw.cpp
+ * @brief Kumaraswamy (Kw) Distribution Functions
+ * 
+ * @details
+ * This file implements the full suite of distribution functions for the
+ * two-parameter Kumaraswamy (Kw) distribution, which is the base case
+ * of the entire GKw family (setting γ=1, δ=0, λ=1).
+ * 
+ * **Relationship to GKw:**
+ * \deqn{Kw(\alpha, \beta) = GKw(\alpha, \beta, 1, 0, 1)}
+ * 
+ * The Kumaraswamy distribution has probability density function:
+ * \deqn{
+ *   f(x; \alpha, \beta) = \alpha \beta x^{\alpha-1} (1-x^\alpha)^{\beta-1}
+ * }
+ * for \eqn{x \in (0,1)}.
+ * 
+ * **Historical Context:**
+ * Introduced by Kumaraswamy (1980) as a tractable alternative to the Beta
+ * distribution for modeling double-bounded random processes. Unlike the Beta
+ * distribution, both the PDF and CDF have closed-form expressions.
+ * 
+ * **Derivation from GKw:**
+ * Setting γ=1, δ=0, λ=1 in the GKw PDF:
+ * - The Beta function becomes: \eqn{B(1,0+1) = B(1,1) = 1}
+ * - The exponent simplifies: \eqn{\gamma\lambda - 1 = 1 \cdot 1 - 1 = 0}
+ * - The final term vanishes: \eqn{\{...\}^\delta = \{...\}^0 = 1}
+ * 
+ * The cumulative distribution function is:
+ * \deqn{
+ *   F(x) = 1 - (1-x^\alpha)^\beta
+ * }
+ * 
+ * The quantile function (inverse CDF) is:
+ * \deqn{
+ *   Q(p) = \left\{1 - (1-p)^{1/\beta}\right\}^{1/\alpha}
+ * }
+ * 
+ * **Parameter Constraints:**
+ * - \eqn{\alpha > 0} (shape parameter)
+ * - \eqn{\beta > 0} (shape parameter)
+ * 
+ * **Special Cases:**
+ * | Distribution | Condition | Relation |
+ * |--------------|-----------|----------|
+ * | Uniform(0,1) | \eqn{\alpha = \beta = 1} | Kw(1, 1) |
+ * | Power function | \eqn{\beta = 1} | Kw(α, 1) |
+ * 
+ * **Random Variate Generation:**
+ * Uses inverse transform method:
+ * 1. Generate \eqn{U \sim Uniform(0,1)}
+ * 2. Return \eqn{X = Q(U) = \{1 - (1-U)^{1/\beta}\}^{1/\alpha}}
+ * 
+ * **Advantages over Beta:**
+ * - Closed-form CDF: \eqn{F(x) = 1-(1-x^\alpha)^\beta}
+ * - Simpler moments formulas
+ * - Efficient random number generation
+ * - No special functions required (no Beta function in CDF/quantile)
+ * 
+ * **Numerical Stability:**
+ * All computations use log-space arithmetic and numerically stable helper
+ * functions from utils.h to prevent overflow/underflow.
+ * 
+ * **Implemented Functions:**
+ * - dkw(): Probability density function (PDF)
+ * - pkw(): Cumulative distribution function (CDF)
+ * - qkw(): Quantile function (inverse CDF)
+ * - rkw(): Random variate generation
+ * - llkw(): Negative log-likelihood for MLE
+ * - grkw(): Gradient of negative log-likelihood
+ * - hskw(): Hessian of negative log-likelihood
+ * 
+ * @author Lopes, J. E.
+ * @date 2025-01-07
+ * 
+ * @references
+ * Kumaraswamy, P. (1980). A generalized probability density function for
+ * double-bounded random processes. Journal of Hydrology, 46(1-2), 79-88.
+ * 
+ * Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
+ * with some tractability advantages. Statistical Methodology, 6(1), 70-81.
+ * 
+ * @see gkw.cpp for the parent distribution
+ * @see utils.h for numerical stability functions and parameter validators
+ * 
+ * @note All functions use R's vectorization conventions with parameter recycling.
+ * @note Thread-safe: No global state is modified.
+ */
+
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 #include "utils.h"
 
-/*
-----------------------------------------------------------------------------
-KUMARASWAMY (Kw) DISTRIBUTION
-----------------------------------------------------------------------------
 
-Parameters: alpha>0, beta>0.
+// ============================================================================
+// PROBABILITY DENSITY FUNCTION
+// ============================================================================
 
-* PDF:
-f(x) = alpha * beta * x^(alpha -1) * (1 - x^alpha)^(beta -1),  for 0<x<1.
-
-* CDF:
-F(x)= 1 - (1 - x^alpha)^beta.
-
-* QUANTILE:
-Q(p)= {1 - [1 - p]^(1/beta)}^(1/alpha).
-
-* RANDOM GENERATION:
-If V ~ Uniform(0,1), then X= {1 - [1 - V]^(1/beta)}^(1/alpha).
-
-* NEGATIVE LOG-LIKELIHOOD:
-sum over i of -log( f(x_i) ).
-log f(x_i)= log(alpha) + log(beta) + (alpha-1)*log(x_i) + (beta-1)*log(1 - x_i^alpha).
-----------------------------------------------------------------------------*/
-
-
-
-
-
-
-// -----------------------------------------------------------------------------
-// 1) dkw: PDF of Kumaraswamy
-// -----------------------------------------------------------------------------
-
-
-//' @title Density of the Kumaraswamy (Kw) Distribution
-//' @author Lopes, J. E.
-//' @keywords distribution density kumaraswamy
-//'
-//' @description
-//' Computes the probability density function (PDF) for the two-parameter
-//' Kumaraswamy (Kw) distribution with shape parameters \code{alpha} (\eqn{\alpha})
-//' and \code{beta} (\eqn{\beta}). This distribution is defined on the interval (0, 1).
-//'
-//' @param x Vector of quantiles (values between 0 and 1).
-//' @param alpha Shape parameter \code{alpha} > 0. Can be a scalar or a vector.
-//'   Default: 1.0.
-//' @param beta Shape parameter \code{beta} > 0. Can be a scalar or a vector.
-//'   Default: 1.0.
-//' @param log_prob Logical; if \code{TRUE}, the logarithm of the density is
-//'   returned (\eqn{\log(f(x))}). Default: \code{FALSE}.
-//'
-//' @return A vector of density values (\eqn{f(x)}) or log-density values
-//'   (\eqn{\log(f(x))}). The length of the result is determined by the recycling
-//'   rule applied to the arguments (\code{x}, \code{alpha}, \code{beta}).
-//'   Returns \code{0} (or \code{-Inf} if \code{log_prob = TRUE}) for \code{x}
-//'   outside the interval (0, 1), or \code{NaN} if parameters are invalid
-//'   (e.g., \code{alpha <= 0}, \code{beta <= 0}).
-//'
-//' @details
-//' The probability density function (PDF) of the Kumaraswamy (Kw) distribution
-//' is given by:
-//' \deqn{
-//' f(x; \alpha, \beta) = \alpha \beta x^{\alpha-1} (1 - x^\alpha)^{\beta-1}
-//' }
-//' for \eqn{0 < x < 1}, \eqn{\alpha > 0}, and \eqn{\beta > 0}.
-//'
-//' The Kumaraswamy distribution is identical to the Generalized Kumaraswamy (GKw)
-//' distribution (\code{\link{dgkw}}) with parameters \eqn{\gamma = 1},
-//' \eqn{\delta = 0}, and \eqn{\lambda = 1}. It is also a special case of the
-//' Exponentiated Kumaraswamy (\code{\link{dekw}}) with \eqn{\lambda = 1}, and
-//' the Kumaraswamy-Kumaraswamy (\code{\link{dkkw}}) with \eqn{\delta = 0}
-//' and \eqn{\lambda = 1}.
-//'
-//' @references
-//' Kumaraswamy, P. (1980). A generalized probability density function for
-//' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
-//'
-//'
-//' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
-//' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
-//'
-//'
-//' @seealso
-//' \code{\link{dgkw}} (parent distribution density),
-//' \code{\link{dekw}}, \code{\link{dkkw}},
-//' \code{\link{pkw}}, \code{\link{qkw}}, \code{\link{rkw}} (other Kw functions),
-//' \code{\link[stats]{dbeta}}
-//'
-//' @examples
-//' \donttest{
-//' # Example values
-//' x_vals <- c(0.2, 0.5, 0.8)
-//' alpha_par <- 2.0
-//' beta_par <- 3.0
-//'
-//' # Calculate density using dkw
-//' densities <- dkw(x_vals, alpha_par, beta_par)
-//' print(densities)
-//'
-//' # Calculate log-density
-//' log_densities <- dkw(x_vals, alpha_par, beta_par, log_prob = TRUE)
-//' print(log_densities)
-//' # Check: should match log(densities)
-//' print(log(densities))
-//'
-//' # Compare with dgkw setting gamma = 1, delta = 0, lambda = 1
-//' densities_gkw <- dgkw(x_vals, alpha_par, beta_par, gamma = 1.0, delta = 0.0,
-//'                       lambda = 1.0)
-//' print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-//'
-//' # Plot the density for different shape parameter combinations
-//' curve_x <- seq(0.001, 0.999, length.out = 200)
-//' plot(curve_x, dkw(curve_x, alpha = 2, beta = 3), type = "l",
-//'      main = "Kumaraswamy Density Examples", xlab = "x", ylab = "f(x)",
-//'      col = "blue", ylim = c(0, 4))
-//' lines(curve_x, dkw(curve_x, alpha = 3, beta = 2), col = "red")
-//' lines(curve_x, dkw(curve_x, alpha = 0.5, beta = 0.5), col = "green") # U-shaped
-//' lines(curve_x, dkw(curve_x, alpha = 5, beta = 1), col = "purple") # J-shaped
-//' lines(curve_x, dkw(curve_x, alpha = 1, beta = 3), col = "orange") # J-shaped (reversed)
-//' legend("top", legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
-//'        col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2)
-//' }
-//'
-//' @export
-// [[Rcpp::export]]
+/**
+ * @brief Probability Density Function of the Kumaraswamy Distribution
+ * 
+ * Computes the density (or log-density) for the Kumaraswamy distribution
+ * at specified quantiles.
+ * 
+ * @param x Vector of quantiles (values in (0,1))
+ * @param alpha Shape parameter vector (α > 0)
+ * @param beta Shape parameter vector (β > 0)
+ * @param log_prob If TRUE, returns log-density; otherwise returns density
+ * 
+ * @return NumericVector of density values (or log-density if log_prob=TRUE)
+ * 
+ * @details
+ * The log-density is computed as:
+ * \deqn{
+ *   \log f(x) = \log(\alpha) + \log(\beta)
+ *   + (\alpha-1)\log(x) + (\beta-1)\log(1-x^\alpha)
+ * }
+ * 
+ * @note Exported as .dkw_cpp for internal package use
+ */
+// [[Rcpp::export(.dkw_cpp)]]
 Rcpp::NumericVector dkw(
-   const arma::vec& x,
-   const Rcpp::NumericVector& alpha,
-   const Rcpp::NumericVector& beta,
-   bool log_prob=false
+    const arma::vec& x,
+    const Rcpp::NumericVector& alpha,
+    const Rcpp::NumericVector& beta,
+    bool log_prob = false
 ) {
- arma::vec a_vec(alpha.begin(), alpha.size());
- arma::vec b_vec(beta.begin(), beta.size());
- 
- size_t N= std::max({ x.n_elem, a_vec.n_elem, b_vec.n_elem });
- arma::vec out(N);
- 
- out.fill(log_prob ? R_NegInf : 0.0);
- 
- for (size_t i=0; i<N; i++){
-   double a= a_vec[i % a_vec.n_elem];
-   double b= b_vec[i % b_vec.n_elem];
-   double xx= x[i % x.n_elem];
-   
-   if (!check_kw_pars(a,b)) {
-     // invalid => pdf=0 or logpdf=-Inf
-     continue;
-   }
-   if (xx<=0.0 || xx>=1.0 || !R_finite(xx)) {
-     // outside domain => 0 or -Inf
-     continue;
-   }
-   
-   // log f(x)= log(a)+ log(b) + (a-1)* log(x) + (b-1)* log(1- x^a)
-   double la= std::log(a);
-   double lb= std::log(b);
-   
-   double lx= std::log(xx);
-   double xalpha= a* lx; // log(x^a)
-   // log(1- x^a)= log1mexp(xalpha)
-   double log_1_xalpha= log1mexp(xalpha);
-   if (!R_finite(log_1_xalpha)) {
-     continue;
-   }
-   
-   double log_pdf= la + lb + (a-1.0)* lx + (b-1.0)* log_1_xalpha;
-   
-   if (log_prob) {
-     out(i)= log_pdf;
-   } else {
-     out(i)= std::exp(log_pdf);
-   }
- }
- 
- return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
+  // Convert R vectors to Armadillo vectors
+  arma::vec a_vec(alpha.begin(), alpha.size());
+  arma::vec b_vec(beta.begin(), beta.size());
+  
+  // Determine output length for recycling
+  size_t N = std::max({x.n_elem, a_vec.n_elem, b_vec.n_elem});
+  
+  // Initialize result with appropriate default
+  arma::vec out(N);
+  out.fill(log_prob ? R_NegInf : 0.0);
+  
+  for (size_t i = 0; i < N; i++) {
+    // Extract recycled parameters
+    double a = a_vec[i % a_vec.n_elem];
+    double b = b_vec[i % b_vec.n_elem];
+    double xx = x[i % x.n_elem];
+    
+    // Validate parameters
+    if (!check_kw_pars(a, b)) {
+      continue;
+    }
+    
+    // Check support: x must be in (0, 1)
+    if (xx <= 0.0 || xx >= 1.0 || !R_finite(xx)) {
+      continue;
+    }
+    
+    // ---- Log-space computation of density ----
+    
+    // Normalization constant: log(αβ)
+    double la = safe_log(a);
+    double lb = safe_log(b);
+    
+    // Compute log(x) and log(x^α)
+    double lx = safe_log(xx);
+    double log_xalpha = a * lx;  // log(x^α)
+    
+    // Compute log(1 - x^α) using stable log1mexp
+    double log_v = log1mexp(log_xalpha);
+    if (!R_finite(log_v)) {
+      continue;
+    }
+    
+    // Assemble log-density:
+    // log(f) = log(α) + log(β) + (α-1)*log(x) + (β-1)*log(1-x^α)
+    double log_pdf = la + lb + (a - 1.0) * lx + (b - 1.0) * log_v;
+    
+    // Validate result
+    if (!R_finite(log_pdf)) {
+      continue;
+    }
+    
+    // Return appropriate scale
+    out(i) = log_prob ? log_pdf : safe_exp(log_pdf);
+  }
+  
+  return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
 }
 
 
-// -----------------------------------------------------------------------------
-// 2) pkw: CDF of Kumaraswamy
-// -----------------------------------------------------------------------------
+// ============================================================================
+// CUMULATIVE DISTRIBUTION FUNCTION
+// ============================================================================
 
-//' @title Cumulative Distribution Function (CDF) of the Kumaraswamy (Kw) Distribution
-//' @author Lopes, J. E.
-//' @keywords distribution cumulative kumaraswamy
-//'
-//' @description
-//' Computes the cumulative distribution function (CDF), \eqn{P(X \le q)}, for the
-//' two-parameter Kumaraswamy (Kw) distribution with shape parameters \code{alpha}
-//' (\eqn{\alpha}) and \code{beta} (\eqn{\beta}). This distribution is defined
-//' on the interval (0, 1).
-//'
-//' @param q Vector of quantiles (values generally between 0 and 1).
-//' @param alpha Shape parameter \code{alpha} > 0. Can be a scalar or a vector.
-//'   Default: 1.0.
-//' @param beta Shape parameter \code{beta} > 0. Can be a scalar or a vector.
-//'   Default: 1.0.
-//' @param lower_tail Logical; if \code{TRUE} (default), probabilities are
-//'   \eqn{P(X \le q)}, otherwise, \eqn{P(X > q)}.
-//' @param log_p Logical; if \code{TRUE}, probabilities \eqn{p} are given as
-//'   \eqn{\log(p)}. Default: \code{FALSE}.
-//'
-//' @return A vector of probabilities, \eqn{F(q)}, or their logarithms/complements
-//'   depending on \code{lower_tail} and \code{log_p}. The length of the result
-//'   is determined by the recycling rule applied to the arguments (\code{q},
-//'   \code{alpha}, \code{beta}). Returns \code{0} (or \code{-Inf} if
-//'   \code{log_p = TRUE}) for \code{q <= 0} and \code{1} (or \code{0} if
-//'   \code{log_p = TRUE}) for \code{q >= 1}. Returns \code{NaN} for invalid
-//'   parameters.
-//'
-//' @details
-//' The cumulative distribution function (CDF) of the Kumaraswamy (Kw)
-//' distribution is given by:
-//' \deqn{
-//' F(x; \alpha, \beta) = 1 - (1 - x^\alpha)^\beta
-//' }
-//' for \eqn{0 < x < 1}, \eqn{\alpha > 0}, and \eqn{\beta > 0}.
-//'
-//' The Kw distribution is a special case of several generalized distributions:
-//' \itemize{
-//'  \item Generalized Kumaraswamy (\code{\link{pgkw}}) with \eqn{\gamma=1, \delta=0, \lambda=1}.
-//'  \item Exponentiated Kumaraswamy (\code{\link{pekw}}) with \eqn{\lambda=1}.
-//'  \item Kumaraswamy-Kumaraswamy (\code{\link{pkkw}}) with \eqn{\delta=0, \lambda=1}.
-//' }
-//' The implementation uses the closed-form expression for efficiency.
-//'
-//' @references
-//' Kumaraswamy, P. (1980). A generalized probability density function for
-//' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
-//'
-//'
-//' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
-//' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
-//'
-//'
-//' @seealso
-//' \code{\link{pgkw}}, \code{\link{pekw}}, \code{\link{pkkw}} (related generalized CDFs),
-//' \code{\link{dkw}}, \code{\link{qkw}}, \code{\link{rkw}} (other Kw functions),
-//' \code{\link[stats]{pbeta}}
-//'
-//' @examples
-//' \donttest{
-//' # Example values
-//' q_vals <- c(0.2, 0.5, 0.8)
-//' alpha_par <- 2.0
-//' beta_par <- 3.0
-//'
-//' # Calculate CDF P(X <= q) using pkw
-//' probs <- pkw(q_vals, alpha_par, beta_par)
-//' print(probs)
-//'
-//' # Calculate upper tail P(X > q)
-//' probs_upper <- pkw(q_vals, alpha_par, beta_par, lower_tail = FALSE)
-//' print(probs_upper)
-//' # Check: probs + probs_upper should be 1
-//' print(probs + probs_upper)
-//'
-//' # Calculate log CDF
-//' log_probs <- pkw(q_vals, alpha_par, beta_par, log_p = TRUE)
-//' print(log_probs)
-//' # Check: should match log(probs)
-//' print(log(probs))
-//'
-//' # Compare with pgkw setting gamma = 1, delta = 0, lambda = 1
-//' probs_gkw <- pgkw(q_vals, alpha_par, beta_par, gamma = 1.0, delta = 0.0,
-//'                   lambda = 1.0)
-//' print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-//'
-//' # Plot the CDF for different shape parameter combinations
-//' curve_q <- seq(0.001, 0.999, length.out = 200)
-//' plot(curve_q, pkw(curve_q, alpha = 2, beta = 3), type = "l",
-//'      main = "Kumaraswamy CDF Examples", xlab = "q", ylab = "F(q)",
-//'      col = "blue", ylim = c(0, 1))
-//' lines(curve_q, pkw(curve_q, alpha = 3, beta = 2), col = "red")
-//' lines(curve_q, pkw(curve_q, alpha = 0.5, beta = 0.5), col = "green")
-//' lines(curve_q, pkw(curve_q, alpha = 5, beta = 1), col = "purple")
-//' lines(curve_q, pkw(curve_q, alpha = 1, beta = 3), col = "orange")
-//' legend("bottomright", legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
-//'        col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2)
-//'
-//' }
-//'
-//' @export
-// [[Rcpp::export]]
+/**
+ * @brief Cumulative Distribution Function of the Kumaraswamy Distribution
+ * 
+ * Computes the cumulative probability for the Kumaraswamy distribution
+ * at specified quantiles.
+ * 
+ * @param q Vector of quantiles
+ * @param alpha Shape parameter vector (α > 0)
+ * @param beta Shape parameter vector (β > 0)
+ * @param lower_tail If TRUE, returns P(X ≤ q); otherwise P(X > q)
+ * @param log_p If TRUE, returns log-probability
+ * 
+ * @return NumericVector of cumulative probabilities
+ * 
+ * @details
+ * The CDF has a closed form (unlike the Beta distribution):
+ * \deqn{F(x) = 1 - (1-x^\alpha)^\beta}
+ * 
+ * @note Exported as .pkw_cpp for internal package use
+ */
+// [[Rcpp::export(.pkw_cpp)]]
 Rcpp::NumericVector pkw(
-   const arma::vec& q,
-   const Rcpp::NumericVector& alpha,
-   const Rcpp::NumericVector& beta,
-   bool lower_tail=true,
-   bool log_p=false
+    const arma::vec& q,
+    const Rcpp::NumericVector& alpha,
+    const Rcpp::NumericVector& beta,
+    bool lower_tail = true,
+    bool log_p = false
 ) {
- arma::vec a_vec(alpha.begin(), alpha.size());
- arma::vec b_vec(beta.begin(), beta.size());
- 
- size_t N= std::max({ q.n_elem, a_vec.n_elem, b_vec.n_elem });
- arma::vec out(N);
- 
- for (size_t i=0; i<N; i++){
-   double a= a_vec[i % a_vec.n_elem];
-   double b= b_vec[i % b_vec.n_elem];
-   double xx= q[i % q.n_elem];
-   
-   if (!check_kw_pars(a,b)) {
-     out(i)= NA_REAL;
-     continue;
-   }
-   
-   // boundary
-   if (!R_finite(xx) || xx<=0.0) {
-     double val0= (lower_tail ? 0.0 : 1.0);
-     out(i)= log_p ? std::log(val0) : val0;
-     continue;
-   }
-   if (xx>=1.0) {
-     double val1= (lower_tail ? 1.0 : 0.0);
-     out(i)= log_p ? std::log(val1) : val1;
-     continue;
-   }
-   
-   double xalpha= std::pow(xx, a);
-   double tmp= 1.0 - std::pow( (1.0 - xalpha), b );
-   if (tmp<=0.0) {
-     double val0= (lower_tail ? 0.0 : 1.0);
-     out(i)= log_p ? std::log(val0) : val0;
-     continue;
-   }
-   if (tmp>=1.0) {
-     double val1= (lower_tail ? 1.0 : 0.0);
-     out(i)= log_p ? std::log(val1) : val1;
-     continue;
-   }
-   
-   double val= tmp;
-   if (!lower_tail) {
-     val= 1.0- val;
-   }
-   if (log_p) {
-     val= std::log(val);
-   }
-   out(i)= val;
- }
- 
- return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
+  // Convert R vectors to Armadillo vectors
+  arma::vec a_vec(alpha.begin(), alpha.size());
+  arma::vec b_vec(beta.begin(), beta.size());
+  
+  // Determine output length for recycling
+  size_t N = std::max({q.n_elem, a_vec.n_elem, b_vec.n_elem});
+  
+  arma::vec out(N);
+  
+  for (size_t i = 0; i < N; i++) {
+    // Extract recycled parameters
+    double a = a_vec[i % a_vec.n_elem];
+    double b = b_vec[i % b_vec.n_elem];
+    double xx = q[i % q.n_elem];
+    
+    // Validate parameters
+    if (!check_kw_pars(a, b)) {
+      out(i) = NA_REAL;
+      continue;
+    }
+    
+    // Handle boundary: q ≤ 0
+    if (!R_finite(xx) || xx <= 0.0) {
+      double val0 = lower_tail ? 0.0 : 1.0;
+      out(i) = log_p ? safe_log(val0) : val0;
+      continue;
+    }
+    
+    // Handle boundary: q ≥ 1
+    if (xx >= 1.0) {
+      double val1 = lower_tail ? 1.0 : 0.0;
+      out(i) = log_p ? safe_log(val1) : val1;
+      continue;
+    }
+    
+    // ---- Compute CDF ----
+    
+    // Step 1: x^α
+    double xalpha = safe_pow(xx, a);
+    
+    // Step 2: (1 - x^α)^β
+    double one_minus_xalpha_beta = safe_pow(1.0 - xalpha, b);
+    
+    // Step 3: F(x) = 1 - (1 - x^α)^β
+    double tmp = 1.0 - one_minus_xalpha_beta;
+    
+    // Boundary checks after computation
+    if (tmp <= 0.0) {
+      double val0 = lower_tail ? 0.0 : 1.0;
+      out(i) = log_p ? safe_log(val0) : val0;
+      continue;
+    }
+    if (tmp >= 1.0) {
+      double val1 = lower_tail ? 1.0 : 0.0;
+      out(i) = log_p ? safe_log(val1) : val1;
+      continue;
+    }
+    
+    double val = tmp;
+    
+    // Apply tail adjustment
+    if (!lower_tail) {
+      val = 1.0 - val;
+    }
+    
+    // Apply log transformation
+    if (log_p) {
+      val = safe_log(val);
+    }
+    
+    out(i) = val;
+  }
+  
+  return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
 }
 
-// -----------------------------------------------------------------------------
-// 3) qkw: Quantile of Kumaraswamy
-// -----------------------------------------------------------------------------
 
-//' @title Quantile Function of the Kumaraswamy (Kw) Distribution
-//' @author Lopes, J. E.
-//' @keywords distribution quantile kumaraswamy
-//'
-//' @description
-//' Computes the quantile function (inverse CDF) for the two-parameter
-//' Kumaraswamy (Kw) distribution with shape parameters \code{alpha} (\eqn{\alpha})
-//' and \code{beta} (\eqn{\beta}). It finds the value \code{q} such that
-//' \eqn{P(X \le q) = p}.
-//'
-//' @param p Vector of probabilities (values between 0 and 1).
-//' @param alpha Shape parameter \code{alpha} > 0. Can be a scalar or a vector.
-//'   Default: 1.0.
-//' @param beta Shape parameter \code{beta} > 0. Can be a scalar or a vector.
-//'   Default: 1.0.
-//' @param lower_tail Logical; if \code{TRUE} (default), probabilities are \eqn{p = P(X \le q)},
-//'   otherwise, probabilities are \eqn{p = P(X > q)}.
-//' @param log_p Logical; if \code{TRUE}, probabilities \code{p} are given as
-//'   \eqn{\log(p)}. Default: \code{FALSE}.
-//'
-//' @return A vector of quantiles corresponding to the given probabilities \code{p}.
-//'   The length of the result is determined by the recycling rule applied to
-//'   the arguments (\code{p}, \code{alpha}, \code{beta}).
-//'   Returns:
-//'   \itemize{
-//'     \item \code{0} for \code{p = 0} (or \code{p = -Inf} if \code{log_p = TRUE},
-//'           when \code{lower_tail = TRUE}).
-//'     \item \code{1} for \code{p = 1} (or \code{p = 0} if \code{log_p = TRUE},
-//'           when \code{lower_tail = TRUE}).
-//'     \item \code{NaN} for \code{p < 0} or \code{p > 1} (or corresponding log scale).
-//'     \item \code{NaN} for invalid parameters (e.g., \code{alpha <= 0},
-//'           \code{beta <= 0}).
-//'   }
-//'   Boundary return values are adjusted accordingly for \code{lower_tail = FALSE}.
-//'
-//' @details
-//' The quantile function \eqn{Q(p)} is the inverse of the CDF \eqn{F(q)}. The CDF
-//' for the Kumaraswamy distribution is \eqn{F(q) = 1 - (1 - q^\alpha)^\beta}
-//' (see \code{\link{pkw}}). Inverting this equation for \eqn{q} yields the
-//' quantile function:
-//' \deqn{
-//' Q(p) = \left\{ 1 - (1 - p)^{1/\beta} \right\}^{1/\alpha}
-//' }
-//' The function uses this closed-form expression and correctly handles the
-//' \code{lower_tail} and \code{log_p} arguments by transforming \code{p}
-//' appropriately before applying the formula. This is equivalent to the general
-//' GKw quantile function (\code{\link{qgkw}}) evaluated with \eqn{\gamma=1, \delta=0, \lambda=1}.
-//'
-//' @references
-//' Kumaraswamy, P. (1980). A generalized probability density function for
-//' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
-//'
-//'
-//' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
-//' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
-//'
-//'
-//' @seealso
-//' \code{\link{qgkw}} (parent distribution quantile function),
-//' \code{\link{dkw}}, \code{\link{pkw}}, \code{\link{rkw}} (other Kw functions),
-//' \code{\link[stats]{qbeta}}, \code{\link[stats]{qunif}}
-//'
-//' @examples
-//' \donttest{
-//' # Example values
-//' p_vals <- c(0.1, 0.5, 0.9)
-//' alpha_par <- 2.0
-//' beta_par <- 3.0
-//'
-//' # Calculate quantiles using qkw
-//' quantiles <- qkw(p_vals, alpha_par, beta_par)
-//' print(quantiles)
-//'
-//' # Calculate quantiles for upper tail probabilities P(X > q) = p
-//' quantiles_upper <- qkw(p_vals, alpha_par, beta_par, lower_tail = FALSE)
-//' print(quantiles_upper)
-//'
-//' # Calculate quantiles from log probabilities
-//' log_p_vals <- log(p_vals)
-//' quantiles_logp <- qkw(log_p_vals, alpha_par, beta_par, log_p = TRUE)
-//' print(quantiles_logp)
-//' # Check: should match original quantiles
-//' print(quantiles)
-//'
-//' # Compare with qgkw setting gamma = 1, delta = 0, lambda = 1
-//' quantiles_gkw <- qgkw(p_vals, alpha = alpha_par, beta = beta_par,
-//'                      gamma = 1.0, delta = 0.0, lambda = 1.0)
-//' print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-//'
-//' # Verify inverse relationship with pkw
-//' p_check <- 0.75
-//' q_calc <- qkw(p_check, alpha_par, beta_par)
-//' p_recalc <- pkw(q_calc, alpha_par, beta_par)
-//' print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-//' # abs(p_check - p_recalc) < 1e-9 # Should be TRUE
-//'
-//' # Boundary conditions
-//' print(qkw(c(0, 1), alpha_par, beta_par)) # Should be 0, 1
-//' print(qkw(c(-Inf, 0), alpha_par, beta_par, log_p = TRUE)) # Should be 0, 1
-//'
-//' }
-//'
-//' @export
-// [[Rcpp::export]]
+// ============================================================================
+// QUANTILE FUNCTION
+// ============================================================================
+
+/**
+ * @brief Quantile Function (Inverse CDF) of the Kumaraswamy Distribution
+ * 
+ * Computes quantiles for the Kumaraswamy distribution
+ * given probability values.
+ * 
+ * @param p Vector of probabilities (values in [0,1])
+ * @param alpha Shape parameter vector (α > 0)
+ * @param beta Shape parameter vector (β > 0)
+ * @param lower_tail If TRUE, probabilities are P(X ≤ x); otherwise P(X > x)
+ * @param log_p If TRUE, probabilities are given as log(p)
+ * 
+ * @return NumericVector of quantiles
+ * 
+ * @details
+ * The quantile function has a closed form (unlike the Beta distribution):
+ * \deqn{Q(p) = \left\{1 - (1-p)^{1/\beta}\right\}^{1/\alpha}}
+ * 
+ * @note Exported as .qkw_cpp for internal package use
+ */
+// [[Rcpp::export(.qkw_cpp)]]
 Rcpp::NumericVector qkw(
-   const arma::vec& p,
-   const Rcpp::NumericVector& alpha,
-   const Rcpp::NumericVector& beta,
-   bool lower_tail=true,
-   bool log_p=false
+    const arma::vec& p,
+    const Rcpp::NumericVector& alpha,
+    const Rcpp::NumericVector& beta,
+    bool lower_tail = true,
+    bool log_p = false
 ) {
- arma::vec a_vec(alpha.begin(), alpha.size());
- arma::vec b_vec(beta.begin(), beta.size());
- 
- size_t N= std::max({ p.n_elem, a_vec.n_elem, b_vec.n_elem });
- arma::vec out(N);
- 
- for (size_t i=0; i<N; i++){
-   double a= a_vec[i % a_vec.n_elem];
-   double b= b_vec[i % b_vec.n_elem];
-   double pp= p[i % p.n_elem];
-   
-   if (!check_kw_pars(a,b)) {
-     out(i)= NA_REAL;
-     continue;
-   }
-   
-   // convert if log
-   if (log_p) {
-     if (pp>0.0) {
-       // invalid => p>1
-       out(i)= NA_REAL;
-       continue;
-     }
-     pp= std::exp(pp);
-   }
-   if (!lower_tail) {
-     pp= 1.0 - pp;
-   }
-   
-   // boundary
-   if (pp<=0.0) {
-     out(i)= 0.0;
-     continue;
-   }
-   if (pp>=1.0) {
-     out(i)= 1.0;
-     continue;
-   }
-   
-   // x= {1 - [1 - p]^(1/beta)}^(1/alpha)
-   double step1= 1.0 - pp;
-   if (step1<0.0) step1=0.0;
-   double step2= std::pow(step1, 1.0/b);
-   double step3= 1.0 - step2;
-   if (step3<0.0) step3=0.0;
-   
-   double xval;
-   if (a==1.0) {
-     xval= step3;
-   } else {
-     xval= std::pow(step3, 1.0/a);
-     if (!R_finite(xval)|| xval<0.0) xval=0.0;
-     if (xval>1.0) xval=1.0;
-   }
-   out(i)= xval;
- }
- 
- return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
+  // Convert R vectors to Armadillo vectors
+  arma::vec a_vec(alpha.begin(), alpha.size());
+  arma::vec b_vec(beta.begin(), beta.size());
+  
+  // Determine output length for recycling
+  size_t N = std::max({p.n_elem, a_vec.n_elem, b_vec.n_elem});
+  
+  arma::vec out(N);
+  
+  for (size_t i = 0; i < N; i++) {
+    // Extract recycled parameters
+    double a = a_vec[i % a_vec.n_elem];
+    double b = b_vec[i % b_vec.n_elem];
+    double pp = p[i % p.n_elem];
+    
+    // Validate parameters
+    if (!check_kw_pars(a, b)) {
+      out(i) = NA_REAL;
+      continue;
+    }
+    
+    // ---- Convert probability to linear scale ----
+    if (log_p) {
+      if (pp > 0.0) {
+        out(i) = NA_REAL;
+        continue;
+      }
+      pp = safe_exp(pp);
+    }
+    
+    // Handle upper tail (pp is now always linear scale)
+    if (!lower_tail) {
+      pp = 1.0 - pp;
+    }
+    
+    // Handle boundary cases
+    if (pp <= 0.0) {
+      out(i) = 0.0;
+      continue;
+    }
+    if (pp >= 1.0) {
+      out(i) = 1.0;
+      continue;
+    }
+    
+    // ---- Compute quantile via closed-form formula ----
+    
+    // Step 1: 1 - p
+    double step1 = 1.0 - pp;
+    step1 = std::max(0.0, step1);
+    
+    // Step 2: (1 - p)^(1/β)
+    double step2 = safe_pow(step1, 1.0 / b);
+    
+    // Step 3: 1 - (1 - p)^(1/β)
+    double step3 = 1.0 - step2;
+    step3 = std::max(0.0, step3);
+    
+    // Step 4: {1 - (1 - p)^(1/β)}^(1/α)
+    double xval;
+    if (a == 1.0) {
+      xval = step3;
+    } else {
+      xval = safe_pow(step3, 1.0 / a);
+    }
+    
+    // Clamp to valid support
+    xval = std::max(0.0, std::min(1.0, xval));
+    
+    out(i) = xval;
+  }
+  
+  return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
 }
 
 
-// -----------------------------------------------------------------------------
-// 4) rkw: Random Generation from Kumaraswamy
-// -----------------------------------------------------------------------------
+// ============================================================================
+// RANDOM NUMBER GENERATION
+// ============================================================================
 
-//' @title Random Number Generation for the Kumaraswamy (Kw) Distribution
-//' @author Lopes, J. E.
-//' @keywords distribution random kumaraswamy
-//'
-//' @description
-//' Generates random deviates from the two-parameter Kumaraswamy (Kw)
-//' distribution with shape parameters \code{alpha} (\eqn{\alpha}) and
-//' \code{beta} (\eqn{\beta}).
-//'
-//' @param n Number of observations. If \code{length(n) > 1}, the length is
-//'   taken to be the number required. Must be a non-negative integer.
-//' @param alpha Shape parameter \code{alpha} > 0. Can be a scalar or a vector.
-//'   Default: 1.0.
-//' @param beta Shape parameter \code{beta} > 0. Can be a scalar or a vector.
-//'   Default: 1.0.
-//'
-//' @return A vector of length \code{n} containing random deviates from the Kw
-//'   distribution, with values in (0, 1). The length of the result is determined
-//'   by \code{n} and the recycling rule applied to the parameters (\code{alpha},
-//'   \code{beta}). Returns \code{NaN} if parameters are invalid (e.g.,
-//'   \code{alpha <= 0}, \code{beta <= 0}).
-//'
-//' @details
-//' The generation method uses the inverse transform (quantile) method.
-//' That is, if \eqn{U} is a random variable following a standard Uniform
-//' distribution on (0, 1), then \eqn{X = Q(U)} follows the Kw distribution,
-//' where \eqn{Q(p)} is the Kw quantile function (\code{\link{qkw}}):
-//' \deqn{
-//' Q(p) = \left\{ 1 - (1 - p)^{1/\beta} \right\}^{1/\alpha}
-//' }
-//' The implementation generates \eqn{U} using \code{\link[stats]{runif}}
-//' and applies this transformation. This is equivalent to the general GKw
-//' generation method (\code{\link{rgkw}}) evaluated at \eqn{\gamma=1, \delta=0, \lambda=1}.
-//'
-//' @references
-//' Kumaraswamy, P. (1980). A generalized probability density function for
-//' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
-//'
-//'
-//' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
-//' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
-//'
-//'
-//' Devroye, L. (1986). *Non-Uniform Random Variate Generation*. Springer-Verlag.
-//' (General methods for random variate generation).
-//'
-//' @seealso
-//' \code{\link{rgkw}} (parent distribution random generation),
-//' \code{\link{dkw}}, \code{\link{pkw}}, \code{\link{qkw}} (other Kw functions),
-//' \code{\link[stats]{runif}}
-//'
-//' @examples
-//' \donttest{
-//' set.seed(2029) # for reproducibility
-//'
-//' # Generate 1000 random values from a specific Kw distribution
-//' alpha_par <- 2.0
-//' beta_par <- 3.0
-//'
-//' x_sample_kw <- rkw(1000, alpha = alpha_par, beta = beta_par)
-//' summary(x_sample_kw)
-//'
-//' # Histogram of generated values compared to theoretical density
-//' hist(x_sample_kw, breaks = 30, freq = FALSE, # freq=FALSE for density
-//'      main = "Histogram of Kw Sample", xlab = "x", ylim = c(0, 2.5))
-//' curve(dkw(x, alpha = alpha_par, beta = beta_par),
-//'       add = TRUE, col = "red", lwd = 2, n = 201)
-//' legend("top", legend = "Theoretical PDF", col = "red", lwd = 2, bty = "n")
-//'
-//' # Comparing empirical and theoretical quantiles (Q-Q plot)
-//' prob_points <- seq(0.01, 0.99, by = 0.01)
-//' theo_quantiles <- qkw(prob_points, alpha = alpha_par, beta = beta_par)
-//' emp_quantiles <- quantile(x_sample_kw, prob_points, type = 7)
-//'
-//' plot(theo_quantiles, emp_quantiles, pch = 16, cex = 0.8,
-//'      main = "Q-Q Plot for Kw Distribution",
-//'      xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)")
-//' abline(a = 0, b = 1, col = "blue", lty = 2)
-//'
-//' # Compare summary stats with rgkw(..., gamma=1, delta=0, lambda=1)
-//' # Note: individual values will differ due to randomness
-//' x_sample_gkw <- rgkw(1000, alpha = alpha_par, beta = beta_par, gamma = 1.0,
-//'                      delta = 0.0, lambda = 1.0)
-//' print("Summary stats for rkw sample:")
-//' print(summary(x_sample_kw))
-//' print("Summary stats for rgkw(gamma=1, delta=0, lambda=1) sample:")
-//' print(summary(x_sample_gkw)) # Should be similar
-//'
-//' }
-//'
-//' @export
-// [[Rcpp::export]]
+/**
+ * @brief Random Variate Generation for the Kumaraswamy Distribution
+ * 
+ * Generates random samples from the Kumaraswamy distribution
+ * using the inverse transform method.
+ * 
+ * @param n Number of random variates to generate
+ * @param alpha Shape parameter vector (α > 0)
+ * @param beta Shape parameter vector (β > 0)
+ * 
+ * @return NumericVector of n random variates from Kw distribution
+ * 
+ * @details
+ * Algorithm (extremely efficient due to closed-form quantile):
+ * 1. Generate U ~ Uniform(0,1)
+ * 2. Return X = Q(U) = {1 - (1-U)^(1/β)}^(1/α)
+ * 
+ * This is faster than Beta distribution random generation which requires
+ * rejection sampling or more complex algorithms.
+ * 
+ * @note Exported as .rkw_cpp for internal package use
+ */
+// [[Rcpp::export(.rkw_cpp)]]
 Rcpp::NumericVector rkw(
-   int n,
-   const Rcpp::NumericVector& alpha,
-   const Rcpp::NumericVector& beta
+    int n,
+    const Rcpp::NumericVector& alpha,
+    const Rcpp::NumericVector& beta
 ) {
- if (n<=0) {
-   Rcpp::stop("rkw: n must be positive");
- }
- 
- arma::vec a_vec(alpha.begin(), alpha.size());
- arma::vec b_vec(beta.begin(), beta.size());
- 
- size_t k= std::max({ a_vec.n_elem, b_vec.n_elem });
- arma::vec out(n);
- 
- for (int i=0; i<n; i++){
-   size_t idx= i % k;
-   double a= a_vec[idx % a_vec.n_elem];
-   double b= b_vec[idx % b_vec.n_elem];
-   
-   if (!check_kw_pars(a,b)) {
-     out(i)= NA_REAL;
-     Rcpp::warning("rkw: invalid parameters at index %d", i+1);
-     continue;
-   }
-   
-   double U= R::runif(0.0,1.0);
-   // X= {1 - [1 - U]^(1/beta)}^(1/alpha)
-   double step1= 1.0 - U;
-   if (step1<0.0) step1=0.0;
-   double step2= std::pow(step1, 1.0/b);
-   double step3= 1.0 - step2;
-   if (step3<0.0) step3=0.0;
-   
-   double x;
-   if (a==1.0) {
-     x= step3;
-   } else {
-     x= std::pow(step3, 1.0/a);
-     if (!R_finite(x)|| x<0.0) x=0.0;
-     if (x>1.0) x=1.0;
-   }
-   out(i)= x;
- }
- 
- return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
-}
-
-// -----------------------------------------------------------------------------
-// 5) llkw: Negative Log-Likelihood for Kumaraswamy
-// -----------------------------------------------------------------------------
-
-//' @title Negative Log-Likelihood of the Kumaraswamy (Kw) Distribution
-//' @author Lopes, J. E.
-//' @keywords distribution likelihood optimize kumaraswamy
-//'
-//' @description
-//' Computes the negative log-likelihood function for the two-parameter
-//' Kumaraswamy (Kw) distribution with parameters \code{alpha} (\eqn{\alpha})
-//' and \code{beta} (\eqn{\beta}), given a vector of observations. This function
-//' is suitable for maximum likelihood estimation.
-//'
-//' @param par A numeric vector of length 2 containing the distribution parameters
-//'   in the order: \code{alpha} (\eqn{\alpha > 0}), \code{beta} (\eqn{\beta > 0}).
-//' @param data A numeric vector of observations. All values must be strictly
-//'   between 0 and 1 (exclusive).
-//'
-//' @return Returns a single \code{double} value representing the negative
-//'   log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
-//'   if any parameter values in \code{par} are invalid according to their
-//'   constraints, or if any value in \code{data} is not in the interval (0, 1).
-//'
-//' @details
-//' The Kumaraswamy (Kw) distribution's probability density function (PDF) is
-//' (see \code{\link{dkw}}):
-//' \deqn{
-//' f(x | \theta) = \alpha \beta x^{\alpha-1} (1 - x^\alpha)^{\beta-1}
-//' }
-//' for \eqn{0 < x < 1} and \eqn{\theta = (\alpha, \beta)}.
-//' The log-likelihood function \eqn{\ell(\theta | \mathbf{x})} for a sample
-//' \eqn{\mathbf{x} = (x_1, \dots, x_n)} is \eqn{\sum_{i=1}^n \ln f(x_i | \theta)}:
-//' \deqn{
-//' \ell(\theta | \mathbf{x}) = n[\ln(\alpha) + \ln(\beta)]
-//' + \sum_{i=1}^{n} [(\alpha-1)\ln(x_i) + (\beta-1)\ln(v_i)]
-//' }
-//' where \eqn{v_i = 1 - x_i^{\alpha}}.
-//' This function computes and returns the *negative* log-likelihood, \eqn{-\ell(\theta|\mathbf{x})},
-//' suitable for minimization using optimization routines like \code{\link[stats]{optim}}.
-//' It is equivalent to the negative log-likelihood of the GKw distribution
-//' (\code{\link{llgkw}}) evaluated at \eqn{\gamma=1, \delta=0, \lambda=1}.
-//'
-//' @references
-//' Kumaraswamy, P. (1980). A generalized probability density function for
-//' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
-//'
-//'
-//' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
-//' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
-//'
-//'
-//' @seealso
-//' \code{\link{llgkw}} (parent distribution negative log-likelihood),
-//' \code{\link{dkw}}, \code{\link{pkw}}, \code{\link{qkw}}, \code{\link{rkw}},
-//' \code{grkw} (gradient, if available),
-//' \code{hskw} (Hessian, if available),
-//' \code{\link[stats]{optim}}
-//'
-//' @examples
-//' \donttest{
-//' ## Example 1: Maximum Likelihood Estimation with Analytical Gradient
-//' 
-//' # Generate sample data
-//' set.seed(123)
-//' n <- 1000
-//' true_params <- c(alpha = 2.5, beta = 3.5)
-//' data <- rkw(n, alpha = true_params[1], beta = true_params[2])
-//' 
-//' # Optimization using BFGS with analytical gradient
-//' fit <- optim(
-//'   par = c(2, 2),
-//'   fn = llkw,
-//'   gr = grkw,
-//'   data = data,
-//'   method = "BFGS",
-//'   hessian = TRUE
-//' )
-//' 
-//' # Extract results
-//' mle <- fit$par
-//' names(mle) <- c("alpha", "beta")
-//' se <- sqrt(diag(solve(fit$hessian)))
-//' ci_lower <- mle - 1.96 * se
-//' ci_upper <- mle + 1.96 * se
-//' 
-//' # Summary table
-//' results <- data.frame(
-//'   Parameter = c("alpha", "beta"),
-//'   True = true_params,
-//'   MLE = mle,
-//'   SE = se,
-//'   CI_Lower = ci_lower,
-//'   CI_Upper = ci_upper
-//' )
-//' print(results, digits = 4)
-//' 
-//' ## Example 2: Verifying Gradient at MLE
-//' 
-//' # At MLE, gradient should be approximately zero
-//' gradient_at_mle <- grkw(par = mle, data = data)
-//' print(gradient_at_mle)
-//' cat("Max absolute score:", max(abs(gradient_at_mle)), "\n")
-//' 
-//' ## Example 3: Checking Hessian Properties
-//' 
-//' # Hessian at MLE
-//' hessian_at_mle <- hskw(par = mle, data = data)
-//' print(hessian_at_mle, digits = 4)
-//' 
-//' # Check positive definiteness via eigenvalues
-//' eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
-//' print(eigenvals)
-//' all(eigenvals > 0)
-//' 
-//' # Condition number
-//' cond_number <- max(eigenvals) / min(eigenvals)
-//' cat("Condition number:", format(cond_number, scientific = TRUE), "\n")
-//' 
-//' ## Example 4: Comparing Optimization Methods
-//' 
-//' methods <- c("BFGS", "L-BFGS-B", "Nelder-Mead", "CG")
-//' start_params <- c(2, 2)
-//' 
-//' comparison <- data.frame(
-//'   Method = character(),
-//'   Alpha_Est = numeric(),
-//'   Beta_Est = numeric(),
-//'   NegLogLik = numeric(),
-//'   Convergence = integer(),
-//'   stringsAsFactors = FALSE
-//' )
-//' 
-//' for (method in methods) {
-//'   if (method %in% c("BFGS", "CG")) {
-//'     fit_temp <- optim(
-//'       par = start_params,
-//'       fn = llkw,
-//'       gr = grkw,
-//'       data = data,
-//'       method = method
-//'     )
-//'   } else if (method == "L-BFGS-B") {
-//'     fit_temp <- optim(
-//'       par = start_params,
-//'       fn = llkw,
-//'       gr = grkw,
-//'       data = data,
-//'       method = method,
-//'       lower = c(0.01, 0.01),
-//'       upper = c(100, 100)
-//'     )
-//'   } else {
-//'     fit_temp <- optim(
-//'       par = start_params,
-//'       fn = llkw,
-//'       data = data,
-//'       method = method
-//'     )
-//'   }
-//'   
-//'   comparison <- rbind(comparison, data.frame(
-//'     Method = method,
-//'     Alpha_Est = fit_temp$par[1],
-//'     Beta_Est = fit_temp$par[2],
-//'     NegLogLik = fit_temp$value,
-//'     Convergence = fit_temp$convergence,
-//'     stringsAsFactors = FALSE
-//'   ))
-//' }
-//' 
-//' print(comparison, digits = 4, row.names = FALSE)
-//' 
-//' ## Example 5: Likelihood Ratio Test
-//' 
-//' # Test H0: beta = 3 vs H1: beta free
-//' loglik_full <- -fit$value
-//' 
-//' # Restricted model: fix beta = 3
-//' restricted_ll <- function(alpha, data, beta_fixed) {
-//'   llkw(par = c(alpha, beta_fixed), data = data)
-//' }
-//' 
-//' fit_restricted <- optimize(
-//'   f = restricted_ll,
-//'   interval = c(0.1, 10),
-//'   data = data,
-//'   beta_fixed = 3,
-//'   maximum = FALSE
-//' )
-//' 
-//' loglik_restricted <- -fit_restricted$objective
-//' lr_stat <- 2 * (loglik_full - loglik_restricted)
-//' p_value <- pchisq(lr_stat, df = 1, lower.tail = FALSE)
-//' 
-//' cat("LR Statistic:", round(lr_stat, 4), "\n")
-//' cat("P-value:", format.pval(p_value, digits = 4), "\n")
-//' 
-//' ## Example 6: Univariate Profile Likelihoods
-//' 
-//' # Grid for alpha
-//' alpha_grid <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = 50)
-//' alpha_grid <- alpha_grid[alpha_grid > 0]
-//' profile_ll_alpha <- numeric(length(alpha_grid))
-//' 
-//' for (i in seq_along(alpha_grid)) {
-//'   profile_fit <- optimize(
-//'     f = function(beta) llkw(c(alpha_grid[i], beta), data),
-//'     interval = c(0.1, 10),
-//'     maximum = FALSE
-//'   )
-//'   profile_ll_alpha[i] <- -profile_fit$objective
-//' }
-//' 
-//' # Grid for beta
-//' beta_grid <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = 50)
-//' beta_grid <- beta_grid[beta_grid > 0]
-//' profile_ll_beta <- numeric(length(beta_grid))
-//' 
-//' for (i in seq_along(beta_grid)) {
-//'   profile_fit <- optimize(
-//'     f = function(alpha) llkw(c(alpha, beta_grid[i]), data),
-//'     interval = c(0.1, 10),
-//'     maximum = FALSE
-//'   )
-//'   profile_ll_beta[i] <- -profile_fit$objective
-//' }
-//' 
-//' # 95% confidence threshold
-//' chi_crit <- qchisq(0.95, df = 1)
-//' threshold <- max(profile_ll_alpha) - chi_crit / 2
-//' 
-//' # Plot 
-//' 
-//' # Profile for alpha
-//' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
-//'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
-//'      main = expression(paste("Profile Likelihood: ", alpha)), las = 1)
-//' abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
-//' abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
-//' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-//' legend("topright",
-//'        legend = c("MLE", "True", "95% CI"),
-//'        col = c("#8B0000", "#006400", "#808080"),
-//'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
-//' grid(col = "gray90")
-//' 
-//' # Profile for beta
-//' plot(beta_grid, profile_ll_beta, type = "l", lwd = 2, col = "#2E4057",
-//'      xlab = expression(beta), ylab = "Profile Log-Likelihood",
-//'      main = expression(paste("Profile Likelihood: ", beta)), las = 1)
-//' abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
-//' abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
-//' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-//' legend("topright",
-//'        legend = c("MLE", "True", "95% CI"),
-//'        col = c("#8B0000", "#006400", "#808080"),
-//'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
-//' grid(col = "gray90")
-//' 
-//' ## Example 7: 2D Profile Likelihood Surface
-//' 
-//' # Create 2D grid
-//' alpha_2d <- seq(mle[1] - 1, mle[1] + 1, length.out = round(n/4))
-//' beta_2d <- seq(mle[2] - 1, mle[2] + 1, length.out = round(n/4))
-//' alpha_2d <- alpha_2d[alpha_2d > 0]
-//' beta_2d <- beta_2d[beta_2d > 0]
-//' 
-//' # Compute log-likelihood surface
-//' ll_surface <- matrix(NA, nrow = length(alpha_2d), ncol = length(beta_2d))
-//' 
-//' for (i in seq_along(alpha_2d)) {
-//'   for (j in seq_along(beta_2d)) {
-//'     ll_surface[i, j] <- -llkw(c(alpha_2d[i], beta_2d[j]), data)
-//'   }
-//' }
-//' 
-//' # Confidence region levels
-//' max_ll <- max(ll_surface, na.rm = TRUE)
-//' levels_90 <- max_ll - qchisq(0.90, df = 2) / 2
-//' levels_95 <- max_ll - qchisq(0.95, df = 2) / 2
-//' levels_99 <- max_ll - qchisq(0.99, df = 2) / 2
-//' 
-//' # Plot contour
-//' contour(alpha_2d, beta_2d, ll_surface,
-//'         xlab = expression(alpha), ylab = expression(beta),
-//'         main = "2D Profile Log-Likelihood",
-//'         levels = seq(min(ll_surface, na.rm = TRUE), max_ll, length.out = round(n/4)),
-//'         col = "#2E4057", las = 1, lwd = 1)
-//' 
-//' # Add confidence region contours
-//' contour(alpha_2d, beta_2d, ll_surface,
-//'         levels = c(levels_90, levels_95, levels_99),
-//'         col = c("#FFA07A", "#FF6347", "#8B0000"),
-//'         lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
-//'         add = TRUE, labcex = 0.8)
-//' 
-//' # Mark points
-//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-//' 
-//' legend("topright",
-//'        legend = c("MLE", "True", "90% CR", "95% CR", "99% CR"),
-//'        col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
-//'        pch = c(19, 17, NA, NA, NA),
-//'        lty = c(NA, NA, 3, 2, 1),
-//'        lwd = c(NA, NA, 2, 2.5, 3),
-//'        bty = "n", cex = 0.8)
-//' grid(col = "gray90")
-//' 
-//' ## Example 8: Combined View - Profiles with 2D Surface
-//' 
-//' # Top left: Profile for alpha
-//' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
-//'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
-//'      main = expression(paste("Profile: ", alpha)), las = 1)
-//' abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
-//' abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
-//' abline(h = threshold, col = "#808080", lty = 3)
-//' grid(col = "gray90")
-//' 
-//' # Top right: Profile for beta
-//' plot(beta_grid, profile_ll_beta, type = "l", lwd = 2, col = "#2E4057",
-//'      xlab = expression(beta), ylab = "Profile Log-Likelihood",
-//'      main = expression(paste("Profile: ", beta)), las = 1)
-//' abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
-//' abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
-//' abline(h = threshold, col = "#808080", lty = 3)
-//' grid(col = "gray90")
-//' 
-//' # Bottom left: 2D contour
-//' contour(alpha_2d, beta_2d, ll_surface,
-//'         xlab = expression(alpha), ylab = expression(beta),
-//'         main = "2D Log-Likelihood Surface",
-//'         levels = seq(min(ll_surface, na.rm = TRUE), max_ll, length.out = 15),
-//'         col = "#2E4057", las = 1, lwd = 1)
-//' contour(alpha_2d, beta_2d, ll_surface,
-//'         levels = c(levels_95),
-//'         col = "#8B0000", lwd = 2.5, add = TRUE)
-//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-//' grid(col = "gray90")
-//' 
-//' ## Example 9: Numerical Gradient Verification
-//' 
-//' # Manual finite difference gradient
-//' numerical_gradient <- function(f, x, data, h = 1e-7) {
-//'   grad <- numeric(length(x))
-//'   for (i in seq_along(x)) {
-//'     x_plus <- x_minus <- x
-//'     x_plus[i] <- x[i] + h
-//'     x_minus[i] <- x[i] - h
-//'     grad[i] <- (f(x_plus, data) - f(x_minus, data)) / (2 * h)
-//'   }
-//'   return(grad)
-//' }
-//' 
-//' # Compare
-//' grad_analytical <- grkw(par = mle, data = data)
-//' grad_numerical <- numerical_gradient(llkw, mle, data)
-//' 
-//' comparison_grad <- data.frame(
-//'   Parameter = c("alpha", "beta"),
-//'   Analytical = grad_analytical,
-//'   Numerical = grad_numerical,
-//'   Difference = abs(grad_analytical - grad_numerical)
-//' )
-//' print(comparison_grad, digits = 8)
-//' 
-//' ## Example 10: Bootstrap Confidence Intervals
-//' 
-//' n_boot <- round(n/4)
-//' boot_estimates <- matrix(NA, nrow = n_boot, ncol = 2)
-//' 
-//' set.seed(456)
-//' for (b in 1:n_boot) {
-//'   boot_data <- rkw(n, alpha = mle[1], beta = mle[2])
-//'   boot_fit <- optim(
-//'     par = mle,
-//'     fn = llkw,
-//'     gr = grkw,
-//'     data = boot_data,
-//'     method = "BFGS",
-//'     control = list(maxit = 500)
-//'   )
-//'   if (boot_fit$convergence == 0) {
-//'     boot_estimates[b, ] <- boot_fit$par
-//'   }
-//' }
-//' 
-//' boot_estimates <- boot_estimates[complete.cases(boot_estimates), ]
-//' boot_ci <- apply(boot_estimates, 2, quantile, probs = c(0.025, 0.975))
-//' colnames(boot_ci) <- c("alpha", "beta")
-//' 
-//' print(t(boot_ci), digits = 4)
-//' 
-//' # Plot bootstrap distributions
-//' 
-//' hist(boot_estimates[, 1], breaks = 20, col = "#87CEEB", border = "white",
-//'      main = expression(paste("Bootstrap: ", hat(alpha))),
-//'      xlab = expression(hat(alpha)), las = 1)
-//' abline(v = mle[1], col = "#8B0000", lwd = 2)
-//' abline(v = true_params[1], col = "#006400", lwd = 2, lty = 2)
-//' abline(v = boot_ci[, 1], col = "#2E4057", lwd = 2, lty = 3)
-//' legend("topright", legend = c("MLE", "True", "95% CI"),
-//'        col = c("#8B0000", "#006400", "#2E4057"),
-//'        lwd = 2, lty = c(1, 2, 3), bty = "n")
-//' 
-//' hist(boot_estimates[, 2], breaks = 20, col = "#FFA07A", border = "white",
-//'      main = expression(paste("Bootstrap: ", hat(beta))),
-//'      xlab = expression(hat(beta)), las = 1)
-//' abline(v = mle[2], col = "#8B0000", lwd = 2)
-//' abline(v = true_params[2], col = "#006400", lwd = 2, lty = 2)
-//' abline(v = boot_ci[, 2], col = "#2E4057", lwd = 2, lty = 3)
-//' legend("topright", legend = c("MLE", "True", "95% CI"),
-//'        col = c("#8B0000", "#006400", "#2E4057"),
-//'        lwd = 2, lty = c(1, 2, 3), bty = "n")
-//' 
-//' }
-//'
-//' @export
-// [[Rcpp::export]]
-double llkw(const Rcpp::NumericVector& par,
-           const Rcpp::NumericVector& data) {
- if (par.size()<2) {
-   return R_PosInf;
- }
- double a= par[0];
- double b= par[1];
- 
- if (!check_kw_pars(a,b)) {
-   return R_PosInf;
- }
- 
- arma::vec x= Rcpp::as<arma::vec>(data);
- if (x.n_elem<1) {
-   return R_PosInf;
- }
- if (arma::any(x<=0.0) || arma::any(x>=1.0)) {
-   return R_PosInf;
- }
- 
- int n= x.n_elem;
- // constant: n*( log(a)+ log(b) )
- double cst= n*( std::log(a) + std::log(b) );
- 
- // sum( (a-1)* log(x_i ) )
- arma::vec lx= arma::log(x);
- double sum1= (a-1.0)* arma::sum(lx);
- 
- // sum( (b-1)* log(1- x^a) )
- arma::vec xalpha= arma::pow(x,a);
- arma::vec log_1_xalpha= arma::log(1.0 - xalpha);
- double sum2= (b-1.0)* arma::sum(log_1_xalpha);
- 
- double loglike= cst + sum1 + sum2;
- // negative
- return -loglike;
+  if (n <= 0) {
+    Rcpp::stop("rkw: n must be positive");
+  }
+  
+  // Convert R vectors to Armadillo vectors
+  arma::vec a_vec(alpha.begin(), alpha.size());
+  arma::vec b_vec(beta.begin(), beta.size());
+  
+  arma::vec out(n);
+  
+  for (int i = 0; i < n; i++) {
+    // Extract recycled parameters (direct modulo, no intermediate variable)
+    double a = a_vec[i % a_vec.n_elem];
+    double b = b_vec[i % b_vec.n_elem];
+    
+    // Validate parameters
+    if (!check_kw_pars(a, b)) {
+      out(i) = NA_REAL;
+      Rcpp::warning("rkw: invalid parameters at index %d", i + 1);
+      continue;
+    }
+    
+    // Generate U ~ Uniform(0,1)
+    double U = R::runif(0.0, 1.0);
+    
+    // Step 1: 1 - U
+    double step1 = 1.0 - U;
+    step1 = std::max(0.0, step1);
+    
+    // Step 2: (1 - U)^(1/β)
+    double step2 = safe_pow(step1, 1.0 / b);
+    
+    // Step 3: 1 - (1 - U)^(1/β)
+    double step3 = 1.0 - step2;
+    step3 = std::max(0.0, step3);
+    
+    // Step 4: {1 - (1 - U)^(1/β)}^(1/α)
+    double x;
+    if (a == 1.0) {
+      x = step3;
+    } else {
+      x = safe_pow(step3, 1.0 / a);
+    }
+    
+    // Clamp to valid support
+    x = std::max(0.0, std::min(1.0, x));
+    
+    out(i) = x;
+  }
+  
+  return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
 }
 
 
+// ============================================================================
+// NEGATIVE LOG-LIKELIHOOD FUNCTION
+// ============================================================================
 
-//' @title Gradient of the Negative Log-Likelihood for the Kumaraswamy (Kw) Distribution
-//' @author Lopes, J. E.
-//' @keywords distribution likelihood optimize gradient kumaraswamy
-//'
-//' @description
-//' Computes the gradient vector (vector of first partial derivatives) of the
-//' negative log-likelihood function for the two-parameter Kumaraswamy (Kw)
-//' distribution with parameters \code{alpha} (\eqn{\alpha}) and \code{beta}
-//' (\eqn{\beta}). This provides the analytical gradient often used for efficient
-//' optimization via maximum likelihood estimation.
-//'
-//' @param par A numeric vector of length 2 containing the distribution parameters
-//'   in the order: \code{alpha} (\eqn{\alpha > 0}), \code{beta} (\eqn{\beta > 0}).
-//' @param data A numeric vector of observations. All values must be strictly
-//'   between 0 and 1 (exclusive).
-//'
-//' @return Returns a numeric vector of length 2 containing the partial derivatives
-//'   of the negative log-likelihood function \eqn{-\ell(\theta | \mathbf{x})} with
-//'   respect to each parameter: \eqn{(-\partial \ell/\partial \alpha, -\partial \ell/\partial \beta)}.
-//'   Returns a vector of \code{NaN} if any parameter values are invalid according
-//'   to their constraints, or if any value in \code{data} is not in the
-//'   interval (0, 1).
-//'
-//' @details
-//' The components of the gradient vector of the negative log-likelihood
-//' (\eqn{-\nabla \ell(\theta | \mathbf{x})}) for the Kw model are:
-//'
-//' \deqn{
-//' -\frac{\partial \ell}{\partial \alpha} = -\frac{n}{\alpha} - \sum_{i=1}^{n}\ln(x_i)
-//' + (\beta-1)\sum_{i=1}^{n}\frac{x_i^{\alpha}\ln(x_i)}{v_i}
-//' }
-//' \deqn{
-//' -\frac{\partial \ell}{\partial \beta} = -\frac{n}{\beta} - \sum_{i=1}^{n}\ln(v_i)
-//' }
-//'
-//' where \eqn{v_i = 1 - x_i^{\alpha}}.
-//' These formulas represent the derivatives of \eqn{-\ell(\theta)}, consistent with
-//' minimizing the negative log-likelihood. They correspond to the relevant components
-//' of the general GKw gradient (\code{\link{grgkw}}) evaluated at \eqn{\gamma=1, \delta=0, \lambda=1}.
-//'
-//' @references
-//' Kumaraswamy, P. (1980). A generalized probability density function for
-//' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
-//'
-//'
-//' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
-//' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
-//'
-//' (Note: Specific gradient formulas might be derived or sourced from additional references).
-//'
-//' @seealso
-//' \code{\link{grgkw}} (parent distribution gradient),
-//' \code{\link{llkw}} (negative log-likelihood for Kw),
-//' \code{hskw} (Hessian for Kw, if available),
-//' \code{\link{dkw}} (density for Kw),
-//' \code{\link[stats]{optim}},
-//' \code{\link[numDeriv]{grad}} (for numerical gradient comparison).
-//'
-//' @examples
-//' \donttest{
-//' ## Example 1: Basic Gradient Evaluation
-//' 
-//' # Generate sample data
-//' set.seed(123)
-//' n <- 1000
-//' true_params <- c(alpha = 2.5, beta = 3.5)
-//' data <- rkw(n, alpha = true_params[1], beta = true_params[2])
-//' 
-//' # Evaluate gradient at true parameters
-//' grad_true <- grkw(par = true_params, data = data)
-//' cat("Gradient at true parameters:\n")
-//' print(grad_true)
-//' cat("Norm:", sqrt(sum(grad_true^2)), "\n")
-//' 
-//' # Evaluate at different parameter values
-//' test_params <- rbind(
-//'   c(1.5, 2.5),
-//'   c(2.0, 3.0),
-//'   c(2.5, 3.5),
-//'   c(3.0, 4.0)
-//' )
-//' 
-//' grad_norms <- apply(test_params, 1, function(p) {
-//'   g <- grkw(p, data)
-//'   sqrt(sum(g^2))
-//' })
-//' 
-//' results <- data.frame(
-//'   Alpha = test_params[, 1],
-//'   Beta = test_params[, 2],
-//'   Grad_Norm = grad_norms
-//' )
-//' print(results, digits = 4)
-//' 
-//' 
-//' ## Example 2: Gradient in Optimization
-//' 
-//' # Optimization with analytical gradient
-//' fit_with_grad <- optim(
-//'   par = c(2, 2),
-//'   fn = llkw,
-//'   gr = grkw,
-//'   data = data,
-//'   method = "BFGS",
-//'   hessian = TRUE,
-//'   control = list(trace = 0)
-//' )
-//' 
-//' # Optimization without gradient
-//' fit_no_grad <- optim(
-//'   par = c(2, 2),
-//'   fn = llkw,
-//'   data = data,
-//'   method = "BFGS",
-//'   hessian = TRUE,
-//'   control = list(trace = 0)
-//' )
-//' 
-//' comparison <- data.frame(
-//'   Method = c("With Gradient", "Without Gradient"),
-//'   Alpha = c(fit_with_grad$par[1], fit_no_grad$par[1]),
-//'   Beta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
-//'   NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
-//'   Iterations = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
-//' )
-//' print(comparison, digits = 4, row.names = FALSE)
-//' 
-//' 
-//' ## Example 3: Verifying Gradient at MLE
-//' 
-//' mle <- fit_with_grad$par
-//' names(mle) <- c("alpha", "beta")
-//' 
-//' # At MLE, gradient should be approximately zero
-//' gradient_at_mle <- grkw(par = mle, data = data)
-//' cat("\nGradient at MLE:\n")
-//' print(gradient_at_mle)
-//' cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
-//' cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
-//' 
-//' 
-//' ## Example 4: Numerical vs Analytical Gradient
-//' 
-//' # Manual finite difference gradient
-//' numerical_gradient <- function(f, x, data, h = 1e-7) {
-//'   grad <- numeric(length(x))
-//'   for (i in seq_along(x)) {
-//'     x_plus <- x_minus <- x
-//'     x_plus[i] <- x[i] + h
-//'     x_minus[i] <- x[i] - h
-//'     grad[i] <- (f(x_plus, data) - f(x_minus, data)) / (2 * h)
-//'   }
-//'   return(grad)
-//' }
-//' 
-//' # Compare at several points
-//' test_points <- rbind(
-//'   c(1.5, 2.5),
-//'   c(2.0, 3.0),
-//'   mle,
-//'   c(3.0, 4.0)
-//' )
-//' 
-//' cat("\nNumerical vs Analytical Gradient Comparison:\n")
-//' for (i in 1:nrow(test_points)) {
-//'   grad_analytical <- grkw(par = test_points[i, ], data = data)
-//'   grad_numerical <- numerical_gradient(llkw, test_points[i, ], data)
-//'   
-//'   cat("\nPoint", i, ": alpha =", test_points[i, 1], 
-//'       ", beta =", test_points[i, 2], "\n")
-//'   
-//'   comparison <- data.frame(
-//'     Parameter = c("alpha", "beta"),
-//'     Analytical = grad_analytical,
-//'     Numerical = grad_numerical,
-//'     Abs_Diff = abs(grad_analytical - grad_numerical),
-//'     Rel_Error = abs(grad_analytical - grad_numerical) / 
-//'                 (abs(grad_analytical) + 1e-10)
-//'   )
-//'   print(comparison, digits = 8)
-//' }
-//' 
-//' 
-//' ## Example 5: Gradient Path Visualization
-//' 
-//' # Create grid
-//' alpha_grid <- seq(mle[1] - 1, mle[1] + 1, length.out = 20)
-//' beta_grid <- seq(mle[2] - 1, mle[2] + 1, length.out = 20)
-//' alpha_grid <- alpha_grid[alpha_grid > 0]
-//' beta_grid <- beta_grid[beta_grid > 0]
-//' 
-//' # Compute gradient vectors
-//' grad_alpha <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
-//' grad_beta <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
-//' 
-//' for (i in seq_along(alpha_grid)) {
-//'   for (j in seq_along(beta_grid)) {
-//'     g <- grkw(c(alpha_grid[i], beta_grid[j]), data)
-//'     grad_alpha[i, j] <- -g[1]  # Negative for gradient ascent
-//'     grad_beta[i, j] <- -g[2]
-//'   }
-//' }
-//' 
-//' # Plot gradient field
-//' 
-//' plot(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5,
-//'      xlim = range(alpha_grid), ylim = range(beta_grid),
-//'      xlab = expression(alpha), ylab = expression(beta),
-//'      main = "Gradient Vector Field", las = 1)
-//' 
-//' # Subsample for clearer visualization
-//' step <- 2
-//' for (i in seq(1, length(alpha_grid), by = step)) {
-//'   for (j in seq(1, length(beta_grid), by = step)) {
-//'     arrows(alpha_grid[i], beta_grid[j],
-//'            alpha_grid[i] + 0.05 * grad_alpha[i, j],
-//'            beta_grid[j] + 0.05 * grad_beta[i, j],
-//'            length = 0.05, col = "#2E4057", lwd = 1)
-//'   }
-//' }
-//' 
-//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-//' legend("topright",
-//'        legend = c("MLE", "True"),
-//'        col = c("#8B0000", "#006400"),
-//'        pch = c(19, 17), bty = "n")
-//' grid(col = "gray90")
-//' 
-//' 
-//' ## Example 6: Score Test Statistic
-//' 
-//' # Score test for H0: theta = theta0
-//' theta0 <- c(2, 3)
-//' score_theta0 <- -grkw(par = theta0, data = data)  # Score is negative gradient
-//' 
-//' # Fisher information at theta0 (using Hessian)
-//' fisher_info <- hskw(par = theta0, data = data)
-//' 
-//' # Score test statistic
-//' score_stat <- t(score_theta0) %*% solve(fisher_info) %*% score_theta0
-//' p_value <- pchisq(score_stat, df = 2, lower.tail = FALSE)
-//' 
-//' cat("\nScore Test:\n")
-//' cat("H0: alpha = 2, beta = 3\n")
-//' cat("Score vector:", score_theta0, "\n")
-//' cat("Test statistic:", score_stat, "\n")
-//' cat("P-value:", format.pval(p_value, digits = 4), "\n")
-//' 
-//' }
-//' @export
-// [[Rcpp::export]]
+/**
+ * @brief Negative Log-Likelihood for Kumaraswamy Distribution
+ * 
+ * Computes the negative log-likelihood function for parameter estimation
+ * via maximum likelihood.
+ * 
+ * @param par Parameter vector of length 2: (α, β)
+ * @param data Vector of observations (must be in (0,1))
+ * 
+ * @return Negative log-likelihood value (scalar)
+ * 
+ * @details
+ * The log-likelihood for n observations is:
+ * \deqn{
+ *   \ell(\theta) = n[\ln\alpha + \ln\beta]
+ *   + (\alpha-1)\sum\ln x_i + (\beta-1)\sum\ln(1-x_i^\alpha)
+ * }
+ * 
+ * Returns +Inf for invalid parameters or data outside (0,1).
+ * 
+ * @note Exported as .llkw_cpp for internal package use
+ */
+// [[Rcpp::export(.llkw_cpp)]]
+double llkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
+  // Validate parameter vector length
+  if (par.size() < 2) {
+    return R_PosInf;
+  }
+  
+  // Extract parameters
+  double a = par[0];
+  double b = par[1];
+  
+  // Validate parameters using consistent checker
+  if (!check_kw_pars(a, b)) {
+    return R_PosInf;
+  }
+  
+  // Convert and validate data
+  arma::vec x = Rcpp::as<arma::vec>(data);
+  if (x.n_elem < 1) {
+    return R_PosInf;
+  }
+  if (arma::any(x <= 0.0) || arma::any(x >= 1.0)) {
+    return R_PosInf;
+  }
+  
+  int n = x.n_elem;
+  
+  // Constant term: n * [log(α) + log(β)]
+  double cst = n * (safe_log(a) + safe_log(b));
+  
+  // Term 1: (α-1) * Σ log(x)
+  arma::vec lx = vec_safe_log(x);
+  double sum1 = (a - 1.0) * arma::sum(lx);
+  
+  // Term 2: (β-1) * Σ log(1-x^α)
+  // Use log-space for numerical stability
+  arma::vec log_xalpha = a * lx;
+  arma::vec log_v = vec_log1mexp(log_xalpha);
+  double sum2 = (b - 1.0) * arma::sum(log_v);
+  
+  double loglike = cst + sum1 + sum2;
+  
+  return -loglike;
+}
+
+
+// ============================================================================
+// GRADIENT OF NEGATIVE LOG-LIKELIHOOD
+// ============================================================================
+
+/**
+ * @brief Gradient of Negative Log-Likelihood for Kumaraswamy Distribution
+ * 
+ * Computes the gradient vector of the negative log-likelihood for
+ * optimization-based parameter estimation.
+ * 
+ * @param par Parameter vector of length 2: (α, β)
+ * @param data Vector of observations (must be in (0,1))
+ * 
+ * @return NumericVector of length 2 containing partial derivatives
+ *         with respect to (α, β)
+ * 
+ * @details
+ * The gradient components are:
+ * - ∂ℓ/∂α = n/α + Σlog(x) - (β-1)Σ[x^α log(x)/(1-x^α)]
+ * - ∂ℓ/∂β = n/β + Σlog(1-x^α)
+ * 
+ * @note Exported as .grkw_cpp for internal package use
+ */
+// [[Rcpp::export(.grkw_cpp)]]
 Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
- // Parameter extraction
- double alpha = par[0];   // Shape parameter α > 0
- double beta = par[1];    // Shape parameter β > 0
- 
- // Parameter validation
- if (alpha <= 0 || beta <= 0) {
-   Rcpp::NumericVector grad(2, R_NaN);
-   return grad;
- }
- 
- // Data conversion and validation
- arma::vec x = Rcpp::as<arma::vec>(data);
- 
- if (arma::any(x <= 0) || arma::any(x >= 1)) {
-   Rcpp::NumericVector grad(2, R_NaN);
-   return grad;
- }
- 
- int n = x.n_elem;  // Sample size
- 
- // Initialize gradient vector
- Rcpp::NumericVector grad(2, 0.0);
- 
- // Small constant to avoid numerical issues
- double eps = std::numeric_limits<double>::epsilon() * 100;
- 
- // Compute transformations and intermediate values
- arma::vec log_x = arma::log(x);                // log(x_i)
- arma::vec x_alpha = arma::pow(x, alpha);       // x_i^α
- arma::vec x_alpha_log_x = x_alpha % log_x;     // x_i^α * log(x_i)
- 
- // v_i = 1 - x_i^α
- arma::vec v = 1.0 - x_alpha;
- v = arma::clamp(v, eps, 1.0 - eps);            // Prevent numerical issues
- 
- arma::vec log_v = arma::log(v);                // log(1-x_i^α)
- 
- // Calculate partial derivatives for each parameter (for log-likelihood)
- 
- // ∂ℓ/∂α = n/α + Σᵢlog(xᵢ) - Σᵢ[(β-1)xᵢ^α*log(xᵢ)/(1-xᵢ^α)]
- double d_alpha = n / alpha + arma::sum(log_x);
- 
- // Calculate the term for α gradient
- arma::vec alpha_term = (beta - 1.0) * x_alpha_log_x / v;
- 
- d_alpha -= arma::sum(alpha_term);
- 
- // ∂ℓ/∂β = n/β + Σᵢlog(1-xᵢ^α)
- double d_beta = n / beta + arma::sum(log_v);
- 
- // Since we're optimizing negative log-likelihood, negate all derivatives
- grad[0] = -d_alpha;
- grad[1] = -d_beta;
- 
- return grad;
+  // Validate parameter vector length
+  if (par.size() < 2) {
+    return Rcpp::NumericVector(2, R_NaN);
+  }
+  
+  // Extract parameters
+  double alpha = par[0];
+  double beta = par[1];
+  
+  // Validate parameters using consistent checker
+  if (!check_kw_pars(alpha, beta)) {
+    return Rcpp::NumericVector(2, R_NaN);
+  }
+  
+  // Convert and validate data
+  arma::vec x = Rcpp::as<arma::vec>(data);
+  if (arma::any(x <= 0) || arma::any(x >= 1)) {
+    return Rcpp::NumericVector(2, R_NaN);
+  }
+  
+  int n = x.n_elem;
+  Rcpp::NumericVector grad(2, 0.0);
+  
+  // Numerical stability constant
+  const double eps = std::numeric_limits<double>::epsilon() * 100;
+  
+  // ---- Compute intermediate quantities ----
+  
+  arma::vec log_x = vec_safe_log(x);
+  arma::vec x_alpha = vec_safe_pow(x, alpha);
+  arma::vec x_alpha_log_x = x_alpha % log_x;
+  
+  // v = 1 - x^α (with clamping for numerical stability)
+  arma::vec v = 1.0 - x_alpha;
+  v = arma::clamp(v, eps, 1.0 - eps);
+  
+  arma::vec log_v = vec_safe_log(v);
+  
+  // ---- Calculate gradient components ----
+  
+  // ∂ℓ/∂α = n/α + Σlog(x) - (β-1)Σ[x^α log(x)/(1-x^α)]
+  double d_alpha = n / alpha + arma::sum(log_x);
+  arma::vec alpha_term = (beta - 1.0) * x_alpha_log_x / v;
+  d_alpha -= arma::sum(alpha_term);
+  
+  // ∂ℓ/∂β = n/β + Σlog(1-x^α)
+  double d_beta = n / beta + arma::sum(log_v);
+  
+  // Return NEGATIVE gradient (for minimization of negative log-likelihood)
+  grad[0] = -d_alpha;
+  grad[1] = -d_beta;
+  
+  return grad;
 }
 
 
+// ============================================================================
+// HESSIAN OF NEGATIVE LOG-LIKELIHOOD
+// ============================================================================
 
-//' @title Hessian Matrix of the Negative Log-Likelihood for the Kw Distribution
-//' @author Lopes, J. E.
-//' @keywords distribution likelihood optimize hessian kumaraswamy
-//'
-//' @description
-//' Computes the analytic 2x2 Hessian matrix (matrix of second partial derivatives)
-//' of the negative log-likelihood function for the two-parameter Kumaraswamy (Kw)
-//' distribution with parameters \code{alpha} (\eqn{\alpha}) and \code{beta}
-//' (\eqn{\beta}). The Hessian is useful for estimating standard errors and in
-//' optimization algorithms.
-//'
-//' @param par A numeric vector of length 2 containing the distribution parameters
-//'   in the order: \code{alpha} (\eqn{\alpha > 0}), \code{beta} (\eqn{\beta > 0}).
-//' @param data A numeric vector of observations. All values must be strictly
-//'   between 0 and 1 (exclusive).
-//'
-//' @return Returns a 2x2 numeric matrix representing the Hessian matrix of the
-//'   negative log-likelihood function, \eqn{-\partial^2 \ell / (\partial \theta_i \partial \theta_j)},
-//'   where \eqn{\theta = (\alpha, \beta)}.
-//'   Returns a 2x2 matrix populated with \code{NaN} if any parameter values are
-//'   invalid according to their constraints, or if any value in \code{data} is
-//'   not in the interval (0, 1).
-//'
-//' @details
-//' This function calculates the analytic second partial derivatives of the
-//' negative log-likelihood function (\eqn{-\ell(\theta|\mathbf{x})}). The components
-//' are the negative of the second derivatives of the log-likelihood \eqn{\ell}
-//' (derived from the PDF in \code{\link{dkw}}).
-//'
-//' Let \eqn{v_i = 1 - x_i^{\alpha}}. The second derivatives of the positive log-likelihood (\eqn{\ell}) are:
-//' \deqn{
-//' \frac{\partial^2 \ell}{\partial \alpha^2} = -\frac{n}{\alpha^2} -
-//' (\beta-1)\sum_{i=1}^{n}\frac{x_i^{\alpha}(\ln(x_i))^2}{v_i^2}
-//' }
-//' \deqn{
-//' \frac{\partial^2 \ell}{\partial \alpha \partial \beta} = -
-//' \sum_{i=1}^{n}\frac{x_i^{\alpha}\ln(x_i)}{v_i}
-//' }
-//' \deqn{
-//' \frac{\partial^2 \ell}{\partial \beta^2} = -\frac{n}{\beta^2}
-//' }
-//' The function returns the Hessian matrix containing the negative of these values.
-//'
-//' Key properties of the returned matrix:
-//' \itemize{
-//'   \item Dimensions: 2x2.
-//'   \item Symmetry: The matrix is symmetric.
-//'   \item Ordering: Rows and columns correspond to the parameters in the order
-//'     \eqn{\alpha, \beta}.
-//'   \item Content: Analytic second derivatives of the *negative* log-likelihood.
-//' }
-//' This corresponds to the relevant 2x2 submatrix of the 5x5 GKw Hessian (\code{\link{hsgkw}})
-//' evaluated at \eqn{\gamma=1, \delta=0, \lambda=1}.
-//'
-//' @references
-//' Kumaraswamy, P. (1980). A generalized probability density function for
-//' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
-//'
-//'
-//' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
-//' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
-//'
-//' (Note: Specific Hessian formulas might be derived or sourced from additional references).
-//'
-//' @seealso
-//' \code{\link{hsgkw}} (parent distribution Hessian),
-//' \code{\link{llkw}} (negative log-likelihood for Kw),
-//' \code{grkw} (gradient for Kw, if available),
-//' \code{\link{dkw}} (density for Kw),
-//' \code{\link[stats]{optim}},
-//' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).
-//'
-//' @examples
-//' \donttest{
-//' ## Example 1: Basic Hessian Evaluation
-//' 
-//' # Generate sample data
-//' set.seed(123)
-//' n <- 1000
-//' true_params <- c(alpha = 2.5, beta = 3.5)
-//' data <- rkw(n, alpha = true_params[1], beta = true_params[2])
-//' 
-//' # Evaluate Hessian at true parameters
-//' hess_true <- hskw(par = true_params, data = data)
-//' cat("Hessian matrix at true parameters:\n")
-//' print(hess_true, digits = 4)
-//' 
-//' # Check symmetry
-//' cat("\nSymmetry check (max |H - H^T|):",
-//'     max(abs(hess_true - t(hess_true))), "\n")
-//' 
-//' ## Example 2: Hessian Properties at MLE
-//' 
-//' # Fit model
-//' fit <- optim(
-//'   par = c(2, 2),
-//'   fn = llkw,
-//'   gr = grkw,
-//'   data = data,
-//'   method = "BFGS",
-//'   hessian = TRUE
-//' )
-//' 
-//' mle <- fit$par
-//' names(mle) <- c("alpha", "beta")
-//' 
-//' # Hessian at MLE
-//' hessian_at_mle <- hskw(par = mle, data = data)
-//' cat("\nHessian at MLE:\n")
-//' print(hessian_at_mle, digits = 4)
-//' 
-//' # Compare with optim's numerical Hessian
-//' cat("\nComparison with optim Hessian:\n")
-//' cat("Max absolute difference:",
-//'     max(abs(hessian_at_mle - fit$hessian)), "\n")
-//' 
-//' # Eigenvalue analysis
-//' eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
-//' cat("\nEigenvalues:\n")
-//' print(eigenvals)
-//' 
-//' cat("\nPositive definite:", all(eigenvals > 0), "\n")
-//' cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
-//' 
-//' 
-//' ## Example 3: Standard Errors and Confidence Intervals
-//' 
-//' # Observed information matrix (negative Hessian for neg-loglik)
-//' obs_info <- hessian_at_mle
-//' 
-//' # Variance-covariance matrix
-//' vcov_matrix <- solve(obs_info)
-//' cat("\nVariance-Covariance Matrix:\n")
-//' print(vcov_matrix, digits = 6)
-//' 
-//' # Standard errors
-//' se <- sqrt(diag(vcov_matrix))
-//' names(se) <- c("alpha", "beta")
-//' 
-//' # Correlation matrix
-//' corr_matrix <- cov2cor(vcov_matrix)
-//' cat("\nCorrelation Matrix:\n")
-//' print(corr_matrix, digits = 4)
-//' 
-//' # Confidence intervals
-//' z_crit <- qnorm(0.975)
-//' results <- data.frame(
-//'   Parameter = c("alpha", "beta"),
-//'   True = true_params,
-//'   MLE = mle,
-//'   SE = se,
-//'   CI_Lower = mle - z_crit * se,
-//'   CI_Upper = mle + z_crit * se
-//' )
-//' print(results, digits = 4)
-//' 
-//' ## Example 4: Determinant and Trace Analysis
-//' 
-//' # Compute at different points
-//' test_params <- rbind(
-//'   c(1.5, 2.5),
-//'   c(2.0, 3.0),
-//'   mle,
-//'   c(3.0, 4.0)
-//' )
-//' 
-//' hess_properties <- data.frame(
-//'   Alpha = numeric(),
-//'   Beta = numeric(),
-//'   Determinant = numeric(),
-//'   Trace = numeric(),
-//'   Min_Eigenval = numeric(),
-//'   Max_Eigenval = numeric(),
-//'   Cond_Number = numeric(),
-//'   stringsAsFactors = FALSE
-//' )
-//' 
-//' for (i in 1:nrow(test_params)) {
-//'   H <- hskw(par = test_params[i, ], data = data)
-//'   eigs <- eigen(H, only.values = TRUE)$values
-//' 
-//'   hess_properties <- rbind(hess_properties, data.frame(
-//'     Alpha = test_params[i, 1],
-//'     Beta = test_params[i, 2],
-//'     Determinant = det(H),
-//'     Trace = sum(diag(H)),
-//'     Min_Eigenval = min(eigs),
-//'     Max_Eigenval = max(eigs),
-//'     Cond_Number = max(eigs) / min(eigs)
-//'   ))
-//' }
-//' 
-//' cat("\nHessian Properties at Different Points:\n")
-//' print(hess_properties, digits = 4, row.names = FALSE)
-//' 
-//' ## Example 5: Curvature Visualization
-//' 
-//' # Create grid around MLE
-//' alpha_grid <- seq(mle[1] - 0.5, mle[1] + 0.5, length.out = 30)
-//' beta_grid <- seq(mle[2] - 0.5, mle[2] + 0.5, length.out = 30)
-//' alpha_grid <- alpha_grid[alpha_grid > 0]
-//' beta_grid <- beta_grid[beta_grid > 0]
-//' 
-//' # Compute curvature measures
-//' determinant_surface <- matrix(NA, nrow = length(alpha_grid),
-//'                                ncol = length(beta_grid))
-//' trace_surface <- matrix(NA, nrow = length(alpha_grid),
-//'                          ncol = length(beta_grid))
-//' 
-//' for (i in seq_along(alpha_grid)) {
-//'   for (j in seq_along(beta_grid)) {
-//'     H <- hskw(c(alpha_grid[i], beta_grid[j]), data)
-//'     determinant_surface[i, j] <- det(H)
-//'     trace_surface[i, j] <- sum(diag(H))
-//'   }
-//' }
-//' 
-//' # Plot
-//' 
-//' contour(alpha_grid, beta_grid, determinant_surface,
-//'         xlab = expression(alpha), ylab = expression(beta),
-//'         main = "Hessian Determinant", las = 1,
-//'         col = "#2E4057", lwd = 1.5, nlevels = 15)
-//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-//' grid(col = "gray90")
-//' 
-//' contour(alpha_grid, beta_grid, trace_surface,
-//'         xlab = expression(alpha), ylab = expression(beta),
-//'         main = "Hessian Trace", las = 1,
-//'         col = "#2E4057", lwd = 1.5, nlevels = 15)
-//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-//' grid(col = "gray90")
-//' 
-//' ## Example 6: Fisher Information and Asymptotic Efficiency
-//' 
-//' # Observed information (at MLE)
-//' obs_fisher <- hessian_at_mle
-//' 
-//' # Asymptotic covariance matrix
-//' asymp_cov <- solve(obs_fisher)
-//' 
-//' cat("\nAsymptotic Standard Errors:\n")
-//' cat("SE(alpha):", sqrt(asymp_cov[1, 1]), "\n")
-//' cat("SE(beta):", sqrt(asymp_cov[2, 2]), "\n")
-//' 
-//' # Cramér-Rao Lower Bound
-//' cat("\nCramér-Rao Lower Bounds:\n")
-//' cat("CRLB(alpha):", sqrt(asymp_cov[1, 1]), "\n")
-//' cat("CRLB(beta):", sqrt(asymp_cov[2, 2]), "\n")
-//' 
-//' # Efficiency ellipse (95% confidence region)
-//' theta <- seq(0, 2 * pi, length.out = 100)
-//' chi2_val <- qchisq(0.95, df = 2)
-//' 
-//' # Eigendecomposition
-//' eig_decomp <- eigen(asymp_cov)
-//' 
-//' # Ellipse points
-//' ellipse <- matrix(NA, nrow = 100, ncol = 2)
-//' for (i in 1:100) {
-//'   v <- c(cos(theta[i]), sin(theta[i]))
-//'   ellipse[i, ] <- mle + sqrt(chi2_val) *
-//'     (eig_decomp$vectors %*% diag(sqrt(eig_decomp$values)) %*% v)
-//' }
-//' 
-//' # Plot confidence ellipse
-//' 
-//' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
-//'      xlab = expression(alpha), ylab = expression(beta),
-//'      main = "95% Confidence Ellipse", las = 1)
-//' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-//' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-//' legend("topright",
-//'        legend = c("MLE", "True", "95% CR"),
-//'        col = c("#8B0000", "#006400", "#2E4057"),
-//'        pch = c(19, 17, NA), lty = c(NA, NA, 1),
-//'        lwd = c(NA, NA, 2), bty = "n")
-//' grid(col = "gray90")
-//' 
-//' }
-//'
-//' @export
-// [[Rcpp::export]]
+/**
+ * @brief Hessian Matrix of Negative Log-Likelihood for Kumaraswamy Distribution
+ * 
+ * Computes the Hessian matrix (matrix of second partial derivatives) of
+ * the negative log-likelihood for standard error estimation and
+ * optimization algorithms.
+ * 
+ * @param par Parameter vector of length 2: (α, β)
+ * @param data Vector of observations (must be in (0,1))
+ * 
+ * @return NumericMatrix of dimension 2×2 containing the Hessian
+ * 
+ * @details
+ * Computes analytical second derivatives. The Hessian is symmetric.
+ * Parameter ordering: (α, β) → indices (0, 1).
+ * 
+ * The Hessian components are:
+ * - H[α,α] = -n/α² - (β-1)Σ[x^α(log x)²(1+x^α/(1-x^α))/(1-x^α)]
+ * - H[α,β] = -Σ[x^α log(x)/(1-x^α)]
+ * - H[β,β] = -n/β²
+ * 
+ * Returns NaN matrix for invalid inputs.
+ * 
+ * @note Exported as .hskw_cpp for internal package use
+ */
+// [[Rcpp::export(.hskw_cpp)]]
 Rcpp::NumericMatrix hskw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
- // Parameter extraction
- double alpha = par[0];   // Shape parameter α > 0
- double beta = par[1];    // Shape parameter β > 0
- 
- // Initialize Hessian matrix
- Rcpp::NumericMatrix hess(2, 2);
- 
- // Parameter validation
- if (alpha <= 0 || beta <= 0) {
-   hess.fill(R_NaN);
-   return hess;
- }
- 
- // Data conversion and validation
- arma::vec x = Rcpp::as<arma::vec>(data);
- 
- if (arma::any(x <= 0) || arma::any(x >= 1)) {
-   hess.fill(R_NaN);
-   return hess;
- }
- 
- int n = x.n_elem;  // Sample size
- 
- // Small constant to avoid numerical issues
- double eps = std::numeric_limits<double>::epsilon() * 100;
- 
- // Compute transformations and intermediate values
- arma::vec log_x = arma::log(x);                  // log(x_i)
- arma::vec log_x_squared = arma::square(log_x);   // (log(x_i))²
- arma::vec x_alpha = arma::pow(x, alpha);         // x_i^α
- arma::vec x_alpha_log_x = x_alpha % log_x;       // x_i^α * log(x_i)
- 
- // v_i = 1 - x_i^α
- arma::vec v = 1.0 - x_alpha;
- v = arma::clamp(v, eps, 1.0 - eps);              // Prevent numerical issues
- 
- // Additional terms for second derivatives
- arma::vec term_ratio = x_alpha / v;              // x_i^α / (1-x_i^α)
- arma::vec term_combined = 1.0 + term_ratio;      // 1 + x_i^α/(1-x_i^α)
- 
- // Calculate the Hessian components for negative log-likelihood
- 
- // H[0,0] = ∂²ℓ/∂α² = -n/α² - Σᵢ[(β-1)x_i^α(log(x_i))²/(1-x_i^α)(1 + x_i^α/(1-x_i^α))]
- double h_alpha_alpha = -n / (alpha * alpha);
- arma::vec d2a_terms = (beta - 1.0) * x_alpha % log_x_squared % term_combined / v;
- h_alpha_alpha -= arma::sum(d2a_terms);
- 
- // H[0,1] = H[1,0] = ∂²ℓ/∂α∂β = -Σᵢ[x_i^α*log(x_i)/(1-x_i^α)]
- double h_alpha_beta = -arma::sum(x_alpha_log_x / v);
- 
- // H[1,1] = ∂²ℓ/∂β² = -n/β²
- double h_beta_beta = -n / (beta * beta);
- 
- // Fill the Hessian matrix (symmetric)
- hess(0, 0) = -h_alpha_alpha;
- hess(0, 1) = hess(1, 0) = -h_alpha_beta;
- hess(1, 1) = -h_beta_beta;
- 
- return hess;
+  // Initialize NaN matrix for error cases
+  Rcpp::NumericMatrix nanHess(2, 2);
+  nanHess.fill(R_NaN);
+  
+  // Validate parameter vector length
+  if (par.size() < 2) {
+    return nanHess;
+  }
+  
+  // Extract parameters
+  double alpha = par[0];
+  double beta = par[1];
+  
+  // Validate parameters using consistent checker
+  if (!check_kw_pars(alpha, beta)) {
+    return nanHess;
+  }
+  
+  // Convert and validate data
+  arma::vec x = Rcpp::as<arma::vec>(data);
+  if (arma::any(x <= 0) || arma::any(x >= 1)) {
+    return nanHess;
+  }
+  
+  int n = x.n_elem;
+  Rcpp::NumericMatrix hess(2, 2);
+  
+  // Numerical stability constant
+  const double eps = std::numeric_limits<double>::epsilon() * 100;
+  
+  // ---- Compute intermediate quantities ----
+  
+  arma::vec log_x = vec_safe_log(x);
+  arma::vec log_x_squared = arma::square(log_x);
+  arma::vec x_alpha = vec_safe_pow(x, alpha);
+  arma::vec x_alpha_log_x = x_alpha % log_x;
+  
+  // v = 1 - x^α (with clamping for numerical stability)
+  arma::vec v = 1.0 - x_alpha;
+  v = arma::clamp(v, eps, 1.0 - eps);
+  
+  // Additional terms for second derivatives
+  arma::vec term_ratio = x_alpha / v;              // x^α / (1-x^α)
+  arma::vec term_combined = 1.0 + term_ratio;      // 1 + x^α/(1-x^α) = 1/(1-x^α)
+  
+  // ---- Calculate Hessian components (of log-likelihood ℓ) ----
+  
+  // H[α,α] = ∂²ℓ/∂α² = -n/α² - (β-1)Σ[x^α(log x)²(1+x^α/(1-x^α))/(1-x^α)]
+  double h_alpha_alpha = -n / (alpha * alpha);
+  arma::vec d2a_terms = (beta - 1.0) * x_alpha % log_x_squared % term_combined / v;
+  h_alpha_alpha -= arma::sum(d2a_terms);
+  
+  // H[α,β] = H[β,α] = ∂²ℓ/∂α∂β = -Σ[x^α log(x)/(1-x^α)]
+  double h_alpha_beta = -arma::sum(x_alpha_log_x / v);
+  
+  // H[β,β] = ∂²ℓ/∂β² = -n/β²
+  double h_beta_beta = -n / (beta * beta);
+  
+  // Fill the Hessian matrix (symmetric) - NEGATE for negative log-likelihood
+  hess(0, 0) = -h_alpha_alpha;
+  hess(0, 1) = hess(1, 0) = -h_alpha_beta;
+  hess(1, 1) = -h_beta_beta;
+  
+  return hess;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+// // [[Rcpp::plugins(cpp11)]]
+// // [[Rcpp::depends(RcppArmadillo)]]
+// #include <RcppArmadillo.h>
+// #include "utils.h"
+// 
+// /*
+// ----------------------------------------------------------------------------
+// KUMARASWAMY (Kw) DISTRIBUTION
+// ----------------------------------------------------------------------------
+// 
+// Parameters: alpha>0, beta>0.
+// 
+// * PDF:
+// f(x) = alpha * beta * x^(alpha -1) * (1 - x^alpha)^(beta -1),  for 0<x<1.
+// 
+// * CDF:
+// F(x)= 1 - (1 - x^alpha)^beta.
+// 
+// * QUANTILE:
+// Q(p)= {1 - [1 - p]^(1/beta)}^(1/alpha).
+// 
+// * RANDOM GENERATION:
+// If V ~ Uniform(0,1), then X= {1 - [1 - V]^(1/beta)}^(1/alpha).
+// 
+// * NEGATIVE LOG-LIKELIHOOD:
+// sum over i of -log( f(x_i) ).
+// log f(x_i)= log(alpha) + log(beta) + (alpha-1)*log(x_i) + (beta-1)*log(1 - x_i^alpha).
+// ----------------------------------------------------------------------------*/
+// 
+// // -----------------------------------------------------------------------------
+// // 1) dkw: PDF of Kumaraswamy
+// // -----------------------------------------------------------------------------
+// 
+// // [[Rcpp::export(.dkw_cpp)]]
+// Rcpp::NumericVector dkw(
+//    const arma::vec& x,
+//    const Rcpp::NumericVector& alpha,
+//    const Rcpp::NumericVector& beta,
+//    bool log_prob=false
+// ) {
+//  arma::vec a_vec(alpha.begin(), alpha.size());
+//  arma::vec b_vec(beta.begin(), beta.size());
+//  
+//  size_t N= std::max({ x.n_elem, a_vec.n_elem, b_vec.n_elem });
+//  arma::vec out(N);
+//  
+//  out.fill(log_prob ? R_NegInf : 0.0);
+//  
+//  for (size_t i=0; i<N; i++){
+//    double a= a_vec[i % a_vec.n_elem];
+//    double b= b_vec[i % b_vec.n_elem];
+//    double xx= x[i % x.n_elem];
+//    
+//    if (!check_kw_pars(a,b)) {
+//      // invalid => pdf=0 or logpdf=-Inf
+//      continue;
+//    }
+//    if (xx<=0.0 || xx>=1.0 || !R_finite(xx)) {
+//      // outside domain => 0 or -Inf
+//      continue;
+//    }
+//    
+//    // log f(x)= log(a)+ log(b) + (a-1)* log(x) + (b-1)* log(1- x^a)
+//    double la= std::log(a);
+//    double lb= std::log(b);
+//    
+//    double lx= std::log(xx);
+//    double xalpha= a* lx; // log(x^a)
+//    // log(1- x^a)= log1mexp(xalpha)
+//    double log_1_xalpha= log1mexp(xalpha);
+//    if (!R_finite(log_1_xalpha)) {
+//      continue;
+//    }
+//    
+//    double log_pdf= la + lb + (a-1.0)* lx + (b-1.0)* log_1_xalpha;
+//    
+//    if (log_prob) {
+//      out(i)= log_pdf;
+//    } else {
+//      out(i)= std::exp(log_pdf);
+//    }
+//  }
+//  
+//  return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
+// }
+// 
+// 
+// // -----------------------------------------------------------------------------
+// // 2) pkw: CDF of Kumaraswamy
+// // -----------------------------------------------------------------------------
+// 
+// // [[Rcpp::export(.pkw_cpp)]]
+// Rcpp::NumericVector pkw(
+//    const arma::vec& q,
+//    const Rcpp::NumericVector& alpha,
+//    const Rcpp::NumericVector& beta,
+//    bool lower_tail=true,
+//    bool log_p=false
+// ) {
+//  arma::vec a_vec(alpha.begin(), alpha.size());
+//  arma::vec b_vec(beta.begin(), beta.size());
+//  
+//  size_t N= std::max({ q.n_elem, a_vec.n_elem, b_vec.n_elem });
+//  arma::vec out(N);
+//  
+//  for (size_t i=0; i<N; i++){
+//    double a= a_vec[i % a_vec.n_elem];
+//    double b= b_vec[i % b_vec.n_elem];
+//    double xx= q[i % q.n_elem];
+//    
+//    if (!check_kw_pars(a,b)) {
+//      out(i)= NA_REAL;
+//      continue;
+//    }
+//    
+//    // boundary
+//    if (!R_finite(xx) || xx<=0.0) {
+//      double val0= (lower_tail ? 0.0 : 1.0);
+//      out(i)= log_p ? std::log(val0) : val0;
+//      continue;
+//    }
+//    if (xx>=1.0) {
+//      double val1= (lower_tail ? 1.0 : 0.0);
+//      out(i)= log_p ? std::log(val1) : val1;
+//      continue;
+//    }
+//    
+//    double xalpha= std::pow(xx, a);
+//    double tmp= 1.0 - std::pow( (1.0 - xalpha), b );
+//    if (tmp<=0.0) {
+//      double val0= (lower_tail ? 0.0 : 1.0);
+//      out(i)= log_p ? std::log(val0) : val0;
+//      continue;
+//    }
+//    if (tmp>=1.0) {
+//      double val1= (lower_tail ? 1.0 : 0.0);
+//      out(i)= log_p ? std::log(val1) : val1;
+//      continue;
+//    }
+//    
+//    double val= tmp;
+//    if (!lower_tail) {
+//      val= 1.0- val;
+//    }
+//    if (log_p) {
+//      val= std::log(val);
+//    }
+//    out(i)= val;
+//  }
+//  
+//  return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
+// }
+// 
+// // -----------------------------------------------------------------------------
+// // 3) qkw: Quantile of Kumaraswamy
+// // -----------------------------------------------------------------------------
+// 
+// 
+// // [[Rcpp::export(.qkw_cpp)]]
+// Rcpp::NumericVector qkw(
+//    const arma::vec& p,
+//    const Rcpp::NumericVector& alpha,
+//    const Rcpp::NumericVector& beta,
+//    bool lower_tail=true,
+//    bool log_p=false
+// ) {
+//  arma::vec a_vec(alpha.begin(), alpha.size());
+//  arma::vec b_vec(beta.begin(), beta.size());
+//  
+//  size_t N= std::max({ p.n_elem, a_vec.n_elem, b_vec.n_elem });
+//  arma::vec out(N);
+//  
+//  for (size_t i=0; i<N; i++){
+//    double a= a_vec[i % a_vec.n_elem];
+//    double b= b_vec[i % b_vec.n_elem];
+//    double pp= p[i % p.n_elem];
+//    
+//    if (!check_kw_pars(a,b)) {
+//      out(i)= NA_REAL;
+//      continue;
+//    }
+//    
+//    // convert if log
+//    if (log_p) {
+//      if (pp>0.0) {
+//        // invalid => p>1
+//        out(i)= NA_REAL;
+//        continue;
+//      }
+//      pp= std::exp(pp);
+//    }
+//    if (!lower_tail) {
+//      pp= 1.0 - pp;
+//    }
+//    
+//    // boundary
+//    if (pp<=0.0) {
+//      out(i)= 0.0;
+//      continue;
+//    }
+//    if (pp>=1.0) {
+//      out(i)= 1.0;
+//      continue;
+//    }
+//    
+//    // x= {1 - [1 - p]^(1/beta)}^(1/alpha)
+//    double step1= 1.0 - pp;
+//    if (step1<0.0) step1=0.0;
+//    double step2= std::pow(step1, 1.0/b);
+//    double step3= 1.0 - step2;
+//    if (step3<0.0) step3=0.0;
+//    
+//    double xval;
+//    if (a==1.0) {
+//      xval= step3;
+//    } else {
+//      xval= std::pow(step3, 1.0/a);
+//      if (!R_finite(xval)|| xval<0.0) xval=0.0;
+//      if (xval>1.0) xval=1.0;
+//    }
+//    out(i)= xval;
+//  }
+//  
+//  return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
+// }
+// 
+// 
+// // -----------------------------------------------------------------------------
+// // 4) rkw: Random Generation from Kumaraswamy
+// // -----------------------------------------------------------------------------
+// 
+// // [[Rcpp::export(.rkw_cpp)]]
+// Rcpp::NumericVector rkw(
+//    int n,
+//    const Rcpp::NumericVector& alpha,
+//    const Rcpp::NumericVector& beta
+// ) {
+//  if (n<=0) {
+//    Rcpp::stop("rkw: n must be positive");
+//  }
+//  
+//  arma::vec a_vec(alpha.begin(), alpha.size());
+//  arma::vec b_vec(beta.begin(), beta.size());
+//  
+//  size_t k= std::max({ a_vec.n_elem, b_vec.n_elem });
+//  arma::vec out(n);
+//  
+//  for (int i=0; i<n; i++){
+//    size_t idx= i % k;
+//    double a= a_vec[idx % a_vec.n_elem];
+//    double b= b_vec[idx % b_vec.n_elem];
+//    
+//    if (!check_kw_pars(a,b)) {
+//      out(i)= NA_REAL;
+//      Rcpp::warning("rkw: invalid parameters at index %d", i+1);
+//      continue;
+//    }
+//    
+//    double U= R::runif(0.0,1.0);
+//    // X= {1 - [1 - U]^(1/beta)}^(1/alpha)
+//    double step1= 1.0 - U;
+//    if (step1<0.0) step1=0.0;
+//    double step2= std::pow(step1, 1.0/b);
+//    double step3= 1.0 - step2;
+//    if (step3<0.0) step3=0.0;
+//    
+//    double x;
+//    if (a==1.0) {
+//      x= step3;
+//    } else {
+//      x= std::pow(step3, 1.0/a);
+//      if (!R_finite(x)|| x<0.0) x=0.0;
+//      if (x>1.0) x=1.0;
+//    }
+//    out(i)= x;
+//  }
+//  
+//  return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
+// }
+// 
+// // -----------------------------------------------------------------------------
+// // 5) llkw: Negative Log-Likelihood for Kumaraswamy
+// // -----------------------------------------------------------------------------
+// 
+// 
+// // [[Rcpp::export(.llkw_cpp)]]
+// double llkw(const Rcpp::NumericVector& par,
+//            const Rcpp::NumericVector& data) {
+//  if (par.size()<2) {
+//    return R_PosInf;
+//  }
+//  double a= par[0];
+//  double b= par[1];
+//  
+//  if (!check_kw_pars(a,b)) {
+//    return R_PosInf;
+//  }
+//  
+//  arma::vec x= Rcpp::as<arma::vec>(data);
+//  if (x.n_elem<1) {
+//    return R_PosInf;
+//  }
+//  if (arma::any(x<=0.0) || arma::any(x>=1.0)) {
+//    return R_PosInf;
+//  }
+//  
+//  int n= x.n_elem;
+//  // constant: n*( log(a)+ log(b) )
+//  double cst= n*( std::log(a) + std::log(b) );
+//  
+//  // sum( (a-1)* log(x_i ) )
+//  arma::vec lx= arma::log(x);
+//  double sum1= (a-1.0)* arma::sum(lx);
+//  
+//  // sum( (b-1)* log(1- x^a) )
+//  arma::vec xalpha= arma::pow(x,a);
+//  arma::vec log_1_xalpha= arma::log(1.0 - xalpha);
+//  double sum2= (b-1.0)* arma::sum(log_1_xalpha);
+//  
+//  double loglike= cst + sum1 + sum2;
+//  // negative
+//  return -loglike;
+// }
+// 
+// 
+// 
+// // [[Rcpp::export(.grkw_cpp)]]
+// Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
+//  // Parameter extraction
+//  double alpha = par[0];   // Shape parameter α > 0
+//  double beta = par[1];    // Shape parameter β > 0
+//  
+//  // Parameter validation
+//  if (alpha <= 0 || beta <= 0) {
+//    Rcpp::NumericVector grad(2, R_NaN);
+//    return grad;
+//  }
+//  
+//  // Data conversion and validation
+//  arma::vec x = Rcpp::as<arma::vec>(data);
+//  
+//  if (arma::any(x <= 0) || arma::any(x >= 1)) {
+//    Rcpp::NumericVector grad(2, R_NaN);
+//    return grad;
+//  }
+//  
+//  int n = x.n_elem;  // Sample size
+//  
+//  // Initialize gradient vector
+//  Rcpp::NumericVector grad(2, 0.0);
+//  
+//  // Small constant to avoid numerical issues
+//  double eps = std::numeric_limits<double>::epsilon() * 100;
+//  
+//  // Compute transformations and intermediate values
+//  arma::vec log_x = arma::log(x);                // log(x_i)
+//  arma::vec x_alpha = arma::pow(x, alpha);       // x_i^α
+//  arma::vec x_alpha_log_x = x_alpha % log_x;     // x_i^α * log(x_i)
+//  
+//  // v_i = 1 - x_i^α
+//  arma::vec v = 1.0 - x_alpha;
+//  v = arma::clamp(v, eps, 1.0 - eps);            // Prevent numerical issues
+//  
+//  arma::vec log_v = arma::log(v);                // log(1-x_i^α)
+//  
+//  // Calculate partial derivatives for each parameter (for log-likelihood)
+//  
+//  // ∂ℓ/∂α = n/α + Σᵢlog(xᵢ) - Σᵢ[(β-1)xᵢ^α*log(xᵢ)/(1-xᵢ^α)]
+//  double d_alpha = n / alpha + arma::sum(log_x);
+//  
+//  // Calculate the term for α gradient
+//  arma::vec alpha_term = (beta - 1.0) * x_alpha_log_x / v;
+//  
+//  d_alpha -= arma::sum(alpha_term);
+//  
+//  // ∂ℓ/∂β = n/β + Σᵢlog(1-xᵢ^α)
+//  double d_beta = n / beta + arma::sum(log_v);
+//  
+//  // Since we're optimizing negative log-likelihood, negate all derivatives
+//  grad[0] = -d_alpha;
+//  grad[1] = -d_beta;
+//  
+//  return grad;
+// }
+// 
+// 
+// // [[Rcpp::export(.hskw_cpp)]]
+// Rcpp::NumericMatrix hskw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
+//  // Parameter extraction
+//  double alpha = par[0];   // Shape parameter α > 0
+//  double beta = par[1];    // Shape parameter β > 0
+//  
+//  // Initialize Hessian matrix
+//  Rcpp::NumericMatrix hess(2, 2);
+//  
+//  // Parameter validation
+//  if (alpha <= 0 || beta <= 0) {
+//    hess.fill(R_NaN);
+//    return hess;
+//  }
+//  
+//  // Data conversion and validation
+//  arma::vec x = Rcpp::as<arma::vec>(data);
+//  
+//  if (arma::any(x <= 0) || arma::any(x >= 1)) {
+//    hess.fill(R_NaN);
+//    return hess;
+//  }
+//  
+//  int n = x.n_elem;  // Sample size
+//  
+//  // Small constant to avoid numerical issues
+//  double eps = std::numeric_limits<double>::epsilon() * 100;
+//  
+//  // Compute transformations and intermediate values
+//  arma::vec log_x = arma::log(x);                  // log(x_i)
+//  arma::vec log_x_squared = arma::square(log_x);   // (log(x_i))²
+//  arma::vec x_alpha = arma::pow(x, alpha);         // x_i^α
+//  arma::vec x_alpha_log_x = x_alpha % log_x;       // x_i^α * log(x_i)
+//  
+//  // v_i = 1 - x_i^α
+//  arma::vec v = 1.0 - x_alpha;
+//  v = arma::clamp(v, eps, 1.0 - eps);              // Prevent numerical issues
+//  
+//  // Additional terms for second derivatives
+//  arma::vec term_ratio = x_alpha / v;              // x_i^α / (1-x_i^α)
+//  arma::vec term_combined = 1.0 + term_ratio;      // 1 + x_i^α/(1-x_i^α)
+//  
+//  // Calculate the Hessian components for negative log-likelihood
+//  
+//  // H[0,0] = ∂²ℓ/∂α² = -n/α² - Σᵢ[(β-1)x_i^α(log(x_i))²/(1-x_i^α)(1 + x_i^α/(1-x_i^α))]
+//  double h_alpha_alpha = -n / (alpha * alpha);
+//  arma::vec d2a_terms = (beta - 1.0) * x_alpha % log_x_squared % term_combined / v;
+//  h_alpha_alpha -= arma::sum(d2a_terms);
+//  
+//  // H[0,1] = H[1,0] = ∂²ℓ/∂α∂β = -Σᵢ[x_i^α*log(x_i)/(1-x_i^α)]
+//  double h_alpha_beta = -arma::sum(x_alpha_log_x / v);
+//  
+//  // H[1,1] = ∂²ℓ/∂β² = -n/β²
+//  double h_beta_beta = -n / (beta * beta);
+//  
+//  // Fill the Hessian matrix (symmetric)
+//  hess(0, 0) = -h_alpha_alpha;
+//  hess(0, 1) = hess(1, 0) = -h_alpha_beta;
+//  hess(1, 1) = -h_beta_beta;
+//  
+//  return hess;
+// }

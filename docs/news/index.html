@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,95 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="gkwdist-development-version">gkwdist (development version)<a class="anchor" aria-label="anchor" href="#gkwdist-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.1.1" id="gkwdist-111">gkwdist 1.1.1<a class="anchor" aria-label="anchor" href="#gkwdist-111"></a></h2>
+<div class="section level3">
+<h3 id="major-refactoring-release-1-1-1">Major Refactoring Release<a class="anchor" aria-label="anchor" href="#major-refactoring-release-1-1-1"></a></h3>
+<p>This release represents a comprehensive refactoring of the entire package codebase, focusing on numerical stability, code consistency, and maintainability.</p>
+<div class="section level4">
+<h4 id="c-backend-overhaul-1-1-1">C++ Backend Overhaul<a class="anchor" aria-label="anchor" href="#c-backend-overhaul-1-1-1"></a></h4>
+<ul><li>
+<p><strong>Unified utility functions</strong>: Introduced <code>utils.h</code> header providing numerically stable implementations of critical functions:</p>
+<ul><li>
+<code>log1mexp()</code>: Stable computation of log(1 - exp(x)) using Mächler (2012) methodology</li>
+<li>
+<code>log1pexp()</code>: Overflow-protected computation of log(1 + exp(x))</li>
+<li>
+<code>safe_log()</code>, <code>safe_exp()</code>, <code>safe_pow()</code>: Protected arithmetic operations with graceful handling of edge cases</li>
+<li>Vectorized versions (<code>vec_safe_log</code>, <code>vec_log1mexp</code>, etc.) for efficient array operations</li>
+</ul></li>
+<li><p><strong>Consistent parameter validation</strong>: All distribution families now use dedicated parameter checkers (<code>check_pars()</code>, <code>check_kw_pars()</code>, <code>check_ekw_pars()</code>, etc.) that properly handle NaN, Inf, and boundary conditions.</p></li>
+<li>
+<p><strong>Complete documentation</strong>: All C++ source files now include comprehensive Doxygen-style documentation headers describing:</p>
+<ul><li>Mathematical formulas for PDF, CDF, quantile, and random generation</li>
+<li>Parameter constraints and special cases</li>
+<li>Numerical stability considerations</li>
+<li>Relationship to parent GKw distribution</li>
+</ul></li>
+</ul></div>
+<div class="section level4">
+<h4 id="bug-fixes-1-1-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-1-1"></a></h4>
+<ul><li><p><strong>Fixed critical bug in <code><a href="../reference/qgkw.html">qgkw()</a></code></strong>: Corrected logic error where <code>lower_tail</code> transformation was incorrectly applied when <code>log_p = TRUE</code>. The probability is now properly converted to linear scale before tail adjustment.</p></li>
+<li><p><strong>Fixed gradient calculation in <code><a href="../reference/grkkw.html">grkkw()</a></code></strong>: Resolved issue where <code>log_z</code> was not recomputed after clamping <code>z</code> to minimum threshold, causing corrupted gradient values near boundaries.</p></li>
+<li><p><strong>Fixed Hessian calculation in <code><a href="../reference/hsmc.html">hsmc()</a></code></strong>: Corrected sign errors and formula for the lambda component of the Hessian matrix for the Beta-Power/McDonald distribution.</p></li>
+<li><p><strong>Fixed gradient signs in <code><a href="../reference/grmc.html">grmc()</a></code></strong>: Ensured consistent computation of log-likelihood gradient before negation for optimization.</p></li>
+</ul></div>
+<div class="section level4">
+<h4 id="code-quality-improvements-1-1-1">Code Quality Improvements<a class="anchor" aria-label="anchor" href="#code-quality-improvements-1-1-1"></a></h4>
+<ul><li><p><strong>Eliminated unused variables</strong>: Removed declared but unused constants (<code>exp_threshold</code>) and intermediate variables across all distribution files.</p></li>
+<li><p><strong>Removed redundant calculations</strong>: Streamlined computations, notably in <code><a href="../reference/pgkw.html">pgkw()</a></code> where logarithm was computed twice for the same quantity.</p></li>
+<li><p><strong>Simplified parameter recycling</strong>: Replaced double-modulo indexing pattern (<code>idx = i % k; vec[idx % vec.n_elem]</code>) with direct single-modulo access (<code>vec[i % vec.n_elem]</code>) in random generation functions.</p></li>
+<li><p><strong>Standardized function signatures</strong>: All distribution functions now follow consistent patterns for parameter order, validation, and return value handling.</p></li>
+</ul></div>
+<div class="section level4">
+<h4 id="r-wrapper-layer-1-1-1">R Wrapper Layer<a class="anchor" aria-label="anchor" href="#r-wrapper-layer-1-1-1"></a></h4>
+<ul><li>
+<strong>Complete separation of R and C++ interfaces</strong>: All exported R functions now serve as wrappers around internal C++ implementations (<code>.dgkw_cpp</code>, <code>.pgkw_cpp</code>, etc.), providing:
+<ul><li>Enhanced input validation with informative error messages</li>
+<li>Consistent argument checking across all distribution families</li>
+<li>Proper NA/NaN propagation</li>
+<li>Documentation accessible via standard R help system</li>
+</ul></li>
+</ul></div>
+<div class="section level4">
+<h4 id="distribution-families-1-1-1">Distribution Families<a class="anchor" aria-label="anchor" href="#distribution-families-1-1-1"></a></h4>
+<p>All seven distribution families have been refactored with identical improvements:</p>
+<table class="table"><thead><tr><th>Distribution</th>
+<th>Parameters</th>
+<th>File</th>
+</tr></thead><tbody><tr><td>Generalized Kumaraswamy (GKw)</td>
+<td>α, β, γ, δ, λ</td>
+<td><code>gkw.cpp</code></td>
+</tr><tr><td>Kumaraswamy-Kumaraswamy (KKw)</td>
+<td>α, β, δ, λ</td>
+<td><code>kkw.cpp</code></td>
+</tr><tr><td>Beta-Kumaraswamy (BKw)</td>
+<td>α, β, γ, δ</td>
+<td><code>bkw.cpp</code></td>
+</tr><tr><td>Exponentiated Kumaraswamy (EKw)</td>
+<td>α, β, λ</td>
+<td><code>ekw.cpp</code></td>
+</tr><tr><td>Beta-Power/McDonald (BP/Mc)</td>
+<td>γ, δ, λ</td>
+<td><code>bpmc.cpp</code></td>
+</tr><tr><td>Kumaraswamy (Kw)</td>
+<td>α, β</td>
+<td><code>kw.cpp</code></td>
+</tr><tr><td>Beta (GKw-style)</td>
+<td>γ, δ</td>
+<td><code>beta.cpp</code></td>
+</tr></tbody></table><p>Each family includes: density (<code>d*</code>), distribution (<code>p*</code>), quantile (<code>q*</code>), random generation (<code>r*</code>), negative log-likelihood (<code>ll*</code>), gradient (<code>gr*</code>), and Hessian (<code>hs*</code>) functions.</p>
+</div>
+<div class="section level4">
+<h4 id="technical-notes-1-1-1">Technical Notes<a class="anchor" aria-label="anchor" href="#technical-notes-1-1-1"></a></h4>
+<ul><li>Minimum supported R version remains 3.5.0</li>
+<li>C++11 standard required (enabled via Rcpp plugin)</li>
+<li>Depends on RcppArmadillo for efficient linear algebra operations</li>
+</ul></div>
+<div class="section level4">
+<h4 id="acknowledgments-1-1-1">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments-1-1-1"></a></h4>
+<p>Special thanks to the thorough code review process that identified subtle numerical issues in edge cases, particularly for extreme parameter values and observations near distribution boundaries.</p>
+</div>
+</div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.7" id="gkwdist-107">gkwdist 1.0.7<a class="anchor" aria-label="anchor" href="#gkwdist-107"></a></h2>
