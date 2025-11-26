@@ -8,7 +8,7 @@ This distribution is defined on the interval (0, 1).
 ## Usage
 
 ``` r
-dmc(x, gamma, delta, lambda, log_prob = FALSE)
+dmc(x, gamma = 1, delta = 0, lambda = 1, log = FALSE)
 ```
 
 ## Arguments
@@ -32,7 +32,7 @@ dmc(x, gamma, delta, lambda, log_prob = FALSE)
   Shape parameter `lambda` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- log_prob:
+- log:
 
   Logical; if `TRUE`, the logarithm of the density is returned
   (\\\log(f(x))\\). Default: `FALSE`.
@@ -42,9 +42,9 @@ dmc(x, gamma, delta, lambda, log_prob = FALSE)
 A vector of density values (\\f(x)\\) or log-density values
 (\\\log(f(x))\\). The length of the result is determined by the
 recycling rule applied to the arguments (`x`, `gamma`, `delta`,
-`lambda`). Returns `0` (or `-Inf` if `log_prob = TRUE`) for `x` outside
-the interval (0, 1), or `NaN` if parameters are invalid (e.g.,
-`gamma <= 0`, `delta < 0`, `lambda <= 0`).
+`lambda`). Returns `0` (or `-Inf` if `log = TRUE`) for `x` outside the
+interval (0, 1), or `NaN` if parameters are invalid (e.g., `gamma <= 0`,
+`delta < 0`, `lambda <= 0`).
 
 ## Details
 
@@ -107,7 +107,7 @@ print(stats::dbeta(x_vals, shape1 = gamma_par, shape2 = delta_par + 1))
 #> [1] 1.252198 1.546796 0.626099
 
 # Calculate log-density
-log_densities <- dmc(x_vals, gamma_par, delta_par, lambda_par, log_prob = TRUE)
+log_densities <- dmc(x_vals, gamma_par, delta_par, lambda_par, log = TRUE)
 print(log_densities)
 #> [1]  0.2249005  0.4361857 -0.4682467
 
@@ -115,7 +115,7 @@ print(log_densities)
 densities_gkw <- dgkw(x_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
                       delta = delta_par, lambda = lambda_par)
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#> [1] "Max difference: 1.54679608384557"
+#> [1] "Max difference: 0"
 
 # Plot the density for different lambda values
 curve_x <- seq(0.01, 0.99, length.out = 200)

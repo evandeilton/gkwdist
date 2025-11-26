@@ -6,7 +6,7 @@ Kumaraswamy (GKw) distribution defined on the interval (0, 1).
 ## Usage
 
 ``` r
-rgkw(n, alpha, beta, gamma, delta, lambda)
+rgkw(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1)
 ```
 
 ## Arguments
@@ -131,11 +131,5 @@ samples_vec <- rgkw(n_param, alpha = alphas_vec, beta = 2, gamma = 1, delta = 0,
 print(samples_vec) # One sample for each alpha value
 #> [1] 0.4386491 0.2135709 0.8667377
 # Result length matches n=3, parameters alpha recycled accordingly
-
-# Example with invalid parameters (should produce NaN)
-invalid_sample <- rgkw(1, alpha = -1, beta = 2, gamma = 1, delta = 0, lambda = 1)
-#> Warning: rgkw: invalid parameters at index 1 (alpha,beta,gamma>0, delta>=0, lambda>0)
-print(invalid_sample)
-#> [1] NA
 # }
 ```

@@ -8,7 +8,7 @@ Kumaraswamy-Kumaraswamy (kkw) distribution with parameters `alpha`
 ## Usage
 
 ``` r
-dkkw(x, alpha, beta, delta, lambda, log_prob = FALSE)
+dkkw(x, alpha = 1, beta = 1, delta = 0, lambda = 1, log = FALSE)
 ```
 
 ## Arguments
@@ -37,7 +37,7 @@ dkkw(x, alpha, beta, delta, lambda, log_prob = FALSE)
   Shape parameter `lambda` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- log_prob:
+- log:
 
   Logical; if `TRUE`, the logarithm of the density is returned
   (\\\log(f(x))\\). Default: `FALSE`.
@@ -47,9 +47,9 @@ dkkw(x, alpha, beta, delta, lambda, log_prob = FALSE)
 A vector of density values (\\f(x)\\) or log-density values
 (\\\log(f(x))\\). The length of the result is determined by the
 recycling rule applied to the arguments (`x`, `alpha`, `beta`, `delta`,
-`lambda`). Returns `0` (or `-Inf` if `log_prob = TRUE`) for `x` outside
-the interval (0, 1), or `NaN` if parameters are invalid (e.g.,
-`alpha <= 0`, `beta <= 0`, `delta < 0`, `lambda <= 0`).
+`lambda`). Returns `0` (or `-Inf` if `log = TRUE`) for `x` outside the
+interval (0, 1), or `NaN` if parameters are invalid (e.g., `alpha <= 0`,
+`beta <= 0`, `delta < 0`, `lambda <= 0`).
 
 ## Details
 
@@ -109,7 +109,7 @@ print(densities)
 
 # Calculate log-density
 log_densities <- dkkw(x_vals, alpha_par, beta_par, delta_par, lambda_par,
-                       log_prob = TRUE)
+                       log = TRUE)
 print(log_densities)
 #> [1] -0.1886168  0.7706662 -1.0233034
 # Check: should match log(densities)
@@ -120,7 +120,7 @@ print(log(densities))
 densities_gkw <- dgkw(x_vals, alpha_par, beta_par, gamma = 1.0,
                       delta_par, lambda_par)
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#> [1] "Max difference: 2.16120550922315"
+#> [1] "Max difference: 8.88178419700125e-16"
 
 # Plot the density
 curve_x <- seq(0.01, 0.99, length.out = 200)

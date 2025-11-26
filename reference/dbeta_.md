@@ -11,7 +11,7 @@ Beta distribution with shape parameters `shape1 = gamma` and
 ## Usage
 
 ``` r
-dbeta_(x, gamma, delta, log_prob = FALSE)
+dbeta_(x, gamma = 1, delta = 0, log = FALSE)
 ```
 
 ## Arguments
@@ -31,7 +31,7 @@ dbeta_(x, gamma, delta, log_prob = FALSE)
   \ge 0\\ so that `shape2 >= 1`. Can be a scalar or a vector. Default:
   0.0 (leading to `shape2 = 1`).
 
-- log_prob:
+- log:
 
   Logical; if `TRUE`, the logarithm of the density is returned
   (\\\log(f(x))\\). Default: `FALSE`.
@@ -41,9 +41,8 @@ dbeta_(x, gamma, delta, log_prob = FALSE)
 A vector of density values (\\f(x)\\) or log-density values
 (\\\log(f(x))\\). The length of the result is determined by the
 recycling rule applied to the arguments (`x`, `gamma`, `delta`). Returns
-`0` (or `-Inf` if `log_prob = TRUE`) for `x` outside the interval (0,
-1), or `NaN` if parameters are invalid (e.g., `gamma <= 0`,
-`delta < 0`).
+`0` (or `-Inf` if `log = TRUE`) for `x` outside the interval (0, 1), or
+`NaN` if parameters are invalid (e.g., `gamma <= 0`, `delta < 0`).
 
 ## Details
 
@@ -116,7 +115,7 @@ print(paste("Max difference vs stats::dbeta:", max(abs(densities - densities_sta
 densities_gkw <- dgkw(x_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
                       delta = delta_par, lambda = 1.0)
 print(paste("Max difference vs dgkw:", max(abs(densities - densities_gkw))))
-#> [1] "Max difference vs dgkw: 2.048"
+#> [1] "Max difference vs dgkw: 0"
 
 # Compare with dmc setting lambda=1
 densities_mc <- dmc(x_vals, gamma = gamma_par, delta = delta_par, lambda = 1.0)
@@ -124,7 +123,7 @@ print(paste("Max difference vs dmc:", max(abs(densities - densities_mc))))
 #> [1] "Max difference vs dmc: 4.44089209850063e-16"
 
 # Calculate log-density
-log_densities <- dbeta_(x_vals, gamma_par, delta_par, log_prob = TRUE)
+log_densities <- dbeta_(x_vals, gamma_par, delta_par, log = TRUE)
 print(log_densities)
 #> [1]  0.7168637  0.2231436 -2.0557250
 print(stats::dbeta(x_vals, shape1 = shape1, shape2 = shape2, log = TRUE))

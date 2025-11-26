@@ -225,22 +225,22 @@ for (i in 1:nrow(test_points)) {
 #> 
 #> Point 1 : alpha = 1.5 , beta = 2.5 
 #>   Parameter Analytical  Numerical      Abs_Diff     Rel_Error
-#> 1     alpha -431.55771 -431.55771 1.2864847e-06 2.9810258e-09
+#> 1     alpha -431.55771 -431.55771 1.2864846e-06 2.9810256e-09
 #> 2      beta  122.18002  122.18002 7.1891532e-07 5.8840662e-09
 #> 
 #> Point 2 : alpha = 2 , beta = 3 
 #>   Parameter  Analytical   Numerical      Abs_Diff     Rel_Error
-#> 1     alpha -170.184879 -170.184880 1.3360205e-06 7.8504066e-09
+#> 1     alpha -170.184879 -170.184879 7.6758630e-07 4.5103085e-09
 #> 2      beta   42.661367   42.661367 3.0471102e-07 7.1425518e-09
 #> 
 #> Point 3 : alpha = 2.511171 , beta = 3.570812 
 #>   Parameter     Analytical      Numerical      Abs_Diff   Rel_Error
-#> 1     alpha  2.0717825e-05  2.1600499e-05 8.8267439e-07 0.042604382
-#> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493050e-07 0.057995138
+#> 1     alpha  2.0717825e-05  2.3305802e-05 2.5879771e-06 0.124914880
+#> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493044e-07 0.057995133
 #> 
 #> Point 4 : alpha = 3 , beta = 4 
 #>   Parameter Analytical  Numerical      Abs_Diff     Rel_Error
-#> 1     alpha 133.673727 133.673730 2.8540615e-06 2.1350953e-08
+#> 1     alpha 133.673727 133.673730 2.8540616e-06 2.1350954e-08
 #> 2      beta -32.697532 -32.697532 5.1952384e-08 1.5888778e-09
 
 

@@ -10,7 +10,15 @@ distribution where the parameter \\\gamma = 1\\.
 ## Usage
 
 ``` r
-qkkw(p, alpha, beta, delta, lambda, lower_tail = TRUE, log_p = FALSE)
+qkkw(
+  p,
+  alpha = 1,
+  beta = 1,
+  delta = 0,
+  lambda = 1,
+  lower.tail = TRUE,
+  log.p = FALSE
+)
 ```
 
 ## Arguments
@@ -39,12 +47,12 @@ qkkw(p, alpha, beta, delta, lambda, lower_tail = TRUE, log_p = FALSE)
   Shape parameter `lambda` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\p = P(X \le q)\\,
   otherwise, probabilities are \\p = P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities `p` are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -55,11 +63,11 @@ A vector of quantiles corresponding to the given probabilities `p`. The
 length of the result is determined by the recycling rule applied to the
 arguments (`p`, `alpha`, `beta`, `delta`, `lambda`). Returns:
 
-- `0` for `p = 0` (or `p = -Inf` if `log_p = TRUE`, when
-  `lower_tail = TRUE`).
+- `0` for `p = 0` (or `p = -Inf` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
-- `1` for `p = 1` (or `p = 0` if `log_p = TRUE`, when
-  `lower_tail = TRUE`).
+- `1` for `p = 1` (or `p = 0` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
 - `NaN` for `p < 0` or `p > 1` (or corresponding log scale).
 
@@ -67,7 +75,7 @@ arguments (`p`, `alpha`, `beta`, `delta`, `lambda`). Returns:
   `delta < 0`, `lambda <= 0`).
 
 Boundary return values are adjusted accordingly for
-`lower_tail = FALSE`.
+`lower.tail = FALSE`.
 
 ## Details
 
@@ -79,8 +87,8 @@ q^\alpha)^\beta\bigr\]^\lambda\bigr\\^{\delta + 1} \$\$ Inverting this
 equation for \\q\\ yields the quantile function: \$\$ Q(p) = \left\[ 1 -
 \left\\ 1 - \left\[ 1 - (1 - p)^{1/(\delta+1)} \right\]^{1/\lambda}
 \right\\^{1/\beta} \right\]^{1/\alpha} \$\$ The function uses this
-closed-form expression and correctly handles the `lower_tail` and
-`log_p` arguments by transforming `p` appropriately before applying the
+closed-form expression and correctly handles the `lower.tail` and
+`log.p` arguments by transforming `p` appropriately before applying the
 formula.
 
 ## References
@@ -124,7 +132,7 @@ print(quantiles)
 # Calculate quantiles for upper tail probabilities P(X > q) = p
 # e.g., for p=0.1, find q such that P(X > q) = 0.1 (90th percentile)
 quantiles_upper <- qkkw(p_vals, alpha_par, beta_par, delta_par, lambda_par,
-                         lower_tail = FALSE)
+                         lower.tail = FALSE)
 print(quantiles_upper)
 #> [1] 0.6851540 0.4631919 0.2425575
 # Check: qkkw(p, ..., lt=F) == qkkw(1-p, ..., lt=T)
@@ -132,9 +140,9 @@ print(qkkw(1 - p_vals, alpha_par, beta_par, delta_par, lambda_par))
 #> [1] 0.6851540 0.4631919 0.2425575
 
 # Calculate quantiles from log probabilities
-log_p_vals <- log(p_vals)
-quantiles_logp <- qkkw(log_p_vals, alpha_par, beta_par, delta_par, lambda_par,
-                        log_p = TRUE)
+log.p_vals <- log(p_vals)
+quantiles_logp <- qkkw(log.p_vals, alpha_par, beta_par, delta_par, lambda_par,
+                        log.p = TRUE)
 print(quantiles_logp)
 #> [1] 0.2425575 0.4631919 0.6851540
 # Check: should match original quantiles
@@ -158,7 +166,7 @@ print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 # Boundary conditions
 print(qkkw(c(0, 1), alpha_par, beta_par, delta_par, lambda_par)) # Should be 0, 1
 #> [1] 0 1
-print(qkkw(c(-Inf, 0), alpha_par, beta_par, delta_par, lambda_par, log_p = TRUE)) # Should be 0, 1
+print(qkkw(c(-Inf, 0), alpha_par, beta_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
 
 # }

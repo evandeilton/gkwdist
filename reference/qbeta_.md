@@ -10,7 +10,7 @@ with shape parameters `shape1 = gamma` and `shape2 = delta + 1`.
 ## Usage
 
 ``` r
-qbeta_(p, gamma, delta, lower_tail = TRUE, log_p = FALSE)
+qbeta_(p, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE)
 ```
 
 ## Arguments
@@ -30,12 +30,12 @@ qbeta_(p, gamma, delta, lower_tail = TRUE, log_p = FALSE)
   \ge 0\\ so that `shape2 >= 1`. Can be a scalar or a vector. Default:
   0.0 (leading to `shape2 = 1`).
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\p = P(X \le q)\\,
   otherwise, probabilities are \\p = P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities `p` are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -46,25 +46,25 @@ A vector of quantiles corresponding to the given probabilities `p`. The
 length of the result is determined by the recycling rule applied to the
 arguments (`p`, `gamma`, `delta`). Returns:
 
-- `0` for `p = 0` (or `p = -Inf` if `log_p = TRUE`, when
-  `lower_tail = TRUE`).
+- `0` for `p = 0` (or `p = -Inf` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
-- `1` for `p = 1` (or `p = 0` if `log_p = TRUE`, when
-  `lower_tail = TRUE`).
+- `1` for `p = 1` (or `p = 0` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
 - `NaN` for `p < 0` or `p > 1` (or corresponding log scale).
 
 - `NaN` for invalid parameters (e.g., `gamma <= 0`, `delta < 0`).
 
 Boundary return values are adjusted accordingly for
-`lower_tail = FALSE`.
+`lower.tail = FALSE`.
 
 ## Details
 
 This function computes the quantiles of a Beta distribution with
 parameters `shape1 = gamma` and `shape2 = delta + 1`. It is equivalent
 to calling
-`stats::qbeta(p, shape1 = gamma, shape2 = delta + 1, lower.tail = lower_tail, log.p = log_p)`.
+`stats::qbeta(p, shape1 = gamma, shape2 = delta + 1, lower.tail = lower.tail, log.p = log.p)`.
 
 This distribution arises as a special case of the five-parameter
 Generalized Kumaraswamy (GKw) distribution
@@ -135,18 +135,18 @@ print(paste("Max difference vs qmc:", max(abs(quantiles - quantiles_mc))))
 #> [1] "Max difference vs qmc: 0"
 
 # Calculate quantiles for upper tail
-quantiles_upper <- qbeta_(p_vals, gamma_par, delta_par, lower_tail = FALSE)
+quantiles_upper <- qbeta_(p_vals, gamma_par, delta_par, lower.tail = FALSE)
 print(quantiles_upper)
 #> [1] 0.5838904 0.3138102 0.1122350
 print(stats::qbeta(p_vals, shape1, shape2, lower.tail = FALSE))
 #> [1] 0.5838904 0.3138102 0.1122350
 
 # Calculate quantiles from log probabilities
-log_p_vals <- log(p_vals)
-quantiles_logp <- qbeta_(log_p_vals, gamma_par, delta_par, log_p = TRUE)
+log.p_vals <- log(p_vals)
+quantiles_logp <- qbeta_(log.p_vals, gamma_par, delta_par, log.p = TRUE)
 print(quantiles_logp)
 #> [1] 0.1122350 0.3138102 0.5838904
-print(stats::qbeta(log_p_vals, shape1, shape2, log.p = TRUE))
+print(stats::qbeta(log.p_vals, shape1, shape2, log.p = TRUE))
 #> [1] 0.1122350 0.3138102 0.5838904
 
 # Verify inverse relationship with pbeta_
@@ -160,7 +160,7 @@ print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 # Boundary conditions
 print(qbeta_(c(0, 1), gamma_par, delta_par)) # Should be 0, 1
 #> [1] 0 1
-print(qbeta_(c(-Inf, 0), gamma_par, delta_par, log_p = TRUE)) # Should be 0, 1
+print(qbeta_(c(-Inf, 0), gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
 
 # }

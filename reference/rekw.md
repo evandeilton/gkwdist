@@ -9,7 +9,7 @@ Generalized Kumaraswamy (GKw) distribution where \\\gamma = 1\\ and
 ## Usage
 
 ``` r
-rekw(n, alpha, beta, lambda)
+rekw(n, alpha = 1, beta = 1, lambda = 1)
 ```
 
 ## Arguments

@@ -8,7 +8,15 @@ the Kumaraswamy-Kumaraswamy (kkw) distribution with parameters `alpha`
 ## Usage
 
 ``` r
-pkkw(q, alpha, beta, delta, lambda, lower_tail = TRUE, log_p = FALSE)
+pkkw(
+  q,
+  alpha = 1,
+  beta = 1,
+  delta = 0,
+  lambda = 1,
+  lower.tail = TRUE,
+  log.p = FALSE
+)
 ```
 
 ## Arguments
@@ -37,12 +45,12 @@ pkkw(q, alpha, beta, delta, lambda, lower_tail = TRUE, log_p = FALSE)
   Shape parameter `lambda` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\P(X \le q)\\,
   otherwise, \\P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities \\p\\ are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -50,10 +58,10 @@ pkkw(q, alpha, beta, delta, lambda, lower_tail = TRUE, log_p = FALSE)
 ## Value
 
 A vector of probabilities, \\F(q)\\, or their logarithms/complements
-depending on `lower_tail` and `log_p`. The length of the result is
+depending on `lower.tail` and `log.p`. The length of the result is
 determined by the recycling rule applied to the arguments (`q`, `alpha`,
-`beta`, `delta`, `lambda`). Returns `0` (or `-Inf` if `log_p = TRUE`)
-for `q <= 0` and `1` (or `0` if `log_p = TRUE`) for `q >= 1`. Returns
+`beta`, `delta`, `lambda`). Returns `0` (or `-Inf` if `log.p = TRUE`)
+for `q <= 0` and `1` (or `0` if `log.p = TRUE`) for `q >= 1`. Returns
 `NaN` for invalid parameters.
 
 ## Details
@@ -73,7 +81,7 @@ utilizes the property \\I_x(1, b) = 1 - (1-x)^b\\, yielding the kkw CDF:
 q \< 1\\.
 
 The implementation uses this closed-form expression for efficiency and
-handles `lower_tail` and `log_p` arguments appropriately.
+handles `lower.tail` and `log.p` arguments appropriately.
 
 ## References
 
@@ -115,7 +123,7 @@ print(probs)
 
 # Calculate upper tail P(X > q)
 probs_upper <- pkkw(q_vals, alpha_par, beta_par, delta_par, lambda_par,
-                     lower_tail = FALSE)
+                     lower.tail = FALSE)
 print(probs_upper)
 #> [1] 0.94187892 0.41954319 0.01818839
 # Check: probs + probs_upper should be 1
@@ -123,9 +131,9 @@ print(probs + probs_upper)
 #> [1] 1 1 1
 
 # Calculate log CDF
-log_probs <- pkkw(q_vals, alpha_par, beta_par, delta_par, lambda_par,
-                   log_p = TRUE)
-print(log_probs)
+logs <- pkkw(q_vals, alpha_par, beta_par, delta_par, lambda_par,
+                   log.p = TRUE)
+print(logs)
 #> [1] -2.84522685 -0.54393988 -0.01835583
 # Check: should match log(probs)
 print(log(probs))
@@ -135,7 +143,7 @@ print(log(probs))
 probs_gkw <- pgkw(q_vals, alpha_par, beta_par, gamma = 1.0,
                   delta_par, lambda_par)
 print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-#> [1] "Max difference: 4.85722573273506e-17"
+#> [1] "Max difference: 1.04083408558608e-16"
 
 # Plot the CDF
 curve_q <- seq(0.01, 0.99, length.out = 200)

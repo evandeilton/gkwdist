@@ -8,7 +8,7 @@ defined on the interval (0, 1).
 ## Usage
 
 ``` r
-pkw(q, alpha, beta, lower_tail = TRUE, log_p = FALSE)
+pkw(q, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE)
 ```
 
 ## Arguments
@@ -27,12 +27,12 @@ pkw(q, alpha, beta, lower_tail = TRUE, log_p = FALSE)
   Shape parameter `beta` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\P(X \le q)\\,
   otherwise, \\P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities \\p\\ are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -40,10 +40,10 @@ pkw(q, alpha, beta, lower_tail = TRUE, log_p = FALSE)
 ## Value
 
 A vector of probabilities, \\F(q)\\, or their logarithms/complements
-depending on `lower_tail` and `log_p`. The length of the result is
+depending on `lower.tail` and `log.p`. The length of the result is
 determined by the recycling rule applied to the arguments (`q`, `alpha`,
-`beta`). Returns `0` (or `-Inf` if `log_p = TRUE`) for `q <= 0` and `1`
-(or `0` if `log_p = TRUE`) for `q >= 1`. Returns `NaN` for invalid
+`beta`). Returns `0` (or `-Inf` if `log.p = TRUE`) for `q <= 0` and `1`
+(or `0` if `log.p = TRUE`) for `q >= 1`. Returns `NaN` for invalid
 parameters.
 
 ## Details
@@ -110,7 +110,7 @@ print(probs)
 #> [1] 0.115264 0.578125 0.953344
 
 # Calculate upper tail P(X > q)
-probs_upper <- pkw(q_vals, alpha_par, beta_par, lower_tail = FALSE)
+probs_upper <- pkw(q_vals, alpha_par, beta_par, lower.tail = FALSE)
 print(probs_upper)
 #> [1] 0.884736 0.421875 0.046656
 # Check: probs + probs_upper should be 1
@@ -118,8 +118,8 @@ print(probs + probs_upper)
 #> [1] 1 1 1
 
 # Calculate log CDF
-log_probs <- pkw(q_vals, alpha_par, beta_par, log_p = TRUE)
-print(log_probs)
+logs <- pkw(q_vals, alpha_par, beta_par, log.p = TRUE)
+print(logs)
 #> [1] -2.16053013 -0.54796517 -0.04777948
 # Check: should match log(probs)
 print(log(probs))
@@ -129,7 +129,7 @@ print(log(probs))
 probs_gkw <- pgkw(q_vals, alpha_par, beta_par, gamma = 1.0, delta = 0.0,
                   lambda = 1.0)
 print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-#> [1] "Max difference: 1.11022302462516e-16"
+#> [1] "Max difference: 1.38777878078145e-16"
 
 # Plot the CDF for different shape parameter combinations
 curve_q <- seq(0.001, 0.999, length.out = 200)

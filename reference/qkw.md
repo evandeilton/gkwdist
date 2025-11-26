@@ -8,7 +8,7 @@ p\\.
 ## Usage
 
 ``` r
-qkw(p, alpha, beta, lower_tail = TRUE, log_p = FALSE)
+qkw(p, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE)
 ```
 
 ## Arguments
@@ -27,12 +27,12 @@ qkw(p, alpha, beta, lower_tail = TRUE, log_p = FALSE)
   Shape parameter `beta` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\p = P(X \le q)\\,
   otherwise, probabilities are \\p = P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities `p` are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -43,18 +43,18 @@ A vector of quantiles corresponding to the given probabilities `p`. The
 length of the result is determined by the recycling rule applied to the
 arguments (`p`, `alpha`, `beta`). Returns:
 
-- `0` for `p = 0` (or `p = -Inf` if `log_p = TRUE`, when
-  `lower_tail = TRUE`).
+- `0` for `p = 0` (or `p = -Inf` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
-- `1` for `p = 1` (or `p = 0` if `log_p = TRUE`, when
-  `lower_tail = TRUE`).
+- `1` for `p = 1` (or `p = 0` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
 - `NaN` for `p < 0` or `p > 1` (or corresponding log scale).
 
 - `NaN` for invalid parameters (e.g., `alpha <= 0`, `beta <= 0`).
 
 Boundary return values are adjusted accordingly for
-`lower_tail = FALSE`.
+`lower.tail = FALSE`.
 
 ## Details
 
@@ -65,7 +65,7 @@ q^\alpha)^\beta\\ (see
 Inverting this equation for \\q\\ yields the quantile function: \$\$
 Q(p) = \left\\ 1 - (1 - p)^{1/\beta} \right\\^{1/\alpha} \$\$ The
 function uses this closed-form expression and correctly handles the
-`lower_tail` and `log_p` arguments by transforming `p` appropriately
+`lower.tail` and `log.p` arguments by transforming `p` appropriately
 before applying the formula. This is equivalent to the general GKw
 quantile function
 ([`qgkw`](https://evandeilton.github.io/gkwdist/reference/qgkw.md))
@@ -110,13 +110,13 @@ print(quantiles)
 #> [1] 0.1857703 0.4542020 0.7320117
 
 # Calculate quantiles for upper tail probabilities P(X > q) = p
-quantiles_upper <- qkw(p_vals, alpha_par, beta_par, lower_tail = FALSE)
+quantiles_upper <- qkw(p_vals, alpha_par, beta_par, lower.tail = FALSE)
 print(quantiles_upper)
 #> [1] 0.7320117 0.4542020 0.1857703
 
 # Calculate quantiles from log probabilities
-log_p_vals <- log(p_vals)
-quantiles_logp <- qkw(log_p_vals, alpha_par, beta_par, log_p = TRUE)
+log.p_vals <- log(p_vals)
+quantiles_logp <- qkw(log.p_vals, alpha_par, beta_par, log.p = TRUE)
 print(quantiles_logp)
 #> [1] 0.1857703 0.4542020 0.7320117
 # Check: should match original quantiles
@@ -127,7 +127,7 @@ print(quantiles)
 quantiles_gkw <- qgkw(p_vals, alpha = alpha_par, beta = beta_par,
                      gamma = 1.0, delta = 0.0, lambda = 1.0)
 print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-#> [1] "Max difference: 2.77555756156289e-17"
+#> [1] "Max difference: 0"
 
 # Verify inverse relationship with pkw
 p_check <- 0.75
@@ -140,7 +140,7 @@ print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 # Boundary conditions
 print(qkw(c(0, 1), alpha_par, beta_par)) # Should be 0, 1
 #> [1] 0 1
-print(qkw(c(-Inf, 0), alpha_par, beta_par, log_p = TRUE)) # Should be 0, 1
+print(qkw(c(-Inf, 0), alpha_par, beta_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
 
 # }

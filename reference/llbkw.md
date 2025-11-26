@@ -153,10 +153,10 @@ results <- data.frame(
 )
 print(results, digits = 4)
 #>       Parameter True     MLE     SE CI_Lower CI_Upper
-#> alpha     alpha  2.0 2.51814 0.7638   1.0211    4.015
-#> beta       beta  1.5 2.36948 4.7050  -6.8524   11.591
-#> gamma     gamma  1.5 1.15022 0.4221   0.3228    1.978
-#> delta     delta  0.5 0.04233 2.0842  -4.0427    4.127
+#> alpha     alpha  2.0 2.51814 0.7598   1.0289    4.007
+#> beta       beta  1.5 2.36884 4.5438  -6.5369   11.275
+#> gamma     gamma  1.5 1.15021 0.4206   0.3259    1.975
+#> delta     delta  0.5 0.04261 2.0140  -3.9048    3.990
 
 cat("\nNegative log-likelihood at MLE:", fit$value, "\n")
 #> 
@@ -226,9 +226,9 @@ for (method in methods) {
 print(comparison, digits = 4, row.names = FALSE)
 #>       Method Alpha  Beta Gamma     Delta NegLogLik Convergence
 #>         BFGS 2.528 2.470 1.145 0.0001526    -270.2           0
-#>     L-BFGS-B 2.528 2.446 1.145 0.0100000    -270.2           0
+#>     L-BFGS-B 2.526 2.446 1.146 0.0100000    -270.2           0
 #>  Nelder-Mead 2.570 2.332 1.122 0.0670160    -270.2           1
-#>           CG 2.516 1.603 1.147 0.5552087    -270.2           1
+#>           CG 2.516 1.618 1.147 0.5412596    -270.2           1
 
 
 ## Example 4: Likelihood Ratio Test
@@ -254,7 +254,7 @@ lr_stat <- 2 * (loglik_full - loglik_restricted)
 p_value <- pchisq(lr_stat, df = 1, lower.tail = FALSE)
 
 cat("LR Statistic:", round(lr_stat, 4), "\n")
-#> LR Statistic: 0.0493 
+#> LR Statistic: 0.0492 
 cat("P-value:", format.pval(p_value, digits = 4), "\n")
 #> P-value: 0.8244 
 

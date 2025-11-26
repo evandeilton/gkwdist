@@ -147,7 +147,7 @@ cat("\nComparison with optim Hessian:\n")
 #> Comparison with optim Hessian:
 cat("Max absolute difference:",
     max(abs(hessian_at_mle - fit$hessian)), "\n")
-#> Max absolute difference: 0.0002574136 
+#> Max absolute difference: 0.0002574138 
 
 # Eigenvalue analysis
 eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values

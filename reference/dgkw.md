@@ -7,7 +7,7 @@ Generalized Kumaraswamy (GKw) distribution, defined on the interval (0,
 ## Usage
 
 ``` r
-dgkw(x, alpha, beta, gamma, delta, lambda, log_prob = FALSE)
+dgkw(x, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, log = FALSE)
 ```
 
 ## Arguments
@@ -41,7 +41,7 @@ dgkw(x, alpha, beta, gamma, delta, lambda, log_prob = FALSE)
   Shape parameter `lambda` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- log_prob:
+- log:
 
   Logical; if `TRUE`, the logarithm of the density is returned. Default:
   `FALSE`.
@@ -51,7 +51,7 @@ dgkw(x, alpha, beta, gamma, delta, lambda, log_prob = FALSE)
 A vector of density values (\\f(x)\\) or log-density values
 (\\\log(f(x))\\). The length of the result is determined by the
 recycling rule applied to the arguments (`x`, `alpha`, `beta`, `gamma`,
-`delta`, `lambda`). Returns `0` (or `-Inf` if `log_prob = TRUE`) for `x`
+`delta`, `lambda`). Returns `0` (or `-Inf` if `log = TRUE`) for `x`
 outside the interval (0, 1), or `NaN` if parameters are invalid.
 
 ## Details
@@ -111,7 +111,7 @@ Lopes, J. E.
 # \donttest{
 # Simple density evaluation at a point
 dgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1) # Kw case
-#> [1] 0
+#> [1] 1.6875
 
 # Plot the PDF for various parameter sets
 x_vals <- seq(0.01, 0.99, by = 0.01)
@@ -137,11 +137,11 @@ legend("topright", legend = c("Kw(2,3)", "Beta(2,4) equivalent", "EKw(2,3, lambd
 
 
 # Log-density
-log_pdf_val <- dgkw(0.5, 2, 3, 1, 0, 1, log_prob = TRUE)
-print(log_pdf_val)
-#> [1] -Inf
+log.pdf_val <- dgkw(0.5, 2, 3, 1, 0, 1, log = TRUE)
+print(log.pdf_val)
+#> [1] 0.5232481
 print(log(dgkw(0.5, 2, 3, 1, 0, 1))) # Should match
-#> [1] -Inf
+#> [1] 0.5232481
 
 # }
 ```

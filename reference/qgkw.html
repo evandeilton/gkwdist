@@ -11,7 +11,7 @@ that \(P(X \le x) = p\), where X follows the GKw distribution."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@ that \(P(X \le x) = p\), where X follows the GKw distribution."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Generalized Kumaraswamy Distribution Quantile Function</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/gkw.R" class="external-link"><code>R/gkw.R</code></a></small>
       <div class="d-none name"><code>qgkw.Rd</code></div>
     </div>
 
@@ -50,7 +50,16 @@ that \(P(X \le x) = p\), where <code>X</code> follows the GKw distribution.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">qgkw</span><span class="op">(</span><span class="va">p</span>, <span class="va">alpha</span>, <span class="va">beta</span>, <span class="va">gamma</span>, <span class="va">delta</span>, <span class="va">lambda</span>, lower_tail <span class="op">=</span> <span class="cn">TRUE</span>, log_p <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">qgkw</span><span class="op">(</span></span>
+<span>  <span class="va">p</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  beta <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  gamma <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  delta <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  lambda <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  lower.tail <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  log.p <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -86,12 +95,12 @@ Default: 0.0.</p></dd>
 Default: 1.0.</p></dd>
 
 
-<dt id="arg-lower-tail">lower_tail<a class="anchor" aria-label="anchor" href="#arg-lower-tail"></a></dt>
+<dt id="arg-lower-tail">lower.tail<a class="anchor" aria-label="anchor" href="#arg-lower-tail"></a></dt>
 <dd><p>Logical; if <code>TRUE</code> (default), probabilities are
 \(P(X \le x)\), otherwise, \(P(X &gt; x)\).</p></dd>
 
 
-<dt id="arg-log-p">log_p<a class="anchor" aria-label="anchor" href="#arg-log-p"></a></dt>
+<dt id="arg-log-p">log.p<a class="anchor" aria-label="anchor" href="#arg-log-p"></a></dt>
 <dd><p>Logical; if <code>TRUE</code>, probabilities <code>p</code> are given as
 \(\log(p)\). Default: <code>FALSE</code>.</p></dd>
 
@@ -101,8 +110,8 @@ Default: 1.0.</p></dd>
     <p>A vector of quantiles corresponding to the given probabilities <code>p</code>.
 The length of the result is determined by the recycling rule applied to
 the arguments (<code>p</code>, <code>alpha</code>, <code>beta</code>, <code>gamma</code>,
-<code>delta</code>, <code>lambda</code>). Returns:</p><ul><li><p><code>0</code> for <code>p = 0</code> (or <code>p = -Inf</code> if <code>log_p = TRUE</code>).</p></li>
-<li><p><code>1</code> for <code>p = 1</code> (or <code>p = 0</code> if <code>log_p = TRUE</code>).</p></li>
+<code>delta</code>, <code>lambda</code>). Returns:</p><ul><li><p><code>0</code> for <code>p = 0</code> (or <code>p = -Inf</code> if <code>log.p = TRUE</code>).</p></li>
+<li><p><code>1</code> for <code>p = 1</code> (or <code>p = 0</code> if <code>log.p = TRUE</code>).</p></li>
 <li><p><code>NaN</code> for <code>p &lt; 0</code> or <code>p &gt; 1</code> (or corresponding log scale).</p></li>
 <li><p><code>NaN</code> for invalid parameters (e.g., <code>alpha &lt;= 0</code>,
 <code>beta &lt;= 0</code>, <code>gamma &lt;= 0</code>, <code>delta &lt; 0</code>,
@@ -119,7 +128,7 @@ $$
 where \(I^{-1}_{p}(a, b)\) is the inverse of the regularized incomplete beta
 function, which corresponds to the quantile function of the Beta distribution,
 <code><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">qbeta</a></code>.</p>
-<p>The computation proceeds as follows:</p><ol><li><p>Calculate <code>y = stats::qbeta(p, shape1 = gamma, shape2 = delta + 1, lower.tail = lower_tail, log.p = log_p)</code>.</p></li>
+<p>The computation proceeds as follows:</p><ol><li><p>Calculate <code>y = stats::qbeta(p, shape1 = gamma, shape2 = delta + 1, lower.tail = lower.tail, log.p = log.p)</code>.</p></li>
 <li><p>Calculate \(v = y^{1/\lambda}\).</p></li>
 <li><p>Calculate \(w = (1 - v)^{1/\beta}\). Note: Requires \(v \le 1\).</p></li>
 <li><p>Calculate \(q = (1 - w)^{1/\alpha}\). Note: Requires \(w \le 1\).</p></li>
@@ -160,16 +169,16 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Upper tail quantile (e.g., find x such that P(X &gt; x) = 0.1, which is 90th percentile)</span></span></span>
 <span class="r-in"><span><span class="va">q90</span> <span class="op">&lt;-</span> <span class="fu">qgkw</span><span class="op">(</span><span class="fl">0.1</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">1</span>,</span></span>
-<span class="r-in"><span>            lower_tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>            lower.tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">q90</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7320117</span>
-<span class="r-in"><span><span class="co"># Check: should match quantile for p = 0.9 with lower_tail = TRUE</span></span></span>
+<span class="r-in"><span><span class="co"># Check: should match quantile for p = 0.9 with lower.tail = TRUE</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">qgkw</span><span class="op">(</span><span class="fl">0.9</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7320117</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Log probabilities</span></span></span>
 <span class="r-in"><span><span class="va">median_logp</span> <span class="op">&lt;-</span> <span class="fu">qgkw</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">1</span>,</span></span>
-<span class="r-in"><span>                    log_p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                    log.p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">median_logp</span><span class="op">)</span> <span class="co"># Should match median_val</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.454202</span>
 <span class="r-in"><span></span></span>

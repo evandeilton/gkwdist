@@ -8,7 +8,7 @@ distribution is defined on the interval (0, 1).
 ## Usage
 
 ``` r
-dbkw(x, alpha, beta, gamma, delta, log_prob = FALSE)
+dbkw(x, alpha = 1, beta = 1, gamma = 1, delta = 0, log = FALSE)
 ```
 
 ## Arguments
@@ -37,7 +37,7 @@ dbkw(x, alpha, beta, gamma, delta, log_prob = FALSE)
   Shape parameter `delta` \>= 0. Can be a scalar or a vector. Default:
   0.0.
 
-- log_prob:
+- log:
 
   Logical; if `TRUE`, the logarithm of the density is returned
   (\\\log(f(x))\\). Default: `FALSE`.
@@ -47,9 +47,9 @@ dbkw(x, alpha, beta, gamma, delta, log_prob = FALSE)
 A vector of density values (\\f(x)\\) or log-density values
 (\\\log(f(x))\\). The length of the result is determined by the
 recycling rule applied to the arguments (`x`, `alpha`, `beta`, `gamma`,
-`delta`). Returns `0` (or `-Inf` if `log_prob = TRUE`) for `x` outside
-the interval (0, 1), or `NaN` if parameters are invalid (e.g.,
-`alpha <= 0`, `beta <= 0`, `gamma <= 0`, `delta < 0`).
+`delta`). Returns `0` (or `-Inf` if `log = TRUE`) for `x` outside the
+interval (0, 1), or `NaN` if parameters are invalid (e.g., `alpha <= 0`,
+`beta <= 0`, `gamma <= 0`, `delta < 0`).
 
 ## Details
 
@@ -108,7 +108,7 @@ print(densities)
 
 # Calculate log-density
 log_densities <- dbkw(x_vals, alpha_par, beta_par, gamma_par, delta_par,
-                      log_prob = TRUE)
+                      log = TRUE)
 print(log_densities)
 #> [1] -0.156388009  0.451327626  0.003869786
 # Check: should match log(densities)
@@ -119,7 +119,7 @@ print(log(densities))
 densities_gkw <- dgkw(x_vals, alpha_par, beta_par, gamma = gamma_par,
                       delta = delta_par, lambda = 1.0)
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#> [1] "Max difference: 1.57039569973479"
+#> [1] "Max difference: 2.22044604925031e-16"
 
 # Plot the density for different gamma values
 curve_x <- seq(0.01, 0.99, length.out = 200)

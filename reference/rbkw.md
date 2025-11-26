@@ -9,7 +9,7 @@ parameter \\\lambda = 1\\.
 ## Usage
 
 ``` r
-rbkw(n, alpha, beta, gamma, delta)
+rbkw(n, alpha = 1, beta = 1, gamma = 1, delta = 0)
 ```
 
 ## Arguments

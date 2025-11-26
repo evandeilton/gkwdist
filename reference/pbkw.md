@@ -10,7 +10,15 @@ a special case of the Generalized Kumaraswamy (GKw) distribution where
 ## Usage
 
 ``` r
-pbkw(q, alpha, beta, gamma, delta, lower_tail = TRUE, log_p = FALSE)
+pbkw(
+  q,
+  alpha = 1,
+  beta = 1,
+  gamma = 1,
+  delta = 0,
+  lower.tail = TRUE,
+  log.p = FALSE
+)
 ```
 
 ## Arguments
@@ -39,12 +47,12 @@ pbkw(q, alpha, beta, gamma, delta, lower_tail = TRUE, log_p = FALSE)
   Shape parameter `delta` \>= 0. Can be a scalar or a vector. Default:
   0.0.
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\P(X \le q)\\,
   otherwise, \\P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities \\p\\ are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -52,10 +60,10 @@ pbkw(q, alpha, beta, gamma, delta, lower_tail = TRUE, log_p = FALSE)
 ## Value
 
 A vector of probabilities, \\F(q)\\, or their logarithms/complements
-depending on `lower_tail` and `log_p`. The length of the result is
+depending on `lower.tail` and `log.p`. The length of the result is
 determined by the recycling rule applied to the arguments (`q`, `alpha`,
-`beta`, `gamma`, `delta`). Returns `0` (or `-Inf` if `log_p = TRUE`) for
-`q <= 0` and `1` (or `0` if `log_p = TRUE`) for `q >= 1`. Returns `NaN`
+`beta`, `gamma`, `delta`). Returns `0` (or `-Inf` if `log.p = TRUE`) for
+`q <= 0` and `1` (or `0` if `log.p = TRUE`) for `q >= 1`. Returns `NaN`
 for invalid parameters.
 
 ## Details
@@ -114,7 +122,7 @@ print(probs)
 
 # Calculate upper tail P(X > q)
 probs_upper <- pbkw(q_vals, alpha_par, beta_par, gamma_par, delta_par,
-                    lower_tail = FALSE)
+                    lower.tail = FALSE)
 print(probs_upper)
 #> [1] 0.9122424 0.5234652 0.1003877
 # Check: probs + probs_upper should be 1
@@ -122,9 +130,9 @@ print(probs + probs_upper)
 #> [1] 1 1 1
 
 # Calculate log CDF
-log_probs <- pbkw(q_vals, alpha_par, beta_par, gamma_par, delta_par,
-                  log_p = TRUE)
-print(log_probs)
+logs <- pbkw(q_vals, alpha_par, beta_par, gamma_par, delta_par,
+                  log.p = TRUE)
+print(logs)
 #> [1] -2.4331773 -0.7412146 -0.1057914
 # Check: should match log(probs)
 print(log(probs))
@@ -134,7 +142,7 @@ print(log(probs))
 probs_gkw <- pgkw(q_vals, alpha_par, beta_par, gamma = gamma_par,
                  delta = delta_par, lambda = 1.0)
 print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-#> [1] "Max difference: 0"
+#> [1] "Max difference: 1.66533453693773e-16"
 
 # Plot the CDF
 curve_q <- seq(0.01, 0.99, length.out = 200)

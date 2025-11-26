@@ -10,7 +10,7 @@ where \\\alpha = 1\\ and \\\beta = 1\\.
 ## Usage
 
 ``` r
-pmc(q, gamma, delta, lambda, lower_tail = TRUE, log_p = FALSE)
+pmc(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE)
 ```
 
 ## Arguments
@@ -34,12 +34,12 @@ pmc(q, gamma, delta, lambda, lower_tail = TRUE, log_p = FALSE)
   Shape parameter `lambda` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\P(X \le q)\\,
   otherwise, \\P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities \\p\\ are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -47,10 +47,10 @@ pmc(q, gamma, delta, lambda, lower_tail = TRUE, log_p = FALSE)
 ## Value
 
 A vector of probabilities, \\F(q)\\, or their logarithms/complements
-depending on `lower_tail` and `log_p`. The length of the result is
+depending on `lower.tail` and `log.p`. The length of the result is
 determined by the recycling rule applied to the arguments (`q`, `gamma`,
-`delta`, `lambda`). Returns `0` (or `-Inf` if `log_p = TRUE`) for
-`q <= 0` and `1` (or `0` if `log_p = TRUE`) for `q >= 1`. Returns `NaN`
+`delta`, `lambda`). Returns `0` (or `-Inf` if `log.p = TRUE`) for
+`q <= 0` and `1` (or `0` if `log.p = TRUE`) for `q >= 1`. Returns `NaN`
 for invalid parameters.
 
 ## Details
@@ -115,7 +115,7 @@ print(stats::pbeta(q_vals, shape1 = gamma_par, shape2 = delta_par + 1))
 
 # Calculate upper tail P(X > q)
 probs_upper <- pmc(q_vals, gamma_par, delta_par, lambda_par,
-                   lower_tail = FALSE)
+                   lower.tail = FALSE)
 print(probs_upper)
 #> [1] 0.85865010 0.39774756 0.05366563
 # Check: probs + probs_upper should be 1
@@ -123,8 +123,8 @@ print(probs + probs_upper)
 #> [1] 1 1 1
 
 # Calculate log CDF
-log_probs <- pmc(q_vals, gamma_par, delta_par, lambda_par, log_p = TRUE)
-print(log_probs)
+logs <- pmc(q_vals, gamma_par, delta_par, lambda_par, log.p = TRUE)
+print(logs)
 #> [1] -1.95651693 -0.50707859 -0.05515932
 # Check: should match log(probs)
 print(log(probs))

@@ -10,7 +10,7 @@ special case of the Generalized Kumaraswamy (GKw) distribution where
 ## Usage
 
 ``` r
-qmc(p, gamma, delta, lambda, lower_tail = TRUE, log_p = FALSE)
+qmc(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE)
 ```
 
 ## Arguments
@@ -34,12 +34,12 @@ qmc(p, gamma, delta, lambda, lower_tail = TRUE, log_p = FALSE)
   Shape parameter `lambda` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\p = P(X \le q)\\,
   otherwise, probabilities are \\p = P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities `p` are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -50,11 +50,11 @@ A vector of quantiles corresponding to the given probabilities `p`. The
 length of the result is determined by the recycling rule applied to the
 arguments (`p`, `gamma`, `delta`, `lambda`). Returns:
 
-- `0` for `p = 0` (or `p = -Inf` if `log_p = TRUE`, when
-  `lower_tail = TRUE`).
+- `0` for `p = 0` (or `p = -Inf` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
-- `1` for `p = 1` (or `p = 0` if `log_p = TRUE`, when
-  `lower_tail = TRUE`).
+- `1` for `p = 1` (or `p = 0` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
 - `NaN` for `p < 0` or `p > 1` (or corresponding log scale).
 
@@ -62,7 +62,7 @@ arguments (`p`, `gamma`, `delta`, `lambda`). Returns:
   `lambda <= 0`).
 
 Boundary return values are adjusted accordingly for
-`lower_tail = FALSE`.
+`lower.tail = FALSE`.
 
 ## Details
 
@@ -79,7 +79,7 @@ then solve \\q^\lambda = y\\ for \\q\\, yielding the quantile function:
 \$\$ Q(p) = \left\[ I^{-1}\_{p}(\gamma, \delta+1) \right\]^{1/\lambda}
 \$\$ The function uses this formula, calculating \\I^{-1}\_{p}(\gamma,
 \delta+1)\\ via `qbeta(p, gamma, delta + 1, ...)` while respecting the
-`lower_tail` and `log_p` arguments. This is equivalent to the general
+`lower.tail` and `log.p` arguments. This is equivalent to the general
 GKw quantile function
 ([`qgkw`](https://evandeilton.github.io/gkwdist/reference/qgkw.md))
 evaluated with \\\alpha=1, \beta=1\\.
@@ -129,7 +129,7 @@ print(stats::qbeta(p_vals, shape1 = gamma_par, shape2 = delta_par + 1))
 
 # Calculate quantiles for upper tail probabilities P(X > q) = p
 quantiles_upper <- qmc(p_vals, gamma_par, delta_par, lambda_par,
-                       lower_tail = FALSE)
+                       lower.tail = FALSE)
 print(quantiles_upper)
 #> [1] 0.7379563 0.4355544 0.1649288
 # Check: qmc(p, ..., lt=F) == qmc(1-p, ..., lt=T)
@@ -137,8 +137,8 @@ print(qmc(1 - p_vals, gamma_par, delta_par, lambda_par))
 #> [1] 0.7379563 0.4355544 0.1649288
 
 # Calculate quantiles from log probabilities
-log_p_vals <- log(p_vals)
-quantiles_logp <- qmc(log_p_vals, gamma_par, delta_par, lambda_par, log_p = TRUE)
+log.p_vals <- log(p_vals)
+quantiles_logp <- qmc(log.p_vals, gamma_par, delta_par, lambda_par, log.p = TRUE)
 print(quantiles_logp)
 #> [1] 0.1649288 0.4355544 0.7379563
 # Check: should match original quantiles
@@ -162,7 +162,7 @@ print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 # Boundary conditions
 print(qmc(c(0, 1), gamma_par, delta_par, lambda_par)) # Should be 0, 1
 #> [1] 0 1
-print(qmc(c(-Inf, 0), gamma_par, delta_par, lambda_par, log_p = TRUE)) # Should be 0, 1
+print(qmc(c(-Inf, 0), gamma_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
 
 # }

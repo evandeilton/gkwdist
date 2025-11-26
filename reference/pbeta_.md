@@ -10,7 +10,7 @@ corresponding to the standard Beta distribution with shape parameters
 ## Usage
 
 ``` r
-pbeta_(q, gamma, delta, lower_tail = TRUE, log_p = FALSE)
+pbeta_(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE)
 ```
 
 ## Arguments
@@ -30,12 +30,12 @@ pbeta_(q, gamma, delta, lower_tail = TRUE, log_p = FALSE)
   \ge 0\\ so that `shape2 >= 1`. Can be a scalar or a vector. Default:
   0.0 (leading to `shape2 = 1`).
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\P(X \le q)\\,
   otherwise, \\P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities \\p\\ are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -43,17 +43,17 @@ pbeta_(q, gamma, delta, lower_tail = TRUE, log_p = FALSE)
 ## Value
 
 A vector of probabilities, \\F(q)\\, or their logarithms/complements
-depending on `lower_tail` and `log_p`. The length of the result is
+depending on `lower.tail` and `log.p`. The length of the result is
 determined by the recycling rule applied to the arguments (`q`, `gamma`,
-`delta`). Returns `0` (or `-Inf` if `log_p = TRUE`) for `q <= 0` and `1`
-(or `0` if `log_p = TRUE`) for `q >= 1`. Returns `NaN` for invalid
+`delta`). Returns `0` (or `-Inf` if `log.p = TRUE`) for `q <= 0` and `1`
+(or `0` if `log.p = TRUE`) for `q >= 1`. Returns `NaN` for invalid
 parameters.
 
 ## Details
 
 This function computes the CDF of a Beta distribution with parameters
 `shape1 = gamma` and `shape2 = delta + 1`. It is equivalent to calling
-`stats::pbeta(q, shape1 = gamma, shape2 = delta + 1, lower.tail = lower_tail, log.p = log_p)`.
+`stats::pbeta(q, shape1 = gamma, shape2 = delta + 1, lower.tail = lower.tail, log.p = log.p)`.
 
 This distribution arises as a special case of the five-parameter
 Generalized Kumaraswamy (GKw) distribution
@@ -123,15 +123,15 @@ print(paste("Max difference vs pmc:", max(abs(probs - probs_mc))))
 #> [1] "Max difference vs pmc: 0"
 
 # Calculate upper tail P(X > q)
-probs_upper <- pbeta_(q_vals, gamma_par, delta_par, lower_tail = FALSE)
+probs_upper <- pbeta_(q_vals, gamma_par, delta_par, lower.tail = FALSE)
 print(probs_upper)
 #> [1] 0.73728 0.18750 0.00672
 print(stats::pbeta(q_vals, shape1, shape2, lower.tail = FALSE))
 #> [1] 0.73728 0.18750 0.00672
 
 # Calculate log CDF
-log_probs <- pbeta_(q_vals, gamma_par, delta_par, log_p = TRUE)
-print(log_probs)
+log.probs <- pbeta_(q_vals, gamma_par, delta_par, log.p = TRUE)
+print(log.probs)
 #> [1] -1.336666453 -0.207639365 -0.006742681
 print(stats::pbeta(q_vals, shape1, shape2, log.p = TRUE))
 #> [1] -1.336666453 -0.207639365 -0.006742681

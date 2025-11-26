@@ -165,7 +165,7 @@ cat("\nComparison with optim Hessian:\n")
 #> Comparison with optim Hessian:
 cat("Max absolute difference:",
     max(abs(hessian_at_mle - fit$hessian)), "\n")
-#> Max absolute difference: 0.0003078667 
+#> Max absolute difference: 0.0003078661 
 
 # Eigenvalue analysis
 eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
@@ -173,13 +173,13 @@ cat("\nEigenvalues:\n")
 #> 
 #> Eigenvalues:
 print(eigenvals)
-#> [1] 2.109731e+03 9.911840e+01 1.552331e+00 9.866428e-03
+#> [1] 2.109731e+03 9.911840e+01 1.552326e+00 9.865714e-03
 
 cat("\nPositive definite:", all(eigenvals > 0), "\n")
 #> 
 #> Positive definite: TRUE 
 cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
-#> Condition number: 213829.2 
+#> Condition number: 213844.7 
 
 
 ## Example 3: Standard Errors and Confidence Intervals
@@ -194,10 +194,10 @@ cat("\nVariance-Covariance Matrix:\n")
 #> Variance-Covariance Matrix:
 print(vcov_matrix, digits = 6)
 #>          [,1]     [,2]      [,3]      [,4]
-#> [1,]  4.72527  17.8381  -9.97973  -3.65563
-#> [2,] 17.83805  71.2209 -40.54649 -13.54957
-#> [3,] -9.97973 -40.5465  23.21460   7.54000
-#> [4,] -3.65563 -13.5496   7.54000   2.84775
+#> [1,]  4.72561  17.8394  -9.98047  -3.65589
+#> [2,] 17.83937  71.2261 -40.54941 -13.55057
+#> [3,] -9.98047 -40.5494  23.21625   7.54057
+#> [4,] -3.65589 -13.5506   7.54057   2.84794
 
 # Standard errors
 se <- sqrt(diag(vcov_matrix))
@@ -227,9 +227,9 @@ results <- data.frame(
 )
 print(results, digits = 4)
 #>        Parameter True   MLE    SE CI_Lower CI_Upper
-#> alpha      alpha  2.0 2.304 2.174   -1.956    6.565
-#> beta        beta  3.0 3.610 8.439  -12.931   20.150
-#> delta      delta  1.5 1.222 4.818   -8.221   10.666
+#> alpha      alpha  2.0 2.304 2.174   -1.957    6.565
+#> beta        beta  3.0 3.610 8.440  -12.932   20.151
+#> delta      delta  1.5 1.222 4.818   -8.222   10.666
 #> lambda    lambda  2.0 1.705 1.688   -1.603    5.012
 
 
@@ -285,7 +285,7 @@ print(hess_properties, digits = 4, row.names = FALSE)
 #>  Cond_Number
 #>      -28.985
 #>    -1011.104
-#>   213829.226
+#>   213844.693
 #>       -8.462
 
 

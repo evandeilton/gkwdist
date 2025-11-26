@@ -155,9 +155,9 @@ results <- data.frame(
 )
 print(results, digits = 4)
 #>        Parameter True   MLE    SE CI_Lower CI_Upper
-#> alpha      alpha  2.0 2.304 2.170   -1.949    6.558
-#> beta        beta  3.0 3.610 8.425  -12.904   20.123
-#> delta      delta  1.5 1.222 4.810   -8.206   10.651
+#> alpha      alpha  2.0 2.304 2.170   -1.950    6.558
+#> beta        beta  3.0 3.610 8.426  -12.905   20.124
+#> delta      delta  1.5 1.222 4.811   -8.206   10.651
 #> lambda    lambda  2.0 1.705 1.685   -1.598    5.007
 
 cat("\nNegative log-likelihood at MLE:", fit$value, "\n")
@@ -228,7 +228,7 @@ for (method in methods) {
 print(comparison, digits = 4, row.names = FALSE)
 #>       Method Alpha  Beta Delta Lambda NegLogLik Convergence
 #>         BFGS 2.304 3.610 1.222  1.705    -586.5           0
-#>     L-BFGS-B 2.097 2.926 1.706  1.877    -586.5           0
+#>     L-BFGS-B 2.102 2.937 1.697  1.873    -586.5           0
 #>  Nelder-Mead 2.385 3.957 1.043  1.644    -586.5           0
 #>           CG 2.003 2.974 1.578  2.002    -586.5           1
 

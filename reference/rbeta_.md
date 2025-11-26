@@ -11,7 +11,7 @@ case of the Generalized Kumaraswamy (GKw) distribution where \\\alpha =
 ## Usage
 
 ``` r
-rbeta_(n, gamma, delta)
+rbeta_(n, gamma = 1, delta = 0)
 ```
 
 ## Arguments

@@ -7,7 +7,16 @@ the interval (0, 1). Calculates \\P(X \le q)\\.
 ## Usage
 
 ``` r
-pgkw(q, alpha, beta, gamma, delta, lambda, lower_tail = TRUE, log_p = FALSE)
+pgkw(
+  q,
+  alpha = 1,
+  beta = 1,
+  gamma = 1,
+  delta = 0,
+  lambda = 1,
+  lower.tail = TRUE,
+  log.p = FALSE
+)
 ```
 
 ## Arguments
@@ -41,12 +50,12 @@ pgkw(q, alpha, beta, gamma, delta, lambda, lower_tail = TRUE, log_p = FALSE)
   Shape parameter `lambda` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\P(X \le q)\\,
   otherwise, \\P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities \\p\\ are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -54,10 +63,10 @@ pgkw(q, alpha, beta, gamma, delta, lambda, lower_tail = TRUE, log_p = FALSE)
 ## Value
 
 A vector of probabilities, \\F(q)\\, or their logarithms if
-`log_p = TRUE`. The length of the result is determined by the recycling
+`log.p = TRUE`. The length of the result is determined by the recycling
 rule applied to the arguments (`q`, `alpha`, `beta`, `gamma`, `delta`,
-`lambda`). Returns `0` (or `-Inf` if `log_p = TRUE`) for `q <= 0` and
-`1` (or `0` if `log_p = TRUE`) for `q >= 1`. Returns `NaN` for invalid
+`lambda`). Returns `0` (or `-Inf` if `log.p = TRUE`) for `q <= 0` and
+`1` (or `0` if `log.p = TRUE`) for `q >= 1`. Returns `NaN` for invalid
 parameters.
 
 ## Details
@@ -113,7 +122,7 @@ print(prob)
 
 # Upper tail probability P(X > q)
 prob_upper <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-                 lower_tail = FALSE)
+                 lower.tail = FALSE)
 print(prob_upper)
 #> [1] 0.421875
 # Check: prob + prob_upper should be 1
@@ -121,12 +130,12 @@ print(prob + prob_upper)
 #> [1] 1
 
 # Log probability
-log_prob <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-                 log_p = TRUE)
-print(log_prob)
+log <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+                 log.p = TRUE)
+print(log)
 #> [1] -0.5479652
-# Check: exp(log_prob) should be prob
-print(exp(log_prob))
+# Check: exp(log) should be prob
+print(exp(log))
 #> [1] 0.578125
 
 # Use of vectorized parameters

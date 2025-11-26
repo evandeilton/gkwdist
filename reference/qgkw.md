@@ -7,7 +7,16 @@ that \\P(X \le x) = p\\, where `X` follows the GKw distribution.
 ## Usage
 
 ``` r
-qgkw(p, alpha, beta, gamma, delta, lambda, lower_tail = TRUE, log_p = FALSE)
+qgkw(
+  p,
+  alpha = 1,
+  beta = 1,
+  gamma = 1,
+  delta = 0,
+  lambda = 1,
+  lower.tail = TRUE,
+  log.p = FALSE
+)
 ```
 
 ## Arguments
@@ -41,12 +50,12 @@ qgkw(p, alpha, beta, gamma, delta, lambda, lower_tail = TRUE, log_p = FALSE)
   Shape parameter `lambda` \> 0. Can be a scalar or a vector. Default:
   1.0.
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\P(X \le x)\\,
   otherwise, \\P(X \> x)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities `p` are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -57,9 +66,9 @@ A vector of quantiles corresponding to the given probabilities `p`. The
 length of the result is determined by the recycling rule applied to the
 arguments (`p`, `alpha`, `beta`, `gamma`, `delta`, `lambda`). Returns:
 
-- `0` for `p = 0` (or `p = -Inf` if `log_p = TRUE`).
+- `0` for `p = 0` (or `p = -Inf` if `log.p = TRUE`).
 
-- `1` for `p = 1` (or `p = 0` if `log_p = TRUE`).
+- `1` for `p = 1` (or `p = 0` if `log.p = TRUE`).
 
 - `NaN` for `p < 0` or `p > 1` (or corresponding log scale).
 
@@ -80,7 +89,7 @@ distribution, [`qbeta`](https://rdrr.io/r/stats/Beta.html).
 The computation proceeds as follows:
 
 1.  Calculate
-    `y = stats::qbeta(p, shape1 = gamma, shape2 = delta + 1, lower.tail = lower_tail, log.p = log_p)`.
+    `y = stats::qbeta(p, shape1 = gamma, shape2 = delta + 1, lower.tail = lower.tail, log.p = log.p)`.
 
 2.  Calculate \\v = y^{1/\lambda}\\.
 
@@ -129,16 +138,16 @@ print(quantiles)
 
 # Upper tail quantile (e.g., find x such that P(X > x) = 0.1, which is 90th percentile)
 q90 <- qgkw(0.1, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-            lower_tail = FALSE)
+            lower.tail = FALSE)
 print(q90)
 #> [1] 0.7320117
-# Check: should match quantile for p = 0.9 with lower_tail = TRUE
+# Check: should match quantile for p = 0.9 with lower.tail = TRUE
 print(qgkw(0.9, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1))
 #> [1] 0.7320117
 
 # Log probabilities
 median_logp <- qgkw(log(0.5), alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-                    log_p = TRUE)
+                    log.p = TRUE)
 print(median_logp) # Should match median_val
 #> [1] 0.454202
 

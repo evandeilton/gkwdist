@@ -9,7 +9,7 @@ case of the Generalized Kumaraswamy (GKw) distribution where \\\alpha =
 ## Usage
 
 ``` r
-rmc(n, gamma, delta, lambda)
+rmc(n, gamma = 1, delta = 0, lambda = 1)
 ```
 
 ## Arguments

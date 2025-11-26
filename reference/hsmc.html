@@ -19,7 +19,7 @@ standard errors and in optimization algorithms."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,7 @@ standard errors and in optimization algorithms."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Hessian Matrix of the Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/bpmc.R" class="external-link"><code>R/bpmc.R</code></a></small>
       <div class="d-none name"><code>hsmc.Rd</code></div>
     </div>
 
@@ -209,7 +209,7 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Comparison with optim Hessian:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max absolute difference:"</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">hessian_at_mle</span> <span class="op">-</span> <span class="va">fit</span><span class="op">$</span><span class="va">hessian</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute difference: 0.0002574136 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute difference: 0.0002574138 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Eigenvalue analysis</span></span></span>
 <span class="r-in"><span><span class="va">eigenvals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">hessian_at_mle</span>, only.values <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">values</span></span></span>

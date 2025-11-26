@@ -8,7 +8,7 @@ defined on the interval (0, 1).
 ## Usage
 
 ``` r
-dekw(x, alpha, beta, lambda, log_prob = FALSE)
+dekw(x, alpha = 1, beta = 1, lambda = 1, log = FALSE)
 ```
 
 ## Arguments
@@ -32,7 +32,7 @@ dekw(x, alpha, beta, lambda, log_prob = FALSE)
   Shape parameter `lambda` \> 0 (exponent parameter). Can be a scalar or
   a vector. Default: 1.0.
 
-- log_prob:
+- log:
 
   Logical; if `TRUE`, the logarithm of the density is returned
   (\\\log(f(x))\\). Default: `FALSE`.
@@ -42,9 +42,9 @@ dekw(x, alpha, beta, lambda, log_prob = FALSE)
 A vector of density values (\\f(x)\\) or log-density values
 (\\\log(f(x))\\). The length of the result is determined by the
 recycling rule applied to the arguments (`x`, `alpha`, `beta`,
-`lambda`). Returns `0` (or `-Inf` if `log_prob = TRUE`) for `x` outside
-the interval (0, 1), or `NaN` if parameters are invalid (e.g.,
-`alpha <= 0`, `beta <= 0`, `lambda <= 0`).
+`lambda`). Returns `0` (or `-Inf` if `log = TRUE`) for `x` outside the
+interval (0, 1), or `NaN` if parameters are invalid (e.g., `alpha <= 0`,
+`beta <= 0`, `lambda <= 0`).
 
 ## Details
 
@@ -102,7 +102,7 @@ print(densities)
 #> [1] 0.5631989 1.9246241 0.9110922
 
 # Calculate log-density
-log_densities <- dekw(x_vals, alpha_par, beta_par, lambda_par, log_prob = TRUE)
+log_densities <- dekw(x_vals, alpha_par, beta_par, lambda_par, log = TRUE)
 print(log_densities)
 #> [1] -0.57412239  0.65473067 -0.09311121
 # Check: should match log(densities)
@@ -113,7 +113,7 @@ print(log(densities))
 densities_gkw <- dgkw(x_vals, alpha_par, beta_par, gamma = 1.0, delta = 0.0,
                       lambda = lambda_par)
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#> [1] "Max difference: 1.92462408185217"
+#> [1] "Max difference: 3.33066907387547e-16"
 
 # Plot the density for different lambda values
 curve_x <- seq(0.01, 0.99, length.out = 200)

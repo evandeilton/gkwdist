@@ -7,7 +7,7 @@ distribution with shape parameters `alpha` (\\\alpha\\) and `beta`
 ## Usage
 
 ``` r
-rkw(n, alpha, beta)
+rkw(n, alpha = 1, beta = 1)
 ```
 
 ## Arguments

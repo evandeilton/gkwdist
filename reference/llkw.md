@@ -410,8 +410,8 @@ comparison_grad <- data.frame(
 )
 print(comparison_grad, digits = 8)
 #>   Parameter     Analytical      Numerical    Difference
-#> 1     alpha  2.0717825e-05  2.1600499e-05 8.8267439e-07
-#> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493050e-07
+#> 1     alpha  2.0717825e-05  2.3305802e-05 2.5879771e-06
+#> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493044e-07
 
 ## Example 10: Bootstrap Confidence Intervals
 

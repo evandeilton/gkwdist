@@ -17,7 +17,7 @@ is typically used for maximum likelihood estimation via numerical optimization."
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,7 @@ is typically used for maximum likelihood estimation via numerical optimization."
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Negative Log-Likelihood for Beta-Kumaraswamy (BKw) Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/bkw.R" class="external-link"><code>R/bkw.R</code></a></small>
       <div class="d-none name"><code>llbkw.Rd</code></div>
     </div>
 
@@ -190,10 +190,10 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Parameter True     MLE     SE CI_Lower CI_Upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> alpha     alpha  2.0 2.51814 0.7638   1.0211    4.015</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> beta       beta  1.5 2.36948 4.7050  -6.8524   11.591</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gamma     gamma  1.5 1.15022 0.4221   0.3228    1.978</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> delta     delta  0.5 0.04233 2.0842  -4.0427    4.127</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alpha     alpha  2.0 2.51814 0.7598   1.0289    4.007</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> beta       beta  1.5 2.36884 4.5438  -6.5369   11.275</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gamma     gamma  1.5 1.15021 0.4206   0.3259    1.975</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> delta     delta  0.5 0.04261 2.0140  -3.9048    3.990</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nNegative log-likelihood at MLE:"</span>, <span class="va">fit</span><span class="op">$</span><span class="va">value</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -263,9 +263,9 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span>, digits <span class="op">=</span> <span class="fl">4</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Method Alpha  Beta Gamma     Delta NegLogLik Convergence</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         BFGS 2.528 2.470 1.145 0.0001526    -270.2           0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     L-BFGS-B 2.528 2.446 1.145 0.0100000    -270.2           0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     L-BFGS-B 2.526 2.446 1.146 0.0100000    -270.2           0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Nelder-Mead 2.570 2.332 1.122 0.0670160    -270.2           1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           CG 2.516 1.603 1.147 0.5552087    -270.2           1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           CG 2.516 1.618 1.147 0.5412596    -270.2           1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 4: Likelihood Ratio Test</span></span></span>
@@ -291,7 +291,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="va">p_value</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">pchisq</a></span><span class="op">(</span><span class="va">lr_stat</span>, df <span class="op">=</span> <span class="fl">1</span>, lower.tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"LR Statistic:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">lr_stat</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> LR Statistic: 0.0493 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> LR Statistic: 0.0492 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"P-value:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.pval.html" class="external-link">format.pval</a></span><span class="op">(</span><span class="va">p_value</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> P-value: 0.8244 </span>
 <span class="r-in"><span></span></span>

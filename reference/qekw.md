@@ -10,7 +10,7 @@ Generalized Kumaraswamy (GKw) distribution where \\\gamma = 1\\ and
 ## Usage
 
 ``` r
-qekw(p, alpha, beta, lambda, lower_tail = TRUE, log_p = FALSE)
+qekw(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = FALSE)
 ```
 
 ## Arguments
@@ -34,12 +34,12 @@ qekw(p, alpha, beta, lambda, lower_tail = TRUE, log_p = FALSE)
   Shape parameter `lambda` \> 0 (exponent parameter). Can be a scalar or
   a vector. Default: 1.0.
 
-- lower_tail:
+- lower.tail:
 
   Logical; if `TRUE` (default), probabilities are \\p = P(X \le q)\\,
   otherwise, probabilities are \\p = P(X \> q)\\.
 
-- log_p:
+- log.p:
 
   Logical; if `TRUE`, probabilities `p` are given as \\\log(p)\\.
   Default: `FALSE`.
@@ -50,11 +50,11 @@ A vector of quantiles corresponding to the given probabilities `p`. The
 length of the result is determined by the recycling rule applied to the
 arguments (`p`, `alpha`, `beta`, `lambda`). Returns:
 
-- `0` for `p = 0` (or `p = -Inf` if `log_p = TRUE`, when
-  `lower_tail = TRUE`).
+- `0` for `p = 0` (or `p = -Inf` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
-- `1` for `p = 1` (or `p = 0` if `log_p = TRUE`, when
-  `lower_tail = TRUE`).
+- `1` for `p = 1` (or `p = 0` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
 - `NaN` for `p < 0` or `p > 1` (or corresponding log scale).
 
@@ -62,7 +62,7 @@ arguments (`p`, `alpha`, `beta`, `lambda`). Returns:
   `lambda <= 0`).
 
 Boundary return values are adjusted accordingly for
-`lower_tail = FALSE`.
+`lower.tail = FALSE`.
 
 ## Details
 
@@ -73,7 +73,7 @@ CDF for the EKw (\\\gamma=1, \delta=0\\) distribution is \\F(q) = \[1 -
 Inverting this equation for \\q\\ yields the quantile function: \$\$
 Q(p) = \left\\ 1 - \left\[ 1 - p^{1/\lambda} \right\]^{1/\beta}
 \right\\^{1/\alpha} \$\$ The function uses this closed-form expression
-and correctly handles the `lower_tail` and `log_p` arguments by
+and correctly handles the `lower.tail` and `log.p` arguments by
 transforming `p` appropriately before applying the formula. This is
 equivalent to the general GKw quantile function
 ([`qgkw`](https://evandeilton.github.io/gkwdist/reference/qgkw.md))
@@ -122,7 +122,7 @@ print(quantiles)
 
 # Calculate quantiles for upper tail probabilities P(X > q) = p
 quantiles_upper <- qekw(p_vals, alpha_par, beta_par, lambda_par,
-                        lower_tail = FALSE)
+                        lower.tail = FALSE)
 print(quantiles_upper)
 #> [1] 0.7695287 0.5311017 0.2787375
 # Check: qekw(p, ..., lt=F) == qekw(1-p, ..., lt=T)
@@ -130,9 +130,9 @@ print(qekw(1 - p_vals, alpha_par, beta_par, lambda_par))
 #> [1] 0.7695287 0.5311017 0.2787375
 
 # Calculate quantiles from log probabilities
-log_p_vals <- log(p_vals)
-quantiles_logp <- qekw(log_p_vals, alpha_par, beta_par, lambda_par,
-                       log_p = TRUE)
+log.p_vals <- log(p_vals)
+quantiles_logp <- qekw(log.p_vals, alpha_par, beta_par, lambda_par,
+                       log.p = TRUE)
 print(quantiles_logp)
 #> [1] 0.2787375 0.5311017 0.7695287
 # Check: should match original quantiles
@@ -143,7 +143,7 @@ print(quantiles)
 quantiles_gkw <- qgkw(p_vals, alpha = alpha_par, beta = beta_par,
                      gamma = 1.0, delta = 0.0, lambda = lambda_par)
 print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-#> [1] "Max difference: 1.11022302462516e-16"
+#> [1] "Max difference: 0"
 
 # Verify inverse relationship with pekw
 p_check <- 0.75
@@ -156,7 +156,7 @@ print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 # Boundary conditions
 print(qekw(c(0, 1), alpha_par, beta_par, lambda_par)) # Should be 0, 1
 #> [1] 0 1
-print(qekw(c(-Inf, 0), alpha_par, beta_par, lambda_par, log_p = TRUE)) # Should be 0, 1
+print(qekw(c(-Inf, 0), alpha_par, beta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
 # }
 ```

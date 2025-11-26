@@ -183,9 +183,9 @@ comparison <- data.frame(
   Iterations = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
 )
 print(comparison, digits = 4, row.names = FALSE)
-#>            Method Alpha  Beta  Delta Lambda NegLogLik Iterations
-#>     With Gradient 2.304 3.610 1.2222  1.705    -586.5        113
-#>  Without Gradient 2.495 4.544 0.8006  1.570    -586.5        213
+#>            Method Alpha  Beta Delta Lambda NegLogLik Iterations
+#>     With Gradient 2.304 3.610 1.222  1.705    -586.5        113
+#>  Without Gradient 2.522 4.749 0.726  1.555    -586.5        215
 
 
 ## Example 3: Verifying Gradient at MLE
@@ -199,11 +199,11 @@ cat("\nGradient at MLE:\n")
 #> 
 #> Gradient at MLE:
 print(gradient_at_mle)
-#> [1]  0.05693999 -0.03217987 -0.03422936  0.04666259
+#> [1]  0.05694856 -0.03217876 -0.03422681  0.04667205
 cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
-#> Max absolute component: 0.05693999 
+#> Max absolute component: 0.05694856 
 cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
-#> Gradient norm: 0.08733128 
+#> Gradient norm: 0.08734052 
 
 
 ## Example 4: Numerical vs Analytical Gradient
@@ -234,10 +234,10 @@ comparison_grad <- data.frame(
 )
 print(comparison_grad, digits = 8)
 #>   Parameter   Analytical    Numerical      Abs_Diff     Rel_Error
-#> 1     alpha  0.056939988  0.056946874 6.8854030e-06 1.2092386e-04
-#> 2      beta -0.032179868 -0.032188154 8.2867859e-06 2.5751461e-04
-#> 3     delta -0.034229365 -0.034231107 1.7418460e-06 5.0887477e-05
-#> 4    lambda  0.046662594  0.046659352 3.2420501e-06 6.9478566e-05
+#> 1     alpha  0.056948562  0.056934937 1.3625334e-05 2.3925685e-04
+#> 2      beta -0.032178763 -0.032184744 5.9802837e-06 1.8584566e-04
+#> 3     delta -0.034226814 -0.034229970 3.1560530e-06 9.2209956e-05
+#> 4    lambda  0.046672050  0.046666742 5.3084718e-06 1.1373985e-04
 
 
 ## Example 5: Score Test Statistic

@@ -1,6 +1,121 @@
 # Changelog
 
-## gkwdist (development version)
+## gkwdist 1.1.1
+
+### Major Refactoring Release
+
+This release represents a comprehensive refactoring of the entire
+package codebase, focusing on numerical stability, code consistency, and
+maintainability.
+
+#### C++ Backend Overhaul
+
+- **Unified utility functions**: Introduced `utils.h` header providing
+  numerically stable implementations of critical functions:
+
+  - `log1mexp()`: Stable computation of log(1 - exp(x)) using
+    Mächler (2012) methodology
+  - `log1pexp()`: Overflow-protected computation of log(1 + exp(x))
+  - `safe_log()`, `safe_exp()`, `safe_pow()`: Protected arithmetic
+    operations with graceful handling of edge cases
+  - Vectorized versions (`vec_safe_log`, `vec_log1mexp`, etc.) for
+    efficient array operations
+
+- **Consistent parameter validation**: All distribution families now use
+  dedicated parameter checkers (`check_pars()`, `check_kw_pars()`,
+  `check_ekw_pars()`, etc.) that properly handle NaN, Inf, and boundary
+  conditions.
+
+- **Complete documentation**: All C++ source files now include
+  comprehensive Doxygen-style documentation headers describing:
+
+  - Mathematical formulas for PDF, CDF, quantile, and random generation
+  - Parameter constraints and special cases
+  - Numerical stability considerations
+  - Relationship to parent GKw distribution
+
+#### Bug Fixes
+
+- **Fixed critical bug in
+  [`qgkw()`](https://evandeilton.github.io/gkwdist/reference/qgkw.md)**:
+  Corrected logic error where `lower_tail` transformation was
+  incorrectly applied when `log_p = TRUE`. The probability is now
+  properly converted to linear scale before tail adjustment.
+
+- **Fixed gradient calculation in
+  [`grkkw()`](https://evandeilton.github.io/gkwdist/reference/grkkw.md)**:
+  Resolved issue where `log_z` was not recomputed after clamping `z` to
+  minimum threshold, causing corrupted gradient values near boundaries.
+
+- **Fixed Hessian calculation in
+  [`hsmc()`](https://evandeilton.github.io/gkwdist/reference/hsmc.md)**:
+  Corrected sign errors and formula for the lambda component of the
+  Hessian matrix for the Beta-Power/McDonald distribution.
+
+- **Fixed gradient signs in
+  [`grmc()`](https://evandeilton.github.io/gkwdist/reference/grmc.md)**:
+  Ensured consistent computation of log-likelihood gradient before
+  negation for optimization.
+
+#### Code Quality Improvements
+
+- **Eliminated unused variables**: Removed declared but unused constants
+  (`exp_threshold`) and intermediate variables across all distribution
+  files.
+
+- **Removed redundant calculations**: Streamlined computations, notably
+  in [`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md)
+  where logarithm was computed twice for the same quantity.
+
+- **Simplified parameter recycling**: Replaced double-modulo indexing
+  pattern (`idx = i % k; vec[idx % vec.n_elem]`) with direct
+  single-modulo access (`vec[i % vec.n_elem]`) in random generation
+  functions.
+
+- **Standardized function signatures**: All distribution functions now
+  follow consistent patterns for parameter order, validation, and return
+  value handling.
+
+#### R Wrapper Layer
+
+- **Complete separation of R and C++ interfaces**: All exported R
+  functions now serve as wrappers around internal C++ implementations
+  (`.dgkw_cpp`, `.pgkw_cpp`, etc.), providing:
+  - Enhanced input validation with informative error messages
+  - Consistent argument checking across all distribution families
+  - Proper NA/NaN propagation
+  - Documentation accessible via standard R help system
+
+#### Distribution Families
+
+All seven distribution families have been refactored with identical
+improvements:
+
+| Distribution                    | Parameters    | File       |
+|---------------------------------|---------------|------------|
+| Generalized Kumaraswamy (GKw)   | α, β, γ, δ, λ | `gkw.cpp`  |
+| Kumaraswamy-Kumaraswamy (KKw)   | α, β, δ, λ    | `kkw.cpp`  |
+| Beta-Kumaraswamy (BKw)          | α, β, γ, δ    | `bkw.cpp`  |
+| Exponentiated Kumaraswamy (EKw) | α, β, λ       | `ekw.cpp`  |
+| Beta-Power/McDonald (BP/Mc)     | γ, δ, λ       | `bpmc.cpp` |
+| Kumaraswamy (Kw)                | α, β          | `kw.cpp`   |
+| Beta (GKw-style)                | γ, δ          | `beta.cpp` |
+
+Each family includes: density (`d*`), distribution (`p*`), quantile
+(`q*`), random generation (`r*`), negative log-likelihood (`ll*`),
+gradient (`gr*`), and Hessian (`hs*`) functions.
+
+#### Technical Notes
+
+- Minimum supported R version remains 3.5.0
+- C++11 standard required (enabled via Rcpp plugin)
+- Depends on RcppArmadillo for efficient linear algebra operations
+
+#### Acknowledgments
+
+Special thanks to the thorough code review process that identified
+subtle numerical issues in edge cases, particularly for extreme
+parameter values and observations near distribution boundaries.
 
 ## gkwdist 1.0.7
 

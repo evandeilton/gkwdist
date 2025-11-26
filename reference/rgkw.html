@@ -9,7 +9,7 @@ distribution defined on the interval (0, 1)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@ distribution defined on the interval (0, 1)."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Generalized Kumaraswamy Distribution Random Generation</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/gkw.R" class="external-link"><code>R/gkw.R</code></a></small>
       <div class="d-none name"><code>rgkw.Rd</code></div>
     </div>
 
@@ -47,7 +47,7 @@ distribution defined on the interval (0, 1).</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rgkw</span><span class="op">(</span><span class="va">n</span>, <span class="va">alpha</span>, <span class="va">beta</span>, <span class="va">gamma</span>, <span class="va">delta</span>, <span class="va">lambda</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rgkw</span><span class="op">(</span><span class="va">n</span>, alpha <span class="op">=</span> <span class="fl">1</span>, beta <span class="op">=</span> <span class="fl">1</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -164,12 +164,6 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">samples_vec</span><span class="op">)</span> <span class="co"># One sample for each alpha value</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.4386491 0.2135709 0.8667377</span>
 <span class="r-in"><span><span class="co"># Result length matches n=3, parameters alpha recycled accordingly</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example with invalid parameters (should produce NaN)</span></span></span>
-<span class="r-in"><span><span class="va">invalid_sample</span> <span class="op">&lt;-</span> <span class="fu">rgkw</span><span class="op">(</span><span class="fl">1</span>, alpha <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, beta <span class="op">=</span> <span class="fl">2</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>rgkw: invalid parameters at index 1 (alpha,beta,gamma&gt;0, delta&gt;=0, lambda&gt;0)</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">invalid_sample</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

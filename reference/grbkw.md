@@ -233,9 +233,9 @@ comparison_grad <- data.frame(
 print(comparison_grad, digits = 8)
 #>   Parameter  Analytical   Numerical      Abs_Diff     Rel_Error
 #> 1     alpha  0.50006808  0.50006093 7.1441844e-06 1.4286424e-05
-#> 2      beta -0.14962570 -0.14962154 4.1532289e-06 2.7757458e-05
-#> 3     gamma  0.66679761  0.66679576 1.8569186e-06 2.7848309e-06
-#> 4     delta -0.26559804 -0.26560144 3.4024424e-06 1.2810495e-05
+#> 2      beta -0.14962570 -0.14961984 5.8585316e-06 3.9154582e-05
+#> 3     gamma  0.66679761  0.66679604 1.5727016e-06 2.3585892e-06
+#> 4     delta -0.26559804 -0.26560144 3.4024423e-06 1.2810495e-05
 
 
 ## Example 5: Score Test Statistic
