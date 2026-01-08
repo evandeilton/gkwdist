@@ -59,8 +59,10 @@ Numerical stability is maintained similarly to \code{\link{llgkw}}.
 set.seed(123)
 n <- 1000
 true_params <- c(alpha = 2.5, beta = 3.5, lambda = 2.0)
-data <- rekw(n, alpha = true_params[1], beta = true_params[2],
-             lambda = true_params[3])
+data <- rekw(n,
+  alpha = true_params[1], beta = true_params[2],
+  lambda = true_params[3]
+)
 
 # Evaluate negative log-likelihood at true parameters
 nll_true <- llekw(par = true_params, data = data)
@@ -177,8 +179,10 @@ print(comparison, digits = 4, row.names = FALSE)
 loglik_full <- -fit$value
 
 restricted_ll <- function(params_restricted, data, lambda_fixed) {
-  llekw(par = c(params_restricted[1], params_restricted[2],
-                lambda_fixed), data = data)
+  llekw(par = c(
+    params_restricted[1], params_restricted[2],
+    lambda_fixed
+  ), data = data)
 }
 
 fit_restricted <- optim(
@@ -247,45 +251,57 @@ threshold <- max(profile_ll_alpha) - chi_crit / 2
 
 # Plot all profiles
 
-plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = "Profile Log-Likelihood",
-     main = expression(paste("Profile: ", alpha)), las = 1)
+plot(alpha_grid, profile_ll_alpha,
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = "Profile Log-Likelihood",
+  main = expression(paste("Profile: ", alpha)), las = 1
+)
 abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
 abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
 abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-legend("topright", legend = c("MLE", "True", "95\% CI"),
-       col = c("#8B0000", "#006400", "#808080"),
-       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+legend("topright",
+  legend = c("MLE", "True", "95\% CI"),
+  col = c("#8B0000", "#006400", "#808080"),
+  lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8
+)
 grid(col = "gray90")
 
-plot(beta_grid, profile_ll_beta, type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(beta), ylab = "Profile Log-Likelihood",
-     main = expression(paste("Profile: ", beta)), las = 1)
+plot(beta_grid, profile_ll_beta,
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(beta), ylab = "Profile Log-Likelihood",
+  main = expression(paste("Profile: ", beta)), las = 1
+)
 abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
 abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
 abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-legend("topright", legend = c("MLE", "True", "95\% CI"),
-       col = c("#8B0000", "#006400", "#808080"),
-       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+legend("topright",
+  legend = c("MLE", "True", "95\% CI"),
+  col = c("#8B0000", "#006400", "#808080"),
+  lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8
+)
 grid(col = "gray90")
 
-plot(lambda_grid, profile_ll_lambda, type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(lambda), ylab = "Profile Log-Likelihood",
-     main = expression(paste("Profile: ", lambda)), las = 1)
+plot(lambda_grid, profile_ll_lambda,
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(lambda), ylab = "Profile Log-Likelihood",
+  main = expression(paste("Profile: ", lambda)), las = 1
+)
 abline(v = mle[3], col = "#8B0000", lty = 2, lwd = 2)
 abline(v = true_params[3], col = "#006400", lty = 2, lwd = 2)
 abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-legend("topright", legend = c("MLE", "True", "95\% CI"),
-       col = c("#8B0000", "#006400", "#808080"),
-       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+legend("topright",
+  legend = c("MLE", "True", "95\% CI"),
+  col = c("#8B0000", "#006400", "#808080"),
+  lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8
+)
 grid(col = "gray90")
 
 
 ## Example 6: 2D Log-Likelihood Surface (Alpha vs Beta)
 
 # Create 2D grid
-alpha_2d <- seq(mle[1] - 0.8, mle[1] + 0.8, length.out = round(n/25))
-beta_2d <- seq(mle[2] - 0.8, mle[2] + 0.8, length.out = round(n/25))
+alpha_2d <- seq(mle[1] - 0.8, mle[1] + 0.8, length.out = round(n / 25))
+beta_2d <- seq(mle[2] - 0.8, mle[2] + 0.8, length.out = round(n / 25))
 alpha_2d <- alpha_2d[alpha_2d > 0]
 beta_2d <- beta_2d[beta_2d > 0]
 
@@ -306,35 +322,38 @@ levels_99_ab <- max_ll_ab - qchisq(0.99, df = 2) / 2
 
 # Plot contour
 contour(alpha_2d, beta_2d, ll_surface_ab,
-        xlab = expression(alpha), ylab = expression(beta),
-        main = "2D Log-Likelihood: Alpha vs Beta",
-        levels = seq(min(ll_surface_ab, na.rm = TRUE), max_ll_ab, length.out = 20),
-        col = "#2E4057", las = 1, lwd = 1)
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "2D Log-Likelihood: Alpha vs Beta",
+  levels = seq(min(ll_surface_ab, na.rm = TRUE), max_ll_ab, length.out = 20),
+  col = "#2E4057", las = 1, lwd = 1
+)
 
 contour(alpha_2d, beta_2d, ll_surface_ab,
-        levels = c(levels_90_ab, levels_95_ab, levels_99_ab),
-        col = c("#FFA07A", "#FF6347", "#8B0000"),
-        lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
-        add = TRUE, labcex = 0.8)
+  levels = c(levels_90_ab, levels_95_ab, levels_99_ab),
+  col = c("#FFA07A", "#FF6347", "#8B0000"),
+  lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+  add = TRUE, labcex = 0.8
+)
 
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
-       col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
-       pch = c(19, 17, NA, NA, NA),
-       lty = c(NA, NA, 3, 2, 1),
-       lwd = c(NA, NA, 2, 2.5, 3),
-       bty = "n", cex = 0.8)
+  legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
+  col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+  pch = c(19, 17, NA, NA, NA),
+  lty = c(NA, NA, 3, 2, 1),
+  lwd = c(NA, NA, 2, 2.5, 3),
+  bty = "n", cex = 0.8
+)
 grid(col = "gray90")
 
 
 ## Example 7: 2D Log-Likelihood Surface (Alpha vs Lambda)
 
 # Create 2D grid
-alpha_2d_2 <- seq(mle[1] - 0.8, mle[1] + 0.8, length.out = round(n/25))
-lambda_2d <- seq(mle[3] - 0.8, mle[3] + 0.8, length.out = round(n/25))
+alpha_2d_2 <- seq(mle[1] - 0.8, mle[1] + 0.8, length.out = round(n / 25))
+lambda_2d <- seq(mle[3] - 0.8, mle[3] + 0.8, length.out = round(n / 25))
 alpha_2d_2 <- alpha_2d_2[alpha_2d_2 > 0]
 lambda_2d <- lambda_2d[lambda_2d > 0]
 
@@ -355,35 +374,38 @@ levels_99_al <- max_ll_al - qchisq(0.99, df = 2) / 2
 
 # Plot contour
 contour(alpha_2d_2, lambda_2d, ll_surface_al,
-        xlab = expression(alpha), ylab = expression(lambda),
-        main = "2D Log-Likelihood: Alpha vs Lambda",
-        levels = seq(min(ll_surface_al, na.rm = TRUE), max_ll_al, length.out = 20),
-        col = "#2E4057", las = 1, lwd = 1)
+  xlab = expression(alpha), ylab = expression(lambda),
+  main = "2D Log-Likelihood: Alpha vs Lambda",
+  levels = seq(min(ll_surface_al, na.rm = TRUE), max_ll_al, length.out = 20),
+  col = "#2E4057", las = 1, lwd = 1
+)
 
 contour(alpha_2d_2, lambda_2d, ll_surface_al,
-        levels = c(levels_90_al, levels_95_al, levels_99_al),
-        col = c("#FFA07A", "#FF6347", "#8B0000"),
-        lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
-        add = TRUE, labcex = 0.8)
+  levels = c(levels_90_al, levels_95_al, levels_99_al),
+  col = c("#FFA07A", "#FF6347", "#8B0000"),
+  lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+  add = TRUE, labcex = 0.8
+)
 
 points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
-       col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
-       pch = c(19, 17, NA, NA, NA),
-       lty = c(NA, NA, 3, 2, 1),
-       lwd = c(NA, NA, 2, 2.5, 3),
-       bty = "n", cex = 0.8)
+  legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
+  col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+  pch = c(19, 17, NA, NA, NA),
+  lty = c(NA, NA, 3, 2, 1),
+  lwd = c(NA, NA, 2, 2.5, 3),
+  bty = "n", cex = 0.8
+)
 grid(col = "gray90")
 
 
 ## Example 8: 2D Log-Likelihood Surface (Beta vs Lambda)
 
 # Create 2D grid
-beta_2d_2 <- seq(mle[2] - 0.8, mle[2] + 0.8, length.out = round(n/25))
-lambda_2d_2 <- seq(mle[3] - 0.8, mle[3] + 0.8, length.out = round(n/25))
+beta_2d_2 <- seq(mle[2] - 0.8, mle[2] + 0.8, length.out = round(n / 25))
+lambda_2d_2 <- seq(mle[3] - 0.8, mle[3] + 0.8, length.out = round(n / 25))
 beta_2d_2 <- beta_2d_2[beta_2d_2 > 0]
 lambda_2d_2 <- lambda_2d_2[lambda_2d_2 > 0]
 
@@ -404,29 +426,31 @@ levels_99_bl <- max_ll_bl - qchisq(0.99, df = 2) / 2
 
 # Plot contour
 contour(beta_2d_2, lambda_2d_2, ll_surface_bl,
-        xlab = expression(beta), ylab = expression(lambda),
-        main = "2D Log-Likelihood: Beta vs Lambda",
-        levels = seq(min(ll_surface_bl, na.rm = TRUE), max_ll_bl, length.out = 20),
-        col = "#2E4057", las = 1, lwd = 1)
+  xlab = expression(beta), ylab = expression(lambda),
+  main = "2D Log-Likelihood: Beta vs Lambda",
+  levels = seq(min(ll_surface_bl, na.rm = TRUE), max_ll_bl, length.out = 20),
+  col = "#2E4057", las = 1, lwd = 1
+)
 
 contour(beta_2d_2, lambda_2d_2, ll_surface_bl,
-        levels = c(levels_90_bl, levels_95_bl, levels_99_bl),
-        col = c("#FFA07A", "#FF6347", "#8B0000"),
-        lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
-        add = TRUE, labcex = 0.8)
+  levels = c(levels_90_bl, levels_95_bl, levels_99_bl),
+  col = c("#FFA07A", "#FF6347", "#8B0000"),
+  lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+  add = TRUE, labcex = 0.8
+)
 
 points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
-       col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
-       pch = c(19, 17, NA, NA, NA),
-       lty = c(NA, NA, 3, 2, 1),
-       lwd = c(NA, NA, 2, 2.5, 3),
-       bty = "n", cex = 0.8)
+  legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
+  col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+  pch = c(19, 17, NA, NA, NA),
+  lty = c(NA, NA, 3, 2, 1),
+  lwd = c(NA, NA, 2, 2.5, 3),
+  bty = "n", cex = 0.8
+)
 grid(col = "gray90")
-
 }
 
 }

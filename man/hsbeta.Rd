@@ -72,8 +72,10 @@ cat("Hessian matrix at true parameters:\n")
 print(hess_true, digits = 4)
 
 # Check symmetry
-cat("\nSymmetry check (max |H - H^T|):",
-    max(abs(hess_true - t(hess_true))), "\n")
+cat(
+  "\nSymmetry check (max |H - H^T|):",
+  max(abs(hess_true - t(hess_true))), "\n"
+)
 
 
 ## Example 2: Hessian Properties at MLE
@@ -100,8 +102,10 @@ print(hessian_at_mle, digits = 4)
 
 # Compare with optim's numerical Hessian
 cat("\nComparison with optim Hessian:\n")
-cat("Max absolute difference:",
-    max(abs(hessian_at_mle - fit$hessian)), "\n")
+cat(
+  "Max absolute difference:",
+  max(abs(hessian_at_mle - fit$hessian)), "\n"
+)
 
 # Eigenvalue analysis
 eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
@@ -143,10 +147,14 @@ results <- data.frame(
 )
 print(results, digits = 4)
 
-cat(sprintf("\nMLE corresponds approx to Beta(\%.2f, \%.2f)\n",
-    mle[1], mle[2] + 1))
-cat("True corresponds to Beta(\%.2f, \%.2f)\n",
-    true_params[1], true_params[2] + 1)
+cat(sprintf(
+  "\nMLE corresponds approx to Beta(\%.2f, \%.2f)\n",
+  mle[1], mle[2] + 1
+))
+cat(
+  "True corresponds to Beta(\%.2f, \%.2f)\n",
+  true_params[1], true_params[2] + 1
+)
 
 
 ## Example 4: Determinant and Trace Analysis
@@ -198,10 +206,14 @@ gamma_grid <- gamma_grid[gamma_grid > 0]
 delta_grid <- delta_grid[delta_grid > 0]
 
 # Compute curvature measures
-determinant_surface <- matrix(NA, nrow = length(gamma_grid),
-                               ncol = length(delta_grid))
-trace_surface <- matrix(NA, nrow = length(gamma_grid),
-                         ncol = length(delta_grid))
+determinant_surface <- matrix(NA,
+  nrow = length(gamma_grid),
+  ncol = length(delta_grid)
+)
+trace_surface <- matrix(NA,
+  nrow = length(gamma_grid),
+  ncol = length(delta_grid)
+)
 
 for (i in seq_along(gamma_grid)) {
   for (j in seq_along(delta_grid)) {
@@ -214,17 +226,19 @@ for (i in seq_along(gamma_grid)) {
 # Plot
 
 contour(gamma_grid, delta_grid, determinant_surface,
-        xlab = expression(gamma), ylab = expression(delta),
-        main = "Hessian Determinant", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(gamma), ylab = expression(delta),
+  main = "Hessian Determinant", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 contour(gamma_grid, delta_grid, trace_surface,
-        xlab = expression(gamma), ylab = expression(delta),
-        main = "Hessian Trace", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(gamma), ylab = expression(delta),
+  main = "Hessian Trace", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
@@ -254,9 +268,11 @@ ci_delta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
 # Plot
 
-plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(gamma), ylab = expression(delta),
-     main = "95\% Confidence Ellipse (Gamma vs Delta)", las = 1)
+plot(ellipse[, 1], ellipse[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(gamma), ylab = expression(delta),
+  main = "95\% Confidence Ellipse (Gamma vs Delta)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_gamma, col = "#808080", lty = 3, lwd = 1.5)
@@ -266,14 +282,14 @@ points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
-
 }
 
 }

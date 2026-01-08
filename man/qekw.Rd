@@ -75,7 +75,8 @@ print(quantiles)
 
 # Calculate quantiles for upper tail probabilities P(X > q) = p
 quantiles_upper <- qekw(p_vals, alpha_par, beta_par, lambda_par,
-                        lower.tail = FALSE)
+  lower.tail = FALSE
+)
 print(quantiles_upper)
 # Check: qekw(p, ..., lt=F) == qekw(1-p, ..., lt=T)
 print(qekw(1 - p_vals, alpha_par, beta_par, lambda_par))
@@ -83,14 +84,17 @@ print(qekw(1 - p_vals, alpha_par, beta_par, lambda_par))
 # Calculate quantiles from log probabilities
 log.p_vals <- log(p_vals)
 quantiles_logp <- qekw(log.p_vals, alpha_par, beta_par, lambda_par,
-                       log.p = TRUE)
+  log.p = TRUE
+)
 print(quantiles_logp)
 # Check: should match original quantiles
 print(quantiles)
 
 # Compare with qgkw setting gamma = 1, delta = 0
-quantiles_gkw <- qgkw(p_vals, alpha = alpha_par, beta = beta_par,
-                     gamma = 1.0, delta = 0.0, lambda = lambda_par)
+quantiles_gkw <- qgkw(p_vals,
+  alpha = alpha_par, beta = beta_par,
+  gamma = 1.0, delta = 0.0, lambda = lambda_par
+)
 print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
 
 # Verify inverse relationship with pekw

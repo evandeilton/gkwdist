@@ -145,7 +145,7 @@ for (method in methods) {
       method = method
     )
   }
-  
+
   comparison <- rbind(comparison, data.frame(
     Method = method,
     Alpha_Est = fit_temp$par[1],
@@ -217,39 +217,45 @@ for (i in seq_along(beta_grid)) {
 chi_crit <- qchisq(0.95, df = 1)
 threshold <- max(profile_ll_alpha) - chi_crit / 2
 
-# Plot 
+# Plot
 
 # Profile for alpha
-plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = "Profile Log-Likelihood",
-     main = expression(paste("Profile Likelihood: ", alpha)), las = 1)
+plot(alpha_grid, profile_ll_alpha,
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = "Profile Log-Likelihood",
+  main = expression(paste("Profile Likelihood: ", alpha)), las = 1
+)
 abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
 abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
 abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
 legend("topright",
-       legend = c("MLE", "True", "95\% CI"),
-       col = c("#8B0000", "#006400", "#808080"),
-       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+  legend = c("MLE", "True", "95\% CI"),
+  col = c("#8B0000", "#006400", "#808080"),
+  lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8
+)
 grid(col = "gray90")
 
 # Profile for beta
-plot(beta_grid, profile_ll_beta, type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(beta), ylab = "Profile Log-Likelihood",
-     main = expression(paste("Profile Likelihood: ", beta)), las = 1)
+plot(beta_grid, profile_ll_beta,
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(beta), ylab = "Profile Log-Likelihood",
+  main = expression(paste("Profile Likelihood: ", beta)), las = 1
+)
 abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
 abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
 abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
 legend("topright",
-       legend = c("MLE", "True", "95\% CI"),
-       col = c("#8B0000", "#006400", "#808080"),
-       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+  legend = c("MLE", "True", "95\% CI"),
+  col = c("#8B0000", "#006400", "#808080"),
+  lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8
+)
 grid(col = "gray90")
 
 ## Example 7: 2D Profile Likelihood Surface
 
 # Create 2D grid
-alpha_2d <- seq(mle[1] - 1, mle[1] + 1, length.out = round(n/4))
-beta_2d <- seq(mle[2] - 1, mle[2] + 1, length.out = round(n/4))
+alpha_2d <- seq(mle[1] - 1, mle[1] + 1, length.out = round(n / 4))
+beta_2d <- seq(mle[2] - 1, mle[2] + 1, length.out = round(n / 4))
 alpha_2d <- alpha_2d[alpha_2d > 0]
 beta_2d <- beta_2d[beta_2d > 0]
 
@@ -270,46 +276,53 @@ levels_99 <- max_ll - qchisq(0.99, df = 2) / 2
 
 # Plot contour
 contour(alpha_2d, beta_2d, ll_surface,
-        xlab = expression(alpha), ylab = expression(beta),
-        main = "2D Profile Log-Likelihood",
-        levels = seq(min(ll_surface, na.rm = TRUE), max_ll, length.out = round(n/4)),
-        col = "#2E4057", las = 1, lwd = 1)
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "2D Profile Log-Likelihood",
+  levels = seq(min(ll_surface, na.rm = TRUE), max_ll, length.out = round(n / 4)),
+  col = "#2E4057", las = 1, lwd = 1
+)
 
 # Add confidence region contours
 contour(alpha_2d, beta_2d, ll_surface,
-        levels = c(levels_90, levels_95, levels_99),
-        col = c("#FFA07A", "#FF6347", "#8B0000"),
-        lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
-        add = TRUE, labcex = 0.8)
+  levels = c(levels_90, levels_95, levels_99),
+  col = c("#FFA07A", "#FF6347", "#8B0000"),
+  lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+  add = TRUE, labcex = 0.8
+)
 
 # Mark points
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
-       col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
-       pch = c(19, 17, NA, NA, NA),
-       lty = c(NA, NA, 3, 2, 1),
-       lwd = c(NA, NA, 2, 2.5, 3),
-       bty = "n", cex = 0.8)
+  legend = c("MLE", "True", "90\% CR", "95\% CR", "99\% CR"),
+  col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+  pch = c(19, 17, NA, NA, NA),
+  lty = c(NA, NA, 3, 2, 1),
+  lwd = c(NA, NA, 2, 2.5, 3),
+  bty = "n", cex = 0.8
+)
 grid(col = "gray90")
 
 ## Example 8: Combined View - Profiles with 2D Surface
 
 # Top left: Profile for alpha
-plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = "Profile Log-Likelihood",
-     main = expression(paste("Profile: ", alpha)), las = 1)
+plot(alpha_grid, profile_ll_alpha,
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = "Profile Log-Likelihood",
+  main = expression(paste("Profile: ", alpha)), las = 1
+)
 abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
 abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
 abline(h = threshold, col = "#808080", lty = 3)
 grid(col = "gray90")
 
 # Top right: Profile for beta
-plot(beta_grid, profile_ll_beta, type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(beta), ylab = "Profile Log-Likelihood",
-     main = expression(paste("Profile: ", beta)), las = 1)
+plot(beta_grid, profile_ll_beta,
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(beta), ylab = "Profile Log-Likelihood",
+  main = expression(paste("Profile: ", beta)), las = 1
+)
 abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
 abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
 abline(h = threshold, col = "#808080", lty = 3)
@@ -317,13 +330,15 @@ grid(col = "gray90")
 
 # Bottom left: 2D contour
 contour(alpha_2d, beta_2d, ll_surface,
-        xlab = expression(alpha), ylab = expression(beta),
-        main = "2D Log-Likelihood Surface",
-        levels = seq(min(ll_surface, na.rm = TRUE), max_ll, length.out = 15),
-        col = "#2E4057", las = 1, lwd = 1)
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "2D Log-Likelihood Surface",
+  levels = seq(min(ll_surface, na.rm = TRUE), max_ll, length.out = 15),
+  col = "#2E4057", las = 1, lwd = 1
+)
 contour(alpha_2d, beta_2d, ll_surface,
-        levels = c(levels_95),
-        col = "#8B0000", lwd = 2.5, add = TRUE)
+  levels = c(levels_95),
+  col = "#8B0000", lwd = 2.5, add = TRUE
+)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
@@ -356,7 +371,7 @@ print(comparison_grad, digits = 8)
 
 ## Example 10: Bootstrap Confidence Intervals
 
-n_boot <- round(n/4)
+n_boot <- round(n / 4)
 boot_estimates <- matrix(NA, nrow = n_boot, ncol = 2)
 
 set.seed(456)
@@ -383,26 +398,33 @@ print(t(boot_ci), digits = 4)
 
 # Plot bootstrap distributions
 
-hist(boot_estimates[, 1], breaks = 20, col = "#87CEEB", border = "white",
-     main = expression(paste("Bootstrap: ", hat(alpha))),
-     xlab = expression(hat(alpha)), las = 1)
+hist(boot_estimates[, 1],
+  breaks = 20, col = "#87CEEB", border = "white",
+  main = expression(paste("Bootstrap: ", hat(alpha))),
+  xlab = expression(hat(alpha)), las = 1
+)
 abline(v = mle[1], col = "#8B0000", lwd = 2)
 abline(v = true_params[1], col = "#006400", lwd = 2, lty = 2)
 abline(v = boot_ci[, 1], col = "#2E4057", lwd = 2, lty = 3)
-legend("topright", legend = c("MLE", "True", "95\% CI"),
-       col = c("#8B0000", "#006400", "#2E4057"),
-       lwd = 2, lty = c(1, 2, 3), bty = "n")
+legend("topright",
+  legend = c("MLE", "True", "95\% CI"),
+  col = c("#8B0000", "#006400", "#2E4057"),
+  lwd = 2, lty = c(1, 2, 3), bty = "n"
+)
 
-hist(boot_estimates[, 2], breaks = 20, col = "#FFA07A", border = "white",
-     main = expression(paste("Bootstrap: ", hat(beta))),
-     xlab = expression(hat(beta)), las = 1)
+hist(boot_estimates[, 2],
+  breaks = 20, col = "#FFA07A", border = "white",
+  main = expression(paste("Bootstrap: ", hat(beta))),
+  xlab = expression(hat(beta)), las = 1
+)
 abline(v = mle[2], col = "#8B0000", lwd = 2)
 abline(v = true_params[2], col = "#006400", lwd = 2, lty = 2)
 abline(v = boot_ci[, 2], col = "#2E4057", lwd = 2, lty = 3)
-legend("topright", legend = c("MLE", "True", "95\% CI"),
-       col = c("#8B0000", "#006400", "#2E4057"),
-       lwd = 2, lty = c(1, 2, 3), bty = "n")
-
+legend("topright",
+  legend = c("MLE", "True", "95\% CI"),
+  col = c("#8B0000", "#006400", "#2E4057"),
+  lwd = 2, lty = c(1, 2, 3), bty = "n"
+)
 }
 
 }

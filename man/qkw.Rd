@@ -79,8 +79,10 @@ print(quantiles_logp)
 print(quantiles)
 
 # Compare with qgkw setting gamma = 1, delta = 0, lambda = 1
-quantiles_gkw <- qgkw(p_vals, alpha = alpha_par, beta = beta_par,
-                     gamma = 1.0, delta = 0.0, lambda = 1.0)
+quantiles_gkw <- qgkw(p_vals,
+  alpha = alpha_par, beta = beta_par,
+  gamma = 1.0, delta = 0.0, lambda = 1.0
+)
 print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
 
 # Verify inverse relationship with pkw
@@ -93,7 +95,6 @@ print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 # Boundary conditions
 print(qkw(c(0, 1), alpha_par, beta_par)) # Should be 0, 1
 print(qkw(c(-Inf, 0), alpha_par, beta_par, log.p = TRUE)) # Should be 0, 1
-
 }
 
 }

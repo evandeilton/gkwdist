@@ -69,14 +69,17 @@ print(densities)
 
 # Calculate log-density
 log_densities <- dbkw(x_vals, alpha_par, beta_par, gamma_par, delta_par,
-                      log = TRUE)
+  log = TRUE
+)
 print(log_densities)
 # Check: should match log(densities)
 print(log(densities))
 
 # Compare with dgkw setting lambda = 1
-densities_gkw <- dgkw(x_vals, alpha_par, beta_par, gamma = gamma_par,
-                      delta = delta_par, lambda = 1.0)
+densities_gkw <- dgkw(x_vals, alpha_par, beta_par,
+  gamma = gamma_par,
+  delta = delta_par, lambda = 1.0
+)
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
 
 # Plot the density for different gamma values
@@ -85,12 +88,16 @@ curve_y1 <- dbkw(curve_x, alpha = 2, beta = 3, gamma = 0.5, delta = 1)
 curve_y2 <- dbkw(curve_x, alpha = 2, beta = 3, gamma = 1.0, delta = 1)
 curve_y3 <- dbkw(curve_x, alpha = 2, beta = 3, gamma = 2.0, delta = 1)
 
-plot(curve_x, curve_y1, type = "l", main = "BKw Density Examples (alpha=2, beta=3, delta=1)",
-     xlab = "x", ylab = "f(x)", col = "blue", ylim = range(0, curve_y1, curve_y2, curve_y3))
+plot(curve_x, curve_y1,
+  type = "l", main = "BKw Density Examples (alpha=2, beta=3, delta=1)",
+  xlab = "x", ylab = "f(x)", col = "blue", ylim = range(0, curve_y1, curve_y2, curve_y3)
+)
 lines(curve_x, curve_y2, col = "red")
 lines(curve_x, curve_y3, col = "green")
-legend("topright", legend = c("gamma=0.5", "gamma=1.0", "gamma=2.0"),
-       col = c("blue", "red", "green"), lty = 1, bty = "n")
+legend("topright",
+  legend = c("gamma=0.5", "gamma=1.0", "gamma=2.0"),
+  col = c("blue", "red", "green"), lty = 1, bty = "n"
+)
 }
 
 }

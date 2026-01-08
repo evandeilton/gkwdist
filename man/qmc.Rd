@@ -81,7 +81,8 @@ print(stats::qbeta(p_vals, shape1 = gamma_par, shape2 = delta_par + 1))
 
 # Calculate quantiles for upper tail probabilities P(X > q) = p
 quantiles_upper <- qmc(p_vals, gamma_par, delta_par, lambda_par,
-                       lower.tail = FALSE)
+  lower.tail = FALSE
+)
 print(quantiles_upper)
 # Check: qmc(p, ..., lt=F) == qmc(1-p, ..., lt=T)
 print(qmc(1 - p_vals, gamma_par, delta_par, lambda_par))
@@ -94,8 +95,10 @@ print(quantiles_logp)
 print(quantiles)
 
 # Compare with qgkw setting alpha = 1, beta = 1
-quantiles_gkw <- qgkw(p_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
-                      delta = delta_par, lambda = lambda_par)
+quantiles_gkw <- qgkw(p_vals,
+  alpha = 1.0, beta = 1.0, gamma = gamma_par,
+  delta = delta_par, lambda = lambda_par
+)
 print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
 
 # Verify inverse relationship with pmc
@@ -108,7 +111,6 @@ print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 # Boundary conditions
 print(qmc(c(0, 1), gamma_par, delta_par, lambda_par)) # Should be 0, 1
 print(qmc(c(-Inf, 0), gamma_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
-
 }
 
 }

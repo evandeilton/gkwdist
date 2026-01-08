@@ -73,7 +73,8 @@ print(stats::pbeta(q_vals, shape1 = gamma_par, shape2 = delta_par + 1))
 
 # Calculate upper tail P(X > q)
 probs_upper <- pmc(q_vals, gamma_par, delta_par, lambda_par,
-                   lower.tail = FALSE)
+  lower.tail = FALSE
+)
 print(probs_upper)
 # Check: probs + probs_upper should be 1
 print(probs + probs_upper)
@@ -85,8 +86,10 @@ print(logs)
 print(log(probs))
 
 # Compare with pgkw setting alpha = 1, beta = 1
-probs_gkw <- pgkw(q_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
-                  delta = delta_par, lambda = lambda_par)
+probs_gkw <- pgkw(q_vals,
+  alpha = 1.0, beta = 1.0, gamma = gamma_par,
+  delta = delta_par, lambda = lambda_par
+)
 print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
 
 # Plot the CDF for different lambda values
@@ -95,12 +98,16 @@ curve_p1 <- pmc(curve_q, gamma = 2, delta = 3, lambda = 0.5)
 curve_p2 <- pmc(curve_q, gamma = 2, delta = 3, lambda = 1.0) # Beta(2, 4)
 curve_p3 <- pmc(curve_q, gamma = 2, delta = 3, lambda = 2.0)
 
-plot(curve_q, curve_p2, type = "l", main = "Mc/Beta Power CDF (gamma=2, delta=3)",
-     xlab = "q", ylab = "F(q)", col = "red", ylim = c(0, 1))
+plot(curve_q, curve_p2,
+  type = "l", main = "Mc/Beta Power CDF (gamma=2, delta=3)",
+  xlab = "q", ylab = "F(q)", col = "red", ylim = c(0, 1)
+)
 lines(curve_q, curve_p1, col = "blue")
 lines(curve_q, curve_p3, col = "green")
-legend("bottomright", legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
-       col = c("blue", "red", "green"), lty = 1, bty = "n")
+legend("bottomright",
+  legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
+  col = c("blue", "red", "green"), lty = 1, bty = "n"
+)
 }
 
 }

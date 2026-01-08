@@ -76,22 +76,27 @@ print(logs)
 print(log(probs))
 
 # Compare with pgkw setting gamma = 1, delta = 0, lambda = 1
-probs_gkw <- pgkw(q_vals, alpha_par, beta_par, gamma = 1.0, delta = 0.0,
-                  lambda = 1.0)
+probs_gkw <- pgkw(q_vals, alpha_par, beta_par,
+  gamma = 1.0, delta = 0.0,
+  lambda = 1.0
+)
 print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
 
 # Plot the CDF for different shape parameter combinations
 curve_q <- seq(0.001, 0.999, length.out = 200)
-plot(curve_q, pkw(curve_q, alpha = 2, beta = 3), type = "l",
-     main = "Kumaraswamy CDF Examples", xlab = "q", ylab = "F(q)",
-     col = "blue", ylim = c(0, 1))
+plot(curve_q, pkw(curve_q, alpha = 2, beta = 3),
+  type = "l",
+  main = "Kumaraswamy CDF Examples", xlab = "q", ylab = "F(q)",
+  col = "blue", ylim = c(0, 1)
+)
 lines(curve_q, pkw(curve_q, alpha = 3, beta = 2), col = "red")
 lines(curve_q, pkw(curve_q, alpha = 0.5, beta = 0.5), col = "green")
 lines(curve_q, pkw(curve_q, alpha = 5, beta = 1), col = "purple")
 lines(curve_q, pkw(curve_q, alpha = 1, beta = 3), col = "orange")
-legend("bottomright", legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
-       col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2)
-
+legend("bottomright",
+  legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
+  col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
+)
 }
 
 }

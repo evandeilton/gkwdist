@@ -68,22 +68,26 @@ print(densities)
 
 # Calculate log-density
 log_densities <- dkkw(x_vals, alpha_par, beta_par, delta_par, lambda_par,
-                       log = TRUE)
+  log = TRUE
+)
 print(log_densities)
 # Check: should match log(densities)
 print(log(densities))
 
 # Compare with dgkw setting gamma = 1
-densities_gkw <- dgkw(x_vals, alpha_par, beta_par, gamma = 1.0,
-                      delta_par, lambda_par)
+densities_gkw <- dgkw(x_vals, alpha_par, beta_par,
+  gamma = 1.0,
+  delta_par, lambda_par
+)
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
 
 # Plot the density
 curve_x <- seq(0.01, 0.99, length.out = 200)
 curve_y <- dkkw(curve_x, alpha_par, beta_par, delta_par, lambda_par)
-plot(curve_x, curve_y, type = "l", main = "kkw Density Example",
-     xlab = "x", ylab = "f(x)", col = "blue")
-
+plot(curve_x, curve_y,
+  type = "l", main = "kkw Density Example",
+  xlab = "x", ylab = "f(x)", col = "blue"
+)
 }
 
 }

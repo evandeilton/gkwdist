@@ -62,8 +62,10 @@ of the general GKw gradient (\code{\link{grgkw}}) evaluated at \eqn{\alpha=1, \b
 set.seed(123)
 n <- 1000
 true_params <- c(gamma = 2.0, delta = 2.5, lambda = 1.5)
-data <- rmc(n, gamma = true_params[1], delta = true_params[2],
-            lambda = true_params[3])
+data <- rmc(n,
+  gamma = true_params[1], delta = true_params[2],
+  lambda = true_params[3]
+)
 
 # Evaluate Hessian at true parameters
 hess_true <- hsmc(par = true_params, data = data)
@@ -71,8 +73,10 @@ cat("Hessian matrix at true parameters:\n")
 print(hess_true, digits = 4)
 
 # Check symmetry
-cat("\nSymmetry check (max |H - H^T|):",
-    max(abs(hess_true - t(hess_true))), "\n")
+cat(
+  "\nSymmetry check (max |H - H^T|):",
+  max(abs(hess_true - t(hess_true))), "\n"
+)
 
 
 ## Example 2: Hessian Properties at MLE
@@ -97,8 +101,10 @@ print(hessian_at_mle, digits = 4)
 
 # Compare with optim's numerical Hessian
 cat("\nComparison with optim Hessian:\n")
-cat("Max absolute difference:",
-    max(abs(hessian_at_mle - fit$hessian)), "\n")
+cat(
+  "Max absolute difference:",
+  max(abs(hessian_at_mle - fit$hessian)), "\n"
+)
 
 # Eigenvalue analysis
 eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
@@ -231,63 +237,70 @@ for (i in seq_along(delta_grid)) {
   }
 }
 
-# Plot 
+# Plot
 
 # Determinant plots
 contour(gamma_grid, delta_grid, determinant_surface_gd,
-        xlab = expression(gamma), ylab = expression(delta),
-        main = "Determinant: Gamma vs Delta", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(gamma), ylab = expression(delta),
+  main = "Determinant: Gamma vs Delta", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 contour(gamma_grid, lambda_grid, determinant_surface_gl,
-        xlab = expression(gamma), ylab = expression(lambda),
-        main = "Determinant: Gamma vs Lambda", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(gamma), ylab = expression(lambda),
+  main = "Determinant: Gamma vs Lambda", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 contour(delta_grid, lambda_grid, determinant_surface_dl,
-        xlab = expression(delta), ylab = expression(lambda),
-        main = "Determinant: Delta vs Lambda", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(delta), ylab = expression(lambda),
+  main = "Determinant: Delta vs Lambda", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 # Trace plots
 contour(gamma_grid, delta_grid, trace_surface_gd,
-        xlab = expression(gamma), ylab = expression(delta),
-        main = "Trace: Gamma vs Delta", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(gamma), ylab = expression(delta),
+  main = "Trace: Gamma vs Delta", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 contour(gamma_grid, lambda_grid, trace_surface_gl,
-        xlab = expression(gamma), ylab = expression(lambda),
-        main = "Trace: Gamma vs Lambda", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(gamma), ylab = expression(lambda),
+  main = "Trace: Gamma vs Lambda", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 contour(delta_grid, lambda_grid, trace_surface_dl,
-        xlab = expression(delta), ylab = expression(lambda),
-        main = "Trace: Delta vs Lambda", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(delta), ylab = expression(lambda),
+  main = "Trace: Delta vs Lambda", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 legend("topright",
-       legend = c("MLE", "True"),
-       col = c("#8B0000", "#006400"),
-       pch = c(19, 17),
-       bty = "n", cex = 0.8)
+  legend = c("MLE", "True"),
+  col = c("#8B0000", "#006400"),
+  pch = c(19, 17),
+  bty = "n", cex = 0.8
+)
 
 
 ## Example 6: Confidence Ellipses (All pairs side by side)
@@ -341,13 +354,15 @@ se_dl <- sqrt(diag(vcov_dl))
 ci_delta_dl <- mle[2] + c(-1, 1) * 1.96 * se_dl[1]
 ci_lambda_dl <- mle[3] + c(-1, 1) * 1.96 * se_dl[2]
 
-# Plot 
+# Plot
 
 # Gamma vs Delta
-plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(gamma), ylab = expression(delta),
-     main = "Gamma vs Delta", las = 1, xlim = range(ellipse_gd[, 1], ci_gamma_gd),
-     ylim = range(ellipse_gd[, 2], ci_delta_gd))
+plot(ellipse_gd[, 1], ellipse_gd[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(gamma), ylab = expression(delta),
+  main = "Gamma vs Delta", las = 1, xlim = range(ellipse_gd[, 1], ci_gamma_gd),
+  ylim = range(ellipse_gd[, 2], ci_delta_gd)
+)
 abline(v = ci_gamma_gd, col = "#808080", lty = 3, lwd = 1.5)
 abline(h = ci_delta_gd, col = "#808080", lty = 3, lwd = 1.5)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
@@ -355,10 +370,12 @@ points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 # Gamma vs Lambda
-plot(ellipse_gl[, 1], ellipse_gl[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(gamma), ylab = expression(lambda),
-     main = "Gamma vs Lambda", las = 1, xlim = range(ellipse_gl[, 1], ci_gamma_gl),
-     ylim = range(ellipse_gl[, 2], ci_lambda_gl))
+plot(ellipse_gl[, 1], ellipse_gl[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(gamma), ylab = expression(lambda),
+  main = "Gamma vs Lambda", las = 1, xlim = range(ellipse_gl[, 1], ci_gamma_gl),
+  ylim = range(ellipse_gl[, 2], ci_lambda_gl)
+)
 abline(v = ci_gamma_gl, col = "#808080", lty = 3, lwd = 1.5)
 abline(h = ci_lambda_gl, col = "#808080", lty = 3, lwd = 1.5)
 points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
@@ -366,10 +383,12 @@ points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 # Delta vs Lambda
-plot(ellipse_dl[, 1], ellipse_dl[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(delta), ylab = expression(lambda),
-     main = "Delta vs Lambda", las = 1, xlim = range(ellipse_dl[, 1], ci_delta_dl),
-     ylim = range(ellipse_dl[, 2], ci_lambda_dl))
+plot(ellipse_dl[, 1], ellipse_dl[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(delta), ylab = expression(lambda),
+  main = "Delta vs Lambda", las = 1, xlim = range(ellipse_dl[, 1], ci_delta_dl),
+  ylim = range(ellipse_dl[, 2], ci_lambda_dl)
+)
 abline(v = ci_delta_dl, col = "#808080", lty = 3, lwd = 1.5)
 abline(h = ci_lambda_dl, col = "#808080", lty = 3, lwd = 1.5)
 points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
@@ -377,13 +396,13 @@ points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 legend("topright",
-       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n", cex = 0.8)
-
+  legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n", cex = 0.8
+)
 }
 
 }

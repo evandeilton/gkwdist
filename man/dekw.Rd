@@ -69,8 +69,10 @@ print(log_densities)
 print(log(densities))
 
 # Compare with dgkw setting gamma = 1, delta = 0
-densities_gkw <- dgkw(x_vals, alpha_par, beta_par, gamma = 1.0, delta = 0.0,
-                      lambda = lambda_par)
+densities_gkw <- dgkw(x_vals, alpha_par, beta_par,
+  gamma = 1.0, delta = 0.0,
+  lambda = lambda_par
+)
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
 
 # Plot the density for different lambda values
@@ -79,12 +81,16 @@ curve_y1 <- dekw(curve_x, alpha = 2, beta = 3, lambda = 0.5) # less peaked
 curve_y2 <- dekw(curve_x, alpha = 2, beta = 3, lambda = 1.0) # standard Kw
 curve_y3 <- dekw(curve_x, alpha = 2, beta = 3, lambda = 2.0) # more peaked
 
-plot(curve_x, curve_y2, type = "l", main = "EKw Density Examples (alpha=2, beta=3)",
-     xlab = "x", ylab = "f(x)", col = "red", ylim = range(0, curve_y1, curve_y2, curve_y3))
+plot(curve_x, curve_y2,
+  type = "l", main = "EKw Density Examples (alpha=2, beta=3)",
+  xlab = "x", ylab = "f(x)", col = "red", ylim = range(0, curve_y1, curve_y2, curve_y3)
+)
 lines(curve_x, curve_y1, col = "blue")
 lines(curve_x, curve_y3, col = "green")
-legend("topright", legend = c("lambda=0.5", "lambda=1.0 (Kw)", "lambda=2.0"),
-       col = c("blue", "red", "green"), lty = 1, bty = "n")
+legend("topright",
+  legend = c("lambda=0.5", "lambda=1.0 (Kw)", "lambda=2.0"),
+  col = c("blue", "red", "green"), lty = 1, bty = "n"
+)
 }
 
 }

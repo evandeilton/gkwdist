@@ -84,29 +84,34 @@ print(probs)
 
 # Calculate upper tail P(X > q)
 probs_upper <- pkkw(q_vals, alpha_par, beta_par, delta_par, lambda_par,
-                     lower.tail = FALSE)
+  lower.tail = FALSE
+)
 print(probs_upper)
 # Check: probs + probs_upper should be 1
 print(probs + probs_upper)
 
 # Calculate log CDF
 logs <- pkkw(q_vals, alpha_par, beta_par, delta_par, lambda_par,
-                   log.p = TRUE)
+  log.p = TRUE
+)
 print(logs)
 # Check: should match log(probs)
 print(log(probs))
 
 # Compare with pgkw setting gamma = 1
-probs_gkw <- pgkw(q_vals, alpha_par, beta_par, gamma = 1.0,
-                  delta_par, lambda_par)
+probs_gkw <- pgkw(q_vals, alpha_par, beta_par,
+  gamma = 1.0,
+  delta_par, lambda_par
+)
 print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
 
 # Plot the CDF
 curve_q <- seq(0.01, 0.99, length.out = 200)
 curve_p <- pkkw(curve_q, alpha_par, beta_par, delta_par, lambda_par)
-plot(curve_q, curve_p, type = "l", main = "kkw CDF Example",
-     xlab = "q", ylab = "F(q)", col = "blue", ylim = c(0, 1))
-
+plot(curve_q, curve_p,
+  type = "l", main = "kkw CDF Example",
+  xlab = "q", ylab = "F(q)", col = "blue", ylim = c(0, 1)
+)
 }
 
 }

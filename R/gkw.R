@@ -1,7 +1,7 @@
 # ============================================================================#
 # GENERALIZED KUMARASWAMY (GKw) DISTRIBUTION
 # ============================================================================#
-# 
+#
 # Wrapper functions for the Generalized Kumaraswamy distribution.
 # C++ implementations are in src/gkw.cpp
 #
@@ -108,18 +108,21 @@
 #' # Exponentiated Kumaraswamy (gamma=1, delta=0)
 #' pdf_ekw <- dgkw(x_vals, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 2)
 #'
-#' plot(x_vals, pdf_kw, type = "l", ylim = range(c(pdf_kw, pdf_beta, pdf_ekw)),
-#'      main = "GKw Densities Examples", ylab = "f(x)", xlab="x", col = "blue")
+#' plot(x_vals, pdf_kw,
+#'   type = "l", ylim = range(c(pdf_kw, pdf_beta, pdf_ekw)),
+#'   main = "GKw Densities Examples", ylab = "f(x)", xlab = "x", col = "blue"
+#' )
 #' lines(x_vals, pdf_beta, col = "red")
 #' lines(x_vals, pdf_ekw, col = "green")
-#' legend("topright", legend = c("Kw(2,3)", "Beta(2,4) equivalent", "EKw(2,3, lambda=2)"),
-#'        col = c("blue", "red", "green"), lty = 1, bty = "n")
+#' legend("topright",
+#'   legend = c("Kw(2,3)", "Beta(2,4) equivalent", "EKw(2,3, lambda=2)"),
+#'   col = c("blue", "red", "green"), lty = 1, bty = "n"
+#' )
 #'
 #' # Log-density
 #' log.pdf_val <- dgkw(0.5, 2, 3, 1, 0, 1, log = TRUE)
 #' print(log.pdf_val)
 #' print(log(dgkw(0.5, 2, 3, 1, 0, 1))) # Should match
-#'
 #' }
 #'
 #' @export
@@ -144,17 +147,18 @@ dgkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, log =
   if (!is.logical(log) || length(log) != 1) {
     stop("'log' must be a single logical value")
   }
-  
+
   # Call C++ implementation
-  .Call("_gkwdist_dgkw", 
-        as.numeric(x), 
-        as.numeric(alpha), 
-        as.numeric(beta), 
-        as.numeric(gamma),
-        as.numeric(delta),
-        as.numeric(lambda),
-        as.logical(log),
-        PACKAGE = "gkwdist")
+  .Call("_gkwdist_dgkw",
+    as.numeric(x),
+    as.numeric(alpha),
+    as.numeric(beta),
+    as.numeric(gamma),
+    as.numeric(delta),
+    as.numeric(lambda),
+    as.logical(log),
+    PACKAGE = "gkwdist"
+  )
 }
 
 
@@ -235,15 +239,19 @@ dgkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, log =
 #' print(prob)
 #'
 #' # Upper tail probability P(X > q)
-#' prob_upper <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-#'                  lower.tail = FALSE)
+#' prob_upper <- pgkw(0.5,
+#'   alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+#'   lower.tail = FALSE
+#' )
 #' print(prob_upper)
 #' # Check: prob + prob_upper should be 1
 #' print(prob + prob_upper)
 #'
 #' # Log probability
-#' log <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-#'                  log.p = TRUE)
+#' log <- pgkw(0.5,
+#'   alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+#'   log.p = TRUE
+#' )
 #' print(log)
 #' # Check: exp(log) should be prob
 #' print(exp(log))
@@ -265,14 +273,18 @@ dgkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, log =
 #' cdf_beta_check <- stats::pbeta(x_seq, shape1 = 2, shape2 = 3 + 1)
 #' # max(abs(cdf_beta_equiv - cdf_beta_check)) # Should be close to zero
 #'
-#' plot(x_seq, cdf_kw, type = "l", ylim = c(0, 1),
-#'      main = "GKw CDF Examples", ylab = "F(x)", xlab = "x", col = "blue")
+#' plot(x_seq, cdf_kw,
+#'   type = "l", ylim = c(0, 1),
+#'   main = "GKw CDF Examples", ylab = "F(x)", xlab = "x", col = "blue"
+#' )
 #' lines(x_seq, cdf_beta_equiv, col = "red", lty = 2)
-#' legend("bottomright", legend = c("Kw(2,3)", "Beta(2,4) equivalent"),
-#'        col = c("blue", "red"), lty = c(1, 2), bty = "n")
-#'}
+#' legend("bottomright",
+#'   legend = c("Kw(2,3)", "Beta(2,4) equivalent"),
+#'   col = c("blue", "red"), lty = c(1, 2), bty = "n"
+#' )
+#' }
 #' @export
-pgkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, 
+pgkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
                  lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(q)) stop("'q' must be numeric")
@@ -297,18 +309,19 @@ pgkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
   if (!is.logical(log.p) || length(log.p) != 1) {
     stop("'log.p' must be a single logical value")
   }
-  
+
   # Call C++ implementation
-  .Call("_gkwdist_pgkw", 
-        as.numeric(q), 
-        as.numeric(alpha), 
-        as.numeric(beta), 
-        as.numeric(gamma),
-        as.numeric(delta),
-        as.numeric(lambda),
-        as.logical(lower.tail),
-        as.logical(log.p),
-        PACKAGE = "gkwdist")
+  .Call("_gkwdist_pgkw",
+    as.numeric(q),
+    as.numeric(alpha),
+    as.numeric(beta),
+    as.numeric(gamma),
+    as.numeric(delta),
+    as.numeric(lambda),
+    as.logical(lower.tail),
+    as.logical(log.p),
+    PACKAGE = "gkwdist"
+  )
 }
 
 
@@ -399,15 +412,19 @@ pgkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 #' print(quantiles)
 #'
 #' # Upper tail quantile (e.g., find x such that P(X > x) = 0.1, which is 90th percentile)
-#' q90 <- qgkw(0.1, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-#'             lower.tail = FALSE)
+#' q90 <- qgkw(0.1,
+#'   alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+#'   lower.tail = FALSE
+#' )
 #' print(q90)
 #' # Check: should match quantile for p = 0.9 with lower.tail = TRUE
 #' print(qgkw(0.9, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1))
 #'
 #' # Log probabilities
-#' median_logp <- qgkw(log(0.5), alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-#'                     log.p = TRUE)
+#' median_logp <- qgkw(log(0.5),
+#'   alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+#'   log.p = TRUE
+#' )
 #' print(median_logp) # Should match median_val
 #'
 #' # Vectorized parameters
@@ -422,9 +439,9 @@ pgkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 #' x_val <- qgkw(p_val, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 #' p_check <- pgkw(x_val, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 #' print(paste("Calculated p:", p_check, " (Expected:", p_val, ")"))
-#'}
+#' }
 #' @export
-qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, 
+qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
                  lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(p)) stop("'p' must be numeric")
@@ -449,23 +466,24 @@ qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
   if (!is.logical(log.p) || length(log.p) != 1) {
     stop("'log.p' must be a single logical value")
   }
-  
+
   # Additional validation for probabilities
   if (!log.p && any(p < 0 | p > 1, na.rm = TRUE)) {
     warning("'p' values outside [0, 1] will produce NaN")
   }
-  
+
   # Call C++ implementation
-  .Call("_gkwdist_qgkw", 
-        as.numeric(p), 
-        as.numeric(alpha), 
-        as.numeric(beta), 
-        as.numeric(gamma),
-        as.numeric(delta),
-        as.numeric(lambda),
-        as.logical(lower.tail),
-        as.logical(log.p),
-        PACKAGE = "gkwdist")
+  .Call("_gkwdist_qgkw",
+    as.numeric(p),
+    as.numeric(alpha),
+    as.numeric(beta),
+    as.numeric(gamma),
+    as.numeric(delta),
+    as.numeric(lambda),
+    as.logical(lower.tail),
+    as.logical(log.p),
+    PACKAGE = "gkwdist"
+  )
 }
 
 
@@ -541,10 +559,13 @@ qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 #' summary(x_sample)
 #'
 #' # Histogram of generated values compared to theoretical density
-#' hist(x_sample, breaks = 30, freq = FALSE, # freq=FALSE for density scale
-#'      main = "Histogram of GKw(2,3,1,0,1) Sample", xlab = "x", ylim = c(0, 2.5))
+#' hist(x_sample,
+#'   breaks = 30, freq = FALSE, # freq=FALSE for density scale
+#'   main = "Histogram of GKw(2,3,1,0,1) Sample", xlab = "x", ylim = c(0, 2.5)
+#' )
 #' curve(dgkw(x, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1),
-#'       add = TRUE, col = "red", lwd = 2, n = 201)
+#'   add = TRUE, col = "red", lwd = 2, n = 201
+#' )
 #' legend("topright", legend = "Theoretical PDF", col = "red", lwd = 2, bty = "n")
 #'
 #' # Comparing empirical and theoretical quantiles (Q-Q plot)
@@ -552,9 +573,11 @@ qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 #' theo_quantiles <- qgkw(prob_points, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 #' emp_quantiles <- quantile(x_sample, prob_points)
 #'
-#' plot(theo_quantiles, emp_quantiles, pch = 16, cex = 0.8,
-#'      main = "Q-Q Plot for GKw(2,3,1,0,1)",
-#'      xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)")
+#' plot(theo_quantiles, emp_quantiles,
+#'   pch = 16, cex = 0.8,
+#'   main = "Q-Q Plot for GKw(2,3,1,0,1)",
+#'   xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
+#' )
 #' abline(a = 0, b = 1, col = "blue", lty = 2)
 #'
 #' # Using vectorized parameters: generate 1 value for each alpha
@@ -563,7 +586,7 @@ qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 #' samples_vec <- rgkw(n_param, alpha = alphas_vec, beta = 2, gamma = 1, delta = 0, lambda = 1)
 #' print(samples_vec) # One sample for each alpha value
 #' # Result length matches n=3, parameters alpha recycled accordingly
-#'}
+#' }
 #' @export
 rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
   # Input validation
@@ -572,7 +595,7 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
     stop("'n' must be a positive integer")
   }
   n <- as.integer(n)
-  
+
   if (!is.numeric(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
@@ -588,16 +611,17 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
   if (!is.numeric(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
-  
+
   # Call C++ implementation
-  .Call("_gkwdist_rgkw", 
-        as.integer(n), 
-        as.numeric(alpha), 
-        as.numeric(beta), 
-        as.numeric(gamma),
-        as.numeric(delta),
-        as.numeric(lambda),
-        PACKAGE = "gkwdist")
+  .Call("_gkwdist_rgkw",
+    as.integer(n),
+    as.numeric(alpha),
+    as.numeric(beta),
+    as.numeric(gamma),
+    as.numeric(delta),
+    as.numeric(lambda),
+    PACKAGE = "gkwdist"
+  )
 }
 
 
@@ -673,26 +697,28 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Log-Likelihood Evaluation
-#' 
+#'
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
 #' true_params <- c(alpha = 2.0, beta = 3.0, gamma = 1.5, delta = 2.0, lambda = 1.8)
-#' data <- rgkw(n, alpha = true_params[1], beta = true_params[2],
-#'              gamma = true_params[3], delta = true_params[4],
-#'              lambda = true_params[5])
-#' 
+#' data <- rgkw(n,
+#'   alpha = true_params[1], beta = true_params[2],
+#'   gamma = true_params[3], delta = true_params[4],
+#'   lambda = true_params[5]
+#' )
+#'
 #' # Evaluate negative log-likelihood at true parameters
 #' nll_true <- llgkw(par = true_params, data = data)
 #' cat("Negative log-likelihood at true parameters:", nll_true, "\n")
-#' 
+#'
 #' # Evaluate at different parameter values
 #' test_params <- rbind(
 #'   c(1.5, 2.5, 1.2, 1.5, 1.5),
 #'   c(2.0, 3.0, 1.5, 2.0, 1.8),
 #'   c(2.5, 3.5, 1.8, 2.5, 2.0)
 #' )
-#' 
+#'
 #' nll_values <- apply(test_params, 1, function(p) llgkw(p, data))
 #' results <- data.frame(
 #'   Alpha = test_params[, 1],
@@ -703,10 +729,10 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   NegLogLik = nll_values
 #' )
 #' print(results, digits = 4)
-#' 
-#' 
+#'
+#'
 #' ## Example 2: Maximum Likelihood Estimation
-#' 
+#'
 #' # Optimization using BFGS with analytical gradient
 #' fit <- optim(
 #'   par = c(1.5, 2.5, 1.2, 1.5, 1.5),
@@ -717,11 +743,11 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   hessian = TRUE,
 #'   control = list(maxit = 1000)
 #' )
-#' 
+#'
 #' mle <- fit$par
 #' names(mle) <- c("alpha", "beta", "gamma", "delta", "lambda")
 #' se <- sqrt(diag(solve(fit$hessian)))
-#' 
+#'
 #' results <- data.frame(
 #'   Parameter = c("alpha", "beta", "gamma", "delta", "lambda"),
 #'   True = true_params,
@@ -731,17 +757,17 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   CI_Upper = mle + 1.96 * se
 #' )
 #' print(results, digits = 4)
-#' 
+#'
 #' cat("\nNegative log-likelihood at MLE:", fit$value, "\n")
 #' cat("AIC:", 2 * fit$value + 2 * length(mle), "\n")
 #' cat("BIC:", 2 * fit$value + length(mle) * log(n), "\n")
-#' 
-#' 
+#'
+#'
 #' ## Example 3: Comparing Optimization Methods
-#' 
+#'
 #' methods <- c("BFGS", "Nelder-Mead")
 #' start_params <- c(1.5, 2.5, 1.2, 1.5, 1.5)
-#' 
+#'
 #' comparison <- data.frame(
 #'   Method = character(),
 #'   Alpha = numeric(),
@@ -753,7 +779,7 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   Convergence = integer(),
 #'   stringsAsFactors = FALSE
 #' )
-#' 
+#'
 #' for (method in methods) {
 #'   if (method == "BFGS") {
 #'     fit_temp <- optim(
@@ -784,7 +810,7 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'       control = list(maxit = 1000)
 #'     )
 #'   }
-#' 
+#'
 #'   comparison <- rbind(comparison, data.frame(
 #'     Method = method,
 #'     Alpha = fit_temp$par[1],
@@ -797,21 +823,25 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'     stringsAsFactors = FALSE
 #'   ))
 #' }
-#' 
+#'
 #' print(comparison, digits = 4, row.names = FALSE)
-#' 
-#' 
+#'
+#'
 #' ## Example 4: Likelihood Ratio Test
-#' 
+#'
 #' # Test H0: gamma = 1.5 vs H1: gamma free
 #' loglik_full <- -fit$value
-#' 
+#'
 #' restricted_ll <- function(params_restricted, data, gamma_fixed) {
-#'   llgkw(par = c(params_restricted[1], params_restricted[2],
-#'                 gamma_fixed, params_restricted[3], params_restricted[4]),
-#'         data = data)
+#'   llgkw(
+#'     par = c(
+#'       params_restricted[1], params_restricted[2],
+#'       gamma_fixed, params_restricted[3], params_restricted[4]
+#'     ),
+#'     data = data
+#'   )
 #' }
-#' 
+#'
 #' fit_restricted <- optim(
 #'   par = c(mle[1], mle[2], mle[4], mle[5]),
 #'   fn = restricted_ll,
@@ -820,23 +850,23 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   method = "Nelder-Mead",
 #'   control = list(maxit = 1000)
 #' )
-#' 
+#'
 #' loglik_restricted <- -fit_restricted$value
 #' lr_stat <- 2 * (loglik_full - loglik_restricted)
 #' p_value <- pchisq(lr_stat, df = 1, lower.tail = FALSE)
-#' 
+#'
 #' cat("LR Statistic:", round(lr_stat, 4), "\n")
 #' cat("P-value:", format.pval(p_value, digits = 4), "\n")
-#' 
-#' 
+#'
+#'
 #' ## Example 5: Univariate Profile Likelihoods
-#' 
+#'
 #' # Profile for alpha
 #' xd <- 1
 #' alpha_grid <- seq(mle[1] - xd, mle[1] + xd, length.out = 35)
 #' alpha_grid <- alpha_grid[alpha_grid > 0]
 #' profile_ll_alpha <- numeric(length(alpha_grid))
-#' 
+#'
 #' for (i in seq_along(alpha_grid)) {
 #'   profile_fit <- optim(
 #'     par = mle[-1],
@@ -846,12 +876,12 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   )
 #'   profile_ll_alpha[i] <- -profile_fit$value
 #' }
-#' 
+#'
 #' # Profile for beta
 #' beta_grid <- seq(mle[2] - xd, mle[2] + xd, length.out = 35)
 #' beta_grid <- beta_grid[beta_grid > 0]
 #' profile_ll_beta <- numeric(length(beta_grid))
-#' 
+#'
 #' for (i in seq_along(beta_grid)) {
 #'   profile_fit <- optim(
 #'     par = mle[-2],
@@ -861,12 +891,12 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   )
 #'   profile_ll_beta[i] <- -profile_fit$value
 #' }
-#' 
+#'
 #' # Profile for gamma
 #' gamma_grid <- seq(mle[3] - xd, mle[3] + xd, length.out = 35)
 #' gamma_grid <- gamma_grid[gamma_grid > 0]
 #' profile_ll_gamma <- numeric(length(gamma_grid))
-#' 
+#'
 #' for (i in seq_along(gamma_grid)) {
 #'   profile_fit <- optim(
 #'     par = mle[-3],
@@ -876,12 +906,12 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   )
 #'   profile_ll_gamma[i] <- -profile_fit$value
 #' }
-#' 
+#'
 #' # Profile for delta
 #' delta_grid <- seq(mle[4] - xd, mle[4] + xd, length.out = 35)
 #' delta_grid <- delta_grid[delta_grid > 0]
 #' profile_ll_delta <- numeric(length(delta_grid))
-#' 
+#'
 #' for (i in seq_along(delta_grid)) {
 #'   profile_fit <- optim(
 #'     par = mle[-4],
@@ -891,12 +921,12 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   )
 #'   profile_ll_delta[i] <- -profile_fit$value
 #' }
-#' 
+#'
 #' # Profile for lambda
 #' lambda_grid <- seq(mle[5] - xd, mle[5] + xd, length.out = 35)
 #' lambda_grid <- lambda_grid[lambda_grid > 0]
 #' profile_ll_lambda <- numeric(length(lambda_grid))
-#' 
+#'
 #' for (i in seq_along(lambda_grid)) {
 #'   profile_fit <- optim(
 #'     par = mle[-5],
@@ -906,219 +936,253 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   )
 #'   profile_ll_lambda[i] <- -profile_fit$value
 #' }
-#' 
+#'
 #' # 95% confidence threshold
 #' chi_crit <- qchisq(0.95, df = 1)
 #' threshold <- max(profile_ll_alpha) - chi_crit / 2
-#' 
+#'
 #' # Plot all profiles
-#' 
-#' plot(alpha_grid, profile_ll_alpha, type = "l", lwd = 2, col = "#2E4057",
-#'      xlab = expression(alpha), ylab = "Profile Log-Likelihood",
-#'      main = expression(paste("Profile: ", alpha)), las = 1)
+#'
+#' plot(alpha_grid, profile_ll_alpha,
+#'   type = "l", lwd = 2, col = "#2E4057",
+#'   xlab = expression(alpha), ylab = "Profile Log-Likelihood",
+#'   main = expression(paste("Profile: ", alpha)), las = 1
+#' )
 #' abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
 #' abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
 #' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-#' legend("topright", legend = c("MLE", "True", "95% CI"),
-#'        col = c("#8B0000", "#006400", "#808080"),
-#'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
+#' legend("topright",
+#'   legend = c("MLE", "True", "95% CI"),
+#'   col = c("#8B0000", "#006400", "#808080"),
+#'   lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6
+#' )
 #' grid(col = "gray90")
-#' 
-#' plot(beta_grid, profile_ll_beta, type = "l", lwd = 2, col = "#2E4057",
-#'      xlab = expression(beta), ylab = "Profile Log-Likelihood",
-#'      main = expression(paste("Profile: ", beta)), las = 1)
+#'
+#' plot(beta_grid, profile_ll_beta,
+#'   type = "l", lwd = 2, col = "#2E4057",
+#'   xlab = expression(beta), ylab = "Profile Log-Likelihood",
+#'   main = expression(paste("Profile: ", beta)), las = 1
+#' )
 #' abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
 #' abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
 #' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-#' legend("topright", legend = c("MLE", "True", "95% CI"),
-#'        col = c("#8B0000", "#006400", "#808080"),
-#'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
+#' legend("topright",
+#'   legend = c("MLE", "True", "95% CI"),
+#'   col = c("#8B0000", "#006400", "#808080"),
+#'   lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6
+#' )
 #' grid(col = "gray90")
-#' 
-#' plot(gamma_grid, profile_ll_gamma, type = "l", lwd = 2, col = "#2E4057",
-#'      xlab = expression(gamma), ylab = "Profile Log-Likelihood",
-#'      main = expression(paste("Profile: ", gamma)), las = 1)
+#'
+#' plot(gamma_grid, profile_ll_gamma,
+#'   type = "l", lwd = 2, col = "#2E4057",
+#'   xlab = expression(gamma), ylab = "Profile Log-Likelihood",
+#'   main = expression(paste("Profile: ", gamma)), las = 1
+#' )
 #' abline(v = mle[3], col = "#8B0000", lty = 2, lwd = 2)
 #' abline(v = true_params[3], col = "#006400", lty = 2, lwd = 2)
 #' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-#' legend("topright", legend = c("MLE", "True", "95% CI"),
-#'        col = c("#8B0000", "#006400", "#808080"),
-#'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
+#' legend("topright",
+#'   legend = c("MLE", "True", "95% CI"),
+#'   col = c("#8B0000", "#006400", "#808080"),
+#'   lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6
+#' )
 #' grid(col = "gray90")
-#' 
-#' plot(delta_grid, profile_ll_delta, type = "l", lwd = 2, col = "#2E4057",
-#'      xlab = expression(delta), ylab = "Profile Log-Likelihood",
-#'      main = expression(paste("Profile: ", delta)), las = 1)
+#'
+#' plot(delta_grid, profile_ll_delta,
+#'   type = "l", lwd = 2, col = "#2E4057",
+#'   xlab = expression(delta), ylab = "Profile Log-Likelihood",
+#'   main = expression(paste("Profile: ", delta)), las = 1
+#' )
 #' abline(v = mle[4], col = "#8B0000", lty = 2, lwd = 2)
 #' abline(v = true_params[4], col = "#006400", lty = 2, lwd = 2)
 #' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-#' legend("topright", legend = c("MLE", "True", "95% CI"),
-#'        col = c("#8B0000", "#006400", "#808080"),
-#'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
+#' legend("topright",
+#'   legend = c("MLE", "True", "95% CI"),
+#'   col = c("#8B0000", "#006400", "#808080"),
+#'   lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6
+#' )
 #' grid(col = "gray90")
-#' 
-#' plot(lambda_grid, profile_ll_lambda, type = "l", lwd = 2, col = "#2E4057",
-#'      xlab = expression(lambda), ylab = "Profile Log-Likelihood",
-#'      main = expression(paste("Profile: ", lambda)), las = 1)
+#'
+#' plot(lambda_grid, profile_ll_lambda,
+#'   type = "l", lwd = 2, col = "#2E4057",
+#'   xlab = expression(lambda), ylab = "Profile Log-Likelihood",
+#'   main = expression(paste("Profile: ", lambda)), las = 1
+#' )
 #' abline(v = mle[5], col = "#8B0000", lty = 2, lwd = 2)
 #' abline(v = true_params[5], col = "#006400", lty = 2, lwd = 2)
 #' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-#' legend("topright", legend = c("MLE", "True", "95% CI"),
-#'        col = c("#8B0000", "#006400", "#808080"),
-#'        lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6)
+#' legend("topright",
+#'   legend = c("MLE", "True", "95% CI"),
+#'   col = c("#8B0000", "#006400", "#808080"),
+#'   lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.6
+#' )
 #' grid(col = "gray90")
-#' 
-#' 
+#'
+#'
 #' ## Example 6: 2D Log-Likelihood Surface (Alpha vs Beta)
 #' # Plot all profiles
-#' 
+#'
 #' # Create 2D grid
-#' alpha_2d <- seq(mle[1] - xd, mle[1] + xd, length.out = round(n/4))
-#' beta_2d <- seq(mle[2] - xd, mle[2] + xd, length.out = round(n/4))
+#' alpha_2d <- seq(mle[1] - xd, mle[1] + xd, length.out = round(n / 4))
+#' beta_2d <- seq(mle[2] - xd, mle[2] + xd, length.out = round(n / 4))
 #' alpha_2d <- alpha_2d[alpha_2d > 0]
 #' beta_2d <- beta_2d[beta_2d > 0]
-#' 
+#'
 #' # Compute log-likelihood surface
 #' ll_surface_ab <- matrix(NA, nrow = length(alpha_2d), ncol = length(beta_2d))
-#' 
+#'
 #' for (i in seq_along(alpha_2d)) {
 #'   for (j in seq_along(beta_2d)) {
-#'     ll_surface_ab[i, j] <- llgkw(c(alpha_2d[i], beta_2d[j],
-#'                                      mle[3], mle[4], mle[5]), data)
+#'     ll_surface_ab[i, j] <- llgkw(c(
+#'       alpha_2d[i], beta_2d[j],
+#'       mle[3], mle[4], mle[5]
+#'     ), data)
 #'   }
 #' }
-#' 
+#'
 #' # Confidence region levels
 #' max_ll_ab <- max(ll_surface_ab, na.rm = TRUE)
 #' levels_90_ab <- max_ll_ab - qchisq(0.90, df = 2) / 2
 #' levels_95_ab <- max_ll_ab - qchisq(0.95, df = 2) / 2
 #' levels_99_ab <- max_ll_ab - qchisq(0.99, df = 2) / 2
-#' 
+#'
 #' # Plot contour
 #' contour(alpha_2d, beta_2d, ll_surface_ab,
-#'         xlab = expression(alpha), ylab = expression(beta),
-#'         main = "2D Log-Likelihood: Alpha vs Beta",
-#'         levels = seq(min(ll_surface_ab, na.rm = TRUE), max_ll_ab, length.out = 20),
-#'         col = "#2E4057", las = 1, lwd = 1)
-#' 
+#'   xlab = expression(alpha), ylab = expression(beta),
+#'   main = "2D Log-Likelihood: Alpha vs Beta",
+#'   levels = seq(min(ll_surface_ab, na.rm = TRUE), max_ll_ab, length.out = 20),
+#'   col = "#2E4057", las = 1, lwd = 1
+#' )
+#'
 #' contour(alpha_2d, beta_2d, ll_surface_ab,
-#'         levels = c(levels_90_ab, levels_95_ab, levels_99_ab),
-#'         col = c("#FFA07A", "#FF6347", "#8B0000"),
-#'         lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
-#'         add = TRUE, labcex = 0.8)
-#' 
+#'   levels = c(levels_90_ab, levels_95_ab, levels_99_ab),
+#'   col = c("#FFA07A", "#FF6347", "#8B0000"),
+#'   lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+#'   add = TRUE, labcex = 0.8
+#' )
+#'
 #' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-#' 
+#'
 #' legend("topright",
-#'        legend = c("MLE", "True", "90% CR", "95% CR", "99% CR"),
-#'        col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
-#'        pch = c(19, 17, NA, NA, NA),
-#'        lty = c(NA, NA, 3, 2, 1),
-#'        lwd = c(NA, NA, 2, 2.5, 3),
-#'        bty = "n", cex = 0.8)
+#'   legend = c("MLE", "True", "90% CR", "95% CR", "99% CR"),
+#'   col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+#'   pch = c(19, 17, NA, NA, NA),
+#'   lty = c(NA, NA, 3, 2, 1),
+#'   lwd = c(NA, NA, 2, 2.5, 3),
+#'   bty = "n", cex = 0.8
+#' )
 #' grid(col = "gray90")
-#' 
-#' 
+#'
+#'
 #' ## Example 7: 2D Log-Likelihood Surface (Gamma vs Delta)
-#' 
+#'
 #' # Create 2D grid
-#' gamma_2d <- seq(mle[3] - xd, mle[3] + xd, length.out = round(n/4))
-#' delta_2d <- seq(mle[4] - xd, mle[4] + xd, length.out = round(n/4))
+#' gamma_2d <- seq(mle[3] - xd, mle[3] + xd, length.out = round(n / 4))
+#' delta_2d <- seq(mle[4] - xd, mle[4] + xd, length.out = round(n / 4))
 #' gamma_2d <- gamma_2d[gamma_2d > 0]
 #' delta_2d <- delta_2d[delta_2d > 0]
-#' 
+#'
 #' # Compute log-likelihood surface
 #' ll_surface_gd <- matrix(NA, nrow = length(gamma_2d), ncol = length(delta_2d))
-#' 
+#'
 #' for (i in seq_along(gamma_2d)) {
 #'   for (j in seq_along(delta_2d)) {
-#'     ll_surface_gd[i, j] <- -llgkw(c(mle[1], mle[2], gamma_2d[i],
-#'                                      delta_2d[j], mle[5]), data)
+#'     ll_surface_gd[i, j] <- -llgkw(c(
+#'       mle[1], mle[2], gamma_2d[i],
+#'       delta_2d[j], mle[5]
+#'     ), data)
 #'   }
 #' }
-#' 
+#'
 #' # Confidence region levels
 #' max_ll_gd <- max(ll_surface_gd, na.rm = TRUE)
 #' levels_90_gd <- max_ll_gd - qchisq(0.90, df = 2) / 2
 #' levels_95_gd <- max_ll_gd - qchisq(0.95, df = 2) / 2
 #' levels_99_gd <- max_ll_gd - qchisq(0.99, df = 2) / 2
-#' 
+#'
 #' # Plot contour
 #' contour(gamma_2d, delta_2d, ll_surface_gd,
-#'         xlab = expression(gamma), ylab = expression(delta),
-#'         main = "2D Log-Likelihood: Gamma vs Delta",
-#'         levels = seq(min(ll_surface_gd, na.rm = TRUE), max_ll_gd, length.out = 20),
-#'         col = "#2E4057", las = 1, lwd = 1)
-#' 
+#'   xlab = expression(gamma), ylab = expression(delta),
+#'   main = "2D Log-Likelihood: Gamma vs Delta",
+#'   levels = seq(min(ll_surface_gd, na.rm = TRUE), max_ll_gd, length.out = 20),
+#'   col = "#2E4057", las = 1, lwd = 1
+#' )
+#'
 #' contour(gamma_2d, delta_2d, ll_surface_gd,
-#'         levels = c(levels_90_gd, levels_95_gd, levels_99_gd),
-#'         col = c("#FFA07A", "#FF6347", "#8B0000"),
-#'         lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
-#'         add = TRUE, labcex = 0.8)
-#' 
+#'   levels = c(levels_90_gd, levels_95_gd, levels_99_gd),
+#'   col = c("#FFA07A", "#FF6347", "#8B0000"),
+#'   lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+#'   add = TRUE, labcex = 0.8
+#' )
+#'
 #' points(mle[3], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[3], true_params[4], pch = 17, col = "#006400", cex = 1.5)
-#' 
+#'
 #' legend("topright",
-#'        legend = c("MLE", "True", "90% CR", "95% CR", "99% CR"),
-#'        col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
-#'        pch = c(19, 17, NA, NA, NA),
-#'        lty = c(NA, NA, 3, 2, 1),
-#'        lwd = c(NA, NA, 2, 2.5, 3),
-#'        bty = "n", cex = 0.8)
+#'   legend = c("MLE", "True", "90% CR", "95% CR", "99% CR"),
+#'   col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+#'   pch = c(19, 17, NA, NA, NA),
+#'   lty = c(NA, NA, 3, 2, 1),
+#'   lwd = c(NA, NA, 2, 2.5, 3),
+#'   bty = "n", cex = 0.8
+#' )
 #' grid(col = "gray90")
-#' 
-#' 
+#'
+#'
 #' ## Example 8: 2D Log-Likelihood Surface (Delta vs Lambda)
-#' 
+#'
 #' # Create 2D grid
-#' delta_2d_2 <- seq(mle[4] - xd, mle[4] + xd, length.out = round(n/30))
-#' lambda_2d <- seq(mle[5] - xd, mle[5] + xd, length.out = round(n/30))
+#' delta_2d_2 <- seq(mle[4] - xd, mle[4] + xd, length.out = round(n / 30))
+#' lambda_2d <- seq(mle[5] - xd, mle[5] + xd, length.out = round(n / 30))
 #' delta_2d_2 <- delta_2d_2[delta_2d_2 > 0]
 #' lambda_2d <- lambda_2d[lambda_2d > 0]
-#' 
+#'
 #' # Compute log-likelihood surface
 #' ll_surface_dl <- matrix(NA, nrow = length(delta_2d_2), ncol = length(lambda_2d))
-#' 
+#'
 #' for (i in seq_along(delta_2d_2)) {
 #'   for (j in seq_along(lambda_2d)) {
-#'     ll_surface_dl[i, j] <- -llgkw(c(mle[1], mle[2], mle[3],
-#'                                      delta_2d_2[i], lambda_2d[j]), data)
+#'     ll_surface_dl[i, j] <- -llgkw(c(
+#'       mle[1], mle[2], mle[3],
+#'       delta_2d_2[i], lambda_2d[j]
+#'     ), data)
 #'   }
 #' }
-#' 
+#'
 #' # Confidence region levels
 #' max_ll_dl <- max(ll_surface_dl, na.rm = TRUE)
 #' levels_90_dl <- max_ll_dl - qchisq(0.90, df = 2) / 2
 #' levels_95_dl <- max_ll_dl - qchisq(0.95, df = 2) / 2
 #' levels_99_dl <- max_ll_dl - qchisq(0.99, df = 2) / 2
-#' 
+#'
 #' # Plot contour
 #' contour(delta_2d_2, lambda_2d, ll_surface_dl,
-#'         xlab = expression(delta), ylab = expression(lambda),
-#'         main = "2D Log-Likelihood: Delta vs Lambda",
-#'         levels = seq(min(ll_surface_dl, na.rm = TRUE), max_ll_dl, length.out = 20),
-#'         col = "#2E4057", las = 1, lwd = 1)
-#' 
+#'   xlab = expression(delta), ylab = expression(lambda),
+#'   main = "2D Log-Likelihood: Delta vs Lambda",
+#'   levels = seq(min(ll_surface_dl, na.rm = TRUE), max_ll_dl, length.out = 20),
+#'   col = "#2E4057", las = 1, lwd = 1
+#' )
+#'
 #' contour(delta_2d_2, lambda_2d, ll_surface_dl,
-#'         levels = c(levels_90_dl, levels_95_dl, levels_99_dl),
-#'         col = c("#FFA07A", "#FF6347", "#8B0000"),
-#'         lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
-#'         add = TRUE, labcex = 0.8)
-#' 
+#'   levels = c(levels_90_dl, levels_95_dl, levels_99_dl),
+#'   col = c("#FFA07A", "#FF6347", "#8B0000"),
+#'   lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+#'   add = TRUE, labcex = 0.8
+#' )
+#'
 #' points(mle[4], mle[5], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[4], true_params[5], pch = 17, col = "#006400", cex = 1.5)
-#' 
+#'
 #' legend("topright",
-#'        legend = c("MLE", "True", "90% CR", "95% CR", "99% CR"),
-#'        col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
-#'        pch = c(19, 17, NA, NA, NA),
-#'        lty = c(NA, NA, 3, 2, 1),
-#'        lwd = c(NA, NA, 2, 2.5, 3),
-#'        bty = "n", cex = 0.8)
+#'   legend = c("MLE", "True", "90% CR", "95% CR", "99% CR"),
+#'   col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+#'   pch = c(19, 17, NA, NA, NA),
+#'   lty = c(NA, NA, 3, 2, 1),
+#'   lwd = c(NA, NA, 2, 2.5, 3),
+#'   bty = "n", cex = 0.8
+#' )
 #' grid(col = "gray90")
-#' 
 #' }
 #'
 #' @export
@@ -1133,12 +1197,13 @@ llgkw <- function(par, data) {
   if (length(data) < 1) {
     stop("'data' must have at least one observation")
   }
-  
+
   # Call C++ implementation
-  .Call("_gkwdist_llgkw", 
-        as.numeric(par), 
-        as.numeric(data),
-        PACKAGE = "gkwdist")
+  .Call("_gkwdist_llgkw",
+    as.numeric(par),
+    as.numeric(data),
+    PACKAGE = "gkwdist"
+  )
 }
 
 
@@ -1229,34 +1294,36 @@ llgkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Gradient Evaluation
-#' 
-#' 
+#'
+#'
 #' # Generate sample data
 #' set.seed(123)
 #' n <- 1000
 #' true_params <- c(alpha = 2.0, beta = 3.0, gamma = 1.5, delta = 2.0, lambda = 1.8)
-#' data <- rgkw(n, alpha = true_params[1], beta = true_params[2],
-#'              gamma = true_params[3], delta = true_params[4],
-#'              lambda = true_params[5])
-#' 
+#' data <- rgkw(n,
+#'   alpha = true_params[1], beta = true_params[2],
+#'   gamma = true_params[3], delta = true_params[4],
+#'   lambda = true_params[5]
+#' )
+#'
 #' # Evaluate gradient at true parameters
 #' grad_true <- grgkw(par = true_params, data = data)
 #' cat("Gradient at true parameters:\n")
 #' print(grad_true)
 #' cat("Norm:", sqrt(sum(grad_true^2)), "\n")
-#' 
+#'
 #' # Evaluate at different parameter values
 #' test_params <- rbind(
 #'   c(1.5, 2.5, 1.2, 1.5, 1.5),
 #'   c(2.0, 3.0, 1.5, 2.0, 1.8),
 #'   c(2.5, 3.5, 1.8, 2.5, 2.0)
 #' )
-#' 
+#'
 #' grad_norms <- apply(test_params, 1, function(p) {
 #'   g <- grgkw(p, data)
 #'   sqrt(sum(g^2))
 #' })
-#' 
+#'
 #' results <- data.frame(
 #'   Alpha = test_params[, 1],
 #'   Beta = test_params[, 2],
@@ -1266,10 +1333,10 @@ llgkw <- function(par, data) {
 #'   Grad_Norm = grad_norms
 #' )
 #' print(results, digits = 4)
-#' 
-#' 
+#'
+#'
 #' ## Example 2: Gradient in Optimization
-#' 
+#'
 #' # Optimization with analytical gradient
 #' fit_with_grad <- optim(
 #'   par = c(1.5, 2.5, 1.2, 1.5, 1.5),
@@ -1280,7 +1347,7 @@ llgkw <- function(par, data) {
 #'   hessian = TRUE,
 #'   control = list(trace = 0, maxit = 1000)
 #' )
-#' 
+#'
 #' # Optimization without gradient
 #' fit_no_grad <- optim(
 #'   par = c(1.5, 2.5, 1.2, 1.5, 1.5),
@@ -1290,7 +1357,7 @@ llgkw <- function(par, data) {
 #'   hessian = TRUE,
 #'   control = list(trace = 0, maxit = 1000)
 #' )
-#' 
+#'
 #' comparison <- data.frame(
 #'   Method = c("With Gradient", "Without Gradient"),
 #'   Alpha = c(fit_with_grad$par[1], fit_no_grad$par[1]),
@@ -1302,23 +1369,23 @@ llgkw <- function(par, data) {
 #'   Iterations = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
 #' )
 #' print(comparison, digits = 4, row.names = FALSE)
-#' 
-#' 
+#'
+#'
 #' ## Example 3: Verifying Gradient at MLE
-#' 
+#'
 #' mle <- fit_with_grad$par
 #' names(mle) <- c("alpha", "beta", "gamma", "delta", "lambda")
-#' 
+#'
 #' # At MLE, gradient should be approximately zero
 #' gradient_at_mle <- grgkw(par = mle, data = data)
 #' cat("\nGradient at MLE:\n")
 #' print(gradient_at_mle)
 #' cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
 #' cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
-#' 
-#' 
+#'
+#'
 #' ## Example 4: Numerical vs Analytical Gradient
-#' 
+#'
 #' # Manual finite difference gradient
 #' numerical_gradient <- function(f, x, data, h = 1e-7) {
 #'   grad <- numeric(length(x))
@@ -1330,129 +1397,133 @@ llgkw <- function(par, data) {
 #'   }
 #'   return(grad)
 #' }
-#' 
+#'
 #' # Compare at MLE
 #' grad_analytical <- grgkw(par = mle, data = data)
 #' grad_numerical <- numerical_gradient(llgkw, mle, data)
-#' 
+#'
 #' comparison_grad <- data.frame(
 #'   Parameter = c("alpha", "beta", "gamma", "delta", "lambda"),
 #'   Analytical = grad_analytical,
 #'   Numerical = grad_numerical,
 #'   Abs_Diff = abs(grad_analytical - grad_numerical),
 #'   Rel_Error = abs(grad_analytical - grad_numerical) /
-#'               (abs(grad_analytical) + 1e-10)
+#'     (abs(grad_analytical) + 1e-10)
 #' )
 #' print(comparison_grad, digits = 8)
-#' 
-#' 
+#'
+#'
 #' ## Example 5: Score Test Statistic
-#' 
+#'
 #' # Score test for H0: theta = theta0
 #' theta0 <- c(1.8, 2.8, 1.3, 1.8, 1.6)
 #' score_theta0 <- grgkw(par = theta0, data = data)
-#' 
+#'
 #' # Fisher information at theta0
 #' fisher_info <- hsgkw(par = theta0, data = data)
-#' 
+#'
 #' # Score test statistic
 #' score_stat <- t(score_theta0) %*% solve(fisher_info) %*% score_theta0
 #' p_value <- pchisq(score_stat, df = 5, lower.tail = FALSE)
-#' 
+#'
 #' cat("\nScore Test:\n")
 #' cat("H0: alpha=1.8, beta=2.8, gamma=1.3, delta=1.8, lambda=1.6\n")
 #' cat("Test statistic:", score_stat, "\n")
 #' cat("P-value:", format.pval(p_value, digits = 4), "\n")
-#' 
-#' 
+#'
+#'
 #' ## Example 6: Confidence Ellipse (Alpha vs Beta)
-#' 
+#'
 #' # Observed information
 #' obs_info <- hsgkw(par = mle, data = data)
 #' vcov_full <- solve(obs_info)
 #' vcov_2d <- vcov_full[1:2, 1:2]
-#' 
+#'
 #' # Create confidence ellipse
-#' theta <- seq(0, 2 * pi, length.out = round(n/4))
+#' theta <- seq(0, 2 * pi, length.out = round(n / 4))
 #' chi2_val <- qchisq(0.95, df = 2)
-#' 
+#'
 #' eig_decomp <- eigen(vcov_2d)
-#' ellipse <- matrix(NA, nrow = round(n/4), ncol = 2)
-#' for (i in 1:round(n/4)) {
+#' ellipse <- matrix(NA, nrow = round(n / 4), ncol = 2)
+#' for (i in 1:round(n / 4)) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
 #'   ellipse[i, ] <- mle[1:2] + sqrt(chi2_val) *
 #'     (eig_decomp$vectors %*% diag(sqrt(eig_decomp$values)) %*% v)
 #' }
-#' 
+#'
 #' # Marginal confidence intervals
 #' se_2d <- sqrt(diag(vcov_2d))
 #' ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
 #' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
-#' 
+#'
 #' # Plot
-#' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
-#'      xlab = expression(alpha), ylab = expression(beta),
-#'      main = "95% Confidence Region (Alpha vs Beta)", las = 1)
-#' 
+#' plot(ellipse[, 1], ellipse[, 2],
+#'   type = "l", lwd = 2, col = "#2E4057",
+#'   xlab = expression(alpha), ylab = expression(beta),
+#'   main = "95% Confidence Region (Alpha vs Beta)", las = 1
+#' )
+#'
 #' # Add marginal CIs
 #' abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
 #' abline(h = ci_beta, col = "#808080", lty = 3, lwd = 1.5)
-#' 
+#'
 #' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-#' 
+#'
 #' legend("topright",
-#'        legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-#'        col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-#'        pch = c(19, 17, NA, NA),
-#'        lty = c(NA, NA, 1, 3),
-#'        lwd = c(NA, NA, 2, 1.5),
-#'        bty = "n")
+#'   legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+#'   col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+#'   pch = c(19, 17, NA, NA),
+#'   lty = c(NA, NA, 1, 3),
+#'   lwd = c(NA, NA, 2, 1.5),
+#'   bty = "n"
+#' )
 #' grid(col = "gray90")
-#' 
-#' 
+#'
+#'
 #' ## Example 7: Confidence Ellipse (Gamma vs Delta)
-#' 
+#'
 #' # Extract 2x2 submatrix for gamma and delta
 #' vcov_2d_gd <- vcov_full[3:4, 3:4]
-#' 
+#'
 #' # Create confidence ellipse
 #' eig_decomp_gd <- eigen(vcov_2d_gd)
-#' ellipse_gd <- matrix(NA, nrow = round(n/4), ncol = 2)
-#' for (i in 1:round(n/4)) {
+#' ellipse_gd <- matrix(NA, nrow = round(n / 4), ncol = 2)
+#' for (i in 1:round(n / 4)) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
 #'   ellipse_gd[i, ] <- mle[3:4] + sqrt(chi2_val) *
 #'     (eig_decomp_gd$vectors %*% diag(sqrt(eig_decomp_gd$values)) %*% v)
 #' }
-#' 
+#'
 #' # Marginal confidence intervals
 #' se_2d_gd <- sqrt(diag(vcov_2d_gd))
 #' ci_gamma <- mle[3] + c(-1, 1) * 1.96 * se_2d_gd[1]
 #' ci_delta <- mle[4] + c(-1, 1) * 1.96 * se_2d_gd[2]
-#' 
+#'
 #' # Plot
-#' plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
-#'      xlab = expression(gamma), ylab = expression(delta),
-#'      main = "95% Confidence Region (Gamma vs Delta)", las = 1)
-#' 
+#' plot(ellipse_gd[, 1], ellipse_gd[, 2],
+#'   type = "l", lwd = 2, col = "#2E4057",
+#'   xlab = expression(gamma), ylab = expression(delta),
+#'   main = "95% Confidence Region (Gamma vs Delta)", las = 1
+#' )
+#'
 #' # Add marginal CIs
 #' abline(v = ci_gamma, col = "#808080", lty = 3, lwd = 1.5)
 #' abline(h = ci_delta, col = "#808080", lty = 3, lwd = 1.5)
-#' 
+#'
 #' points(mle[3], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[3], true_params[4], pch = 17, col = "#006400", cex = 1.5)
-#' 
+#'
 #' legend("topright",
-#'        legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-#'        col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-#'        pch = c(19, 17, NA, NA),
-#'        lty = c(NA, NA, 1, 3),
-#'        lwd = c(NA, NA, 2, 1.5),
-#'        bty = "n")
+#'   legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+#'   col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+#'   pch = c(19, 17, NA, NA),
+#'   lty = c(NA, NA, 1, 3),
+#'   lwd = c(NA, NA, 2, 1.5),
+#'   bty = "n"
+#' )
 #' grid(col = "gray90")
-#' 
 #' }
-#' 
 #'
 #' @export
 grgkw <- function(par, data) {
@@ -1466,12 +1537,13 @@ grgkw <- function(par, data) {
   if (length(data) < 1) {
     stop("'data' must have at least one observation")
   }
-  
+
   # Call C++ implementation
-  .Call("_gkwdist_grgkw", 
-        as.numeric(par), 
-        as.numeric(data),
-        PACKAGE = "gkwdist")
+  .Call("_gkwdist_grgkw",
+    as.numeric(par),
+    as.numeric(data),
+    PACKAGE = "gkwdist"
+  )
 }
 
 
@@ -1551,27 +1623,31 @@ grgkw <- function(par, data) {
 #' @examples
 #' \donttest{
 #' ## Example 1: Basic Hessian Evaluation
-#' 
+#'
 #' # Generate sample data
 #' set.seed(2323)
 #' n <- 1000
 #' true_params <- c(alpha = 1.5, beta = 2.0, gamma = 0.8, delta = 1.2, lambda = 0.5)
-#' data <- rgkw(n, alpha = true_params[1], beta = true_params[2],
-#'              gamma = true_params[3], delta = true_params[4],
-#'              lambda = true_params[5])
-#' 
+#' data <- rgkw(n,
+#'   alpha = true_params[1], beta = true_params[2],
+#'   gamma = true_params[3], delta = true_params[4],
+#'   lambda = true_params[5]
+#' )
+#'
 #' # Evaluate Hessian at true parameters
 #' hess_true <- hsgkw(par = true_params, data = data)
 #' cat("Hessian matrix at true parameters:\n")
 #' print(hess_true, digits = 4)
-#' 
+#'
 #' # Check symmetry
-#' cat("\nSymmetry check (max |H - H^T|):",
-#'     max(abs(hess_true - t(hess_true))), "\n")
-#' 
-#' 
+#' cat(
+#'   "\nSymmetry check (max |H - H^T|):",
+#'   max(abs(hess_true - t(hess_true))), "\n"
+#' )
+#'
+#'
 #' ## Example 2: Hessian Properties at MLE
-#' 
+#'
 #' # Fit model
 #' fit <- optim(
 #'   par = c(1.2, 2.0, 0.5, 1.5, 0.2),
@@ -1585,50 +1661,52 @@ grgkw <- function(par, data) {
 #'     factr = 1e-15,
 #'     pgtol = 1e-15,
 #'     trace = FALSE
-#'     )
+#'   )
 #' )
-#' 
+#'
 #' mle <- fit$par
 #' names(mle) <- c("alpha", "beta", "gamma", "delta", "lambda")
-#' 
+#'
 #' # Hessian at MLE
 #' hessian_at_mle <- hsgkw(par = mle, data = data)
 #' cat("\nHessian at MLE:\n")
 #' print(hessian_at_mle, digits = 4)
-#' 
+#'
 #' # Compare with optim's numerical Hessian
 #' cat("\nComparison with optim Hessian:\n")
-#' cat("Max absolute difference:",
-#'     max(abs(hessian_at_mle - fit$hessian)), "\n")
-#' 
+#' cat(
+#'   "Max absolute difference:",
+#'   max(abs(hessian_at_mle - fit$hessian)), "\n"
+#' )
+#'
 #' # Eigenvalue analysis
 #' eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
 #' cat("\nEigenvalues:\n")
 #' print(eigenvals)
-#' 
+#'
 #' cat("\nPositive definite:", all(eigenvals > 0), "\n")
 #' cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
-#' 
-#' 
+#'
+#'
 #' ## Example 3: Standard Errors and Confidence Intervals
-#' 
+#'
 #' # Observed information matrix
 #' obs_info <- hessian_at_mle
-#' 
+#'
 #' # Variance-covariance matrix
 #' vcov_matrix <- solve(obs_info)
 #' cat("\nVariance-Covariance Matrix:\n")
 #' print(vcov_matrix, digits = 6)
-#' 
+#'
 #' # Standard errors
 #' se <- sqrt(diag(vcov_matrix))
 #' names(se) <- c("alpha", "beta", "gamma", "delta", "lambda")
-#' 
+#'
 #' # Correlation matrix
 #' corr_matrix <- cov2cor(vcov_matrix)
 #' cat("\nCorrelation Matrix:\n")
 #' print(corr_matrix, digits = 4)
-#' 
+#'
 #' # Confidence intervals
 #' z_crit <- qnorm(0.975)
 #' results <- data.frame(
@@ -1640,10 +1718,10 @@ grgkw <- function(par, data) {
 #'   CI_Upper = mle + z_crit * se
 #' )
 #' print(results, digits = 4)
-#' 
-#' 
+#'
+#'
 #' ## Example 4: Determinant and Trace Analysis
-#' 
+#'
 #' # Compute at different points
 #' test_params <- rbind(
 #'   c(1.5, 2.5, 1.2, 1.5, 1.5),
@@ -1651,7 +1729,7 @@ grgkw <- function(par, data) {
 #'   mle,
 #'   c(2.5, 3.5, 1.8, 2.5, 2.0)
 #' )
-#' 
+#'
 #' hess_properties <- data.frame(
 #'   Alpha = numeric(),
 #'   Beta = numeric(),
@@ -1665,11 +1743,11 @@ grgkw <- function(par, data) {
 #'   Cond_Number = numeric(),
 #'   stringsAsFactors = FALSE
 #' )
-#' 
+#'
 #' for (i in 1:nrow(test_params)) {
 #'   H <- hsgkw(par = test_params[i, ], data = data)
 #'   eigs <- eigen(H, only.values = TRUE)$values
-#' 
+#'
 #'   hess_properties <- rbind(hess_properties, data.frame(
 #'     Alpha = test_params[i, 1],
 #'     Beta = test_params[i, 2],
@@ -1683,26 +1761,30 @@ grgkw <- function(par, data) {
 #'     Cond_Number = max(eigs) / min(eigs)
 #'   ))
 #' }
-#' 
+#'
 #' cat("\nHessian Properties at Different Points:\n")
 #' print(hess_properties, digits = 4, row.names = FALSE)
-#' 
-#' 
+#'
+#'
 #' ## Example 5: Curvature Visualization (Alpha vs Beta)
-#' 
+#'
 #' xd <- 2
 #' # Create grid around MLE
-#' alpha_grid <- seq(mle[1] - xd, mle[1] + xd, length.out = round(n/4))
-#' beta_grid <- seq(mle[2] - xd, mle[2] + xd, length.out = round(n/4))
+#' alpha_grid <- seq(mle[1] - xd, mle[1] + xd, length.out = round(n / 4))
+#' beta_grid <- seq(mle[2] - xd, mle[2] + xd, length.out = round(n / 4))
 #' alpha_grid <- alpha_grid[alpha_grid > 0]
 #' beta_grid <- beta_grid[beta_grid > 0]
-#' 
+#'
 #' # Compute curvature measures
-#' determinant_surface <- matrix(NA, nrow = length(alpha_grid),
-#'                                ncol = length(beta_grid))
-#' trace_surface <- matrix(NA, nrow = length(alpha_grid),
-#'                          ncol = length(beta_grid))
-#' 
+#' determinant_surface <- matrix(NA,
+#'   nrow = length(alpha_grid),
+#'   ncol = length(beta_grid)
+#' )
+#' trace_surface <- matrix(NA,
+#'   nrow = length(alpha_grid),
+#'   ncol = length(beta_grid)
+#' )
+#'
 #' for (i in seq_along(alpha_grid)) {
 #'   for (j in seq_along(beta_grid)) {
 #'     H <- hsgkw(c(alpha_grid[i], beta_grid[j], mle[3], mle[4], mle[5]), data)
@@ -1710,151 +1792,161 @@ grgkw <- function(par, data) {
 #'     trace_surface[i, j] <- sum(diag(H))
 #'   }
 #' }
-#' 
+#'
 #' # Plot
-#' 
+#'
 #' contour(alpha_grid, beta_grid, determinant_surface,
-#'         xlab = expression(alpha), ylab = expression(beta),
-#'         main = "Hessian Determinant", las = 1,
-#'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+#'   xlab = expression(alpha), ylab = expression(beta),
+#'   main = "Hessian Determinant", las = 1,
+#'   col = "#2E4057", lwd = 1.5, nlevels = 15
+#' )
 #' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 #' grid(col = "gray90")
-#' 
+#'
 #' contour(alpha_grid, beta_grid, trace_surface,
-#'         xlab = expression(alpha), ylab = expression(beta),
-#'         main = "Hessian Trace", las = 1,
-#'         col = "#2E4057", lwd = 1.5, nlevels = 15)
+#'   xlab = expression(alpha), ylab = expression(beta),
+#'   main = "Hessian Trace", las = 1,
+#'   col = "#2E4057", lwd = 1.5, nlevels = 15
+#' )
 #' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 #' grid(col = "gray90")
-#' 
-#' 
+#'
+#'
 #' ## Example 6: Confidence Ellipse (Alpha vs Beta)
-#' 
+#'
 #' # Extract 2x2 submatrix for alpha and beta
 #' vcov_2d <- vcov_matrix[1:2, 1:2]
-#' 
+#'
 #' # Create confidence ellipse
-#' theta <- seq(0, 2 * pi, length.out = round(n/4))
+#' theta <- seq(0, 2 * pi, length.out = round(n / 4))
 #' chi2_val <- qchisq(0.95, df = 2)
-#' 
+#'
 #' eig_decomp <- eigen(vcov_2d)
-#' ellipse <- matrix(NA, nrow = round(n/4), ncol = 2)
-#' for (i in 1:round(n/4)) {
+#' ellipse <- matrix(NA, nrow = round(n / 4), ncol = 2)
+#' for (i in 1:round(n / 4)) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
 #'   ellipse[i, ] <- mle[1:2] + sqrt(chi2_val) *
 #'     (eig_decomp$vectors %*% diag(sqrt(eig_decomp$values)) %*% v)
 #' }
-#' 
+#'
 #' # Marginal confidence intervals
 #' se_2d <- sqrt(diag(vcov_2d))
 #' ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
 #' ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
-#' 
+#'
 #' # Plot
-#' plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
-#'      xlab = expression(alpha), ylab = expression(beta),
-#'      main = "95% Confidence Ellipse (Alpha vs Beta)", las = 1)
-#' 
+#' plot(ellipse[, 1], ellipse[, 2],
+#'   type = "l", lwd = 2, col = "#2E4057",
+#'   xlab = expression(alpha), ylab = expression(beta),
+#'   main = "95% Confidence Ellipse (Alpha vs Beta)", las = 1
+#' )
+#'
 #' # Add marginal CIs
 #' abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
 #' abline(h = ci_beta, col = "#808080", lty = 3, lwd = 1.5)
-#' 
+#'
 #' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-#' 
+#'
 #' legend("topright",
-#'        legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-#'        col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-#'        pch = c(19, 17, NA, NA),
-#'        lty = c(NA, NA, 1, 3),
-#'        lwd = c(NA, NA, 2, 1.5),
-#'        bty = "n")
+#'   legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+#'   col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+#'   pch = c(19, 17, NA, NA),
+#'   lty = c(NA, NA, 1, 3),
+#'   lwd = c(NA, NA, 2, 1.5),
+#'   bty = "n"
+#' )
 #' grid(col = "gray90")
-#' 
-#' 
+#'
+#'
 #' ## Example 7: Confidence Ellipse (Gamma vs Delta)
-#' 
+#'
 #' # Extract 2x2 submatrix for gamma and delta
 #' vcov_2d_gd <- vcov_matrix[3:4, 3:4]
-#' 
+#'
 #' # Create confidence ellipse
 #' eig_decomp_gd <- eigen(vcov_2d_gd)
-#' ellipse_gd <- matrix(NA, nrow = round(n/4), ncol = 2)
-#' for (i in 1:round(n/4)) {
+#' ellipse_gd <- matrix(NA, nrow = round(n / 4), ncol = 2)
+#' for (i in 1:round(n / 4)) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
 #'   ellipse_gd[i, ] <- mle[3:4] + sqrt(chi2_val) *
 #'     (eig_decomp_gd$vectors %*% diag(sqrt(eig_decomp_gd$values)) %*% v)
 #' }
-#' 
+#'
 #' # Marginal confidence intervals
 #' se_2d_gd <- sqrt(diag(vcov_2d_gd))
 #' ci_gamma <- mle[3] + c(-1, 1) * 1.96 * se_2d_gd[1]
 #' ci_delta <- mle[4] + c(-1, 1) * 1.96 * se_2d_gd[2]
-#' 
+#'
 #' # Plot
-#' plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
-#'      xlab = expression(gamma), ylab = expression(delta),
-#'      main = "95% Confidence Ellipse (Gamma vs Delta)", las = 1)
-#' 
+#' plot(ellipse_gd[, 1], ellipse_gd[, 2],
+#'   type = "l", lwd = 2, col = "#2E4057",
+#'   xlab = expression(gamma), ylab = expression(delta),
+#'   main = "95% Confidence Ellipse (Gamma vs Delta)", las = 1
+#' )
+#'
 #' # Add marginal CIs
 #' abline(v = ci_gamma, col = "#808080", lty = 3, lwd = 1.5)
 #' abline(h = ci_delta, col = "#808080", lty = 3, lwd = 1.5)
-#' 
+#'
 #' points(mle[3], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[3], true_params[4], pch = 17, col = "#006400", cex = 1.5)
-#' 
+#'
 #' legend("topright",
-#'        legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-#'        col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-#'        pch = c(19, 17, NA, NA),
-#'        lty = c(NA, NA, 1, 3),
-#'        lwd = c(NA, NA, 2, 1.5),
-#'        bty = "n")
+#'   legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+#'   col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+#'   pch = c(19, 17, NA, NA),
+#'   lty = c(NA, NA, 1, 3),
+#'   lwd = c(NA, NA, 2, 1.5),
+#'   bty = "n"
+#' )
 #' grid(col = "gray90")
-#' 
-#' 
+#'
+#'
 #' ## Example 8: Confidence Ellipse (Delta vs Lambda)
-#' 
+#'
 #' # Extract 2x2 submatrix for delta and lambda
 #' vcov_2d_dl <- vcov_matrix[4:5, 4:5]
-#' 
+#'
 #' # Create confidence ellipse
 #' eig_decomp_dl <- eigen(vcov_2d_dl)
-#' ellipse_dl <- matrix(NA, nrow = round(n/4), ncol = 2)
-#' for (i in 1:round(n/4)) {
+#' ellipse_dl <- matrix(NA, nrow = round(n / 4), ncol = 2)
+#' for (i in 1:round(n / 4)) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
 #'   ellipse_dl[i, ] <- mle[4:5] + sqrt(chi2_val) *
 #'     (eig_decomp_dl$vectors %*% diag(sqrt(eig_decomp_dl$values)) %*% v)
 #' }
-#' 
+#'
 #' # Marginal confidence intervals
 #' se_2d_dl <- sqrt(diag(vcov_2d_dl))
 #' ci_delta_2 <- mle[4] + c(-1, 1) * 1.96 * se_2d_dl[1]
 #' ci_lambda <- mle[5] + c(-1, 1) * 1.96 * se_2d_dl[2]
-#' 
+#'
 #' # Plot
-#' plot(ellipse_dl[, 1], ellipse_dl[, 2], type = "l", lwd = 2, col = "#2E4057",
-#'      xlab = expression(delta), ylab = expression(lambda),
-#'      main = "95% Confidence Ellipse (Delta vs Lambda)", las = 1)
-#' 
+#' plot(ellipse_dl[, 1], ellipse_dl[, 2],
+#'   type = "l", lwd = 2, col = "#2E4057",
+#'   xlab = expression(delta), ylab = expression(lambda),
+#'   main = "95% Confidence Ellipse (Delta vs Lambda)", las = 1
+#' )
+#'
 #' # Add marginal CIs
 #' abline(v = ci_delta_2, col = "#808080", lty = 3, lwd = 1.5)
 #' abline(h = ci_lambda, col = "#808080", lty = 3, lwd = 1.5)
-#' 
+#'
 #' points(mle[4], mle[5], pch = 19, col = "#8B0000", cex = 1.5)
 #' points(true_params[4], true_params[5], pch = 17, col = "#006400", cex = 1.5)
-#' 
+#'
 #' legend("topright",
-#'        legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-#'        col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-#'        pch = c(19, 17, NA, NA),
-#'        lty = c(NA, NA, 1, 3),
-#'        lwd = c(NA, NA, 2, 1.5),
-#'        bty = "n")
+#'   legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+#'   col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+#'   pch = c(19, 17, NA, NA),
+#'   lty = c(NA, NA, 1, 3),
+#'   lwd = c(NA, NA, 2, 1.5),
+#'   bty = "n"
+#' )
 #' grid(col = "gray90")
-#' 
 #' }
 #' @export
 hsgkw <- function(par, data) {
@@ -1868,10 +1960,11 @@ hsgkw <- function(par, data) {
   if (length(data) < 1) {
     stop("'data' must have at least one observation")
   }
-  
+
   # Call C++ implementation
-  .Call("_gkwdist_hsgkw", 
-        as.numeric(par), 
-        as.numeric(data),
-        PACKAGE = "gkwdist")
+  .Call("_gkwdist_hsgkw",
+    as.numeric(par),
+    as.numeric(data),
+    PACKAGE = "gkwdist"
+  )
 }

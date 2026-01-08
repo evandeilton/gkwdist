@@ -1,3 +1,34 @@
+# gkwdist 1.1.2
+
+## Code Cleanup and Testing Enhancement
+
+### C++ Code Cleanup
+
+* **Removed legacy commented code**: Cleaned up all C++ source files (`gkw.cpp`, `bkw.cpp`, `kkw.cpp`, `ekw.cpp`, `kw.cpp`, `bpmc.cpp`, `beta_.cpp`) by removing old commented-out implementations that were kept for reference.
+* **Code formatting**: Improved R wrapper formatting with consistent indentation and alignment in `.Call()` invocations and roxygen examples.
+
+### New Test Suites
+
+* **Analytical derivatives validation** (`test-derivatives-validation.R`):
+  - 70 comprehensive tests validating gradient (`gr*`) and Hessian (`hs*`) functions
+  - Compares analytical derivatives against numerical differentiation via `numDeriv`
+  - Covers all 7 subfamilies: GKw, BKw, KKw, EKw, Mc, Kw, Beta
+  - Multiple parameter configurations per subfamily for robustness
+
+* **MLE performance benchmarks** (`test-mle-performance.R`):
+  - Compares optimization efficiency across three scenarios: numerical-only, analytical gradient, and analytical gradient + Hessian
+  - Validates that analytical derivatives provide equivalent or better accuracy
+  - Tests convergence rates and computational time across all distribution families
+
+### JOSS Paper
+
+* **Added paper for JOSS submission** (`inst/paper/`):
+  - Complete manuscript describing the package's statistical framework
+  - Comprehensive bibliography with foundational references
+  - Compiled PDF ready for submission
+
+---
+
 # gkwdist 1.1.1
 
 ## Major Refactoring Release

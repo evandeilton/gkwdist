@@ -81,8 +81,10 @@ quantiles_stats <- stats::qbeta(p_vals, shape1 = shape1, shape2 = shape2)
 print(paste("Max difference vs stats::qbeta:", max(abs(quantiles - quantiles_stats))))
 
 # Compare with qgkw setting alpha=1, beta=1, lambda=1
-quantiles_gkw <- qgkw(p_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
-                      delta = delta_par, lambda = 1.0)
+quantiles_gkw <- qgkw(p_vals,
+  alpha = 1.0, beta = 1.0, gamma = gamma_par,
+  delta = delta_par, lambda = 1.0
+)
 print(paste("Max difference vs qgkw:", max(abs(quantiles - quantiles_gkw))))
 
 # Compare with qmc setting lambda=1
@@ -110,7 +112,6 @@ print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 # Boundary conditions
 print(qbeta_(c(0, 1), gamma_par, delta_par)) # Should be 0, 1
 print(qbeta_(c(-Inf, 0), gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
-
 }
 
 }

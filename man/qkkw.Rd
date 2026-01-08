@@ -89,7 +89,8 @@ print(quantiles)
 # Calculate quantiles for upper tail probabilities P(X > q) = p
 # e.g., for p=0.1, find q such that P(X > q) = 0.1 (90th percentile)
 quantiles_upper <- qkkw(p_vals, alpha_par, beta_par, delta_par, lambda_par,
-                         lower.tail = FALSE)
+  lower.tail = FALSE
+)
 print(quantiles_upper)
 # Check: qkkw(p, ..., lt=F) == qkkw(1-p, ..., lt=T)
 print(qkkw(1 - p_vals, alpha_par, beta_par, delta_par, lambda_par))
@@ -97,14 +98,17 @@ print(qkkw(1 - p_vals, alpha_par, beta_par, delta_par, lambda_par))
 # Calculate quantiles from log probabilities
 log.p_vals <- log(p_vals)
 quantiles_logp <- qkkw(log.p_vals, alpha_par, beta_par, delta_par, lambda_par,
-                        log.p = TRUE)
+  log.p = TRUE
+)
 print(quantiles_logp)
 # Check: should match original quantiles
 print(quantiles)
 
 # Compare with qgkw setting gamma = 1
-quantiles_gkw <- qgkw(p_vals, alpha_par, beta_par, gamma = 1.0,
-                      delta_par, lambda_par)
+quantiles_gkw <- qgkw(p_vals, alpha_par, beta_par,
+  gamma = 1.0,
+  delta_par, lambda_par
+)
 print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
 
 # Verify inverse relationship with pkkw
@@ -117,7 +121,6 @@ print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 # Boundary conditions
 print(qkkw(c(0, 1), alpha_par, beta_par, delta_par, lambda_par)) # Should be 0, 1
 print(qkkw(c(-Inf, 0), alpha_par, beta_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
-
 }
 
 }

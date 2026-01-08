@@ -58,42 +58,56 @@ gamma_par <- 2.0
 delta_par <- 1.5
 lambda_par <- 1.0 # Equivalent to Beta(gamma, delta+1)
 
-x_sample_mc <- rmc(1000, gamma = gamma_par, delta = delta_par,
-                   lambda = lambda_par)
+x_sample_mc <- rmc(1000,
+  gamma = gamma_par, delta = delta_par,
+  lambda = lambda_par
+)
 summary(x_sample_mc)
 
 # Histogram of generated values compared to theoretical density
-hist(x_sample_mc, breaks = 30, freq = FALSE, # freq=FALSE for density
-     main = "Histogram of Mc Sample (Beta Case)", xlab = "x")
+hist(x_sample_mc,
+  breaks = 30, freq = FALSE, # freq=FALSE for density
+  main = "Histogram of Mc Sample (Beta Case)", xlab = "x"
+)
 curve(dmc(x, gamma = gamma_par, delta = delta_par, lambda = lambda_par),
-      add = TRUE, col = "red", lwd = 2, n = 201)
-curve(stats::dbeta(x, gamma_par, delta_par + 1), add=TRUE, col="blue", lty=2)
-legend("topright", legend = c("Theoretical Mc PDF", "Theoretical Beta PDF"),
-       col = c("red", "blue"), lwd = c(2,1), lty=c(1,2), bty = "n")
+  add = TRUE, col = "red", lwd = 2, n = 201
+)
+curve(stats::dbeta(x, gamma_par, delta_par + 1), add = TRUE, col = "blue", lty = 2)
+legend("topright",
+  legend = c("Theoretical Mc PDF", "Theoretical Beta PDF"),
+  col = c("red", "blue"), lwd = c(2, 1), lty = c(1, 2), bty = "n"
+)
 
 # Comparing empirical and theoretical quantiles (Q-Q plot)
 lambda_par_qq <- 0.7 # Use lambda != 1 for non-Beta case
-x_sample_mc_qq <- rmc(1000, gamma = gamma_par, delta = delta_par,
-                      lambda = lambda_par_qq)
+x_sample_mc_qq <- rmc(1000,
+  gamma = gamma_par, delta = delta_par,
+  lambda = lambda_par_qq
+)
 prob_points <- seq(0.01, 0.99, by = 0.01)
-theo_quantiles <- qmc(prob_points, gamma = gamma_par, delta = delta_par,
-                      lambda = lambda_par_qq)
+theo_quantiles <- qmc(prob_points,
+  gamma = gamma_par, delta = delta_par,
+  lambda = lambda_par_qq
+)
 emp_quantiles <- quantile(x_sample_mc_qq, prob_points, type = 7)
 
-plot(theo_quantiles, emp_quantiles, pch = 16, cex = 0.8,
-     main = "Q-Q Plot for Mc Distribution",
-     xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)")
+plot(theo_quantiles, emp_quantiles,
+  pch = 16, cex = 0.8,
+  main = "Q-Q Plot for Mc Distribution",
+  xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
+)
 abline(a = 0, b = 1, col = "blue", lty = 2)
 
 # Compare summary stats with rgkw(..., alpha=1, beta=1, ...)
 # Note: individual values will differ due to randomness
-x_sample_gkw <- rgkw(1000, alpha = 1.0, beta = 1.0, gamma = gamma_par,
-                     delta = delta_par, lambda = lambda_par_qq)
+x_sample_gkw <- rgkw(1000,
+  alpha = 1.0, beta = 1.0, gamma = gamma_par,
+  delta = delta_par, lambda = lambda_par_qq
+)
 print("Summary stats for rmc sample:")
 print(summary(x_sample_mc_qq))
 print("Summary stats for rgkw(alpha=1, beta=1) sample:")
 print(summary(x_sample_gkw)) # Should be similar
-
 }
 
 }

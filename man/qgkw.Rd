@@ -92,15 +92,19 @@ quantiles <- qgkw(probs, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 print(quantiles)
 
 # Upper tail quantile (e.g., find x such that P(X > x) = 0.1, which is 90th percentile)
-q90 <- qgkw(0.1, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-            lower.tail = FALSE)
+q90 <- qgkw(0.1,
+  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+  lower.tail = FALSE
+)
 print(q90)
 # Check: should match quantile for p = 0.9 with lower.tail = TRUE
 print(qgkw(0.9, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1))
 
 # Log probabilities
-median_logp <- qgkw(log(0.5), alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-                    log.p = TRUE)
+median_logp <- qgkw(log(0.5),
+  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+  log.p = TRUE
+)
 print(median_logp) # Should match median_val
 
 # Vectorized parameters

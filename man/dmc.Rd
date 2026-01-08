@@ -72,8 +72,10 @@ log_densities <- dmc(x_vals, gamma_par, delta_par, lambda_par, log = TRUE)
 print(log_densities)
 
 # Compare with dgkw setting alpha = 1, beta = 1
-densities_gkw <- dgkw(x_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
-                      delta = delta_par, lambda = lambda_par)
+densities_gkw <- dgkw(x_vals,
+  alpha = 1.0, beta = 1.0, gamma = gamma_par,
+  delta = delta_par, lambda = lambda_par
+)
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
 
 # Plot the density for different lambda values
@@ -82,12 +84,16 @@ curve_y1 <- dmc(curve_x, gamma = 2, delta = 3, lambda = 0.5)
 curve_y2 <- dmc(curve_x, gamma = 2, delta = 3, lambda = 1.0) # Beta(2, 4)
 curve_y3 <- dmc(curve_x, gamma = 2, delta = 3, lambda = 2.0)
 
-plot(curve_x, curve_y2, type = "l", main = "McDonald (Mc) Density (gamma=2, delta=3)",
-     xlab = "x", ylab = "f(x)", col = "red", ylim = range(0, curve_y1, curve_y2, curve_y3))
+plot(curve_x, curve_y2,
+  type = "l", main = "McDonald (Mc) Density (gamma=2, delta=3)",
+  xlab = "x", ylab = "f(x)", col = "red", ylim = range(0, curve_y1, curve_y2, curve_y3)
+)
 lines(curve_x, curve_y1, col = "blue")
 lines(curve_x, curve_y3, col = "green")
-legend("topright", legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
-       col = c("blue", "red", "green"), lty = 1, bty = "n")
+legend("topright",
+  legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
+  col = c("blue", "red", "green"), lty = 1, bty = "n"
+)
 }
 
 }

@@ -79,9 +79,11 @@ small or large numbers, often leveraging the Armadillo C++ library for efficienc
 set.seed(123)
 n <- 1000
 true_params <- c(alpha = 2.0, beta = 3.0, gamma = 1.5, delta = 2.0, lambda = 1.8)
-data <- rgkw(n, alpha = true_params[1], beta = true_params[2],
-             gamma = true_params[3], delta = true_params[4],
-             lambda = true_params[5])
+data <- rgkw(n,
+  alpha = true_params[1], beta = true_params[2],
+  gamma = true_params[3], delta = true_params[4],
+  lambda = true_params[5]
+)
 
 # Evaluate gradient at true parameters
 grad_true <- grgkw(par = true_params, data = data)
@@ -185,7 +187,7 @@ comparison_grad <- data.frame(
   Numerical = grad_numerical,
   Abs_Diff = abs(grad_analytical - grad_numerical),
   Rel_Error = abs(grad_analytical - grad_numerical) /
-              (abs(grad_analytical) + 1e-10)
+    (abs(grad_analytical) + 1e-10)
 )
 print(comparison_grad, digits = 8)
 
@@ -217,12 +219,12 @@ vcov_full <- solve(obs_info)
 vcov_2d <- vcov_full[1:2, 1:2]
 
 # Create confidence ellipse
-theta <- seq(0, 2 * pi, length.out = round(n/4))
+theta <- seq(0, 2 * pi, length.out = round(n / 4))
 chi2_val <- qchisq(0.95, df = 2)
 
 eig_decomp <- eigen(vcov_2d)
-ellipse <- matrix(NA, nrow = round(n/4), ncol = 2)
-for (i in 1:round(n/4)) {
+ellipse <- matrix(NA, nrow = round(n / 4), ncol = 2)
+for (i in 1:round(n / 4)) {
   v <- c(cos(theta[i]), sin(theta[i]))
   ellipse[i, ] <- mle[1:2] + sqrt(chi2_val) *
     (eig_decomp$vectors \%*\% diag(sqrt(eig_decomp$values)) \%*\% v)
@@ -234,9 +236,11 @@ ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
 ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
 # Plot
-plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = expression(beta),
-     main = "95\% Confidence Region (Alpha vs Beta)", las = 1)
+plot(ellipse[, 1], ellipse[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "95\% Confidence Region (Alpha vs Beta)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
@@ -246,12 +250,13 @@ points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
 
 
@@ -262,8 +267,8 @@ vcov_2d_gd <- vcov_full[3:4, 3:4]
 
 # Create confidence ellipse
 eig_decomp_gd <- eigen(vcov_2d_gd)
-ellipse_gd <- matrix(NA, nrow = round(n/4), ncol = 2)
-for (i in 1:round(n/4)) {
+ellipse_gd <- matrix(NA, nrow = round(n / 4), ncol = 2)
+for (i in 1:round(n / 4)) {
   v <- c(cos(theta[i]), sin(theta[i]))
   ellipse_gd[i, ] <- mle[3:4] + sqrt(chi2_val) *
     (eig_decomp_gd$vectors \%*\% diag(sqrt(eig_decomp_gd$values)) \%*\% v)
@@ -275,9 +280,11 @@ ci_gamma <- mle[3] + c(-1, 1) * 1.96 * se_2d_gd[1]
 ci_delta <- mle[4] + c(-1, 1) * 1.96 * se_2d_gd[2]
 
 # Plot
-plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(gamma), ylab = expression(delta),
-     main = "95\% Confidence Region (Gamma vs Delta)", las = 1)
+plot(ellipse_gd[, 1], ellipse_gd[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(gamma), ylab = expression(delta),
+  main = "95\% Confidence Region (Gamma vs Delta)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_gamma, col = "#808080", lty = 3, lwd = 1.5)
@@ -287,16 +294,15 @@ points(mle[3], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[3], true_params[4], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
-
 }
-
 
 }
 \references{

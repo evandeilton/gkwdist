@@ -66,8 +66,10 @@ evaluated at \eqn{\gamma=1, \delta=0}. The exact analytical formulas are impleme
 set.seed(123)
 n <- 1000
 true_params <- c(alpha = 2.5, beta = 3.5, lambda = 2.0)
-data <- rekw(n, alpha = true_params[1], beta = true_params[2],
-             lambda = true_params[3])
+data <- rekw(n,
+  alpha = true_params[1], beta = true_params[2],
+  lambda = true_params[3]
+)
 
 # Evaluate Hessian at true parameters
 hess_true <- hsekw(par = true_params, data = data)
@@ -75,8 +77,10 @@ cat("Hessian matrix at true parameters:\n")
 print(hess_true, digits = 4)
 
 # Check symmetry
-cat("\nSymmetry check (max |H - H^T|):",
-    max(abs(hess_true - t(hess_true))), "\n")
+cat(
+  "\nSymmetry check (max |H - H^T|):",
+  max(abs(hess_true - t(hess_true))), "\n"
+)
 
 
 ## Example 2: Hessian Properties at MLE
@@ -101,8 +105,10 @@ print(hessian_at_mle, digits = 4)
 
 # Compare with optim's numerical Hessian
 cat("\nComparison with optim Hessian:\n")
-cat("Max absolute difference:",
-    max(abs(hessian_at_mle - fit$hessian)), "\n")
+cat(
+  "Max absolute difference:",
+  max(abs(hessian_at_mle - fit$hessian)), "\n"
+)
 
 # Eigenvalue analysis
 eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
@@ -196,10 +202,14 @@ alpha_grid <- alpha_grid[alpha_grid > 0]
 beta_grid <- beta_grid[beta_grid > 0]
 
 # Compute curvature measures
-determinant_surface <- matrix(NA, nrow = length(alpha_grid),
-                               ncol = length(beta_grid))
-trace_surface <- matrix(NA, nrow = length(alpha_grid),
-                         ncol = length(beta_grid))
+determinant_surface <- matrix(NA,
+  nrow = length(alpha_grid),
+  ncol = length(beta_grid)
+)
+trace_surface <- matrix(NA,
+  nrow = length(alpha_grid),
+  ncol = length(beta_grid)
+)
 
 for (i in seq_along(alpha_grid)) {
   for (j in seq_along(beta_grid)) {
@@ -212,17 +222,19 @@ for (i in seq_along(alpha_grid)) {
 # Plot
 
 contour(alpha_grid, beta_grid, determinant_surface,
-        xlab = expression(alpha), ylab = expression(beta),
-        main = "Hessian Determinant", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "Hessian Determinant", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 contour(alpha_grid, beta_grid, trace_surface,
-        xlab = expression(alpha), ylab = expression(beta),
-        main = "Hessian Trace", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "Hessian Trace", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
@@ -251,9 +263,11 @@ ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
 # Plot
 
-plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = expression(beta),
-     main = "95\% Confidence Ellipse (Alpha vs Beta)", las = 1)
+plot(ellipse[, 1], ellipse[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "95\% Confidence Ellipse (Alpha vs Beta)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
@@ -263,12 +277,13 @@ points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
 
 
@@ -293,9 +308,11 @@ ci_lambda <- mle[3] + c(-1, 1) * 1.96 * se_2d_al[2]
 
 # Plot
 
-plot(ellipse_al[, 1], ellipse_al[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = expression(lambda),
-     main = "95\% Confidence Ellipse (Alpha vs Lambda)", las = 1)
+plot(ellipse_al[, 1], ellipse_al[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = expression(lambda),
+  main = "95\% Confidence Ellipse (Alpha vs Lambda)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_alpha_2, col = "#808080", lty = 3, lwd = 1.5)
@@ -305,12 +322,13 @@ points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
 
 
@@ -335,9 +353,11 @@ ci_lambda_2 <- mle[3] + c(-1, 1) * 1.96 * se_2d_bl[2]
 
 # Plot
 
-plot(ellipse_bl[, 1], ellipse_bl[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(beta), ylab = expression(lambda),
-     main = "95\% Confidence Ellipse (Beta vs Lambda)", las = 1)
+plot(ellipse_bl[, 1], ellipse_bl[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(beta), ylab = expression(lambda),
+  main = "95\% Confidence Ellipse (Beta vs Lambda)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_beta_2, col = "#808080", lty = 3, lwd = 1.5)
@@ -347,14 +367,14 @@ points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
-
 }
 
 }
