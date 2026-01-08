@@ -107,9 +107,11 @@ Lopes, J. E.
 set.seed(2323)
 n <- 1000
 true_params <- c(alpha = 1.5, beta = 2.0, gamma = 0.8, delta = 1.2, lambda = 0.5)
-data <- rgkw(n, alpha = true_params[1], beta = true_params[2],
-             gamma = true_params[3], delta = true_params[4],
-             lambda = true_params[5])
+data <- rgkw(n,
+  alpha = true_params[1], beta = true_params[2],
+  gamma = true_params[3], delta = true_params[4],
+  lambda = true_params[5]
+)
 
 # Evaluate Hessian at true parameters
 hess_true <- hsgkw(par = true_params, data = data)
@@ -124,8 +126,10 @@ print(hess_true, digits = 4)
 #> [5,] 2991.8 -503.54 3895.1 -838.3 7494.0
 
 # Check symmetry
-cat("\nSymmetry check (max |H - H^T|):",
-    max(abs(hess_true - t(hess_true))), "\n")
+cat(
+  "\nSymmetry check (max |H - H^T|):",
+  max(abs(hess_true - t(hess_true))), "\n"
+)
 #> 
 #> Symmetry check (max |H - H^T|): 0 
 
@@ -145,7 +149,7 @@ fit <- optim(
     factr = 1e-15,
     pgtol = 1e-15,
     trace = FALSE
-    )
+  )
 )
 
 mle <- fit$par
@@ -168,8 +172,10 @@ print(hessian_at_mle, digits = 4)
 cat("\nComparison with optim Hessian:\n")
 #> 
 #> Comparison with optim Hessian:
-cat("Max absolute difference:",
-    max(abs(hessian_at_mle - fit$hessian)), "\n")
+cat(
+  "Max absolute difference:",
+  max(abs(hessian_at_mle - fit$hessian)), "\n"
+)
 #> Max absolute difference: 0.2576065 
 
 # Eigenvalue analysis
@@ -303,16 +309,20 @@ print(hess_properties, digits = 4, row.names = FALSE)
 
 xd <- 2
 # Create grid around MLE
-alpha_grid <- seq(mle[1] - xd, mle[1] + xd, length.out = round(n/4))
-beta_grid <- seq(mle[2] - xd, mle[2] + xd, length.out = round(n/4))
+alpha_grid <- seq(mle[1] - xd, mle[1] + xd, length.out = round(n / 4))
+beta_grid <- seq(mle[2] - xd, mle[2] + xd, length.out = round(n / 4))
 alpha_grid <- alpha_grid[alpha_grid > 0]
 beta_grid <- beta_grid[beta_grid > 0]
 
 # Compute curvature measures
-determinant_surface <- matrix(NA, nrow = length(alpha_grid),
-                               ncol = length(beta_grid))
-trace_surface <- matrix(NA, nrow = length(alpha_grid),
-                         ncol = length(beta_grid))
+determinant_surface <- matrix(NA,
+  nrow = length(alpha_grid),
+  ncol = length(beta_grid)
+)
+trace_surface <- matrix(NA,
+  nrow = length(alpha_grid),
+  ncol = length(beta_grid)
+)
 
 for (i in seq_along(alpha_grid)) {
   for (j in seq_along(beta_grid)) {
@@ -325,18 +335,20 @@ for (i in seq_along(alpha_grid)) {
 # Plot
 
 contour(alpha_grid, beta_grid, determinant_surface,
-        xlab = expression(alpha), ylab = expression(beta),
-        main = "Hessian Determinant", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "Hessian Determinant", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 
 contour(alpha_grid, beta_grid, trace_surface,
-        xlab = expression(alpha), ylab = expression(beta),
-        main = "Hessian Trace", las = 1,
-        col = "#2E4057", lwd = 1.5, nlevels = 15)
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "Hessian Trace", las = 1,
+  col = "#2E4057", lwd = 1.5, nlevels = 15
+)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
@@ -349,12 +361,12 @@ grid(col = "gray90")
 vcov_2d <- vcov_matrix[1:2, 1:2]
 
 # Create confidence ellipse
-theta <- seq(0, 2 * pi, length.out = round(n/4))
+theta <- seq(0, 2 * pi, length.out = round(n / 4))
 chi2_val <- qchisq(0.95, df = 2)
 
 eig_decomp <- eigen(vcov_2d)
-ellipse <- matrix(NA, nrow = round(n/4), ncol = 2)
-for (i in 1:round(n/4)) {
+ellipse <- matrix(NA, nrow = round(n / 4), ncol = 2)
+for (i in 1:round(n / 4)) {
   v <- c(cos(theta[i]), sin(theta[i]))
   ellipse[i, ] <- mle[1:2] + sqrt(chi2_val) *
     (eig_decomp$vectors %*% diag(sqrt(eig_decomp$values)) %*% v)
@@ -366,9 +378,11 @@ ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
 ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
 # Plot
-plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = expression(beta),
-     main = "95% Confidence Ellipse (Alpha vs Beta)", las = 1)
+plot(ellipse[, 1], ellipse[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "95% Confidence Ellipse (Alpha vs Beta)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
@@ -378,12 +392,13 @@ points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
 
 
@@ -395,8 +410,8 @@ vcov_2d_gd <- vcov_matrix[3:4, 3:4]
 
 # Create confidence ellipse
 eig_decomp_gd <- eigen(vcov_2d_gd)
-ellipse_gd <- matrix(NA, nrow = round(n/4), ncol = 2)
-for (i in 1:round(n/4)) {
+ellipse_gd <- matrix(NA, nrow = round(n / 4), ncol = 2)
+for (i in 1:round(n / 4)) {
   v <- c(cos(theta[i]), sin(theta[i]))
   ellipse_gd[i, ] <- mle[3:4] + sqrt(chi2_val) *
     (eig_decomp_gd$vectors %*% diag(sqrt(eig_decomp_gd$values)) %*% v)
@@ -408,9 +423,11 @@ ci_gamma <- mle[3] + c(-1, 1) * 1.96 * se_2d_gd[1]
 ci_delta <- mle[4] + c(-1, 1) * 1.96 * se_2d_gd[2]
 
 # Plot
-plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(gamma), ylab = expression(delta),
-     main = "95% Confidence Ellipse (Gamma vs Delta)", las = 1)
+plot(ellipse_gd[, 1], ellipse_gd[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(gamma), ylab = expression(delta),
+  main = "95% Confidence Ellipse (Gamma vs Delta)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_gamma, col = "#808080", lty = 3, lwd = 1.5)
@@ -420,12 +437,13 @@ points(mle[3], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[3], true_params[4], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
 
 
@@ -437,8 +455,8 @@ vcov_2d_dl <- vcov_matrix[4:5, 4:5]
 
 # Create confidence ellipse
 eig_decomp_dl <- eigen(vcov_2d_dl)
-ellipse_dl <- matrix(NA, nrow = round(n/4), ncol = 2)
-for (i in 1:round(n/4)) {
+ellipse_dl <- matrix(NA, nrow = round(n / 4), ncol = 2)
+for (i in 1:round(n / 4)) {
   v <- c(cos(theta[i]), sin(theta[i]))
   ellipse_dl[i, ] <- mle[4:5] + sqrt(chi2_val) *
     (eig_decomp_dl$vectors %*% diag(sqrt(eig_decomp_dl$values)) %*% v)
@@ -450,9 +468,11 @@ ci_delta_2 <- mle[4] + c(-1, 1) * 1.96 * se_2d_dl[1]
 ci_lambda <- mle[5] + c(-1, 1) * 1.96 * se_2d_dl[2]
 
 # Plot
-plot(ellipse_dl[, 1], ellipse_dl[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(delta), ylab = expression(lambda),
-     main = "95% Confidence Ellipse (Delta vs Lambda)", las = 1)
+plot(ellipse_dl[, 1], ellipse_dl[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(delta), ylab = expression(lambda),
+  main = "95% Confidence Ellipse (Delta vs Lambda)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_delta_2, col = "#808080", lty = 3, lwd = 1.5)
@@ -462,14 +482,14 @@ points(mle[4], mle[5], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[4], true_params[5], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
-
 
 # }
 ```

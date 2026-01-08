@@ -137,7 +137,8 @@ print(quantiles)
 
 # Calculate quantiles for upper tail probabilities P(X > q) = p
 quantiles_upper <- qbkw(p_vals, alpha_par, beta_par, gamma_par, delta_par,
-                        lower.tail = FALSE)
+  lower.tail = FALSE
+)
 print(quantiles_upper)
 #> [1] 0.8003866 0.5149104 0.2138865
 # Check: qbkw(p, ..., lt=F) == qbkw(1-p, ..., lt=T)
@@ -147,7 +148,8 @@ print(qbkw(1 - p_vals, alpha_par, beta_par, gamma_par, delta_par))
 # Calculate quantiles from log probabilities
 log.p_vals <- log(p_vals)
 quantiles_logp <- qbkw(log.p_vals, alpha_par, beta_par, gamma_par, delta_par,
-                       log.p = TRUE)
+  log.p = TRUE
+)
 print(quantiles_logp)
 #> [1] 0.2138865 0.5149104 0.8003866
 # Check: should match original quantiles
@@ -155,8 +157,10 @@ print(quantiles)
 #> [1] 0.2138865 0.5149104 0.8003866
 
 # Compare with qgkw setting lambda = 1
-quantiles_gkw <- qgkw(p_vals, alpha_par, beta_par, gamma = gamma_par,
-                     delta = delta_par, lambda = 1.0)
+quantiles_gkw <- qgkw(p_vals, alpha_par, beta_par,
+  gamma = gamma_par,
+  delta = delta_par, lambda = 1.0
+)
 print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
 #> [1] "Max difference: 0"
 
@@ -173,6 +177,5 @@ print(qbkw(c(0, 1), alpha_par, beta_par, gamma_par, delta_par)) # Should be 0, 1
 #> [1] 0 1
 print(qbkw(c(-Inf, 0), alpha_par, beta_par, gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
-
 # }
 ```

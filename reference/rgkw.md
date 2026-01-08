@@ -106,10 +106,13 @@ summary(x_sample)
 #> 0.01524 0.31493 0.46345 0.46265 0.60804 0.96441 
 
 # Histogram of generated values compared to theoretical density
-hist(x_sample, breaks = 30, freq = FALSE, # freq=FALSE for density scale
-     main = "Histogram of GKw(2,3,1,0,1) Sample", xlab = "x", ylim = c(0, 2.5))
+hist(x_sample,
+  breaks = 30, freq = FALSE, # freq=FALSE for density scale
+  main = "Histogram of GKw(2,3,1,0,1) Sample", xlab = "x", ylim = c(0, 2.5)
+)
 curve(dgkw(x, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1),
-      add = TRUE, col = "red", lwd = 2, n = 201)
+  add = TRUE, col = "red", lwd = 2, n = 201
+)
 legend("topright", legend = "Theoretical PDF", col = "red", lwd = 2, bty = "n")
 
 
@@ -118,9 +121,11 @@ prob_points <- seq(0.01, 0.99, by = 0.01)
 theo_quantiles <- qgkw(prob_points, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 emp_quantiles <- quantile(x_sample, prob_points)
 
-plot(theo_quantiles, emp_quantiles, pch = 16, cex = 0.8,
-     main = "Q-Q Plot for GKw(2,3,1,0,1)",
-     xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)")
+plot(theo_quantiles, emp_quantiles,
+  pch = 16, cex = 0.8,
+  main = "Q-Q Plot for GKw(2,3,1,0,1)",
+  xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
+)
 abline(a = 0, b = 1, col = "blue", lty = 2)
 
 

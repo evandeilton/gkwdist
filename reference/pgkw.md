@@ -121,8 +121,10 @@ print(prob)
 #> [1] 0.578125
 
 # Upper tail probability P(X > q)
-prob_upper <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-                 lower.tail = FALSE)
+prob_upper <- pgkw(0.5,
+  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+  lower.tail = FALSE
+)
 print(prob_upper)
 #> [1] 0.421875
 # Check: prob + prob_upper should be 1
@@ -130,8 +132,10 @@ print(prob + prob_upper)
 #> [1] 1
 
 # Log probability
-log <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-                 log.p = TRUE)
+log <- pgkw(0.5,
+  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+  log.p = TRUE
+)
 print(log)
 #> [1] -0.5479652
 # Check: exp(log) should be prob
@@ -156,11 +160,15 @@ cdf_beta_equiv <- pgkw(x_seq, alpha = 1, beta = 1, gamma = 2, delta = 3, lambda 
 cdf_beta_check <- stats::pbeta(x_seq, shape1 = 2, shape2 = 3 + 1)
 # max(abs(cdf_beta_equiv - cdf_beta_check)) # Should be close to zero
 
-plot(x_seq, cdf_kw, type = "l", ylim = c(0, 1),
-     main = "GKw CDF Examples", ylab = "F(x)", xlab = "x", col = "blue")
+plot(x_seq, cdf_kw,
+  type = "l", ylim = c(0, 1),
+  main = "GKw CDF Examples", ylab = "F(x)", xlab = "x", col = "blue"
+)
 lines(x_seq, cdf_beta_equiv, col = "red", lty = 2)
-legend("bottomright", legend = c("Kw(2,3)", "Beta(2,4) equivalent"),
-       col = c("blue", "red"), lty = c(1, 2), bty = "n")
+legend("bottomright",
+  legend = c("Kw(2,3)", "Beta(2,4) equivalent"),
+  col = c("blue", "red"), lty = c(1, 2), bty = "n"
+)
 
 # }
 ```

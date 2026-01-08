@@ -113,7 +113,8 @@ print(probs)
 
 # Calculate upper tail P(X > q)
 probs_upper <- pekw(q_vals, alpha_par, beta_par, lambda_par,
-                    lower.tail = FALSE)
+  lower.tail = FALSE
+)
 print(probs_upper)
 #> [1] 0.96086724 0.56042536 0.06916125
 # Check: probs + probs_upper should be 1
@@ -129,8 +130,10 @@ print(log(probs))
 #> [1] -3.24079519 -0.82194776 -0.07166921
 
 # Compare with pgkw setting gamma = 1, delta = 0
-probs_gkw <- pgkw(q_vals, alpha_par, beta_par, gamma = 1.0, delta = 0.0,
-                 lambda = lambda_par)
+probs_gkw <- pgkw(q_vals, alpha_par, beta_par,
+  gamma = 1.0, delta = 0.0,
+  lambda = lambda_par
+)
 print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
 #> [1] "Max difference: 9.0205620750794e-17"
 
@@ -140,12 +143,16 @@ curve_p1 <- pekw(curve_q, alpha = 2, beta = 3, lambda = 0.5)
 curve_p2 <- pekw(curve_q, alpha = 2, beta = 3, lambda = 1.0) # standard Kw
 curve_p3 <- pekw(curve_q, alpha = 2, beta = 3, lambda = 2.0)
 
-plot(curve_q, curve_p2, type = "l", main = "EKw CDF Examples (alpha=2, beta=3)",
-     xlab = "q", ylab = "F(q)", col = "red", ylim = c(0, 1))
+plot(curve_q, curve_p2,
+  type = "l", main = "EKw CDF Examples (alpha=2, beta=3)",
+  xlab = "q", ylab = "F(q)", col = "red", ylim = c(0, 1)
+)
 lines(curve_q, curve_p1, col = "blue")
 lines(curve_q, curve_p3, col = "green")
-legend("bottomright", legend = c("lambda=0.5", "lambda=1.0 (Kw)", "lambda=2.0"),
-       col = c("blue", "red", "green"), lty = 1, bty = "n")
+legend("bottomright",
+  legend = c("lambda=0.5", "lambda=1.0 (Kw)", "lambda=2.0"),
+  col = c("blue", "red", "green"), lty = 1, bty = "n"
+)
 
 # }
 ```

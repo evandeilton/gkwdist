@@ -110,8 +110,10 @@ Lopes, J. E.
 set.seed(2203)
 n <- 1000
 true_params <- c(alpha = 2.0, beta = 1.5, gamma = 1.5, delta = 0.5)
-data <- rbkw(n, alpha = true_params[1], beta = true_params[2],
-             gamma = true_params[3], delta = true_params[4])
+data <- rbkw(n,
+  alpha = true_params[1], beta = true_params[2],
+  gamma = true_params[3], delta = true_params[4]
+)
 
 # Evaluate gradient at true parameters
 grad_true <- grbkw(par = true_params, data = data)
@@ -228,7 +230,7 @@ comparison_grad <- data.frame(
   Numerical = grad_numerical,
   Abs_Diff = abs(grad_analytical - grad_numerical),
   Rel_Error = abs(grad_analytical - grad_numerical) /
-              (abs(grad_analytical) + 1e-10)
+    (abs(grad_analytical) + 1e-10)
 )
 print(comparison_grad, digits = 8)
 #>   Parameter  Analytical   Numerical      Abs_Diff     Rel_Error
@@ -318,10 +320,12 @@ ci_delta_bd <- mle[4] + c(-1, 1) * 1.96 * se_bd[2]
 # Plot selected ellipses
 
 # Alpha vs Beta
-plot(ellipse_ab[, 1], ellipse_ab[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = expression(beta),
-     main = "Alpha vs Beta", las = 1, xlim = range(ellipse_ab[, 1], ci_alpha_ab),
-     ylim = range(ellipse_ab[, 2], ci_beta_ab))
+plot(ellipse_ab[, 1], ellipse_ab[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "Alpha vs Beta", las = 1, xlim = range(ellipse_ab[, 1], ci_alpha_ab),
+  ylim = range(ellipse_ab[, 2], ci_beta_ab)
+)
 abline(v = ci_alpha_ab, col = "#808080", lty = 3, lwd = 1.5)
 abline(h = ci_beta_ab, col = "#808080", lty = 3, lwd = 1.5)
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
@@ -330,10 +334,12 @@ grid(col = "gray90")
 
 
 # Alpha vs Gamma
-plot(ellipse_ag[, 1], ellipse_ag[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = expression(gamma),
-     main = "Alpha vs Gamma", las = 1, xlim = range(ellipse_ag[, 1], ci_alpha_ag),
-     ylim = range(ellipse_ag[, 2], ci_gamma_ag))
+plot(ellipse_ag[, 1], ellipse_ag[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = expression(gamma),
+  main = "Alpha vs Gamma", las = 1, xlim = range(ellipse_ag[, 1], ci_alpha_ag),
+  ylim = range(ellipse_ag[, 2], ci_gamma_ag)
+)
 abline(v = ci_alpha_ag, col = "#808080", lty = 3, lwd = 1.5)
 abline(h = ci_gamma_ag, col = "#808080", lty = 3, lwd = 1.5)
 points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
@@ -342,10 +348,12 @@ grid(col = "gray90")
 
 
 # Beta vs Delta
-plot(ellipse_bd[, 1], ellipse_bd[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(beta), ylab = expression(delta),
-     main = "Beta vs Delta", las = 1, xlim = range(ellipse_bd[, 1], ci_beta_bd),
-     ylim = range(ellipse_bd[, 2], ci_delta_bd))
+plot(ellipse_bd[, 1], ellipse_bd[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(beta), ylab = expression(delta),
+  main = "Beta vs Delta", las = 1, xlim = range(ellipse_bd[, 1], ci_beta_bd),
+  ylim = range(ellipse_bd[, 2], ci_delta_bd)
+)
 abline(v = ci_beta_bd, col = "#808080", lty = 3, lwd = 1.5)
 abline(h = ci_delta_bd, col = "#808080", lty = 3, lwd = 1.5)
 points(mle[2], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
@@ -353,13 +361,13 @@ points(true_params[2], true_params[4], pch = 17, col = "#006400", cex = 1.5)
 grid(col = "gray90")
 
 legend("topright",
-       legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n", cex = 0.8)
-
+  legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n", cex = 0.8
+)
 
 # }
 ```

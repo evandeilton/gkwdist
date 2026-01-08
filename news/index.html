@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,11 +34,50 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/evandeilton/gkwdist/blob/v1.1.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.1.1" id="gkwdist-111">gkwdist 1.1.1<a class="anchor" aria-label="anchor" href="#gkwdist-111"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.1.2" id="gkwdist-112">gkwdist 1.1.2<a class="anchor" aria-label="anchor" href="#gkwdist-112"></a></h2>
+<div class="section level3">
+<h3 id="code-cleanup-and-testing-enhancement-1-1-2">Code Cleanup and Testing Enhancement<a class="anchor" aria-label="anchor" href="#code-cleanup-and-testing-enhancement-1-1-2"></a></h3>
+<div class="section level4">
+<h4 id="c-code-cleanup-1-1-2">C++ Code Cleanup<a class="anchor" aria-label="anchor" href="#c-code-cleanup-1-1-2"></a></h4>
+<ul><li>
+<strong>Removed legacy commented code</strong>: Cleaned up all C++ source files (<code>gkw.cpp</code>, <code>bkw.cpp</code>, <code>kkw.cpp</code>, <code>ekw.cpp</code>, <code>kw.cpp</code>, <code>bpmc.cpp</code>, <code>beta_.cpp</code>) by removing old commented-out implementations that were kept for reference.</li>
+<li>
+<strong>Code formatting</strong>: Improved R wrapper formatting with consistent indentation and alignment in <code><a href="https://rdrr.io/r/base/CallExternal.html" class="external-link">.Call()</a></code> invocations and roxygen examples.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="new-test-suites-1-1-2">New Test Suites<a class="anchor" aria-label="anchor" href="#new-test-suites-1-1-2"></a></h4>
+<ul><li>
+<strong>Analytical derivatives validation</strong> (<code>test-derivatives-validation.R</code>):
+<ul><li>70 comprehensive tests validating gradient (<code>gr*</code>) and Hessian (<code>hs*</code>) functions</li>
+<li>Compares analytical derivatives against numerical differentiation via <code>numDeriv</code>
+</li>
+<li>Covers all 7 subfamilies: GKw, BKw, KKw, EKw, Mc, Kw, Beta</li>
+<li>Multiple parameter configurations per subfamily for robustness</li>
+</ul></li>
+<li>
+<strong>MLE performance benchmarks</strong> (<code>test-mle-performance.R</code>):
+<ul><li>Compares optimization efficiency across three scenarios: numerical-only, analytical gradient, and analytical gradient + Hessian</li>
+<li>Validates that analytical derivatives provide equivalent or better accuracy</li>
+<li>Tests convergence rates and computational time across all distribution families</li>
+</ul></li>
+</ul></div>
+<div class="section level4">
+<h4 id="joss-paper-1-1-2">JOSS Paper<a class="anchor" aria-label="anchor" href="#joss-paper-1-1-2"></a></h4>
+<ul><li>
+<strong>Added paper for JOSS submission</strong> (<code>inst/paper/</code>):
+<ul><li>Complete manuscript describing the package’s statistical framework</li>
+<li>Comprehensive bibliography with foundational references</li>
+<li>Compiled PDF ready for submission</li>
+</ul></li>
+</ul><hr></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.1" id="gkwdist-111">gkwdist 1.1.1<a class="anchor" aria-label="anchor" href="#gkwdist-111"></a></h2><p class="text-muted">CRAN release: 2025-11-27</p>
 <div class="section level3">
 <h3 id="major-refactoring-release-1-1-1">Major Refactoring Release<a class="anchor" aria-label="anchor" href="#major-refactoring-release-1-1-1"></a></h3>
 <p>This release represents a comprehensive refactoring of the entire package codebase, focusing on numerical stability, code consistency, and maintainability.</p>

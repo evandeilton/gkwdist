@@ -108,9 +108,11 @@ Lopes, J. E.
 set.seed(123)
 n <- 1000
 true_params <- c(alpha = 2.0, beta = 3.0, gamma = 1.5, delta = 2.0, lambda = 1.8)
-data <- rgkw(n, alpha = true_params[1], beta = true_params[2],
-             gamma = true_params[3], delta = true_params[4],
-             lambda = true_params[5])
+data <- rgkw(n,
+  alpha = true_params[1], beta = true_params[2],
+  gamma = true_params[3], delta = true_params[4],
+  lambda = true_params[5]
+)
 
 # Evaluate gradient at true parameters
 grad_true <- grgkw(par = true_params, data = data)
@@ -183,7 +185,7 @@ comparison <- data.frame(
 )
 print(comparison, digits = 4, row.names = FALSE)
 #>            Method Alpha  Beta  Gamma Delta Lambda NegLogLik Iterations
-#>     With Gradient 1.205 3.288 0.3823 1.462  13.88    -704.3        386
+#>     With Gradient 1.070 3.075 0.3822 1.615  16.24    -704.4        477
 #>  Without Gradient 1.256 3.386 0.3747 1.403  13.43    -704.3        367
 
 
@@ -198,11 +200,11 @@ cat("\nGradient at MLE:\n")
 #> 
 #> Gradient at MLE:
 print(gradient_at_mle)
-#> [1] -0.040704813  0.024508274  0.007276465  0.017706753 -0.010821899
+#> [1] -0.027470375  0.022377512  0.011791820  0.020748843 -0.007071948
 cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
-#> Max absolute component: 0.04070481 
+#> Max absolute component: 0.02747037 
 cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
-#> Gradient norm: 0.05235577 
+#> Gradient norm: 0.04330068 
 
 
 ## Example 4: Numerical vs Analytical Gradient
@@ -229,15 +231,15 @@ comparison_grad <- data.frame(
   Numerical = grad_numerical,
   Abs_Diff = abs(grad_analytical - grad_numerical),
   Rel_Error = abs(grad_analytical - grad_numerical) /
-              (abs(grad_analytical) + 1e-10)
+    (abs(grad_analytical) + 1e-10)
 )
 print(comparison_grad, digits = 8)
 #>   Parameter    Analytical     Numerical      Abs_Diff     Rel_Error
-#> 1     alpha -0.0407048130 -0.0407061407 1.3276474e-06 3.2616473e-05
-#> 2      beta  0.0245082736  0.0245046294 3.6441642e-06 1.4869118e-04
-#> 3     gamma  0.0072764653  0.0072782314 1.7660659e-06 2.4270931e-04
-#> 4     delta  0.0177067532  0.0177067250 2.8273547e-08 1.5967663e-06
-#> 5    lambda -0.0108218991 -0.0108224185 5.1944308e-07 4.7999253e-05
+#> 1     alpha -0.0274703747 -0.0274735612 3.1865307e-06 1.1599881e-04
+#> 2      beta  0.0223775120  0.0223747065 2.8054356e-06 1.2536852e-04
+#> 3     gamma  0.0117918205  0.0117984200 6.5995623e-06 5.5967289e-04
+#> 4     delta  0.0207488431  0.0207489848 1.4161910e-07 6.8253972e-06
+#> 5    lambda -0.0070719476 -0.0070809847 9.0370830e-06 1.2778775e-03
 
 
 ## Example 5: Score Test Statistic
@@ -272,12 +274,12 @@ vcov_full <- solve(obs_info)
 vcov_2d <- vcov_full[1:2, 1:2]
 
 # Create confidence ellipse
-theta <- seq(0, 2 * pi, length.out = round(n/4))
+theta <- seq(0, 2 * pi, length.out = round(n / 4))
 chi2_val <- qchisq(0.95, df = 2)
 
 eig_decomp <- eigen(vcov_2d)
-ellipse <- matrix(NA, nrow = round(n/4), ncol = 2)
-for (i in 1:round(n/4)) {
+ellipse <- matrix(NA, nrow = round(n / 4), ncol = 2)
+for (i in 1:round(n / 4)) {
   v <- c(cos(theta[i]), sin(theta[i]))
   ellipse[i, ] <- mle[1:2] + sqrt(chi2_val) *
     (eig_decomp$vectors %*% diag(sqrt(eig_decomp$values)) %*% v)
@@ -289,9 +291,11 @@ ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
 ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
 # Plot
-plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = expression(beta),
-     main = "95% Confidence Region (Alpha vs Beta)", las = 1)
+plot(ellipse[, 1], ellipse[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "95% Confidence Region (Alpha vs Beta)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
@@ -301,12 +305,13 @@ points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
 
 
@@ -318,8 +323,8 @@ vcov_2d_gd <- vcov_full[3:4, 3:4]
 
 # Create confidence ellipse
 eig_decomp_gd <- eigen(vcov_2d_gd)
-ellipse_gd <- matrix(NA, nrow = round(n/4), ncol = 2)
-for (i in 1:round(n/4)) {
+ellipse_gd <- matrix(NA, nrow = round(n / 4), ncol = 2)
+for (i in 1:round(n / 4)) {
   v <- c(cos(theta[i]), sin(theta[i]))
   ellipse_gd[i, ] <- mle[3:4] + sqrt(chi2_val) *
     (eig_decomp_gd$vectors %*% diag(sqrt(eig_decomp_gd$values)) %*% v)
@@ -331,9 +336,11 @@ ci_gamma <- mle[3] + c(-1, 1) * 1.96 * se_2d_gd[1]
 ci_delta <- mle[4] + c(-1, 1) * 1.96 * se_2d_gd[2]
 
 # Plot
-plot(ellipse_gd[, 1], ellipse_gd[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(gamma), ylab = expression(delta),
-     main = "95% Confidence Region (Gamma vs Delta)", las = 1)
+plot(ellipse_gd[, 1], ellipse_gd[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(gamma), ylab = expression(delta),
+  main = "95% Confidence Region (Gamma vs Delta)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_gamma, col = "#808080", lty = 3, lwd = 1.5)
@@ -343,15 +350,14 @@ points(mle[3], mle[4], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[3], true_params[4], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
 
-
 # }
-
 ```

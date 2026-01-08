@@ -107,37 +107,51 @@ beta_par <- 3.0
 delta_par <- 0.5
 lambda_par <- 1.5
 
-x_sample_kkw <- rkkw(1000, alpha = alpha_par, beta = beta_par,
-                       delta = delta_par, lambda = lambda_par)
+x_sample_kkw <- rkkw(1000,
+  alpha = alpha_par, beta = beta_par,
+  delta = delta_par, lambda = lambda_par
+)
 summary(x_sample_kkw)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #> 0.06135 0.34367 0.46565 0.46855 0.58892 0.88108 
 
 # Histogram of generated values compared to theoretical density
-hist(x_sample_kkw, breaks = 30, freq = FALSE, # freq=FALSE for density
-     main = "Histogram of kkw Sample", xlab = "x", ylim = c(0, 3.5))
-curve(dkkw(x, alpha = alpha_par, beta = beta_par, delta = delta_par,
-            lambda = lambda_par),
-      add = TRUE, col = "red", lwd = 2, n = 201)
+hist(x_sample_kkw,
+  breaks = 30, freq = FALSE, # freq=FALSE for density
+  main = "Histogram of kkw Sample", xlab = "x", ylim = c(0, 3.5)
+)
+curve(
+  dkkw(x,
+    alpha = alpha_par, beta = beta_par, delta = delta_par,
+    lambda = lambda_par
+  ),
+  add = TRUE, col = "red", lwd = 2, n = 201
+)
 legend("topright", legend = "Theoretical PDF", col = "red", lwd = 2, bty = "n")
 
 
 # Comparing empirical and theoretical quantiles (Q-Q plot)
 prob_points <- seq(0.01, 0.99, by = 0.01)
-theo_quantiles <- qkkw(prob_points, alpha = alpha_par, beta = beta_par,
-                        delta = delta_par, lambda = lambda_par)
+theo_quantiles <- qkkw(prob_points,
+  alpha = alpha_par, beta = beta_par,
+  delta = delta_par, lambda = lambda_par
+)
 emp_quantiles <- quantile(x_sample_kkw, prob_points, type = 7) # type 7 is default
 
-plot(theo_quantiles, emp_quantiles, pch = 16, cex = 0.8,
-     main = "Q-Q Plot for kkw Distribution",
-     xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)")
+plot(theo_quantiles, emp_quantiles,
+  pch = 16, cex = 0.8,
+  main = "Q-Q Plot for kkw Distribution",
+  xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
+)
 abline(a = 0, b = 1, col = "blue", lty = 2)
 
 
 # Compare summary stats with rgkw(..., gamma=1, ...)
 # Note: individual values will differ due to randomness
-x_sample_gkw <- rgkw(1000, alpha = alpha_par, beta = beta_par, gamma = 1.0,
-                     delta = delta_par, lambda = lambda_par)
+x_sample_gkw <- rgkw(1000,
+  alpha = alpha_par, beta = beta_par, gamma = 1.0,
+  delta = delta_par, lambda = lambda_par
+)
 print("Summary stats for rkkw sample:")
 #> [1] "Summary stats for rkkw sample:"
 print(summary(x_sample_kkw))

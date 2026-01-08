@@ -105,29 +105,38 @@ summary(x_sample_ekw)
 #> 0.01796 0.40449 0.53117 0.52906 0.65941 0.95165 
 
 # Histogram of generated values compared to theoretical density
-hist(x_sample_ekw, breaks = 30, freq = FALSE, # freq=FALSE for density
-     main = "Histogram of EKw Sample", xlab = "x", ylim = c(0, 3.0))
+hist(x_sample_ekw,
+  breaks = 30, freq = FALSE, # freq=FALSE for density
+  main = "Histogram of EKw Sample", xlab = "x", ylim = c(0, 3.0)
+)
 curve(dekw(x, alpha = alpha_par, beta = beta_par, lambda = lambda_par),
-      add = TRUE, col = "red", lwd = 2, n = 201)
+  add = TRUE, col = "red", lwd = 2, n = 201
+)
 legend("topright", legend = "Theoretical PDF", col = "red", lwd = 2, bty = "n")
 
 
 # Comparing empirical and theoretical quantiles (Q-Q plot)
 prob_points <- seq(0.01, 0.99, by = 0.01)
-theo_quantiles <- qekw(prob_points, alpha = alpha_par, beta = beta_par,
-                       lambda = lambda_par)
+theo_quantiles <- qekw(prob_points,
+  alpha = alpha_par, beta = beta_par,
+  lambda = lambda_par
+)
 emp_quantiles <- quantile(x_sample_ekw, prob_points, type = 7)
 
-plot(theo_quantiles, emp_quantiles, pch = 16, cex = 0.8,
-     main = "Q-Q Plot for EKw Distribution",
-     xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)")
+plot(theo_quantiles, emp_quantiles,
+  pch = 16, cex = 0.8,
+  main = "Q-Q Plot for EKw Distribution",
+  xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
+)
 abline(a = 0, b = 1, col = "blue", lty = 2)
 
 
 # Compare summary stats with rgkw(..., gamma=1, delta=0, ...)
 # Note: individual values will differ due to randomness
-x_sample_gkw <- rgkw(1000, alpha = alpha_par, beta = beta_par, gamma = 1.0,
-                     delta = 0.0, lambda = lambda_par)
+x_sample_gkw <- rgkw(1000,
+  alpha = alpha_par, beta = beta_par, gamma = 1.0,
+  delta = 0.0, lambda = lambda_par
+)
 print("Summary stats for rekw sample:")
 #> [1] "Summary stats for rekw sample:"
 print(summary(x_sample_ekw))
@@ -138,6 +147,5 @@ print("Summary stats for rgkw(gamma=1, delta=0) sample:")
 print(summary(x_sample_gkw)) # Should be similar
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #> 0.02851 0.39394 0.53074 0.52923 0.66914 0.98175 
-
 # }
 ```

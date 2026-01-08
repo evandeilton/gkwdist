@@ -124,8 +124,10 @@ print(paste("Max difference vs stats::qbeta:", max(abs(quantiles - quantiles_sta
 #> [1] "Max difference vs stats::qbeta: 0"
 
 # Compare with qgkw setting alpha=1, beta=1, lambda=1
-quantiles_gkw <- qgkw(p_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
-                      delta = delta_par, lambda = 1.0)
+quantiles_gkw <- qgkw(p_vals,
+  alpha = 1.0, beta = 1.0, gamma = gamma_par,
+  delta = delta_par, lambda = 1.0
+)
 print(paste("Max difference vs qgkw:", max(abs(quantiles - quantiles_gkw))))
 #> [1] "Max difference vs qgkw: 5.55111512312578e-17"
 
@@ -162,6 +164,5 @@ print(qbeta_(c(0, 1), gamma_par, delta_par)) # Should be 0, 1
 #> [1] 0 1
 print(qbeta_(c(-Inf, 0), gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
-
 # }
 ```

@@ -112,8 +112,10 @@ print(paste("Max difference vs stats::pbeta:", max(abs(probs - probs_stats))))
 #> [1] "Max difference vs stats::pbeta: 0"
 
 # Compare with pgkw setting alpha=1, beta=1, lambda=1
-probs_gkw <- pgkw(q_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
-                  delta = delta_par, lambda = 1.0)
+probs_gkw <- pgkw(q_vals,
+  alpha = 1.0, beta = 1.0, gamma = gamma_par,
+  delta = delta_par, lambda = 1.0
+)
 print(paste("Max difference vs pgkw:", max(abs(probs - probs_gkw))))
 #> [1] "Max difference vs pgkw: 1.11022302462516e-16"
 
@@ -139,12 +141,15 @@ print(stats::pbeta(q_vals, shape1, shape2, log.p = TRUE))
 # Plot the CDF
 curve_q <- seq(0.001, 0.999, length.out = 200)
 curve_p <- pbeta_(curve_q, gamma = 2, delta = 3) # Beta(2, 4)
-plot(curve_q, curve_p, type = "l", main = "Beta(2, 4) CDF via pbeta_",
-     xlab = "q", ylab = "F(q)", col = "blue")
-curve(stats::pbeta(x, 2, 4), add=TRUE, col="red", lty=2)
-legend("bottomright", legend=c("pbeta_(gamma=2, delta=3)", "stats::pbeta(shape1=2, shape2=4)"),
-       col=c("blue", "red"), lty=c(1,2), bty="n")
-
+plot(curve_q, curve_p,
+  type = "l", main = "Beta(2, 4) CDF via pbeta_",
+  xlab = "q", ylab = "F(q)", col = "blue"
+)
+curve(stats::pbeta(x, 2, 4), add = TRUE, col = "red", lty = 2)
+legend("bottomright",
+  legend = c("pbeta_(gamma=2, delta=3)", "stats::pbeta(shape1=2, shape2=4)"),
+  col = c("blue", "red"), lty = c(1, 2), bty = "n"
+)
 
 # }
 ```

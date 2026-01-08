@@ -137,8 +137,10 @@ print(quantiles)
 #> [1] 0.05783171 0.18577033 0.30238999 0.45420202 0.60830870 0.73201169 0.88575196
 
 # Upper tail quantile (e.g., find x such that P(X > x) = 0.1, which is 90th percentile)
-q90 <- qgkw(0.1, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-            lower.tail = FALSE)
+q90 <- qgkw(0.1,
+  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+  lower.tail = FALSE
+)
 print(q90)
 #> [1] 0.7320117
 # Check: should match quantile for p = 0.9 with lower.tail = TRUE
@@ -146,8 +148,10 @@ print(qgkw(0.9, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1))
 #> [1] 0.7320117
 
 # Log probabilities
-median_logp <- qgkw(log(0.5), alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-                    log.p = TRUE)
+median_logp <- qgkw(log(0.5),
+  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
+  log.p = TRUE
+)
 print(median_logp) # Should match median_val
 #> [1] 0.454202
 

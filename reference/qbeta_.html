@@ -17,7 +17,7 @@ parameters shape1 = gamma and shape2 = delta + 1."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,7 @@ parameters shape1 = gamma and shape2 = delta + 1."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Quantile Function of the Beta Distribution (gamma, delta+1 Parameterization)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/v1.1.1/R/beta.R" class="external-link"><code>R/beta.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/beta.R" class="external-link"><code>R/beta.R</code></a></small>
       <div class="d-none name"><code>qbeta_.Rd</code></div>
     </div>
 
@@ -161,8 +161,10 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Max difference vs stats::qbeta: 0"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare with qgkw setting alpha=1, beta=1, lambda=1</span></span></span>
-<span class="r-in"><span><span class="va">quantiles_gkw</span> <span class="op">&lt;-</span> <span class="fu"><a href="qgkw.html">qgkw</a></span><span class="op">(</span><span class="va">p_vals</span>, alpha <span class="op">=</span> <span class="fl">1.0</span>, beta <span class="op">=</span> <span class="fl">1.0</span>, gamma <span class="op">=</span> <span class="va">gamma_par</span>,</span></span>
-<span class="r-in"><span>                      delta <span class="op">=</span> <span class="va">delta_par</span>, lambda <span class="op">=</span> <span class="fl">1.0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">quantiles_gkw</span> <span class="op">&lt;-</span> <span class="fu"><a href="qgkw.html">qgkw</a></span><span class="op">(</span><span class="va">p_vals</span>,</span></span>
+<span class="r-in"><span>  alpha <span class="op">=</span> <span class="fl">1.0</span>, beta <span class="op">=</span> <span class="fl">1.0</span>, gamma <span class="op">=</span> <span class="va">gamma_par</span>,</span></span>
+<span class="r-in"><span>  delta <span class="op">=</span> <span class="va">delta_par</span>, lambda <span class="op">=</span> <span class="fl">1.0</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Max difference vs qgkw:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">quantiles</span> <span class="op">-</span> <span class="va">quantiles_gkw</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Max difference vs qgkw: 5.55111512312578e-17"</span>
 <span class="r-in"><span></span></span>
@@ -199,7 +201,6 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 1</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">qbeta_</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>, <span class="fl">0</span><span class="op">)</span>, <span class="va">gamma_par</span>, <span class="va">delta_par</span>, log.p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="co"># Should be 0, 1</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 1</span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

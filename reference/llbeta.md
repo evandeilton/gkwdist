@@ -149,12 +149,16 @@ print(results, digits = 4)
 #> gamma     gamma    2 2.029 0.08495    1.862    2.195
 #> delta     delta    3 2.997 0.17769    2.649    3.346
 
-cat(sprintf("\nMLE corresponds approx to Beta(%.2f, %.2f)\n",
-    mle[1], mle[2] + 1))
+cat(sprintf(
+  "\nMLE corresponds approx to Beta(%.2f, %.2f)\n",
+  mle[1], mle[2] + 1
+))
 #> 
 #> MLE corresponds approx to Beta(2.03, 4.00)
-cat("True corresponds to Beta(%.2f, %.2f)\n",
-    true_params[1], true_params[2] + 1)
+cat(
+  "True corresponds to Beta(%.2f, %.2f)\n",
+  true_params[1], true_params[2] + 1
+)
 #> True corresponds to Beta(%.2f, %.2f)
 #>  2 4
 
@@ -288,29 +292,37 @@ for (i in seq_along(delta_grid)) {
 chi_crit <- qchisq(0.95, df = 1)
 threshold <- max(profile_ll_gamma) - chi_crit / 2
 
-# Plot 
+# Plot
 
-plot(gamma_grid, profile_ll_gamma, type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(gamma), ylab = "Profile Log-Likelihood",
-     main = expression(paste("Profile: ", gamma)), las = 1)
+plot(gamma_grid, profile_ll_gamma,
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(gamma), ylab = "Profile Log-Likelihood",
+  main = expression(paste("Profile: ", gamma)), las = 1
+)
 abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
 abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
 abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-legend("topright", legend = c("MLE", "True", "95% CI"),
-       col = c("#8B0000", "#006400", "#808080"),
-       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+legend("topright",
+  legend = c("MLE", "True", "95% CI"),
+  col = c("#8B0000", "#006400", "#808080"),
+  lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8
+)
 grid(col = "gray90")
 
 
-plot(delta_grid, profile_ll_delta, type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(delta), ylab = "Profile Log-Likelihood",
-     main = expression(paste("Profile: ", delta)), las = 1)
+plot(delta_grid, profile_ll_delta,
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(delta), ylab = "Profile Log-Likelihood",
+  main = expression(paste("Profile: ", delta)), las = 1
+)
 abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
 abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
 abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-legend("topright", legend = c("MLE", "True", "95% CI"),
-       col = c("#8B0000", "#006400", "#808080"),
-       lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8)
+legend("topright",
+  legend = c("MLE", "True", "95% CI"),
+  col = c("#8B0000", "#006400", "#808080"),
+  lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8
+)
 grid(col = "gray90")
 
 
@@ -318,8 +330,8 @@ grid(col = "gray90")
 ## Example 6: 2D Log-Likelihood Surface (Gamma vs Delta)
 
 # Create 2D grid with wider range (±1.5)
-gamma_2d <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = round(n/25))
-delta_2d <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = round(n/25))
+gamma_2d <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = round(n / 25))
+delta_2d <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = round(n / 25))
 gamma_2d <- gamma_2d[gamma_2d > 0]
 delta_2d <- delta_2d[delta_2d > 0]
 
@@ -341,29 +353,31 @@ levels_99_gd <- max_ll_gd - qchisq(0.99, df = 2) / 2
 # Plot contour
 
 contour(gamma_2d, delta_2d, ll_surface_gd,
-        xlab = expression(gamma), ylab = expression(delta),
-        main = "2D Log-Likelihood: Gamma vs Delta",
-        levels = seq(min(ll_surface_gd, na.rm = TRUE), max_ll_gd, length.out = 20),
-        col = "#2E4057", las = 1, lwd = 1)
+  xlab = expression(gamma), ylab = expression(delta),
+  main = "2D Log-Likelihood: Gamma vs Delta",
+  levels = seq(min(ll_surface_gd, na.rm = TRUE), max_ll_gd, length.out = 20),
+  col = "#2E4057", las = 1, lwd = 1
+)
 
 contour(gamma_2d, delta_2d, ll_surface_gd,
-        levels = c(levels_90_gd, levels_95_gd, levels_99_gd),
-        col = c("#FFA07A", "#FF6347", "#8B0000"),
-        lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
-        add = TRUE, labcex = 0.8)
+  levels = c(levels_90_gd, levels_95_gd, levels_99_gd),
+  col = c("#FFA07A", "#FF6347", "#8B0000"),
+  lwd = c(2, 2.5, 3), lty = c(3, 2, 1),
+  add = TRUE, labcex = 0.8
+)
 
 points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "90% CR", "95% CR", "99% CR"),
-       col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
-       pch = c(19, 17, NA, NA, NA),
-       lty = c(NA, NA, 3, 2, 1),
-       lwd = c(NA, NA, 2, 2.5, 3),
-       bty = "n", cex = 0.8)
+  legend = c("MLE", "True", "90% CR", "95% CR", "99% CR"),
+  col = c("#8B0000", "#006400", "#FFA07A", "#FF6347", "#8B0000"),
+  pch = c(19, 17, NA, NA, NA),
+  lty = c(NA, NA, 3, 2, 1),
+  lwd = c(NA, NA, 2, 2.5, 3),
+  bty = "n", cex = 0.8
+)
 grid(col = "gray90")
-
 
 # }
 ```

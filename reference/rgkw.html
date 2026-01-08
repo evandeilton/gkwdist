@@ -9,7 +9,7 @@ distribution defined on the interval (0, 1)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@ distribution defined on the interval (0, 1)."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Generalized Kumaraswamy Distribution Random Generation</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/v1.1.1/R/gkw.R" class="external-link"><code>R/gkw.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/gkw.R" class="external-link"><code>R/gkw.R</code></a></small>
       <div class="d-none name"><code>rgkw.Rd</code></div>
     </div>
 
@@ -139,10 +139,13 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.01524 0.31493 0.46345 0.46265 0.60804 0.96441 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Histogram of generated values compared to theoretical density</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">x_sample</span>, breaks <span class="op">=</span> <span class="fl">30</span>, freq <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># freq=FALSE for density scale</span></span></span>
-<span class="r-in"><span>     main <span class="op">=</span> <span class="st">"Histogram of GKw(2,3,1,0,1) Sample"</span>, xlab <span class="op">=</span> <span class="st">"x"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2.5</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">x_sample</span>,</span></span>
+<span class="r-in"><span>  breaks <span class="op">=</span> <span class="fl">30</span>, freq <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># freq=FALSE for density scale</span></span></span>
+<span class="r-in"><span>  main <span class="op">=</span> <span class="st">"Histogram of GKw(2,3,1,0,1) Sample"</span>, xlab <span class="op">=</span> <span class="st">"x"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/curve.html" class="external-link">curve</a></span><span class="op">(</span><span class="fu"><a href="dgkw.html">dgkw</a></span><span class="op">(</span><span class="va">x</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>      add <span class="op">=</span> <span class="cn">TRUE</span>, col <span class="op">=</span> <span class="st">"red"</span>, lwd <span class="op">=</span> <span class="fl">2</span>, n <span class="op">=</span> <span class="fl">201</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  add <span class="op">=</span> <span class="cn">TRUE</span>, col <span class="op">=</span> <span class="st">"red"</span>, lwd <span class="op">=</span> <span class="fl">2</span>, n <span class="op">=</span> <span class="fl">201</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, legend <span class="op">=</span> <span class="st">"Theoretical PDF"</span>, col <span class="op">=</span> <span class="st">"red"</span>, lwd <span class="op">=</span> <span class="fl">2</span>, bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="rgkw-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
@@ -151,9 +154,11 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="va">theo_quantiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="qgkw.html">qgkw</a></span><span class="op">(</span><span class="va">prob_points</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">emp_quantiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">x_sample</span>, <span class="va">prob_points</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">theo_quantiles</span>, <span class="va">emp_quantiles</span>, pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.8</span>,</span></span>
-<span class="r-in"><span>     main <span class="op">=</span> <span class="st">"Q-Q Plot for GKw(2,3,1,0,1)"</span>,</span></span>
-<span class="r-in"><span>     xlab <span class="op">=</span> <span class="st">"Theoretical Quantiles"</span>, ylab <span class="op">=</span> <span class="st">"Empirical Quantiles (n=1000)"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">theo_quantiles</span>, <span class="va">emp_quantiles</span>,</span></span>
+<span class="r-in"><span>  pch <span class="op">=</span> <span class="fl">16</span>, cex <span class="op">=</span> <span class="fl">0.8</span>,</span></span>
+<span class="r-in"><span>  main <span class="op">=</span> <span class="st">"Q-Q Plot for GKw(2,3,1,0,1)"</span>,</span></span>
+<span class="r-in"><span>  xlab <span class="op">=</span> <span class="st">"Theoretical Quantiles"</span>, ylab <span class="op">=</span> <span class="st">"Empirical Quantiles (n=1000)"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">0</span>, b <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">"blue"</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="rgkw-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

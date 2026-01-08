@@ -208,17 +208,19 @@ cat("\nNumerical vs Analytical Gradient Comparison:\n")
 for (i in 1:nrow(test_points)) {
   grad_analytical <- grkw(par = test_points[i, ], data = data)
   grad_numerical <- numerical_gradient(llkw, test_points[i, ], data)
-  
-  cat("\nPoint", i, ": alpha =", test_points[i, 1], 
-      ", beta =", test_points[i, 2], "\n")
-  
+
+  cat(
+    "\nPoint", i, ": alpha =", test_points[i, 1],
+    ", beta =", test_points[i, 2], "\n"
+  )
+
   comparison <- data.frame(
     Parameter = c("alpha", "beta"),
     Analytical = grad_analytical,
     Numerical = grad_numerical,
     Abs_Diff = abs(grad_analytical - grad_numerical),
-    Rel_Error = abs(grad_analytical - grad_numerical) / 
-                (abs(grad_analytical) + 1e-10)
+    Rel_Error = abs(grad_analytical - grad_numerical) /
+      (abs(grad_analytical) + 1e-10)
   )
   print(comparison, digits = 8)
 }
@@ -259,34 +261,38 @@ grad_beta <- matrix(NA, nrow = length(alpha_grid), ncol = length(beta_grid))
 for (i in seq_along(alpha_grid)) {
   for (j in seq_along(beta_grid)) {
     g <- grkw(c(alpha_grid[i], beta_grid[j]), data)
-    grad_alpha[i, j] <- -g[1]  # Negative for gradient ascent
+    grad_alpha[i, j] <- -g[1] # Negative for gradient ascent
     grad_beta[i, j] <- -g[2]
   }
 }
 
 # Plot gradient field
 
-plot(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5,
-     xlim = range(alpha_grid), ylim = range(beta_grid),
-     xlab = expression(alpha), ylab = expression(beta),
-     main = "Gradient Vector Field", las = 1)
+plot(mle[1], mle[2],
+  pch = 19, col = "#8B0000", cex = 1.5,
+  xlim = range(alpha_grid), ylim = range(beta_grid),
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "Gradient Vector Field", las = 1
+)
 
 # Subsample for clearer visualization
 step <- 2
 for (i in seq(1, length(alpha_grid), by = step)) {
   for (j in seq(1, length(beta_grid), by = step)) {
     arrows(alpha_grid[i], beta_grid[j],
-           alpha_grid[i] + 0.05 * grad_alpha[i, j],
-           beta_grid[j] + 0.05 * grad_beta[i, j],
-           length = 0.05, col = "#2E4057", lwd = 1)
+      alpha_grid[i] + 0.05 * grad_alpha[i, j],
+      beta_grid[j] + 0.05 * grad_beta[i, j],
+      length = 0.05, col = "#2E4057", lwd = 1
+    )
   }
 }
 
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 legend("topright",
-       legend = c("MLE", "True"),
-       col = c("#8B0000", "#006400"),
-       pch = c(19, 17), bty = "n")
+  legend = c("MLE", "True"),
+  col = c("#8B0000", "#006400"),
+  pch = c(19, 17), bty = "n"
+)
 grid(col = "gray90")
 
 
@@ -295,7 +301,7 @@ grid(col = "gray90")
 
 # Score test for H0: theta = theta0
 theta0 <- c(2, 3)
-score_theta0 <- -grkw(par = theta0, data = data)  # Score is negative gradient
+score_theta0 <- -grkw(par = theta0, data = data) # Score is negative gradient
 
 # Fisher information at theta0 (using Hessian)
 fisher_info <- hskw(par = theta0, data = data)
@@ -315,6 +321,5 @@ cat("Test statistic:", score_stat, "\n")
 #> Test statistic: 55.14706 
 cat("P-value:", format.pval(p_value, digits = 4), "\n")
 #> P-value: 1.059e-12 
-
 # }
 ```

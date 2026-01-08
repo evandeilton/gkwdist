@@ -124,8 +124,10 @@ print(quantiles)
 #> [1] 0.1857703 0.4542020 0.7320117
 
 # Compare with qgkw setting gamma = 1, delta = 0, lambda = 1
-quantiles_gkw <- qgkw(p_vals, alpha = alpha_par, beta = beta_par,
-                     gamma = 1.0, delta = 0.0, lambda = 1.0)
+quantiles_gkw <- qgkw(p_vals,
+  alpha = alpha_par, beta = beta_par,
+  gamma = 1.0, delta = 0.0, lambda = 1.0
+)
 print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
 #> [1] "Max difference: 0"
 
@@ -142,6 +144,5 @@ print(qkw(c(0, 1), alpha_par, beta_par)) # Should be 0, 1
 #> [1] 0 1
 print(qkw(c(-Inf, 0), alpha_par, beta_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
-
 # }
 ```

@@ -17,7 +17,7 @@ the parameter \(\gamma = 1\)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,7 @@ the parameter \(\gamma = 1\)."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Quantile Function of the Kumaraswamy-Kumaraswamy (kkw) Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/v1.1.1/R/kkw.R" class="external-link"><code>R/kkw.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/kkw.R" class="external-link"><code>R/kkw.R</code></a></small>
       <div class="d-none name"><code>qkkw.Rd</code></div>
     </div>
 
@@ -173,7 +173,8 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="co"># Calculate quantiles for upper tail probabilities P(X &gt; q) = p</span></span></span>
 <span class="r-in"><span><span class="co"># e.g., for p=0.1, find q such that P(X &gt; q) = 0.1 (90th percentile)</span></span></span>
 <span class="r-in"><span><span class="va">quantiles_upper</span> <span class="op">&lt;-</span> <span class="fu">qkkw</span><span class="op">(</span><span class="va">p_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">delta_par</span>, <span class="va">lambda_par</span>,</span></span>
-<span class="r-in"><span>                         lower.tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  lower.tail <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">quantiles_upper</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.6851540 0.4631919 0.2425575</span>
 <span class="r-in"><span><span class="co"># Check: qkkw(p, ..., lt=F) == qkkw(1-p, ..., lt=T)</span></span></span>
@@ -183,7 +184,8 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="co"># Calculate quantiles from log probabilities</span></span></span>
 <span class="r-in"><span><span class="va">log.p_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">p_vals</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">quantiles_logp</span> <span class="op">&lt;-</span> <span class="fu">qkkw</span><span class="op">(</span><span class="va">log.p_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">delta_par</span>, <span class="va">lambda_par</span>,</span></span>
-<span class="r-in"><span>                        log.p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  log.p <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">quantiles_logp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.2425575 0.4631919 0.6851540</span>
 <span class="r-in"><span><span class="co"># Check: should match original quantiles</span></span></span>
@@ -191,8 +193,10 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.2425575 0.4631919 0.6851540</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare with qgkw setting gamma = 1</span></span></span>
-<span class="r-in"><span><span class="va">quantiles_gkw</span> <span class="op">&lt;-</span> <span class="fu"><a href="qgkw.html">qgkw</a></span><span class="op">(</span><span class="va">p_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, gamma <span class="op">=</span> <span class="fl">1.0</span>,</span></span>
-<span class="r-in"><span>                      <span class="va">delta_par</span>, <span class="va">lambda_par</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">quantiles_gkw</span> <span class="op">&lt;-</span> <span class="fu"><a href="qgkw.html">qgkw</a></span><span class="op">(</span><span class="va">p_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>,</span></span>
+<span class="r-in"><span>  gamma <span class="op">=</span> <span class="fl">1.0</span>,</span></span>
+<span class="r-in"><span>  <span class="va">delta_par</span>, <span class="va">lambda_par</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Max difference:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">quantiles</span> <span class="op">-</span> <span class="va">quantiles_gkw</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># Should be near zero</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Max difference: 0"</span>
 <span class="r-in"><span></span></span>
@@ -209,7 +213,6 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 1</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">qkkw</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>, <span class="fl">0</span><span class="op">)</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">delta_par</span>, <span class="va">lambda_par</span>, log.p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="co"># Should be 0, 1</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0 1</span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

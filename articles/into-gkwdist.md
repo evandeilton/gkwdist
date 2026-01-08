@@ -700,17 +700,17 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] gkwdist_1.1.1
+#> [1] gkwdist_1.1.2
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] digest_0.6.39          desc_1.4.3             R6_2.6.1              
-#>  [4] numDeriv_2016.8-1.1    RcppArmadillo_15.2.2-1 fastmap_1.2.0         
-#>  [7] xfun_0.54              magrittr_2.0.4         cachem_1.1.0          
-#> [10] knitr_1.50             htmltools_0.5.8.1      rmarkdown_2.30        
+#>  [4] numDeriv_2016.8-1.1    RcppArmadillo_15.2.3-1 fastmap_1.2.0         
+#>  [7] xfun_0.55              magrittr_2.0.4         cachem_1.1.0          
+#> [10] knitr_1.51             htmltools_0.5.9        rmarkdown_2.30        
 #> [13] lifecycle_1.0.4        cli_3.6.5              sass_0.4.10           
 #> [16] pkgdown_2.2.0          textshaping_1.0.4      jquerylib_0.1.4       
 #> [19] systemfonts_1.3.1      compiler_4.5.2         tools_4.5.2           
 #> [22] ragg_1.5.0             evaluate_1.0.5         bslib_0.9.0           
-#> [25] Rcpp_1.1.0             yaml_2.3.10            jsonlite_2.0.0        
+#> [25] Rcpp_1.1.0             yaml_2.3.12            jsonlite_2.0.0        
 #> [28] rlang_1.1.6            fs_1.6.6
 ```

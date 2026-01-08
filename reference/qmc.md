@@ -129,7 +129,8 @@ print(stats::qbeta(p_vals, shape1 = gamma_par, shape2 = delta_par + 1))
 
 # Calculate quantiles for upper tail probabilities P(X > q) = p
 quantiles_upper <- qmc(p_vals, gamma_par, delta_par, lambda_par,
-                       lower.tail = FALSE)
+  lower.tail = FALSE
+)
 print(quantiles_upper)
 #> [1] 0.7379563 0.4355544 0.1649288
 # Check: qmc(p, ..., lt=F) == qmc(1-p, ..., lt=T)
@@ -146,8 +147,10 @@ print(quantiles)
 #> [1] 0.1649288 0.4355544 0.7379563
 
 # Compare with qgkw setting alpha = 1, beta = 1
-quantiles_gkw <- qgkw(p_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
-                      delta = delta_par, lambda = lambda_par)
+quantiles_gkw <- qgkw(p_vals,
+  alpha = 1.0, beta = 1.0, gamma = gamma_par,
+  delta = delta_par, lambda = lambda_par
+)
 print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
 #> [1] "Max difference: 5.55111512312578e-17"
 
@@ -164,6 +167,5 @@ print(qmc(c(0, 1), gamma_par, delta_par, lambda_par)) # Should be 0, 1
 #> [1] 0 1
 print(qmc(c(-Inf, 0), gamma_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
-
 # }
 ```

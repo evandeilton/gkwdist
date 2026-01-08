@@ -104,11 +104,11 @@ summary(x_sample)
 # Compare with stats::rbeta
 x_sample_stats <- stats::rbeta(1000, shape1 = shape1, shape2 = shape2)
 # Visually compare histograms or QQ-plots
-hist(x_sample, main="rbeta_ Sample", freq=FALSE, breaks=30)
-curve(dbeta_(x, gamma_par, delta_par), add=TRUE, col="red", lwd=2)
+hist(x_sample, main = "rbeta_ Sample", freq = FALSE, breaks = 30)
+curve(dbeta_(x, gamma_par, delta_par), add = TRUE, col = "red", lwd = 2)
 
-hist(x_sample_stats, main="stats::rbeta Sample", freq=FALSE, breaks=30)
-curve(stats::dbeta(x, shape1, shape2), add=TRUE, col="blue", lwd=2)
+hist(x_sample_stats, main = "stats::rbeta Sample", freq = FALSE, breaks = 30)
+curve(stats::dbeta(x, shape1, shape2), add = TRUE, col = "blue", lwd = 2)
 
 # Compare summary stats (should be similar due to randomness)
 print(summary(x_sample))
@@ -119,8 +119,10 @@ print(summary(x_sample_stats))
 #> 0.01034 0.19696 0.31440 0.33723 0.45535 0.84423 
 
 # Compare summary stats with rgkw(alpha=1, beta=1, lambda=1)
-x_sample_gkw <- rgkw(1000, alpha = 1.0, beta = 1.0, gamma = gamma_par,
-                     delta = delta_par, lambda = 1.0)
+x_sample_gkw <- rgkw(1000,
+  alpha = 1.0, beta = 1.0, gamma = gamma_par,
+  delta = delta_par, lambda = 1.0
+)
 print("Summary stats for rgkw(a=1,b=1,l=1) sample:")
 #> [1] "Summary stats for rgkw(a=1,b=1,l=1) sample:"
 print(summary(x_sample_gkw))
@@ -134,6 +136,5 @@ print("Summary stats for rmc(l=1) sample:")
 print(summary(x_sample_mc))
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #> 0.00105 0.19221 0.31254 0.33300 0.45504 0.91894 
-
 # }
 ```

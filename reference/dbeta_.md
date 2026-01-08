@@ -112,8 +112,10 @@ print(paste("Max difference vs stats::dbeta:", max(abs(densities - densities_sta
 #> [1] "Max difference vs stats::dbeta: 0"
 
 # Compare with dgkw setting alpha=1, beta=1, lambda=1
-densities_gkw <- dgkw(x_vals, alpha = 1.0, beta = 1.0, gamma = gamma_par,
-                      delta = delta_par, lambda = 1.0)
+densities_gkw <- dgkw(x_vals,
+  alpha = 1.0, beta = 1.0, gamma = gamma_par,
+  delta = delta_par, lambda = 1.0
+)
 print(paste("Max difference vs dgkw:", max(abs(densities - densities_gkw))))
 #> [1] "Max difference vs dgkw: 0"
 
@@ -132,12 +134,15 @@ print(stats::dbeta(x_vals, shape1 = shape1, shape2 = shape2, log = TRUE))
 # Plot the density
 curve_x <- seq(0.001, 0.999, length.out = 200)
 curve_y <- dbeta_(curve_x, gamma = 2, delta = 3) # Beta(2, 4)
-plot(curve_x, curve_y, type = "l", main = "Beta(2, 4) Density via dbeta_",
-     xlab = "x", ylab = "f(x)", col = "blue")
-curve(stats::dbeta(x, 2, 4), add=TRUE, col="red", lty=2)
-legend("topright", legend=c("dbeta_(gamma=2, delta=3)", "stats::dbeta(shape1=2, shape2=4)"),
-       col=c("blue", "red"), lty=c(1,2), bty="n")
-
+plot(curve_x, curve_y,
+  type = "l", main = "Beta(2, 4) Density via dbeta_",
+  xlab = "x", ylab = "f(x)", col = "blue"
+)
+curve(stats::dbeta(x, 2, 4), add = TRUE, col = "red", lty = 2)
+legend("topright",
+  legend = c("dbeta_(gamma=2, delta=3)", "stats::dbeta(shape1=2, shape2=4)"),
+  col = c("blue", "red"), lty = c(1, 2), bty = "n"
+)
 
 # }
 ```

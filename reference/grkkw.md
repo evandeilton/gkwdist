@@ -112,8 +112,10 @@ Lopes, J. E.
 set.seed(123)
 n <- 1000
 true_params <- c(alpha = 2.0, beta = 3.0, delta = 1.5, lambda = 2.0)
-data <- rkkw(n, alpha = true_params[1], beta = true_params[2],
-             delta = true_params[3], lambda = true_params[4])
+data <- rkkw(n,
+  alpha = true_params[1], beta = true_params[2],
+  delta = true_params[3], lambda = true_params[4]
+)
 
 # Evaluate gradient at true parameters
 grad_true <- grkkw(par = true_params, data = data)
@@ -230,7 +232,7 @@ comparison_grad <- data.frame(
   Numerical = grad_numerical,
   Abs_Diff = abs(grad_analytical - grad_numerical),
   Rel_Error = abs(grad_analytical - grad_numerical) /
-              (abs(grad_analytical) + 1e-10)
+    (abs(grad_analytical) + 1e-10)
 )
 print(comparison_grad, digits = 8)
 #>   Parameter   Analytical    Numerical      Abs_Diff     Rel_Error
@@ -290,9 +292,11 @@ ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
 ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
 
 # Plot
-plot(ellipse[, 1], ellipse[, 2], type = "l", lwd = 2, col = "#2E4057",
-     xlab = expression(alpha), ylab = expression(beta),
-     main = "95% Confidence Region (Alpha vs Beta)", las = 1)
+plot(ellipse[, 1], ellipse[, 2],
+  type = "l", lwd = 2, col = "#2E4057",
+  xlab = expression(alpha), ylab = expression(beta),
+  main = "95% Confidence Region (Alpha vs Beta)", las = 1
+)
 
 # Add marginal CIs
 abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
@@ -302,12 +306,13 @@ points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
 points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
 
 legend("topright",
-       legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-       col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-       pch = c(19, 17, NA, NA),
-       lty = c(NA, NA, 1, 3),
-       lwd = c(NA, NA, 2, 1.5),
-       bty = "n")
+  legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
+  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
+  pch = c(19, 17, NA, NA),
+  lty = c(NA, NA, 1, 3),
+  lwd = c(NA, NA, 2, 1.5),
+  bty = "n"
+)
 grid(col = "gray90")
 
 # }

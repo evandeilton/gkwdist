@@ -105,22 +105,28 @@ print(log(densities))
 #> [1]  0.1006776  0.5232481 -0.4746866
 
 # Compare with dgkw setting gamma = 1, delta = 0, lambda = 1
-densities_gkw <- dgkw(x_vals, alpha_par, beta_par, gamma = 1.0, delta = 0.0,
-                      lambda = 1.0)
+densities_gkw <- dgkw(x_vals, alpha_par, beta_par,
+  gamma = 1.0, delta = 0.0,
+  lambda = 1.0
+)
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
 #> [1] "Max difference: 2.22044604925031e-16"
 
 # Plot the density for different shape parameter combinations
 curve_x <- seq(0.001, 0.999, length.out = 200)
-plot(curve_x, dkw(curve_x, alpha = 2, beta = 3), type = "l",
-     main = "Kumaraswamy Density Examples", xlab = "x", ylab = "f(x)",
-     col = "blue", ylim = c(0, 4))
+plot(curve_x, dkw(curve_x, alpha = 2, beta = 3),
+  type = "l",
+  main = "Kumaraswamy Density Examples", xlab = "x", ylab = "f(x)",
+  col = "blue", ylim = c(0, 4)
+)
 lines(curve_x, dkw(curve_x, alpha = 3, beta = 2), col = "red")
 lines(curve_x, dkw(curve_x, alpha = 0.5, beta = 0.5), col = "green") # U-shaped
 lines(curve_x, dkw(curve_x, alpha = 5, beta = 1), col = "purple") # J-shaped
 lines(curve_x, dkw(curve_x, alpha = 1, beta = 3), col = "orange") # J-shaped (reversed)
-legend("top", legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
-       col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2)
+legend("top",
+  legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
+  col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
+)
 
 # }
 ```

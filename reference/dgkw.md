@@ -128,12 +128,16 @@ pdf_beta_check <- stats::dbeta(x_vals, shape1 = 2, shape2 = 3 + 1)
 # Exponentiated Kumaraswamy (gamma=1, delta=0)
 pdf_ekw <- dgkw(x_vals, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 2)
 
-plot(x_vals, pdf_kw, type = "l", ylim = range(c(pdf_kw, pdf_beta, pdf_ekw)),
-     main = "GKw Densities Examples", ylab = "f(x)", xlab="x", col = "blue")
+plot(x_vals, pdf_kw,
+  type = "l", ylim = range(c(pdf_kw, pdf_beta, pdf_ekw)),
+  main = "GKw Densities Examples", ylab = "f(x)", xlab = "x", col = "blue"
+)
 lines(x_vals, pdf_beta, col = "red")
 lines(x_vals, pdf_ekw, col = "green")
-legend("topright", legend = c("Kw(2,3)", "Beta(2,4) equivalent", "EKw(2,3, lambda=2)"),
-       col = c("blue", "red", "green"), lty = 1, bty = "n")
+legend("topright",
+  legend = c("Kw(2,3)", "Beta(2,4) equivalent", "EKw(2,3, lambda=2)"),
+  col = c("blue", "red", "green"), lty = 1, bty = "n"
+)
 
 
 # Log-density
@@ -142,6 +146,5 @@ print(log.pdf_val)
 #> [1] 0.5232481
 print(log(dgkw(0.5, 2, 3, 1, 0, 1))) # Should match
 #> [1] 0.5232481
-
 # }
 ```
