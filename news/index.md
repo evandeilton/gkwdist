@@ -2,6 +2,8 @@
 
 ## gkwdist 1.1.2
 
+CRAN release: 2026-01-08
+
 ### Code Cleanup and Testing Enhancement
 
 #### C++ Code Cleanup

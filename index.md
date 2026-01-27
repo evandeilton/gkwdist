@@ -119,7 +119,7 @@ Simplifying:
 
 $$f_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = \frac{\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\gamma - 1}\left( 1 - x^{\alpha} \right)^{\beta{(\delta - 1)}}$$
 
-$$= \frac{\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta\delta - 1}\left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\gamma - 1}$$
+$$f_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = \frac{\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta\delta - 1}\left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\gamma - 1}$$
 
 **CDF:**
 
