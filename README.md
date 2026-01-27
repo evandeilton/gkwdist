@@ -121,7 +121,7 @@ Simplifying:
 
 $$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left(1-(1-x^\alpha)^\beta\right)^{\gamma-1} (1-x^\alpha)^{\beta(\delta-1)}$$
 
-$$= \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta\delta-1} \left(1-(1-x^\alpha)^\beta\right)^{\gamma-1}$$
+$$f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta)} x^{\alpha-1} (1-x^\alpha)^{\beta\delta-1} \left(1-(1-x^\alpha)^\beta\right)^{\gamma-1}$$
 
 **CDF:**
 
