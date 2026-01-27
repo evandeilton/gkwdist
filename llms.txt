@@ -25,8 +25,10 @@ parameter values
 ## Installation
 
 ``` r
-# Install from GitHub
-# install.packages("devtools")
+# Install from CRAN
+install.packages("devtools")
+
+# Or Install from GitHub
 devtools::install_github("evandeilton/gkwdist")
 ```
 
@@ -93,11 +95,11 @@ where $B_{z}(a,b) = \int_{0}^{z}t^{a - 1}(1 - t)^{b - 1}dt$.
 
 **PDF:**
 
-$$f_{\text{GKw}}(x;\alpha,\beta,\gamma,\delta,\lambda) = \frac{\lambda\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\gamma\lambda - 1}\left( 1 - \left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\lambda} \right)^{\delta - 1}$$
+$$f_{\text{GKw}}(x;\alpha,\beta,\gamma,\delta,\lambda) = \frac{\lambda\alpha\beta}{B(\gamma,\delta + 1)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\gamma\lambda - 1}\left\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda} \right\}^{\delta}$$
 
 **CDF:**
 
-$$F_{\text{GKw}}(x;\alpha,\beta,\gamma,\delta,\lambda) = I_{{(1 - {(1 - x^{\alpha})}^{\beta})}^{\lambda}}(\gamma,\delta)$$
+$$F_{\text{GKw}}(x;\alpha,\beta,\gamma,\delta,\lambda) = I_{{\lbrack 1 - {(1 - x^{\alpha})}^{\beta}\rbrack}^{\lambda}}(\gamma,\delta + 1)$$
 
 **Quantile:** Numerical inversion of the CDF via root-finding
 algorithms.
@@ -113,25 +115,19 @@ Numerical integration or simulation methods required.
 
 **PDF:**
 
-$$f_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = \frac{\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\gamma - 1}\left( 1 - \left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right) \right)^{\delta - 1}$$
-
-Simplifying:
-
-$$f_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = \frac{\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\gamma - 1}\left( 1 - x^{\alpha} \right)^{\beta{(\delta - 1)}}$$
-
-$$f_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = \frac{\alpha\beta}{B(\gamma,\delta)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta\delta - 1}\left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\gamma - 1}$$
+$$f_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = \frac{\alpha\beta}{B(\gamma,\delta + 1)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta\delta + \beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\gamma - 1}$$
 
 **CDF:**
 
-$$F_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = I_{1 - {(1 - x^{\alpha})}^{\beta}}(\gamma,\delta)$$
+$$F_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = I_{1 - {(1 - x^{\alpha})}^{\beta}}(\gamma,\delta + 1)$$
 
 **Quantile:** Numerical inversion via root-finding. For the inverse:
 
-$$u = I_{y}(\gamma,\delta)\quad\text{where}\quad y = 1 - \left( 1 - x^{\alpha} \right)^{\beta}$$
+$$u = I_{y}(\gamma,\delta + 1)\quad\text{where}\quad y = 1 - \left( 1 - x^{\alpha} \right)^{\beta}$$
 
 Solving for $x$:
 
-$$x = \left( 1 - \left( 1 - I_{u}^{- 1}(\gamma,\delta) \right)^{1/\beta} \right)^{1/\alpha}$$
+$$x = \left( 1 - \left( 1 - I_{u}^{- 1}(\gamma,\delta + 1) \right)^{1/\beta} \right)^{1/\alpha}$$
 
 ------------------------------------------------------------------------
 
@@ -141,15 +137,15 @@ $$x = \left( 1 - \left( 1 - I_{u}^{- 1}(\gamma,\delta) \right)^{1/\beta} \right)
 
 **PDF:**
 
-$$f_{\text{KKw}}(x;\alpha,\beta,\delta,\lambda) = \alpha\beta\delta\lambda\, x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\lambda - 1}\left( 1 - \left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\lambda} \right)^{\delta - 1}$$
+$$f_{\text{KKw}}(x;\alpha,\beta,\delta,\lambda) = \lambda\alpha\beta(\delta + 1)\, x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda - 1}\left\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda} \right\}^{\delta}$$
 
 **CDF:**
 
-$$F_{\text{KKw}}(x;\alpha,\beta,\delta,\lambda) = 1 - \left( 1 - \left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\lambda} \right)^{\delta}$$
+$$F_{\text{KKw}}(x;\alpha,\beta,\delta,\lambda) = 1 - \left\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda} \right\}^{\delta + 1}$$
 
 **Quantile (closed-form):**
 
-$$Q_{\text{KKw}}(p;\alpha,\beta,\delta,\lambda) = \left( 1 - \left( 1 - \left( 1 - (1 - p)^{1/\delta} \right)^{1/\lambda} \right)^{1/\beta} \right)^{1/\alpha}$$
+$$Q_{\text{KKw}}(p;\alpha,\beta,\delta,\lambda) = \left( 1 - \left( 1 - \left( 1 - (1 - p)^{1/{(\delta + 1)}} \right)^{1/\lambda} \right)^{1/\beta} \right)^{1/\alpha}$$
 
 **Moments:** Analytical expressions not available in closed form.
 
@@ -157,15 +153,15 @@ $$Q_{\text{KKw}}(p;\alpha,\beta,\delta,\lambda) = \left( 1 - \left( 1 - \left( 1
 
 ### 4. Exponentiated Kumaraswamy (EKw)
 
-**Relationship:** Special case of GKw with $\gamma = \delta = 1$
+**Relationship:** Special case of GKw with $\gamma = 1$ and $\delta = 0$
 
 **PDF:**
 
-$$f_{\text{EKw}}(x;\alpha,\beta,\lambda) = \lambda\alpha\beta\, x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\lambda - 1}$$
+$$f_{\text{EKw}}(x;\alpha,\beta,\lambda) = \lambda\alpha\beta\, x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda - 1}$$
 
 **CDF:**
 
-$$F_{\text{EKw}}(x;\alpha,\beta,\lambda) = \left( 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right)^{\lambda}$$
+$$F_{\text{EKw}}(x;\alpha,\beta,\lambda) = \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda}$$
 
 **Quantile (closed-form):**
 
@@ -173,10 +169,10 @@ $$Q_{\text{EKw}}(p;\alpha,\beta,\lambda) = \left( 1 - \left( 1 - p^{1/\lambda} \
 
 **Moments:**
 
-$${\mathbb{E}}\left( X^{r} \right) = \lambda\sum\limits_{k = 0}^{\infty}\frac{( - 1)^{k}\left( \frac{\lambda}{k + 1} \right)}{k + 1} \cdot \beta\, B\left( 1 + \frac{r}{\alpha},(k + 1)\beta \right)$$
+$${\mathbb{E}}\left( X^{r} \right) = \lambda\sum\limits_{k = 0}^{\infty}\frac{( - 1)^{k}\left( \frac{\lambda - 1}{k} \right)}{k + 1} \cdot \beta\, B\left( 1 + \frac{r}{\alpha},(k + 1)\beta \right)$$
 
 where the binomial coefficient is generalized:
-$\left( \frac{\lambda}{k + 1} \right) = \frac{\lambda(\lambda - 1)\cdots(\lambda - k)}{(k + 1)!}$.
+$\left( \frac{\lambda - 1}{k} \right) = \frac{(\lambda - 1)(\lambda - 2)\cdots(\lambda - k)}{k!}$.
 
 ------------------------------------------------------------------------
 
@@ -186,22 +182,23 @@ $\left( \frac{\lambda}{k + 1} \right) = \frac{\lambda(\lambda - 1)\cdots(\lambda
 
 **PDF:**
 
-$$f_{\text{MC}}(x;\gamma,\delta,\lambda) = \frac{\lambda}{B(\gamma,\delta)}x^{\gamma\lambda - 1}\left( 1 - x^{\lambda} \right)^{\delta - 1}$$
+$$f_{\text{MC}}(x;\gamma,\delta,\lambda) = \frac{\lambda}{B(\gamma,\delta + 1)}x^{\gamma\lambda - 1}\left( 1 - x^{\lambda} \right)^{\delta}$$
 
 **CDF:**
 
-$$F_{\text{MC}}(x;\gamma,\delta,\lambda) = I_{x^{\lambda}}(\gamma,\delta)$$
+$$F_{\text{MC}}(x;\gamma,\delta,\lambda) = I_{x^{\lambda}}(\gamma,\delta + 1)$$
 
 **Quantile:**
 
-$$Q_{\text{MC}}(p;\gamma,\delta,\lambda) = \left( I_{p}^{- 1}(\gamma,\delta) \right)^{1/\lambda}$$
+$$Q_{\text{MC}}(p;\gamma,\delta,\lambda) = \left( I_{p}^{- 1}(\gamma,\delta + 1) \right)^{1/\lambda}$$
 
-where $I_{p}^{- 1}(\gamma,\delta)$ is the inverse regularized incomplete
-beta function (quantile function of the Beta distribution).
+where $I_{p}^{- 1}(\gamma,\delta + 1)$ is the inverse regularized
+incomplete beta function (quantile function of the Beta distribution
+with parameters $\gamma$ and $\delta + 1$).
 
 **Moments:**
 
-$${\mathbb{E}}\left( X^{r} \right) = \frac{B(\gamma + r/\lambda,\delta)}{B(\gamma,\delta)}$$
+$${\mathbb{E}}\left( X^{r} \right) = \frac{B(\gamma + r/\lambda,\delta + 1)}{B(\gamma,\delta + 1)}$$
 
 which is valid for $r/\lambda > - \gamma$.
 
@@ -209,8 +206,8 @@ which is valid for $r/\lambda > - \gamma$.
 
 ### 6. Kumaraswamy (Kw)
 
-**Relationship:** Special case of GKw with
-$\gamma = \delta = \lambda = 1$
+**Relationship:** Special case of GKw with $\gamma = 1$, $\delta = 0$,
+$\lambda = 1$
 
 **PDF:**
 
@@ -245,25 +242,31 @@ $$\text{Var}(X) = {\mathbb{E}}\left( X^{2} \right) - \left( {\mathbb{E}}(X) \rig
 **Relationship:** Special case of GKw with
 $\alpha = \beta = \lambda = 1$
 
+**Note on Parameterization:** This package uses a parameterization where
+the Beta distribution has parameters $(\gamma,\delta + 1)$,
+corresponding to the standard
+$\text{Beta}\left( \text{shape}_{1},\text{shape}_{2} \right)$ with
+$\text{shape}_{1} = \gamma$ and $\text{shape}_{2} = \delta + 1$.
+
 **PDF:**
 
-$$f_{\text{Beta}}(x;\gamma,\delta) = \frac{1}{B(\gamma,\delta)}x^{\gamma - 1}(1 - x)^{\delta - 1}$$
+$$f_{\text{Beta}}(x;\gamma,\delta) = \frac{1}{B(\gamma,\delta + 1)}x^{\gamma - 1}(1 - x)^{\delta}$$
 
 **CDF:**
 
-$$F_{\text{Beta}}(x;\gamma,\delta) = I_{x}(\gamma,\delta)$$
+$$F_{\text{Beta}}(x;\gamma,\delta) = I_{x}(\gamma,\delta + 1)$$
 
 **Quantile:**
 
-$$Q_{\text{Beta}}(p;\gamma,\delta) = I_{p}^{- 1}(\gamma,\delta)$$
+$$Q_{\text{Beta}}(p;\gamma,\delta) = I_{p}^{- 1}(\gamma,\delta + 1)$$
 
 **Moments:**
 
-$${\mathbb{E}}\left( X^{r} \right) = \frac{B(\gamma + r,\delta)}{B(\gamma,\delta)} = \frac{\Gamma(\gamma + r)\,\Gamma(\gamma + \delta)}{\Gamma(\gamma)\,\Gamma(\gamma + \delta + r)}$$
+$${\mathbb{E}}\left( X^{r} \right) = \frac{B(\gamma + r,\delta + 1)}{B(\gamma,\delta + 1)} = \frac{\Gamma(\gamma + r)\,\Gamma(\gamma + \delta + 1)}{\Gamma(\gamma)\,\Gamma(\gamma + \delta + 1 + r)}$$
 
-$${\mathbb{E}}(X) = \frac{\gamma}{\gamma + \delta}$$
+$${\mathbb{E}}(X) = \frac{\gamma}{\gamma + \delta + 1}$$
 
-$$\text{Var}(X) = \frac{\gamma\delta}{(\gamma + \delta)^{2}(\gamma + \delta + 1)}$$
+$$\text{Var}(X) = \frac{\gamma(\delta + 1)}{(\gamma + \delta + 1)^{2}(\gamma + \delta + 2)}$$
 
 ------------------------------------------------------------------------
 
@@ -276,11 +279,11 @@ $$\text{Var}(X) = \frac{\gamma\delta}{(\gamma + \delta)^{2}(\gamma + \delta + 1)
                             /                    \
                    BKw(α, β, γ, δ)         KKw(α, β, δ, λ)
                          |                          |
-                     α = β = 1                    δ = 1
+                     α = β = 1                    δ = 0
                          |                          |
                     MC(γ, δ, λ)              EKw(α, β, λ)
                          |                          |
-                      λ = 1                    γ = δ = 1
+                      λ = 1                       λ = 1
                          |                          |
                     Beta(γ, δ)                   Kw(α, β)
 ```
@@ -288,7 +291,8 @@ $$\text{Var}(X) = \frac{\gamma\delta}{(\gamma + \delta)^{2}(\gamma + \delta + 1)
 **Note:** The Beta distribution is obtained from MC by setting
 $\lambda = 1$, or from GKw by setting $\alpha = \beta = \lambda = 1$.
 The Kumaraswamy distribution is obtained from EKw by setting
-$\lambda = 1$, or from GKw by setting $\gamma = \delta = \lambda = 1$.
+$\lambda = 1$, or from GKw by setting $\gamma = 1$, $\delta = 0$,
+$\lambda = 1$.
 
 ------------------------------------------------------------------------
 
@@ -696,14 +700,14 @@ plot(benchmark)
 
 ## References
 
+- **Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010).** A
+  new generalized Kumaraswamy distribution. *arXiv:1004.0911*.
+  [arxiv.org/abs/1004.0911](https://arxiv.org/abs/1004.0911)
+
 - **Cordeiro, G. M., & de Castro, M. (2011).** A new family of
   generalized distributions. *Journal of Statistical Computation and
   Simulation*, 81(7), 883-898.
   [doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
-
-- **Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010).** A
-  new generalized Kumaraswamy distribution. *arXiv:1004.0911*.
-  [arxiv.org/abs/1004.0911](https://arxiv.org/abs/1004.0911)
 
 - **Kumaraswamy, P. (1980).** A generalized probability density function
   for double-bounded random processes. *Journal of Hydrology*, 46(1-2),
@@ -715,14 +719,9 @@ plot(benchmark)
   Methodology*, 6(1), 70-81.
   [doi:10.1016/j.stamet.2008.04.001](https://doi.org/10.1016/j.stamet.2008.04.001)
 
-- **Lemonte, A. J., & Cordeiro, G. M. (2013).** An extended Lomax
-  distribution. *Statistics*, 47(4), 800-816.
-  [doi:10.1080/02331888.2011.568119](https://doi.org/10.1080/02331888.2011.568119)
-
-- **Cordeiro, G. M., & Lemonte, A. J. (2011).** The β-Birnbaum–Saunders
-  distribution: An improved distribution for fatigue life modeling.
-  *Computational Statistics & Data Analysis*, 55(3), 1445-1461.
-  [doi:10.1016/j.csda.2010.10.007](https://doi.org/10.1016/j.csda.2010.10.007)
+- **Nadarajah, S., Cordeiro, G. M., & Ortega, E. M. (2012).** The
+  exponentiated Kumaraswamy distribution. *Journal of the Franklin
+  Institute*, 349(3), 1180-1214.
 
 - **McDonald, J. B. (1984).** Some generalized functions for the size
   distribution of income. *Econometrica*, 52(3), 647-663.
