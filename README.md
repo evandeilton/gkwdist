@@ -29,9 +29,10 @@ parameter values
 
 ``` r
 # Install from CRAN
-install.packages("devtools")
+install.packages("gkwdist")
 
 # Or Install from GitHub
+# install.packages("devtools")
 devtools::install_github("evandeilton/gkwdist")
 ```
 
@@ -97,7 +98,7 @@ where $B_z(a,b) = \int_0^z t^{a-1}(1-t)^{b-1}dt$.
 
 **PDF:**
 
-$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta+1)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma\lambda-1} \left\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right\}^{\delta}$$
+$$f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta+1)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma\lambda-1} \left(1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right)^{\delta}$$
 
 **CDF:**
 
@@ -139,11 +140,11 @@ $$x = \left(1-\left(1-I_u^{-1}(\gamma, \delta+1)\right)^{1/\beta}\right)^{1/\alp
 
 **PDF:**
 
-$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \lambda \alpha \beta (\delta+1) \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\lambda-1} \left\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right\}^{\delta}$$
+$$f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \lambda \alpha \beta (\delta+1) \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\lambda-1} \left(1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right)^{\delta}$$
 
 **CDF:**
 
-$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \left\{1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right\}^{\delta+1}$$
+$$F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \left(1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right)^{\delta+1}$$
 
 **Quantile (closed-form):**
 
