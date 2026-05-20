@@ -92,7 +92,7 @@ print(params_beta)
 params_kw <- gkwgetstartvalues(x, family = "kw")
 print(params_kw)
 #>    alpha     beta 
-#> 1.972954 1.895691 
+#> 1.972954 3.791382 
 
 # Estimate GKw parameters with more starting points
 params_gkw <- gkwgetstartvalues(x, family = "gkw", n_starts = 10)

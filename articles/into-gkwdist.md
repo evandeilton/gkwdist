@@ -4,7 +4,7 @@
 
 The **gkwdist** package provides a comprehensive implementation of the
 Generalized Kumaraswamy (GKw) distribution family for modeling bounded
-continuous data on the unit interval $(0,1)$. All functions are
+continuous data on the unit interval $`(0,1)`$. All functions are
 implemented in C++ via RcppArmadillo, providing substantial performance
 improvements over pure R implementations.
 
@@ -19,6 +19,7 @@ improvements over pure R implementations.
 - **No external dependencies**: Uses only base R functions in examples
 
 ``` r
+
 library(gkwdist)
 ```
 
@@ -31,10 +32,12 @@ library(gkwdist)
 The five-parameter Generalized Kumaraswamy distribution has probability
 density function:
 
-$$f(x;\alpha,\beta,\gamma,\delta,\lambda) = \frac{\lambda\alpha\beta x^{\alpha - 1}}{B(\gamma,\delta + 1)}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\gamma\lambda - 1}\{ 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda}\}^{\delta}$$
+``` math
+f(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda\alpha\beta x^{\alpha-1}}{B(\gamma, \delta+1)} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma\lambda-1} \{1-[1-(1-x^\alpha)^\beta]^\lambda\}^\delta
+```
 
-for $x \in (0,1)$ and all parameters positive, where
-$B( \cdot , \cdot )$ denotes the beta function.
+for $`x \in (0,1)`$ and all parameters positive, where
+$`B(\cdot, \cdot)`$ denotes the beta function.
 
 ### Nested Sub-families
 
@@ -50,7 +53,7 @@ The GKw distribution generalizes several important distributions:
 | Kumaraswamy (Kw)                | α, β          | γ = δ = λ = 1 |
 | Beta                            | γ, δ          | α = β = λ = 1 |
 
-Nested Structure of GKw Family
+Nested Structure of GKw Family {.table}
 
 ------------------------------------------------------------------------
 
@@ -61,6 +64,7 @@ Nested Structure of GKw Family
 All distributions follow the standard R naming convention:
 
 ``` r
+
 # Set parameters for Kumaraswamy distribution
 alpha <- 2.5
 beta <- 3.5
@@ -84,6 +88,7 @@ random_sample <- rkw(1000, alpha, beta)
 ### Visualization
 
 ``` r
+
 # PDF
 plot(x, density,
   type = "l", lwd = 2, col = "#2E4057",
@@ -96,6 +101,7 @@ grid(col = "gray90")
 ![](into-gkwdist_files/figure-html/plot_basic-1.png)
 
 ``` r
+
 
 # CDF
 plot(x, cdf_values,
@@ -110,6 +116,7 @@ grid(col = "gray90")
 
 ``` r
 
+
 # Histogram with theoretical density
 hist(random_sample,
   breaks = 30, probability = TRUE,
@@ -123,6 +130,7 @@ grid(col = "gray90")
 ![](into-gkwdist_files/figure-html/plot_basic-3.png)
 
 ``` r
+
 
 # Q-Q plot
 theoretical_q <- qkw(ppoints(length(random_sample)), alpha, beta)
@@ -145,6 +153,7 @@ grid(col = "gray90")
 ### Flexibility Across Families
 
 ``` r
+
 x_grid <- seq(0.001, 0.999, length.out = 500)
 
 # Compute densities
@@ -186,6 +195,7 @@ grid(col = "gray90")
 ### Basic MLE Workflow
 
 ``` r
+
 # Generate synthetic data
 set.seed(2024)
 n <- 1000
@@ -211,6 +221,7 @@ se <- sqrt(diag(solve(fit$hessian)))
 ### Inference Results
 
 ``` r
+
 # Construct summary table
 results <- data.frame(
   Parameter = c("alpha", "beta"),
@@ -234,9 +245,10 @@ knitr::kable(results,
 | alpha | alpha     |  2.5 | 2.5547 | 0.0816 |   2.3948 |   2.7147 | TRUE     |
 | beta  | beta      |  3.5 | 3.5681 | 0.1926 |   3.1905 |   3.9457 | TRUE     |
 
-Maximum Likelihood Estimates with 95% Confidence Intervals
+Maximum Likelihood Estimates with 95% Confidence Intervals {.table}
 
 ``` r
+
 
 # Information criteria
 cat("\nModel Fit Statistics:\n")
@@ -253,6 +265,7 @@ cat("BIC:", 2 * fit$value + length(mle) * log(n), "\n")
 ### Goodness-of-Fit Assessment
 
 ``` r
+
 # Fitted vs true density
 x_grid <- seq(0.001, 0.999, length.out = 200)
 fitted_dens <- dkw(x_grid, mle[1], mle[2])
@@ -283,6 +296,7 @@ grid(col = "gray90")
 ### Comparing Nested Models
 
 ``` r
+
 # Generate data from EKw distribution
 set.seed(456)
 n <- 1500
@@ -356,11 +370,12 @@ knitr::kable(comparison,
 | Mc    |    3 | 462.32 | -918.63 | -902.69 | TRUE      |
 | EKw   |    3 | 462.17 | -918.35 | -902.41 | TRUE      |
 
-Model Selection via Information Criteria
+Model Selection via Information Criteria {.table}
 
 ### Interpretation
 
 ``` r
+
 best_model <- comparison$Model[1]
 cat("\nBest model by AIC:", best_model, "\n")
 #> 
@@ -391,6 +406,7 @@ Profile likelihood provides more accurate confidence intervals than Wald
 intervals, especially for small samples or near parameter boundaries.
 
 ``` r
+
 # Generate data
 set.seed(789)
 data_profile <- rkw(500, alpha = 2.5, beta = 3.5)
@@ -447,6 +463,7 @@ grid(col = "gray90")
 
 ``` r
 
+
 # Wald vs Profile CI comparison
 se_profile <- sqrt(diag(solve(fit_profile$hessian)))
 wald_ci <- mle_profile[1] + c(-1.96, 1.96) * se_profile[1]
@@ -483,6 +500,7 @@ For multivariate inference, confidence ellipses show the joint
 uncertainty of parameter estimates.
 
 ``` r
+
 # Compute variance-covariance matrix
 vcov_matrix <- solve(fit_profile$hessian)
 
@@ -539,6 +557,7 @@ grid(col = "gray90")
 The C++ implementation provides substantial performance gains:
 
 ``` r
+
 # Generate large dataset
 n_large <- 10000
 data_large <- rkw(n_large, 2, 3)
@@ -562,6 +581,7 @@ system.time({
 ### Example: Modeling Proportions
 
 ``` r
+
 # Simulate customer conversion rates
 set.seed(999)
 n_customers <- 800
@@ -600,6 +620,7 @@ print(round(mle_app, 3))
 ```
 
 ``` r
+
 # Visualization
 x_app <- seq(0.001, 0.999, length.out = 200)
 fitted_app <- dekw(x_app, mle_app[1], mle_app[2], mle_app[3])
@@ -678,10 +699,11 @@ For theoretical details and applications, see:
 ## Session Information
 
 ``` r
+
 sessionInfo()
-#> R version 4.5.2 (2025-10-31)
+#> R version 4.6.0 (2026-04-24)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.3 LTS
+#> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -700,17 +722,17 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] gkwdist_1.1.2
+#> [1] gkwdist_1.1.3
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] digest_0.6.39          desc_1.4.3             R6_2.6.1              
-#>  [4] numDeriv_2016.8-1.1    RcppArmadillo_15.2.3-1 fastmap_1.2.0         
-#>  [7] xfun_0.56              magrittr_2.0.4         cachem_1.1.0          
-#> [10] knitr_1.51             htmltools_0.5.9        rmarkdown_2.30        
-#> [13] lifecycle_1.0.5        cli_3.6.5              sass_0.4.10           
-#> [16] pkgdown_2.2.0          textshaping_1.0.4      jquerylib_0.1.4       
-#> [19] systemfonts_1.3.1      compiler_4.5.2         tools_4.5.2           
-#> [22] ragg_1.5.0             evaluate_1.0.5         bslib_0.9.0           
-#> [25] Rcpp_1.1.1             yaml_2.3.12            jsonlite_2.0.0        
-#> [28] rlang_1.1.7            fs_1.6.6
+#>  [4] numDeriv_2016.8-1.1    RcppArmadillo_15.2.6-1 fastmap_1.2.0         
+#>  [7] xfun_0.57              magrittr_2.0.5         cachem_1.1.0          
+#> [10] knitr_1.51             htmltools_0.5.9        rmarkdown_2.31        
+#> [13] lifecycle_1.0.5        cli_3.6.6              sass_0.4.10           
+#> [16] pkgdown_2.2.0          textshaping_1.0.5      jquerylib_0.1.4       
+#> [19] systemfonts_1.3.2      compiler_4.6.0         tools_4.6.0           
+#> [22] ragg_1.5.2             evaluate_1.0.5         bslib_0.11.0          
+#> [25] Rcpp_1.1.1-1.1         yaml_2.3.12            jsonlite_2.0.0        
+#> [28] rlang_1.2.0            fs_2.1.0
 ```

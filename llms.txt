@@ -10,8 +10,8 @@ status](https://www.r-pkg.org/badges/version/gkwdist)](https://CRAN.R-project.or
 
 `gkwdist` implements the **Generalized Kumaraswamy (GKw)** distribution
 family and its seven nested sub-models for bounded continuous data on
-$(0,1)$. All functions are implemented in **C++** via RcppArmadillo for
-maximum computational efficiency.
+$`(0,1)`$. All functions are implemented in **C++** via RcppArmadillo
+for maximum computational efficiency.
 
 **Key Features:** - Seven flexible distributions for proportions, rates,
 and bounded data - Standard R distribution API: `d*`, `p*`, `q*`, `r*` -
@@ -25,6 +25,7 @@ parameter values
 ## Installation
 
 ``` r
+
 # Install from CRAN
 install.packages("gkwdist")
 
@@ -39,15 +40,15 @@ devtools::install_github("evandeilton/gkwdist")
 
 ### Complete Function Table
 
-| Distribution                  |  Code   | Parameters                           | Functions                                                            |
-|:------------------------------|:-------:|:-------------------------------------|:---------------------------------------------------------------------|
-| **Generalized Kumaraswamy**   |  `gkw`  | $\alpha,\beta,\gamma,\delta,\lambda$ | `dgkw`, `pgkw`, `qgkw`, `rgkw`, `llgkw`, `grgkw`, `hsgkw`            |
-| **Beta-Kumaraswamy**          |  `bkw`  | $\alpha,\beta,\gamma,\delta$         | `dbkw`, `pbkw`, `qbkw`, `rbkw`, `llbkw`, `grbkw`, `hsbkw`            |
-| **Kumaraswamy-Kumaraswamy**   |  `kkw`  | $\alpha,\beta,\delta,\lambda$        | `dkkw`, `pkkw`, `qkkw`, `rkkw`, `llkkw`, `grkkw`, `hskkw`            |
-| **Exponentiated Kumaraswamy** |  `ekw`  | $\alpha,\beta,\lambda$               | `dekw`, `pekw`, `qekw`, `rekw`, `llekw`, `grekw`, `hsekw`            |
-| **McDonald (Beta Power)**     |  `mc`   | $\gamma,\delta,\lambda$              | `dmc`, `pmc`, `qmc`, `rmc`, `llmc`, `grmc`, `hsmc`                   |
-| **Kumaraswamy**               |  `kw`   | $\alpha,\beta$                       | `dkw`, `pkw`, `qkw`, `rkw`, `llkw`, `grkw`, `hskw`                   |
-| **Beta**                      | `beta_` | $\gamma,\delta$                      | `dbeta_`, `pbeta_`, `qbeta_`, `rbeta_`, `llbeta`, `grbeta`, `hsbeta` |
+| Distribution | Code | Parameters | Functions |
+|:---|:--:|:---|:---|
+| **Generalized Kumaraswamy** | `gkw` | $`\alpha, \beta, \gamma, \delta, \lambda`$ | `dgkw`, `pgkw`, `qgkw`, `rgkw`, `llgkw`, `grgkw`, `hsgkw` |
+| **Beta-Kumaraswamy** | `bkw` | $`\alpha, \beta, \gamma, \delta`$ | `dbkw`, `pbkw`, `qbkw`, `rbkw`, `llbkw`, `grbkw`, `hsbkw` |
+| **Kumaraswamy-Kumaraswamy** | `kkw` | $`\alpha, \beta, \delta, \lambda`$ | `dkkw`, `pkkw`, `qkkw`, `rkkw`, `llkkw`, `grkkw`, `hskkw` |
+| **Exponentiated Kumaraswamy** | `ekw` | $`\alpha, \beta, \lambda`$ | `dekw`, `pekw`, `qekw`, `rekw`, `llekw`, `grekw`, `hsekw` |
+| **McDonald (Beta Power)** | `mc` | $`\gamma, \delta, \lambda`$ | `dmc`, `pmc`, `qmc`, `rmc`, `llmc`, `grmc`, `hsmc` |
+| **Kumaraswamy** | `kw` | $`\alpha, \beta`$ | `dkw`, `pkw`, `qkw`, `rkw`, `llkw`, `grkw`, `hskw` |
+| **Beta** | `beta_` | $`\gamma, \delta`$ | `dbeta_`, `pbeta_`, `qbeta_`, `rbeta_`, `llbeta`, `grbeta`, `hsbeta` |
 
 ### Function Types
 
@@ -65,15 +66,21 @@ All analytical functions use the signature: `function(par, data)` where
 
 - `ll*(par, data)` — Negative log-likelihood:
 
-$$- \ell({\mathbf{θ}};\mathbf{x}) = - \sum\limits_{i = 1}^{n}\log f\left( x_{i};{\mathbf{θ}} \right)$$
+``` math
+-\ell(\boldsymbol{\theta}; \mathbf{x}) = -\sum_{i=1}^n \log f(x_i; \boldsymbol{\theta})
+```
 
 - `gr*(par, data)` — Negative gradient (negative score vector):
 
-$$- \nabla_{\mathbf{θ}}\ell({\mathbf{θ}};\mathbf{x})$$
+``` math
+-\nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})
+```
 
 - `hs*(par, data)` — Negative Hessian matrix:
 
-$$- \nabla_{\mathbf{θ}}^{2}\ell({\mathbf{θ}};\mathbf{x})$$
+``` math
+-\nabla^2_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathbf{x})
+```
 
 **Note:** These functions return **negative** values to facilitate
 direct use with optimization routines like
@@ -85,22 +92,27 @@ minimization by default.
 ## Mathematical Specification
 
 **Notation:** All parameters are strictly positive
-($\alpha,\beta,\gamma,\delta,\lambda > 0$); support $x \in (0,1)$. The
-beta function is $B(a,b) = \Gamma(a)\Gamma(b)/\Gamma(a + b)$, and the
-regularized incomplete beta function is $I_{z}(a,b) = B_{z}(a,b)/B(a,b)$
-where $B_{z}(a,b) = \int_{0}^{z}t^{a - 1}(1 - t)^{b - 1}dt$.
+($`\alpha, \beta, \gamma, \delta, \lambda > 0`$); support
+$`x \in (0, 1)`$. The beta function is
+$`B(a,b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)`$, and the regularized
+incomplete beta function is $`I_z(a,b) = B_z(a,b)/B(a,b)`$ where
+$`B_z(a,b) = \int_0^z t^{a-1}(1-t)^{b-1}dt`$.
 
 ### 1. Generalized Kumaraswamy (GKw)
 
-**Parameters:** $\alpha,\beta,\gamma,\delta,\lambda > 0$
+**Parameters:** $`\alpha, \beta, \gamma, \delta, \lambda > 0`$
 
 **PDF:**
 
-$$f_{\text{GKw}}(x;\alpha,\beta,\gamma,\delta,\lambda) = \frac{\lambda\alpha\beta}{B(\gamma,\delta + 1)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\gamma\lambda - 1}\left( 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda} \right)^{\delta}$$
+``` math
+f_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda \alpha \beta}{B(\gamma, \delta+1)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma\lambda-1} \left(1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right)^{\delta}
+```
 
 **CDF:**
 
-$$F_{\text{GKw}}(x;\alpha,\beta,\gamma,\delta,\lambda) = I_{{\lbrack 1 - {(1 - x^{\alpha})}^{\beta}\rbrack}^{\lambda}}(\gamma,\delta + 1)$$
+``` math
+F_{\text{GKw}}(x; \alpha, \beta, \gamma, \delta, \lambda) = I_{\left[1-(1-x^\alpha)^\beta\right]^\lambda}(\gamma, \delta+1)
+```
 
 **Quantile:** Numerical inversion of the CDF via root-finding
 algorithms.
@@ -112,41 +124,55 @@ Numerical integration or simulation methods required.
 
 ### 2. Beta-Kumaraswamy (BKw)
 
-**Relationship:** Special case of GKw with $\lambda = 1$
+**Relationship:** Special case of GKw with $`\lambda = 1`$
 
 **PDF:**
 
-$$f_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = \frac{\alpha\beta}{B(\gamma,\delta + 1)}x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta\delta + \beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\gamma - 1}$$
+``` math
+f_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = \frac{\alpha \beta}{B(\gamma, \delta+1)} x^{\alpha-1} (1-x^\alpha)^{\beta\delta+\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\gamma-1}
+```
 
 **CDF:**
 
-$$F_{\text{BKw}}(x;\alpha,\beta,\gamma,\delta) = I_{1 - {(1 - x^{\alpha})}^{\beta}}(\gamma,\delta + 1)$$
+``` math
+F_{\text{BKw}}(x; \alpha, \beta, \gamma, \delta) = I_{1-(1-x^\alpha)^\beta}(\gamma, \delta+1)
+```
 
 **Quantile:** Numerical inversion via root-finding. For the inverse:
 
-$$u = I_{y}(\gamma,\delta + 1)\quad\text{where}\quad y = 1 - \left( 1 - x^{\alpha} \right)^{\beta}$$
+``` math
+u = I_y(\gamma, \delta+1) \quad \text{where} \quad y = 1-(1-x^\alpha)^\beta
+```
 
-Solving for $x$:
+Solving for $`x`$:
 
-$$x = \left( 1 - \left( 1 - I_{u}^{- 1}(\gamma,\delta + 1) \right)^{1/\beta} \right)^{1/\alpha}$$
+``` math
+x = \left(1-\left(1-I_u^{-1}(\gamma, \delta+1)\right)^{1/\beta}\right)^{1/\alpha}
+```
 
 ------------------------------------------------------------------------
 
 ### 3. Kumaraswamy-Kumaraswamy (KKw)
 
-**Relationship:** Special case of GKw with $\gamma = 1$
+**Relationship:** Special case of GKw with $`\gamma = 1`$
 
 **PDF:**
 
-$$f_{\text{KKw}}(x;\alpha,\beta,\delta,\lambda) = \lambda\alpha\beta(\delta + 1)\, x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda - 1}\left( 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda} \right)^{\delta}$$
+``` math
+f_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = \lambda \alpha \beta (\delta+1) \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\lambda-1} \left(1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right)^{\delta}
+```
 
 **CDF:**
 
-$$F_{\text{KKw}}(x;\alpha,\beta,\delta,\lambda) = 1 - \left( 1 - \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda} \right)^{\delta + 1}$$
+``` math
+F_{\text{KKw}}(x; \alpha, \beta, \delta, \lambda) = 1 - \left(1-\left[1-(1-x^\alpha)^\beta\right]^\lambda\right)^{\delta+1}
+```
 
 **Quantile (closed-form):**
 
-$$Q_{\text{KKw}}(p;\alpha,\beta,\delta,\lambda) = \left( 1 - \left( 1 - \left( 1 - (1 - p)^{1/{(\delta + 1)}} \right)^{1/\lambda} \right)^{1/\beta} \right)^{1/\alpha}$$
+``` math
+Q_{\text{KKw}}(p; \alpha, \beta, \delta, \lambda) = \left(1 - \left(1 - \left(1-(1-p)^{1/(\delta+1)}\right)^{1/\lambda}\right)^{1/\beta}\right)^{1/\alpha}
+```
 
 **Moments:** Analytical expressions not available in closed form.
 
@@ -154,120 +180,163 @@ $$Q_{\text{KKw}}(p;\alpha,\beta,\delta,\lambda) = \left( 1 - \left( 1 - \left( 1
 
 ### 4. Exponentiated Kumaraswamy (EKw)
 
-**Relationship:** Special case of GKw with $\gamma = 1$ and $\delta = 0$
+**Relationship:** Special case of GKw with $`\gamma = 1`$ and
+$`\delta = 0`$
 
 **PDF:**
 
-$$f_{\text{EKw}}(x;\alpha,\beta,\lambda) = \lambda\alpha\beta\, x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}\left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda - 1}$$
+``` math
+f_{\text{EKw}}(x; \alpha, \beta, \lambda) = \lambda \alpha \beta \, x^{\alpha-1} (1-x^\alpha)^{\beta-1} \left[1-(1-x^\alpha)^\beta\right]^{\lambda-1}
+```
 
 **CDF:**
 
-$$F_{\text{EKw}}(x;\alpha,\beta,\lambda) = \left\lbrack 1 - \left( 1 - x^{\alpha} \right)^{\beta} \right\rbrack^{\lambda}$$
+``` math
+F_{\text{EKw}}(x; \alpha, \beta, \lambda) = \left[1-(1-x^\alpha)^\beta\right]^\lambda
+```
 
 **Quantile (closed-form):**
 
-$$Q_{\text{EKw}}(p;\alpha,\beta,\lambda) = \left( 1 - \left( 1 - p^{1/\lambda} \right)^{1/\beta} \right)^{1/\alpha}$$
+``` math
+Q_{\text{EKw}}(p; \alpha, \beta, \lambda) = \left(1-\left(1-p^{1/\lambda}\right)^{1/\beta}\right)^{1/\alpha}
+```
 
 **Moments:**
 
-$${\mathbb{E}}\left( X^{r} \right) = \lambda\sum\limits_{k = 0}^{\infty}\frac{( - 1)^{k}\left( \frac{\lambda - 1}{k} \right)}{k + 1} \cdot \beta\, B\left( 1 + \frac{r}{\alpha},(k + 1)\beta \right)$$
+``` math
+\mathbb{E}(X^r) = \lambda \sum_{k=0}^{\infty} \frac{(-1)^k \binom{\lambda-1}{k}}{k+1} \cdot \beta \, B\left(1 + \frac{r}{\alpha}, (k+1)\beta\right)
+```
 
 where the binomial coefficient is generalized:
-$\left( \frac{\lambda - 1}{k} \right) = \frac{(\lambda - 1)(\lambda - 2)\cdots(\lambda - k)}{k!}$.
+$`\binom{\lambda-1}{k} = \frac{(\lambda-1)(\lambda-2)\cdots(\lambda-k)}{k!}`$.
 
 ------------------------------------------------------------------------
 
 ### 5. McDonald (Beta Power)
 
-**Relationship:** Special case of GKw with $\alpha = \beta = 1$
+**Relationship:** Special case of GKw with $`\alpha = \beta = 1`$
 
 **PDF:**
 
-$$f_{\text{MC}}(x;\gamma,\delta,\lambda) = \frac{\lambda}{B(\gamma,\delta + 1)}x^{\gamma\lambda - 1}\left( 1 - x^{\lambda} \right)^{\delta}$$
+``` math
+f_{\text{MC}}(x; \gamma, \delta, \lambda) = \frac{\lambda}{B(\gamma, \delta+1)} x^{\gamma\lambda-1} (1-x^\lambda)^{\delta}
+```
 
 **CDF:**
 
-$$F_{\text{MC}}(x;\gamma,\delta,\lambda) = I_{x^{\lambda}}(\gamma,\delta + 1)$$
+``` math
+F_{\text{MC}}(x; \gamma, \delta, \lambda) = I_{x^\lambda}(\gamma, \delta+1)
+```
 
 **Quantile:**
 
-$$Q_{\text{MC}}(p;\gamma,\delta,\lambda) = \left( I_{p}^{- 1}(\gamma,\delta + 1) \right)^{1/\lambda}$$
+``` math
+Q_{\text{MC}}(p; \gamma, \delta, \lambda) = \left(I_p^{-1}(\gamma, \delta+1)\right)^{1/\lambda}
+```
 
-where $I_{p}^{- 1}(\gamma,\delta + 1)$ is the inverse regularized
+where $`I_p^{-1}(\gamma, \delta+1)`$ is the inverse regularized
 incomplete beta function (quantile function of the Beta distribution
-with parameters $\gamma$ and $\delta + 1$).
+with parameters $`\gamma`$ and $`\delta+1`$).
 
 **Moments:**
 
-$${\mathbb{E}}\left( X^{r} \right) = \frac{B(\gamma + r/\lambda,\delta + 1)}{B(\gamma,\delta + 1)}$$
+``` math
+\mathbb{E}(X^r) = \frac{B(\gamma + r/\lambda, \delta+1)}{B(\gamma, \delta+1)}
+```
 
-which is valid for $r/\lambda > - \gamma$.
+which is valid for $`r/\lambda > -\gamma`$.
 
 ------------------------------------------------------------------------
 
 ### 6. Kumaraswamy (Kw)
 
-**Relationship:** Special case of GKw with $\gamma = 1$, $\delta = 0$,
-$\lambda = 1$
+**Relationship:** Special case of GKw with $`\gamma = 1`$,
+$`\delta = 0`$, $`\lambda = 1`$
 
 **PDF:**
 
-$$f_{\text{Kw}}(x;\alpha,\beta) = \alpha\beta\, x^{\alpha - 1}\left( 1 - x^{\alpha} \right)^{\beta - 1}$$
+``` math
+f_{\text{Kw}}(x; \alpha, \beta) = \alpha \beta \, x^{\alpha-1} (1-x^\alpha)^{\beta-1}
+```
 
 **CDF:**
 
-$$F_{\text{Kw}}(x;\alpha,\beta) = 1 - \left( 1 - x^{\alpha} \right)^{\beta}$$
+``` math
+F_{\text{Kw}}(x; \alpha, \beta) = 1 - (1-x^\alpha)^\beta
+```
 
 **Quantile (closed-form):**
 
-$$Q_{\text{Kw}}(p;\alpha,\beta) = \left( 1 - (1 - p)^{1/\beta} \right)^{1/\alpha}$$
+``` math
+Q_{\text{Kw}}(p; \alpha, \beta) = \left(1-(1-p)^{1/\beta}\right)^{1/\alpha}
+```
 
 **Moments:**
 
-$${\mathbb{E}}\left( X^{r} \right) = \beta\, B\left( 1 + \frac{r}{\alpha},\beta \right) = \frac{\beta\,\Gamma(1 + r/\alpha)\,\Gamma(\beta)}{\Gamma(1 + r/\alpha + \beta)}$$
+``` math
+\mathbb{E}(X^r) = \beta \, B\left(1 + \frac{r}{\alpha}, \beta\right) = \frac{\beta \, \Gamma(1+r/\alpha) \, \Gamma(\beta)}{\Gamma(1+r/\alpha+\beta)}
+```
 
-which is valid for $r/\alpha > - 1$.
+which is valid for $`r/\alpha > -1`$.
 
 **Special Cases:**
 
-$${\mathbb{E}}(X) = \frac{\beta\,\Gamma(1 + 1/\alpha)\,\Gamma(\beta)}{\Gamma(1 + 1/\alpha + \beta)}$$
+``` math
+\mathbb{E}(X) = \frac{\beta \, \Gamma(1+1/\alpha) \, \Gamma(\beta)}{\Gamma(1+1/\alpha+\beta)}
+```
 
-$${\mathbb{E}}\left( X^{2} \right) = \frac{\beta\,\Gamma(1 + 2/\alpha)\,\Gamma(\beta)}{\Gamma(1 + 2/\alpha + \beta)}$$
+``` math
+\mathbb{E}(X^2) = \frac{\beta \, \Gamma(1+2/\alpha) \, \Gamma(\beta)}{\Gamma(1+2/\alpha+\beta)}
+```
 
-$$\text{Var}(X) = {\mathbb{E}}\left( X^{2} \right) - \left( {\mathbb{E}}(X) \right)^{2}$$
+``` math
+\text{Var}(X) = \mathbb{E}(X^2) - \left(\mathbb{E}(X)\right)^2
+```
 
 ------------------------------------------------------------------------
 
 ### 7. Beta
 
 **Relationship:** Special case of GKw with
-$\alpha = \beta = \lambda = 1$
+$`\alpha = \beta = \lambda = 1`$
 
 **Note on Parameterization:** This package uses a parameterization where
-the Beta distribution has parameters $(\gamma,\delta + 1)$,
+the Beta distribution has parameters $`(\gamma, \delta+1)`$,
 corresponding to the standard
-$\text{Beta}\left( \text{shape}_{1},\text{shape}_{2} \right)$ with
-$\text{shape}_{1} = \gamma$ and $\text{shape}_{2} = \delta + 1$.
+$`\text{Beta}(\text{shape}_1, \text{shape}_2)`$ with
+$`\text{shape}_1 = \gamma`$ and $`\text{shape}_2 = \delta + 1`$.
 
 **PDF:**
 
-$$f_{\text{Beta}}(x;\gamma,\delta) = \frac{1}{B(\gamma,\delta + 1)}x^{\gamma - 1}(1 - x)^{\delta}$$
+``` math
+f_{\text{Beta}}(x; \gamma, \delta) = \frac{1}{B(\gamma, \delta+1)} x^{\gamma-1} (1-x)^{\delta}
+```
 
 **CDF:**
 
-$$F_{\text{Beta}}(x;\gamma,\delta) = I_{x}(\gamma,\delta + 1)$$
+``` math
+F_{\text{Beta}}(x; \gamma, \delta) = I_x(\gamma, \delta+1)
+```
 
 **Quantile:**
 
-$$Q_{\text{Beta}}(p;\gamma,\delta) = I_{p}^{- 1}(\gamma,\delta + 1)$$
+``` math
+Q_{\text{Beta}}(p; \gamma, \delta) = I_p^{-1}(\gamma, \delta+1)
+```
 
 **Moments:**
 
-$${\mathbb{E}}\left( X^{r} \right) = \frac{B(\gamma + r,\delta + 1)}{B(\gamma,\delta + 1)} = \frac{\Gamma(\gamma + r)\,\Gamma(\gamma + \delta + 1)}{\Gamma(\gamma)\,\Gamma(\gamma + \delta + 1 + r)}$$
+``` math
+\mathbb{E}(X^r) = \frac{B(\gamma+r, \delta+1)}{B(\gamma, \delta+1)} = \frac{\Gamma(\gamma+r) \, \Gamma(\gamma+\delta+1)}{\Gamma(\gamma) \, \Gamma(\gamma+\delta+1+r)}
+```
 
-$${\mathbb{E}}(X) = \frac{\gamma}{\gamma + \delta + 1}$$
+``` math
+\mathbb{E}(X) = \frac{\gamma}{\gamma+\delta+1}
+```
 
-$$\text{Var}(X) = \frac{\gamma(\delta + 1)}{(\gamma + \delta + 1)^{2}(\gamma + \delta + 2)}$$
+``` math
+\text{Var}(X) = \frac{\gamma(\delta+1)}{(\gamma+\delta+1)^2(\gamma+\delta+2)}
+```
 
 ------------------------------------------------------------------------
 
@@ -290,10 +359,10 @@ $$\text{Var}(X) = \frac{\gamma(\delta + 1)}{(\gamma + \delta + 1)^{2}(\gamma + \
 ```
 
 **Note:** The Beta distribution is obtained from MC by setting
-$\lambda = 1$, or from GKw by setting $\alpha = \beta = \lambda = 1$.
-The Kumaraswamy distribution is obtained from EKw by setting
-$\lambda = 1$, or from GKw by setting $\gamma = 1$, $\delta = 0$,
-$\lambda = 1$.
+$`\lambda = 1`$, or from GKw by setting
+$`\alpha = \beta = \lambda = 1`$. The Kumaraswamy distribution is
+obtained from EKw by setting $`\lambda = 1`$, or from GKw by setting
+$`\gamma = 1`$, $`\delta = 0`$, $`\lambda = 1`$.
 
 ------------------------------------------------------------------------
 
@@ -302,6 +371,7 @@ $\lambda = 1$.
 ### Example 1: Basic Distribution Functions
 
 ``` r
+
 library(gkwdist)
 
 # Set parameters
@@ -336,6 +406,7 @@ grid()
 ### Example 2: Comparing Distribution Families
 
 ``` r
+
 library(gkwdist)
 
 par(mfrow = c(1,1), mar = c(3,3,2,2))
@@ -372,6 +443,7 @@ grid()
 ### Example 3: Maximum Likelihood Estimation Using optim()
 
 ``` r
+
 library(gkwdist)
 
 # Generate synthetic data from Kumaraswamy distribution
@@ -414,6 +486,7 @@ print(ci)
 ### Example 4: Goodness-of-Fit Diagnostic Plot
 
 ``` r
+
 library(gkwdist)
 
 # Using fitted model from Example 3
@@ -442,6 +515,7 @@ grid()
 ### Example 5: Model Selection Using AIC and BIC
 
 ``` r
+
 library(gkwdist)
 
 # Generate data from Exponentiated Kumaraswamy
@@ -504,6 +578,7 @@ cat("\nBest model by AIC:", results$Model[1], "\n")
 ### Example 6: Using Analytical Functions Directly
 
 ``` r
+
 library(gkwdist)
 
 # Generate data from EKw
@@ -538,6 +613,7 @@ print(se)
 ### Example 7: Q-Q Plot for Model Validation
 
 ``` r
+
 library(gkwdist)
 
 # Generate data and fit model
@@ -573,6 +649,7 @@ grid()
 ### Example 8: Fitting GKw (Full Model) Using optim()
 
 ``` r
+
 library(gkwdist)
 
 # Generate data from GKw
@@ -610,6 +687,7 @@ print(estimates, digits = 4)
 ### Example 9: Comparing Analytical vs Numerical Derivatives
 
 ``` r
+
 library(gkwdist)
 
 # Generate data
@@ -644,6 +722,7 @@ print(comparison, digits = 8)
 The C++ implementation provides substantial performance gains:
 
 ``` r
+
 library(microbenchmark)
 
 # Generate large dataset
@@ -677,15 +756,15 @@ plot(benchmark)
 
 ## When to Use Each Distribution
 
-| Data Characteristics  | Recommended Distribution | Rationale                          |
-|:----------------------|:-------------------------|:-----------------------------------|
-| Unimodal, symmetric   | **Beta**                 | Parsimony; well-studied properties |
-| Unimodal, asymmetric  | **Kumaraswamy**          | Closed-form CDF and quantile       |
-| Bimodal or U-shaped   | **GKw** or **BKw**       | Maximum flexibility                |
-| Extreme skewness      | **KKw** or **EKw**       | Fine control over tail behavior    |
-| J-shaped (monotonic)  | **Kw** or **Beta**       | With appropriate parameter values  |
-| Power transformations | **McDonald**             | Explicit power parameter $\lambda$ |
-| Unknown shape         | **GKw**                  | Fit and test nested models         |
+| Data Characteristics | Recommended Distribution | Rationale |
+|:---|:---|:---|
+| Unimodal, symmetric | **Beta** | Parsimony; well-studied properties |
+| Unimodal, asymmetric | **Kumaraswamy** | Closed-form CDF and quantile |
+| Bimodal or U-shaped | **GKw** or **BKw** | Maximum flexibility |
+| Extreme skewness | **KKw** or **EKw** | Fine control over tail behavior |
+| J-shaped (monotonic) | **Kw** or **Beta** | With appropriate parameter values |
+| Power transformations | **McDonald** | Explicit power parameter $`\lambda`$ |
+| Unknown shape | **GKw** | Fit and test nested models |
 
 **Model Selection Workflow:**
 
@@ -738,6 +817,7 @@ plot(benchmark)
 ## Citation
 
 ``` r
+
 citation("gkwdist")
 ```
 

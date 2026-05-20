@@ -123,7 +123,7 @@ densities_gkw <- dgkw(x_vals, alpha_par, beta_par,
   delta_par, lambda_par
 )
 print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#> [1] "Max difference: 8.88178419700125e-16"
+#> [1] "Max difference: 2.16120550922315"
 
 # Plot the density
 curve_x <- seq(0.01, 0.99, length.out = 200)
