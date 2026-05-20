@@ -37,7 +37,8 @@ constexpr double EPSILON      = std::numeric_limits<double>::epsilon();        /
   constexpr double DBL_MAX_SAFE = std::numeric_limits<double>::max() / 10.0;   // ~1.797693e+307
   
   // Logarithmic bounds (pre-calculated for performance)
-  constexpr double LOG_DBL_MIN  = -708.3964185322641;  // log(DBL_MIN_SAFE)
+  // NOTE: LOG_DBL_MIN = log(DBL_MIN) = log(numeric_limits<double>::min()), NOT log(DBL_MIN_SAFE)
+  constexpr double LOG_DBL_MIN  = -708.3964185322641;  // log(std::numeric_limits<double>::min())
   constexpr double LOG_DBL_MAX  = 308.2547155599167;   // log(DBL_MAX_SAFE)
   
   // Mathematical constants (maximum precision)
@@ -217,9 +218,10 @@ inline double safe_exp(double x) {
     return 0.0;
   }
   
-  // Handle moderate underflow with scaling
+  // Handle moderate underflow with scaling:
+  // DBL_MIN * exp(x - log(DBL_MIN)) = exp(x)  — exact, avoids abrupt flush to zero
   if (x < LOG_DBL_MIN) {
-    return DBL_MIN_SAFE * std::exp(x - LOG_DBL_MIN);
+    return std::numeric_limits<double>::min() * std::exp(x - LOG_DBL_MIN);
   }
   
   return std::exp(x);
@@ -439,12 +441,20 @@ inline arma::vec vec_safe_pow(const arma::vec& x, double y) {
   if (y == 1.0) {
     return x;
   }
-  
+
+  // Fast SIMD path: y > 0, all x positive — typical distribution case (data in (0,1)).
+  // arma::exp(y*arma::log(x)) is fully auto-vectorizable; the branch-heavy scalar loop below is not.
+  if (y > 0.0 && y < EXTREME_EXPONENT && x.min() > 0.0) {
+    return arma::exp(y * arma::log(x));
+  }
+
   // Check if y is effectively an integer (for negative base handling)
   double y_rounded = std::round(y);
   bool y_is_integer = (std::abs(y - y_rounded) <= INTEGER_TOLERANCE);
-  int y_int = static_cast<int>(y_rounded);
-  bool y_is_odd = y_is_integer && (y_int % 2 != 0);
+  // Guard against UB: static_cast<int> is UB when y_rounded > INT_MAX
+  bool y_fits_in_int = (std::abs(y_rounded) <= static_cast<double>(std::numeric_limits<int>::max()));
+  int y_int = y_fits_in_int ? static_cast<int>(y_rounded) : 0;
+  bool y_is_odd = y_is_integer && y_fits_in_int && (y_int % 2 != 0);
   
   // Element-wise computation with shared exponent logic
   for (size_t i = 0; i < n; ++i) {

@@ -144,14 +144,6 @@ Rcpp::NumericVector dgkw(
       continue;
     }
     
-    // Numerical stability: avoid computations at extreme boundaries
-    double x_near_zero = safe_pow(SQRT_EPSILON, 1.0 / a);
-    double x_near_one = 1.0 - x_near_zero;
-    
-    if (xi < x_near_zero || xi > x_near_one) {
-      continue;
-    }
-    
     // ---- Log-space computation of density ----
     
     // Normalization constant: log(λαβ / B(γ, δ+1))
@@ -749,7 +741,7 @@ double llgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   
   // Validate parameters
   if (!check_pars(alpha, beta, gamma, delta, lambda)) {
-    return R_NegInf;
+    return R_PosInf;
   }
   
   // Convert data to Armadillo vector
@@ -1116,63 +1108,32 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
       return nanH;
     }
     
-    // ---- Accumulate Hessian contributions ----
-    
-    // H(α, α)
+    // ---- Accumulate upper-triangle Hessian contributions ----
     H(0, 0) += d2L6_dalpha2 + d2L7_dalpha2 + d2L8_dalpha2;
-    
-    // H(α, β) = H(β, α)
     H(0, 1) += d2L6_dalpha_dbeta + d2L7_dalpha_dbeta + d2L8_dalpha_dbeta;
-    H(1, 0) = H(0, 1);
-    
-    // H(β, β)
     H(1, 1) += d2L7_dbeta2 + d2L8_dbeta2;
-    
-    // H(λ, λ)
     H(4, 4) += d2L8_dlambda2;
-    
-    // H(γ, α) = H(α, γ)
-    H(2, 0) += lambda * (dw_dalpha / w);
-    H(0, 2) = H(2, 0);
-    
-    // H(γ, β) = H(β, γ)
-    H(2, 1) += lambda * (dw_dbeta / w);
-    H(1, 2) = H(2, 1);
-    
-    // H(δ, α) = H(α, δ)
-    H(3, 0) += dz_dalpha / z;
-    H(0, 3) = H(3, 0);
-    
-    // H(δ, β) = H(β, δ)
-    H(3, 1) += dz_dbeta / z;
-    H(1, 3) = H(3, 1);
-    
-    // Accumulate terms for λ mixed derivatives
-    double term1_alpha_lambda = gamma * (dw_dalpha / w);
-    double term2_alpha_lambda = d2L8_dalpha_dlambda;
-    acc_alpha_lambda += term1_alpha_lambda + term2_alpha_lambda;
-    
-    double term1_beta_lambda = gamma * (dw_dbeta / w);
-    double term2_beta_lambda = d2L8_dbeta_dlambda;
-    acc_beta_lambda += term1_beta_lambda + term2_beta_lambda;
-    
+    H(0, 2) += lambda * (dw_dalpha / w);
+    H(1, 2) += lambda * (dw_dbeta / w);
+    H(0, 3) += dz_dalpha / z;
+    H(1, 3) += dz_dbeta / z;
+
+    // λ mixed derivatives
+    acc_alpha_lambda += gamma * (dw_dalpha / w) + d2L8_dalpha_dlambda;
+    acc_beta_lambda  += gamma * (dw_dbeta  / w) + d2L8_dbeta_dlambda;
     acc_gamma_lambda += ln_w;
     acc_delta_lambda += dz_dlambda / z;
   }
-  
-  // Apply accumulated λ mixed derivatives
+
+  // Apply accumulated λ mixed derivatives (upper triangle)
   H(0, 4) = acc_alpha_lambda;
-  H(4, 0) = H(0, 4);
-  
   H(1, 4) = acc_beta_lambda;
-  H(4, 1) = H(1, 4);
-  
   H(2, 4) = acc_gamma_lambda;
-  H(4, 2) = H(2, 4);
-  
   H(3, 4) = acc_delta_lambda;
-  H(4, 3) = H(3, 4);
-  
+
+  // Symmetrize once after all accumulations
+  H = arma::symmatu(H);
+
   // Return NEGATIVE Hessian (for minimization of negative log-likelihood)
   return Rcpp::wrap(-H);
 }

@@ -4,7 +4,6 @@
 #include <limits>
 #include <random>
 #include <string>
-using namespace Rcpp;
 
 /**
  * Computes the probability density function (PDF) of the Generalized Kumaraswamy distribution
@@ -23,7 +22,7 @@ double gkw_pdf(double x, const arma::vec &theta) {
   const double delta  = theta(3);
   const double lambda = theta(4);
 
-  if(alpha <= 0.0 || beta <= 0.0 || gamma_ <= 0.0 || delta <= 0.0 || lambda <= 0.0) return 0.0;
+  if(alpha <= 0.0 || beta <= 0.0 || gamma_ <= 0.0 || delta < 0.0 || lambda <= 0.0) return 0.0;
 
   try {
     const double log_x = std::log(x);
@@ -115,7 +114,7 @@ double ekw_pdf(double x, const arma::vec &theta) {
   full_theta(0) = theta(0);
   full_theta(1) = theta(1);
   full_theta(2) = 1.0;
-  full_theta(3) = 1.0;
+  full_theta(3) = 0.0;  // EKw = GKw(a,b,1,0,l)
   full_theta(4) = theta(2);
 
   return gkw_pdf(x, full_theta);
@@ -147,7 +146,7 @@ double kw_pdf(double x, const arma::vec &theta) {
   full_theta(0) = theta(0);
   full_theta(1) = theta(1);
   full_theta(2) = 1.0;
-  full_theta(3) = 1.0;
+  full_theta(3) = 0.0;  // Kw = GKw(a,b,1,0,1)
   full_theta(4) = 1.0;
 
   return gkw_pdf(x, full_theta);
@@ -777,10 +776,22 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
  }
 
  try {
-   arma::vec data(x.size());
+   // Filter NAs and clamp to (0,1) — std::max(1e-10, NaN) is platform-dependent
+   std::vector<double> clean;
+   clean.reserve(x.size());
    for (int i = 0; i < x.size(); i++) {
-     data(i) = std::max(1e-10, std::min(1.0 - 1e-10, (double)x[i]));
+     if (!Rcpp::NumericVector::is_na(x[i]) && std::isfinite(x[i])) {
+       clean.push_back(std::max(1e-10, std::min(1.0 - 1e-10, (double)x[i])));
+     }
    }
+   if (clean.empty()) {
+     Rcpp::warning("No valid (non-NA, finite, in (0,1)) observations found.");
+     int npar = get_npar(family);
+     Rcpp::NumericVector result(npar, Rcpp::NumericVector::get_na());
+     result.attr("names") = get_param_names(family);
+     return result;
+   }
+   arma::vec data(clean.data(), clean.size());
 
    int n = data.n_elem;
 

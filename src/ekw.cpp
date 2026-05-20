@@ -641,19 +641,8 @@ double llekw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
     
     log_one_minus_v_beta = safe_log(one_minus_v_beta);
     
-    // Term 3: (λ-1) * log(w) with special handling for λ ≈ 1
-    if (std::abs(lambda - 1.0) < 1e-10) {
-      // For λ very close to 1, avoid numerical cancellation
-      if (std::abs(lambda - 1.0) > 1e-15) {
-        sum_term3 += (lambda - 1.0) * log_one_minus_v_beta;
-      }
-      // For λ = 1 (machine precision), term is zero
-    } else if (lambda > 1000.0 && log_one_minus_v_beta < -0.01) {
-      // Special case for very large λ
-      double scaled_term = std::max(log_one_minus_v_beta, -700.0 / lambda);
-      sum_term3 += (lambda - 1.0) * scaled_term;
-    } else {
-      // Standard case
+    // Term 3: (λ-1) * log(w); skip when λ is at machine-epsilon distance from 1
+    if (std::abs(lambda - 1.0) > 1e-15) {
       sum_term3 += (lambda - 1.0) * log_one_minus_v_beta;
     }
   }
@@ -781,25 +770,17 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
     // Calculate (λ-1) * β * v^(β-1) / w term
     double alpha_term2 = 0.0;
     if (std::abs(lambda - 1.0) > 1e-14) {
-      double lambda_factor = lambda - 1.0;
-      if (lambda > 1000.0) {
-        lambda_factor = std::min(lambda_factor, 1000.0);
-      }
-      alpha_term2 = lambda_factor * beta * v_beta_m1 / w;
+      alpha_term2 = (lambda - 1.0) * beta * v_beta_m1 / w;
     }
-    
+
     d_alpha -= x_alpha_log_x * (alpha_term1 - alpha_term2);
-    
+
     // ---- Beta gradient component ----
     double beta_term = 0.0;
     if (std::abs(lambda - 1.0) > 1e-14) {
-      double lambda_factor = lambda - 1.0;
-      if (lambda > 1000.0) {
-        lambda_factor = std::min(lambda_factor, 1000.0);
-      }
-      beta_term = v_beta * log_v * lambda_factor / w;
+      beta_term = v_beta * log_v * (lambda - 1.0) / w;
     }
-    
+
     d_beta -= beta_term;
   }
   
@@ -978,32 +959,16 @@ Rcpp::NumericMatrix hsekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
       d2L6_dbeta_dlambda = dw_dbeta / w;
     }
     
-    // Clamp for large λ
-    if (lambda > 1000.0) {
-      double max_val = 1000.0;
-      d2L6_dalpha2 = std::min(std::max(d2L6_dalpha2, -max_val), max_val);
-      d2L6_dbeta2 = std::min(std::max(d2L6_dbeta2, -max_val), max_val);
-      d2L6_dalpha_dbeta = std::min(std::max(d2L6_dalpha_dbeta, -max_val), max_val);
-    }
-    
-    // ---- Accumulate Hessian contributions ----
+    // ---- Accumulate Hessian contributions (upper triangle only) ----
     H(0, 0) += d2L5_dalpha2 + d2L6_dalpha2;
     H(0, 1) += d2L5_dalpha_dbeta + d2L6_dalpha_dbeta;
-    H(1, 0) = H(0, 1);
     H(1, 1) += d2L6_dbeta2;
     H(0, 2) += d2L6_dalpha_dlambda;
-    H(2, 0) = H(0, 2);
     H(1, 2) += d2L6_dbeta_dlambda;
-    H(2, 1) = H(1, 2);
   }
-  
-  // Enforce perfect symmetry
-  for (int i = 0; i < 3; i++) {
-    for (int j = i + 1; j < 3; j++) {
-      double avg = (H(i, j) + H(j, i)) / 2.0;
-      H(i, j) = H(j, i) = avg;
-    }
-  }
+
+  // Symmetrize once after accumulation
+  H = arma::symmatu(H);
   
   // Return NEGATIVE Hessian (for minimization)
   return Rcpp::wrap(-H);

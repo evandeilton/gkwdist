@@ -1,3 +1,67 @@
+# gkwdist 1.1.3
+
+## Bug Fixes
+
+* **`llgkw()` invalid parameter return** (`gkw.cpp`): Fixed critical error where the
+  negative log-likelihood returned `R_NegInf` (−∞) for invalid parameters instead of
+  `R_PosInf` (+∞). Gradient-based MLE optimizers interpret −∞ as a global minimum,
+  causing them to converge to the invalid boundary rather than the true MLE.
+
+* **`gkwinit.cpp` — delta validation** (`gkwinit.cpp`): Fixed internal `gkw_pdf()`
+  rejecting `delta = 0` (a valid GKw parameter value) due to a strict `delta <= 0`
+  check that should have been `delta < 0`.
+
+* **`gkwinit.cpp` — EKw/Kw sub-family PDF mapping** (`gkwinit.cpp`): Fixed
+  `ekw_pdf()` and `kw_pdf()` passing `delta = 1` instead of the correct `delta = 0`
+  when delegating to `gkw_pdf()`. EKw and Kw are GKw sub-families with `delta = 0`,
+  not `delta = 1`. This produced wrong starting values for MLE of these families.
+
+* **`hsbkw()` — v^(β−1) computation** (`bkw.cpp`): Fixed the Hessian of the BKw
+  negative log-likelihood returning a wrong value for β < 1. The ternary expression
+  `(beta > 1.0) ? v_beta/v : 1.0` coincidentally produces the correct result for
+  β = 1 but is wrong for all 0 < β < 1. Replaced with the exact formula
+  `safe_exp((beta - 1.0) * ln_v)`.
+
+## Numerical Stability
+
+* **`safe_exp()` underflow scaling** (`utils.h`): Fixed a systematic 10× error in
+  the moderate-underflow branch. The previous implementation used
+  `DBL_MIN_SAFE * exp(x − log(DBL_MIN))` where `DBL_MIN_SAFE = 10 * DBL_MIN`,
+  yielding `10 * exp(x)` instead of `exp(x)`. The fix uses
+  `DBL_MIN * exp(x − log(DBL_MIN)) = exp(x)` exactly.
+
+* **`dgkw()` silent boundary truncation removed** (`gkw.cpp`): Removed a block that
+  silently skipped data points within `SQRT_EPSILON^(1/α)` of 0 or 1, returning
+  density 0 for those points without warning. The log-space computation handles
+  near-boundary values correctly without this truncation.
+
+* **`llekw()` / `grekw()` — lambda clamping removed** (`ekw.cpp`): Removed the
+  arbitrary cap `lambda_factor = min(lambda_factor, 1000)` applied to gradient and
+  Hessian terms when λ > 1000. This distorted optimization for large-λ scenarios and
+  produced incorrect standard errors.
+
+## Code Quality
+
+* **`gkwinit.cpp`**: Removed `using namespace Rcpp;` at file scope; replaced with
+  explicit `Rcpp::` qualifications. Added NA/NaN filtering before moment computation
+  to prevent silent corruption when input data contains missing values.
+
+* **`bkw.cpp`**: Removed spurious `try/catch` blocks wrapping `Rcpp::as<arma::vec>()`
+  conversions in `grbkw()` and `hsbkw()`. These conversions cannot throw in this
+  context and the silent fallback masked type errors.
+
+* **`gkw.cpp` / `ekw.cpp`**: Refactored Hessian accumulation to build only the upper
+  triangle inside the observation loop and symmetrize once afterwards with
+  `arma::symmatu()`, eliminating O(n × p²) redundant assignments.
+
+* **`utils.h` — `vec_safe_pow()` UB guard**: Added guard preventing undefined
+  behaviour when casting large `y_rounded` values (> `INT_MAX`) to `int` for
+  odd-exponent sign detection.
+
+* **`utils.h` — `vec_safe_pow()` SIMD fast path**: Added an early-return path
+  `arma::exp(y * arma::log(x))` for the common case (y > 0, all x > 0) that
+  is fully auto-vectorizable, improving throughput in gradient/Hessian evaluation.
+
 # gkwdist 1.1.2
 
 ## Code Cleanup and Testing Enhancement

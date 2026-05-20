@@ -737,14 +737,8 @@ Rcpp::NumericVector grbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   }
   
   // Convert and validate data
-  arma::vec x;
-  try {
-    x = Rcpp::as<arma::vec>(data);
-  } catch (...) {
-    Rcpp::warning("Failed to convert data to arma::vec in grbkw");
-    return Rcpp::NumericVector(4, R_NaN);
-  }
-  
+  arma::vec x = Rcpp::as<arma::vec>(data);
+
   if (x.n_elem == 0 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     Rcpp::warning("Data must be strictly in (0,1) and non-empty for grbkw");
     return Rcpp::NumericVector(4, R_NaN);
@@ -902,14 +896,8 @@ Rcpp::NumericMatrix hsbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   }
   
   // Convert and validate data
-  arma::vec x;
-  try {
-    x = Rcpp::as<arma::vec>(data);
-  } catch (...) {
-    Rcpp::warning("Failed to convert data to arma::vec in hsbkw");
-    return nanH;
-  }
-  
+  arma::vec x = Rcpp::as<arma::vec>(data);
+
   if (x.n_elem == 0 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     Rcpp::warning("Data must be strictly in (0,1) and non-empty for hsbkw");
     return nanH;
@@ -1011,8 +999,7 @@ Rcpp::NumericMatrix hsbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
     }
     w = std::max(std::min(w, 1.0 - eps), eps);
     
-    double v_beta_m1 = (beta > 1.0) ? v_beta / v : 1.0;
-    if (beta == 1.0) v_beta_m1 = 1.0;
+    double v_beta_m1 = safe_exp((beta - 1.0) * ln_v);
     
     double dw_dv = -beta * v_beta_m1;
     double dw_dalpha = dw_dv * dv_dalpha;

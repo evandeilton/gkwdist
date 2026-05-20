@@ -8,3 +8,6 @@
 ^pkgdown$
 ^\.git$
 ^\.gitignore$
+^\.claude$
+^cran-comments\.md$
+^TODO\.md$
