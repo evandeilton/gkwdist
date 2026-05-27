@@ -161,19 +161,19 @@ results <- data.frame(
 )
 print(results, digits = 4)
 #>        Parameter True     MLE      SE CI_Lower CI_Upper
-#> alpha      alpha  2.0  1.0702  1.8188  -2.4946    4.635
-#> beta        beta  3.0  3.0748  3.3714  -3.5332    9.683
-#> gamma      gamma  1.5  0.3822  0.3844  -0.3714    1.136
-#> delta      delta  2.0  1.6150  2.7406  -3.7565    6.987
-#> lambda    lambda  1.8 16.2353 30.0703 -42.7024   75.173
+#> alpha      alpha  2.0  1.2054  1.8369  -2.3949    4.806
+#> beta        beta  3.0  3.2880  3.6955  -3.9552   10.531
+#> gamma      gamma  1.5  0.3823  0.3952  -0.3924    1.157
+#> delta      delta  2.0  1.4619  2.5862  -3.6070    6.531
+#> lambda    lambda  1.8 13.8780 23.0766 -31.3522   59.108
 
 cat("\nNegative log-likelihood at MLE:", fit$value, "\n")
 #> 
-#> Negative log-likelihood at MLE: -704.3541 
+#> Negative log-likelihood at MLE: -704.336 
 cat("AIC:", 2 * fit$value + 2 * length(mle), "\n")
-#> AIC: -1398.708 
+#> AIC: -1398.672 
 cat("BIC:", 2 * fit$value + length(mle) * log(n), "\n")
-#> BIC: -1374.17 
+#> BIC: -1374.133 
 
 
 ## Example 3: Comparing Optimization Methods
@@ -239,7 +239,7 @@ for (method in methods) {
 
 print(comparison, digits = 4, row.names = FALSE)
 #>       Method Alpha  Beta  Gamma Delta Lambda NegLogLik Convergence
-#>         BFGS 1.070 3.075 0.3822 1.615 16.235    -704.4           0
+#>         BFGS 1.205 3.288 0.3823 1.462 13.878    -704.3           0
 #>  Nelder-Mead 1.868 3.136 1.0095 1.870  2.826    -704.0           0
 
 
@@ -272,9 +272,9 @@ lr_stat <- 2 * (loglik_full - loglik_restricted)
 p_value <- pchisq(lr_stat, df = 1, lower.tail = FALSE)
 
 cat("LR Statistic:", round(lr_stat, 4), "\n")
-#> LR Statistic: 0.8112 
+#> LR Statistic: 0.7677 
 cat("P-value:", format.pval(p_value, digits = 4), "\n")
-#> P-value: 0.3678 
+#> P-value: 0.3809 
 
 
 ## Example 5: Univariate Profile Likelihoods
