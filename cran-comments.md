@@ -1,40 +1,27 @@
-# CRAN Submission Comments — gkwdist 1.1.3
-
 ## Summary of Changes
 
-This patch release fixes critical bugs that affected MLE reliability, standard error
-computation, and distribution-family initial value generation. It also corrects a
-systematic numerical error in `safe_exp()` and removes arbitrary clamping that
-distorted gradients/Hessians for large parameter values.
+This is a patch release (1.1.3 → 1.1.4) fixing the CRAN check ERRORs reported on
+2026-05-25. No functional changes; all user-facing code is unchanged.
 
-Full details are in `NEWS.md`.
+### Fix
 
-## Test Environments
+* `tests/testthat/test-mle-performance.R`: Added `skip_on_cran()` to all
+  timing-based benchmark tests. These tests compare wall-clock run times of
+  analytical vs. numerical gradient optimisation and are inherently sensitive to
+  machine load. On CRAN's Linux check hosts the baseline ("no gradient") run
+  happened to be anomalously fast, causing the 2× ratio tolerance to be breached
+  intermittently. The tests remain intact for local development.
 
-* Local: Ubuntu 24.04.2 LTS, R 4.5.2, GCC 13.3.0, x86_64
-* R CMD check run locally with `--as-cran`
+## Test environments
 
-## R CMD CHECK Results
+* Local: Zorin OS 18.1 (Ubuntu 24.04 base), R 4.5.2, GCC 13.3.0, x86_64-linux
+
+## R CMD check results
 
 ```
-Status: OK
 0 errors | 0 warnings | 0 notes
 ```
 
-## Downstream Dependencies
+## Downstream dependencies
 
 None. `gkwdist` has no reverse dependencies on CRAN.
-
-## Key Bug Fixes (for CRAN reviewer context)
-
-1. `llgkw()` returned `R_NegInf` for invalid parameters — optimizers treated −∞ as
-   the global minimum. Fixed to `R_PosInf`.
-
-2. `gkwinit.cpp` rejected `delta = 0` and mapped EKw/Kw to `delta = 1` (wrong);
-   these sub-families require `delta = 0`.
-
-3. `hsbkw()` computed `v^(β−1) = 1` for β < 1 due to a branch error, producing
-   a wrong Hessian and therefore wrong standard errors for β ∈ (0, 1).
-
-4. `safe_exp()` returned `10 × exp(x)` in its moderate-underflow branch — a 10×
-   systematic scaling error.

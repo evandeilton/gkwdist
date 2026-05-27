@@ -254,6 +254,8 @@ families <- c("beta", "kw", "ekw", "mc", "kkw", "bkw", "gkw")
 
 for (fam in families) {
   test_that(paste("Optimization efficiency for family:", fam), {
+    skip_on_cran()
+
     # Test 2 configs per family to balance coverage and time
     for (cfg in c(1, 5)) {
       # Increase reps for complex models
