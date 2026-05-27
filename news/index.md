@@ -1,6 +1,18 @@
 # Changelog
 
+## gkwdist 1.1.4
+
+### CRAN Fix
+
+- **`test-mle-performance.R`**: Added `skip_on_cran()` to all
+  timing-based benchmark tests. These tests compare wall-clock times of
+  analytical vs. numerical gradients and are inherently unreliable on
+  shared/loaded CRAN check machines, causing spurious `ERROR` results.
+  The tests remain available for local development.
+
 ## gkwdist 1.1.3
+
+CRAN release: 2026-05-21
 
 ### Bug Fixes
 
