@@ -15,13 +15,8 @@ authors:
 affiliations:
  - name: Federal University of Paraná (UFPR), Brazil
    index: 1
-citation_author: Lopes, JE
 date: 11 August 2026
-year: 2026
 bibliography: paper.bib
-output: rticles::joss_article
-csl: apa.csl
-journal: JOSS
 ---
 
 # Summary
