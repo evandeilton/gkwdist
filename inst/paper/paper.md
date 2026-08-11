@@ -1,22 +1,23 @@
 ---
-title: 'gkwdist: Generalized Kumaraswamy Distribution Family'
+title: 'gkwdist: An R Package for the Generalized Kumaraswamy Distribution Family'
 tags:
-  - R
-  - Kumaraswamy distribution
-  - bounded data
-  - unit interval
-  - maximum likelihood
-  - analytical derivatives
-  - RcppArmadillo
+- R
+- Kumaraswamy distribution
+- bounded data
+- unit interval
+- maximum likelihood
+- analytical derivatives
+- RcppArmadillo
+date: "11 August 2026"
+output: pdf_document
 authors:
-  - name: José Evandeilton Lopes
-    orcid: 0009-0007-5887-4084
-    affiliation: "1"
-affiliations:
- - name: Federal University of Paraná (UFPR), Brazil
-   index: 1
-date: 11 August 2026
+- name: José Evandeilton Lopes
+  orcid: "0009-0007-5887-4084"
+  affiliation: '1'
 bibliography: paper.bib
+affiliations:
+- name: Federal University of Paraná (UFPR), Brazil
+  index: 1
 ---
 
 # Summary
