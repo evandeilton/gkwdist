@@ -1,5 +1,5 @@
 ---
-title: 'gkwdist: Analytical Likelihood Derivatives for the Generalized Kumaraswamy Distribution Family in R'
+title: 'gkwdist: Generalized Kumaraswamy Distribution Family'
 tags:
   - R
   - Kumaraswamy distribution
