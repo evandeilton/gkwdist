@@ -11,3 +11,6 @@
 ^\.claude$
 ^cran-comments\.md$
 ^TODO\.md$
+^CONTRIBUTING\.md$
+^CODE_OF_CONDUCT\.md$
+^\.Rhistory$

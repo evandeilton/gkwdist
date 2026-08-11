@@ -1,6 +1,6 @@
 Package: gkwdist
 Title: Generalized Kumaraswamy Distribution Family
-Version: 1.1.4
+Version: 1.1.5
 Authors@R: c(person(given = "José Evandeilton",
                     family = "Lopes",
                     role = c("aut", "cre"),
@@ -24,7 +24,6 @@ BugReports: https://github.com/evandeilton/gkwdist/issues
 Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Imports: 
     Rcpp,
     RcppArmadillo,
@@ -40,3 +39,4 @@ Suggests:
 Config/testthat/edition: 3
 NeedsCompilation: yes
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

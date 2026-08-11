@@ -36,7 +36,7 @@
  * All computations use log-space arithmetic and numerically stable helper
  * functions from utils.h to prevent overflow/underflow across the full
  * parameter space. Key techniques include:
- * - log1mexp() for computing log(1 - exp(x)) stably
+ * - gkw_log1mexp() for computing log(1 - exp(x)) stably
  * - safe_pow(), safe_exp(), safe_log() for protected arithmetic
  * - Vectorized operations via Armadillo with element-wise stability
  * 
@@ -159,7 +159,7 @@ Rcpp::NumericVector dgkw(
     double log_x_alpha = safe_log(x_alpha);
     
     // Compute log(1 - x^α) using stable log1mexp
-    double log_one_minus_x_alpha = log1mexp(log_x_alpha);
+    double log_one_minus_x_alpha = gkw_log1mexp(log_x_alpha);
     if (!R_finite(log_one_minus_x_alpha)) {
       continue;
     }
@@ -171,7 +171,7 @@ Rcpp::NumericVector dgkw(
     }
     
     // Compute log(1 - (1 - x^α)^β) = log(w)
-    double log_term1 = log1mexp(log_one_minus_x_alpha_beta);
+    double log_term1 = gkw_log1mexp(log_one_minus_x_alpha_beta);
     if (!R_finite(log_term1)) {
       continue;
     }
@@ -183,7 +183,7 @@ Rcpp::NumericVector dgkw(
     }
     
     // Compute log(1 - [1-(1-x^α)^β]^λ) = log(z)
-    double log_term2 = log1mexp(log_term1_lambda);
+    double log_term2 = gkw_log1mexp(log_term1_lambda);
     if (!R_finite(log_term2)) {
       continue;
     }
@@ -300,7 +300,7 @@ Rcpp::NumericVector pgkw(
     
     // Step 2: log(1 - q^α)
     double log_qi_alpha = safe_log(qi_alpha);
-    double log_one_minus_qi_alpha = log1mexp(log_qi_alpha);
+    double log_one_minus_qi_alpha = gkw_log1mexp(log_qi_alpha);
     if (!R_finite(log_one_minus_qi_alpha)) {
       result(i) = lower_tail ? (log_p ? 0.0 : 1.0) : (log_p ? R_NegInf : 0.0);
       continue;
@@ -1029,7 +1029,7 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
     
     // v = 1 - A and derivatives (using log-space for v)
     double log_A = alpha * ln_xi;
-    double log_v = log1mexp(log_A);
+    double log_v = gkw_log1mexp(log_A);
     if (!R_finite(log_v)) continue;
     double v = safe_exp(log_v);
     double ln_v = log_v;
@@ -1042,7 +1042,7 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
     
     // --- L7: (γλ - 1) ln(w), where w = 1 - v^β ---
     double log_v_beta = beta * log_v;
-    double log_w = log1mexp(log_v_beta);
+    double log_w = gkw_log1mexp(log_v_beta);
     if (!R_finite(log_w)) continue;
     double w = safe_exp(log_w);
     double ln_w = log_w;
@@ -1065,7 +1065,7 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
     
     // --- L8: δ ln(z), where z = 1 - w^λ ---
     double log_w_lambda = lambda * log_w;
-    double log_z = log1mexp(log_w_lambda);
+    double log_z = gkw_log1mexp(log_w_lambda);
     if (!R_finite(log_z)) continue;
     double z = safe_exp(log_z);
     

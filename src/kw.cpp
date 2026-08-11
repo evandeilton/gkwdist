@@ -165,7 +165,7 @@ Rcpp::NumericVector dkw(
     double log_xalpha = a * lx;  // log(x^α)
     
     // Compute log(1 - x^α) using stable log1mexp
-    double log_v = log1mexp(log_xalpha);
+    double log_v = gkw_log1mexp(log_xalpha);
     if (!R_finite(log_v)) {
       continue;
     }

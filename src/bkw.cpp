@@ -161,7 +161,7 @@ Rcpp::NumericVector dbkw(
     double log_xalpha = a * lx;  // log(x^α)
     
     // Compute log(1 - x^α) using stable log1mexp
-    double log_v = log1mexp(log_xalpha);
+    double log_v = gkw_log1mexp(log_xalpha);
     if (!R_finite(log_v)) {
       continue;
     }
@@ -174,7 +174,7 @@ Rcpp::NumericVector dbkw(
     double log_v_beta = b * log_v;
     
     // Compute log(1 - (1-x^α)^β) = log(w) using log1mexp
-    double log_w = log1mexp(log_v_beta);
+    double log_w = gkw_log1mexp(log_v_beta);
     if (!R_finite(log_w)) {
       continue;
     }
@@ -610,77 +610,31 @@ double llbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
     return R_PosInf;
   }
   
-  // Numerical stability constant
-  const double eps = std::sqrt(std::numeric_limits<double>::epsilon());
-  
-  // Constant term: n * [log(α) + log(β) - log(B(γ, δ+1))]
+  // Constant term: n * [log(alpha) + log(beta) - log(B(gamma, delta+1))]
   double logB = R::lbeta(g, d + 1.0);
   double ll_const = n * (safe_log(a) + safe_log(b) - logB);
-  
-  // Term 1: (α - 1) * Σ log(x)
+
+  // Term 1: (alpha - 1) * sum log(x)
   arma::vec lx = vec_safe_log(x);
   double sum1 = (a - 1.0) * arma::sum(lx);
-  
-  // Exponent for term 2
+
+  // With lambda = 1 the innermost factor collapses: z = 1 - w = v^beta, so
+  // delta*log(z) merges into the log(v) term with exponent beta*(delta+1) - 1.
   double exp1 = b * (d + 1.0) - 1.0;
   double sum2 = 0.0;
   double sum3 = 0.0;
-  
+
   for (int i = 0; i < n; i++) {
-    double xi = x(i);
-    
-    // Compute x^α stably
-    double log_xa = a * safe_log(xi);
-    double xa;
-    if (log_xa < -700.0) {
-      xa = 0.0;
-    } else if (log_xa > 700.0) {
-      xa = 1e300;
-    } else {
-      xa = safe_exp(log_xa);
-    }
-    
-    // Compute v = 1 - x^α
-    double v;
-    if (xa > 0.5) {
-      v = std::max(1.0 - xa, eps);
-    } else {
-      v = 1.0 - xa;
-    }
-    v = std::max(std::min(v, 1.0 - eps), eps);
-    
-    // Term 2: (β(δ+1) - 1) * log(v)
-    sum2 += exp1 * safe_log(v);
-    
-    // Compute v^β stably
-    double log_vb = b * safe_log(v);
-    double vb;
-    if (log_vb < -700.0) {
-      vb = 0.0;
-    } else if (log_vb > 700.0) {
-      vb = 1e300;
-    } else {
-      vb = safe_exp(log_vb);
-    }
-    
-    // Compute w = 1 - v^β
-    double w;
-    if (vb > 0.5) {
-      w = std::max(1.0 - vb, eps);
-    } else {
-      w = 1.0 - vb;
-    }
-    w = std::max(std::min(w, 1.0 - eps), eps);
-    
-    // Term 3: (γ - 1) * log(w) (skip if γ = 1)
-    if (g != 1.0) {
-      sum3 += (g - 1.0) * safe_log(w);
-    }
+    double log_v = gkw_log1mexp(a * lx(i));
+    sum2 += exp1 * log_v;
+
+    double log_w = gkw_log1mexp(b * log_v);
+    sum3 += (g - 1.0) * log_w;
   }
-  
+
   // Combine all terms
   double ll = ll_const + sum1 + sum2 + sum3;
-  
+
   // Final validity check
   if (!std::isfinite(ll)) {
     return R_PosInf;
@@ -746,97 +700,63 @@ Rcpp::NumericVector grbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   
   int n = x.n_elem;
   Rcpp::NumericVector grad(4, 0.0);
-  
-  // Numerical stability constant
-  const double eps = std::sqrt(std::numeric_limits<double>::epsilon());
-  
-  // ---- Compute intermediate quantities ----
-  
-  arma::vec log_x = vec_safe_log(x);
-  arma::vec x_alpha = vec_safe_pow(x, alpha);
-  arma::vec x_alpha_log_x = x_alpha % log_x;
-  
-  // Compute v = 1 - x^α
-  arma::vec v(n);
-  for (int i = 0; i < n; i++) {
-    if (x_alpha(i) < 0.5) {
-      v(i) = 1.0 - x_alpha(i);
-    } else {
-      v(i) = -std::expm1(alpha * log_x(i));
-    }
-    v(i) = std::max(std::min(v(i), 1.0 - eps), eps);
-  }
-  
-  arma::vec log_v = vec_safe_log(v);
-  
-  // Compute v^(β-1) and v^β
-  arma::vec v_beta_m1;
-  if (std::abs(beta - 1.0) < eps) {
-    v_beta_m1.ones(n);
-  } else {
-    v_beta_m1 = vec_safe_pow(v, beta - 1.0);
-  }
-  arma::vec v_beta = v % v_beta_m1;
-  arma::vec v_beta_log_v = v_beta % log_v;
-  
-  // Compute w = 1 - v^β
-  arma::vec w(n);
-  arma::vec log_w(n);
-  for (int i = 0; i < n; i++) {
-    if (v_beta(i) < 0.5) {
-      w(i) = 1.0 - v_beta(i);
-    } else {
-      w(i) = -std::expm1(beta * log_v(i));
-    }
-    w(i) = std::max(std::min(w(i), 1.0 - eps), eps);
-    log_w(i) = safe_log(w(i));
-  }
-  
-  // Compute digamma values
+
+  // Digamma values for the Beta-function constant
   double digamma_gamma = R::digamma(gamma);
   double digamma_delta_plus_1 = R::digamma(delta + 1.0);
   double digamma_sum = R::digamma(gamma + delta + 1.0);
-  
-  // ---- Calculate gradient components ----
-  
+
   double term_beta_delta = beta * (delta + 1.0) - 1.0;
   double term_gamma = gamma - 1.0;
-  
-  // d_alpha = n/α + Σlog(x) - Σ[x^α log(x) * ((β(δ+1)-1)/v - (γ-1)βv^(β-1)/w)]
-  double d_alpha = n / alpha + arma::sum(log_x);
+
+  double sum_log_x = 0.0, sum_log_v = 0.0, sum_log_w = 0.0;
+  double acc_alpha = 0.0, acc_beta = 0.0;
+
+  // Log-space blocks, per observation:
+  //   P = dlog(v)/dalpha = -log(x)*exp(log(x^alpha) - log(v))
+  //   S = v^beta/w       = exp(beta*log(v) - log(w))
+  //   Q = dlog(w)/dalpha = -beta*P*S
+  //   R = dlog(w)/dbeta  = -log(v)*S
   for (int i = 0; i < n; i++) {
-    double alpha_term = x_alpha_log_x(i) * (
-      term_beta_delta / v(i) - term_gamma * beta * v_beta_m1(i) / w(i)
-    );
-    if (std::isfinite(alpha_term)) {
-      d_alpha -= alpha_term;
-    }
+    double log_xi = std::log(x(i));
+    sum_log_x += log_xi;
+
+    double log_x_alpha = alpha * log_xi;
+    double log_v = gkw_log1mexp(log_x_alpha);
+    sum_log_v += log_v;
+
+    double log_v_beta = beta * log_v;
+    double log_w = gkw_log1mexp(log_v_beta);
+    sum_log_w += log_w;
+
+    double P = -log_xi * std::exp(log_x_alpha - log_v);
+    double S = std::exp(log_v_beta - log_w);
+    double Q = -beta * P * S;
+    double R = -log_v * S;
+
+    acc_alpha += term_beta_delta * P + term_gamma * Q;
+    acc_beta  += term_gamma * R;
   }
-  
-  // d_beta = n/β + (δ+1)Σlog(v) - (γ-1)Σ[v^β log(v)/w]
-  double d_beta = n / beta + (delta + 1.0) * arma::sum(log_v);
-  if (term_gamma != 0.0) {
-    for (int i = 0; i < n; i++) {
-      double beta_term = term_gamma * v_beta_log_v(i) / w(i);
-      if (std::isfinite(beta_term)) {
-        d_beta -= beta_term;
-      }
-    }
-  }
-  
-  // d_gamma = -n[ψ(γ) - ψ(γ+δ+1)] + Σlog(w)
-  double d_gamma = -n * (digamma_gamma - digamma_sum) + arma::sum(log_w);
-  
-  // d_delta = -n[ψ(δ+1) - ψ(γ+δ+1)] + βΣlog(v)
-  double d_delta = -n * (digamma_delta_plus_1 - digamma_sum) + beta * arma::sum(log_v);
-  
+
+  // d_alpha = n/alpha + sum log(x) + (beta(delta+1)-1)*sum P + (gamma-1)*sum Q
+  double d_alpha = n / alpha + sum_log_x + acc_alpha;
+
+  // d_beta = n/beta + (delta+1)*sum log(v) + (gamma-1)*sum R
+  double d_beta = n / beta + (delta + 1.0) * sum_log_v + acc_beta;
+
+  // d_gamma = -n[psi(gamma) - psi(gamma+delta+1)] + sum log(w)
+  double d_gamma = -n * (digamma_gamma - digamma_sum) + sum_log_w;
+
+  // d_delta = -n[psi(delta+1) - psi(gamma+delta+1)] + beta*sum log(v)
+  double d_delta = -n * (digamma_delta_plus_1 - digamma_sum) + beta * sum_log_v;
+
   // Final validity check
   if (!std::isfinite(d_alpha) || !std::isfinite(d_beta) ||
       !std::isfinite(d_gamma) || !std::isfinite(d_delta)) {
-      Rcpp::warning("Gradient calculation produced non-finite values in grbkw");
+    Rcpp::warning("Gradient calculation produced non-finite values in grbkw");
     return Rcpp::NumericVector(4, R_NaN);
   }
-  
+
   // Return NEGATIVE gradient (for minimization)
   grad[0] = -d_alpha;
   grad[1] = -d_beta;
@@ -904,167 +824,59 @@ Rcpp::NumericMatrix hsbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   }
   
   int n = x.n_elem;
-  
+
   // Initialize Hessian matrix
   arma::mat H(4, 4, arma::fill::zeros);
-  
-  // Numerical stability constant
-  const double eps = std::sqrt(std::numeric_limits<double>::epsilon());
-  
-  // ---- Constant terms (independent of observations) ----
-  
-  // H(α,α) from n*ln(α): -n/α²
-  H(0, 0) = -n / (alpha * alpha);
-  
-  // H(β,β) from n*ln(β): -n/β²
-  H(1, 1) = -n / (beta * beta);
-  
-  // Compute trigamma values
+
+  // Trigamma terms from -n*log(B(gamma, delta+1))
   double trigamma_gamma = R::trigamma(gamma);
   double trigamma_delta_plus_1 = R::trigamma(delta + 1.0);
   double trigamma_sum = R::trigamma(gamma + delta + 1.0);
-  
-  // H(γ,γ): -n*[ψ₁(γ) - ψ₁(γ+δ+1)]
+
+  H(0, 0) = -n / (alpha * alpha);
+  H(1, 1) = -n / (beta * beta);
   H(2, 2) = -n * (trigamma_gamma - trigamma_sum);
-  
-  // H(δ,δ): -n*[ψ₁(δ+1) - ψ₁(γ+δ+1)]
   H(3, 3) = -n * (trigamma_delta_plus_1 - trigamma_sum);
-  
-  // H(γ,δ) = H(δ,γ): n*ψ₁(γ+δ+1)
   H(2, 3) = n * trigamma_sum;
-  H(3, 2) = H(2, 3);
-  
-  // Precompute common factors
-  double beta_delta_factor = beta * (delta + 1.0) - 1.0;
-  double gamma_minus_1 = gamma - 1.0;
-  
-  // ---- Observation-dependent terms ----
+
+  double term_beta_delta = beta * (delta + 1.0) - 1.0;
+  double term_gamma = gamma - 1.0;
+
+  // Same log-space blocks as the gradient. Note which mixed derivatives keep
+  // no vanishing factor and therefore must be accumulated for every parameter
+  // value: d2l/dalpha dgamma = sum Q, d2l/dbeta dgamma = sum R,
+  // d2l/dalpha ddelta = beta*sum P and d2l/dbeta ddelta = sum log(v).
   for (int i = 0; i < n; i++) {
-    double xi = x(i);
-    double ln_xi = safe_log(xi);
-    
-    // ---- Compute A = x^α and derivatives ----
-    double log_A = alpha * ln_xi;
-    double A, dA_dalpha, d2A_dalpha2;
-    
-    if (std::abs(log_A) > 700.0) {
-      if (log_A < -700.0) {
-        A = 0.0;
-        dA_dalpha = 0.0;
-        d2A_dalpha2 = 0.0;
-      } else {
-        A = safe_exp(log_A);
-        dA_dalpha = A * ln_xi;
-        d2A_dalpha2 = dA_dalpha * ln_xi;
-      }
-    } else {
-      A = std::exp(log_A);
-      dA_dalpha = A * ln_xi;
-      d2A_dalpha2 = dA_dalpha * ln_xi;
-    }
-    
-    // ---- Compute v = 1 - A and derivatives ----
-    double v, ln_v;
-    if (A > 0.5) {
-      v = -std::expm1(log_A);
-    } else {
-      v = 1.0 - A;
-    }
-    v = std::max(std::min(v, 1.0 - eps), eps);
-    ln_v = safe_log(v);
-    
-    double dv_dalpha = -dA_dalpha;
-    double d2v_dalpha2 = -d2A_dalpha2;
-    
-    // ---- Derivatives for L5: (β(δ+1)-1)*ln(v) ----
-    double d2L5_dalpha2 = 0.0;
-    if (std::abs(beta_delta_factor) > eps) {
-      double term = (d2v_dalpha2 * v - dv_dalpha * dv_dalpha) / (v * v);
-      if (std::isfinite(term)) {
-        d2L5_dalpha2 = beta_delta_factor * term;
-      }
-    }
-    
-    double d2L5_dalpha_dbeta = (delta + 1.0) * (dv_dalpha / v);
-    double d2L5_dalpha_ddelta = beta * (dv_dalpha / v);
-    double d2L5_dbeta_ddelta = ln_v;
-    
-    // ---- Compute w = 1 - v^β and derivatives ----
-    double v_beta = safe_pow(v, beta);
-    double w;
-    if (v_beta > 0.5) {
-      w = -std::expm1(beta * ln_v);
-    } else {
-      w = 1.0 - v_beta;
-    }
-    w = std::max(std::min(w, 1.0 - eps), eps);
-    
-    double v_beta_m1 = safe_exp((beta - 1.0) * ln_v);
-    
-    double dw_dv = -beta * v_beta_m1;
-    double dw_dalpha = dw_dv * dv_dalpha;
-    
-    // ---- Derivatives for L6: (γ-1)*ln(w) ----
-    double d2L6_dalpha2 = 0.0;
-    double d2L6_dbeta2 = 0.0;
-    double d2L6_dalpha_dbeta = 0.0;
-    double d2L6_dalpha_dgamma = 0.0;
-    double d2L6_dbeta_dgamma = 0.0;
-    
-    if (std::abs(gamma_minus_1) > eps) {
-      // Second derivative of w w.r.t. α
-      double d2w_dalpha2 = -beta * ((beta - 1.0) * safe_pow(v, beta - 2.0) *
-                                    (dv_dalpha * dv_dalpha) +
-                                    v_beta_m1 * d2v_dalpha2);
-      
-      double term_alpha2 = (d2w_dalpha2 * w - dw_dalpha * dw_dalpha) / (w * w);
-      if (std::isfinite(term_alpha2)) {
-        d2L6_dalpha2 = gamma_minus_1 * term_alpha2;
-      }
-      
-      // Derivatives w.r.t. β
-      double dw_dbeta = -v_beta * ln_v;
-      double d2w_dbeta2 = -v_beta * (ln_v * ln_v);
-      double term_beta2 = (d2w_dbeta2 * w - dw_dbeta * dw_dbeta) / (w * w);
-      if (std::isfinite(term_beta2)) {
-        d2L6_dbeta2 = gamma_minus_1 * term_beta2;
-      }
-      
-      // Mixed derivative (α, β)
-      double d_dw_dalpha_dbeta = -v_beta_m1 * (1.0 + beta * ln_v) * dv_dalpha;
-      double mixed_term = (d_dw_dalpha_dbeta / w) - (dw_dalpha * dw_dbeta) / (w * w);
-      if (std::isfinite(mixed_term)) {
-        d2L6_dalpha_dbeta = gamma_minus_1 * mixed_term;
-      }
-      
-      // Mixed derivatives with γ
-      d2L6_dalpha_dgamma = dw_dalpha / w;
-      d2L6_dbeta_dgamma = dw_dbeta / w;
-    }
-    
-    // ---- Accumulate Hessian contributions ----
-    if (std::isfinite(d2L5_dalpha2)) H(0, 0) += d2L5_dalpha2;
-    if (std::isfinite(d2L6_dalpha2)) H(0, 0) += d2L6_dalpha2;
-    
-    if (std::isfinite(d2L6_dbeta2)) H(1, 1) += d2L6_dbeta2;
-    
-    if (std::isfinite(d2L5_dalpha_dbeta)) H(0, 1) += d2L5_dalpha_dbeta;
-    if (std::isfinite(d2L6_dalpha_dbeta)) H(0, 1) += d2L6_dalpha_dbeta;
-    H(1, 0) = H(0, 1);
-    
-    if (std::isfinite(d2L6_dalpha_dgamma)) H(0, 2) += d2L6_dalpha_dgamma;
-    H(2, 0) = H(0, 2);
-    
-    if (std::isfinite(d2L5_dalpha_ddelta)) H(0, 3) += d2L5_dalpha_ddelta;
-    H(3, 0) = H(0, 3);
-    
-    if (std::isfinite(d2L6_dbeta_dgamma)) H(1, 2) += d2L6_dbeta_dgamma;
-    H(2, 1) = H(1, 2);
-    
-    if (std::isfinite(d2L5_dbeta_ddelta)) H(1, 3) += d2L5_dbeta_ddelta;
-    H(3, 1) = H(1, 3);
+    double log_xi = std::log(x(i));
+
+    double log_x_alpha = alpha * log_xi;
+    double log_v = gkw_log1mexp(log_x_alpha);
+    double log_v_beta = beta * log_v;
+    double log_w = gkw_log1mexp(log_v_beta);
+
+    double P = -log_xi * std::exp(log_x_alpha - log_v);
+    double S = std::exp(log_v_beta - log_w);
+    double Q = -beta * P * S;
+    double R = -log_v * S;
+
+    double dP_dalpha = P * (log_xi - P);
+    double dQ_dalpha = Q * (log_xi - P + beta * P - Q);
+    double dQ_dbeta  = -P * S * (1.0 + beta * (log_v - R));
+    double dR_dbeta  = R * (log_v - R);
+
+    H(0, 0) += term_beta_delta * dP_dalpha + term_gamma * dQ_dalpha;
+    H(0, 1) += (delta + 1.0) * P + term_gamma * dQ_dbeta;
+    H(0, 2) += Q;
+    H(0, 3) += beta * P;
+
+    H(1, 1) += term_gamma * dR_dbeta;
+    H(1, 2) += R;
+    H(1, 3) += log_v;
   }
-  
+
+  // Only the upper triangle is accumulated above; mirror it
+  H = arma::symmatu(H);
+
   // Final validity check
   if (!H.is_finite()) {
     Rcpp::warning("Hessian calculation produced non-finite values");

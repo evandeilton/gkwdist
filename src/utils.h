@@ -93,7 +93,7 @@ constexpr double EPSILON      = std::numeric_limits<double>::epsilon();        /
  * @note Time complexity: O(1)
  * @note Relative error: < 2*EPSILON for all u <= 0
  */
-inline double log1mexp(double u) {
+inline double gkw_log1mexp(double u) {
   // Input validation: u must be non-positive
   if (u > 0.0) {
     return R_NaN;
@@ -139,7 +139,7 @@ inline double log1mexp(double u) {
  * @note Time complexity: O(1)
  * @note Relative error: < 2*EPSILON for all x
  */
-inline double log1pexp(double x) {
+inline double gkw_log1pexp(double x) {
   // Region 1: Very large x - asymptotic to x
   if (x > LOG1PEXP_LARGE) {
     return x;
@@ -351,7 +351,7 @@ inline arma::vec vec_log1mexp(const arma::vec& u) {
   // Element-wise processing for maximum numerical reliability
   // Each element may fall in different numerical regime
   for (size_t i = 0; i < n; ++i) {
-    result(i) = log1mexp(u(i));
+    result(i) = gkw_log1mexp(u(i));
   }
   
   return result;
@@ -371,7 +371,7 @@ inline arma::vec vec_log1pexp(const arma::vec& x) {
   arma::vec result(n);
   
   for (size_t i = 0; i < n; ++i) {
-    result(i) = log1pexp(x(i));
+    result(i) = gkw_log1pexp(x(i));
   }
   
   return result;
@@ -919,8 +919,11 @@ inline bool check_beta_pars(double gamma, double delta, bool strict = false) {
     return false;
   }
   
-  // Basic constraints (note: delta > 0 for Beta, not >= 0)
-  if (gamma <= 0.0 || delta <= 0.0) {
+  // The Beta sub-family is Beta(gamma, delta + 1), so the second shape
+  // parameter is delta + 1 and delta = 0 is the legitimate Beta(gamma, 1)
+  // boundary, not an invalid value. This matches every other validator in
+  // this file and the delta >= 0 support of the GKw family itself.
+  if (gamma <= 0.0 || delta < 0.0) {
     return false;
   }
   

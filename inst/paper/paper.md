@@ -1,11 +1,12 @@
 ---
-title: 'gkwdist: An R Package for the Generalized Kumaraswamy Distribution Family'
+title: 'gkwdist: Analytical Likelihood Derivatives for the Generalized Kumaraswamy Distribution Family in R'
 tags:
   - R
   - Kumaraswamy distribution
   - bounded data
   - unit interval
   - maximum likelihood
+  - analytical derivatives
   - RcppArmadillo
 authors:
   - name: José Evandeilton Lopes
@@ -15,7 +16,7 @@ affiliations:
  - name: Federal University of Paraná (UFPR), Brazil
    index: 1
 citation_author: Lopes, JE
-date: 07 January 2026
+date: 11 August 2026
 year: 2026
 bibliography: paper.bib
 output: rticles::joss_article
@@ -25,70 +26,136 @@ journal: JOSS
 
 # Summary
 
-Bounded continuous data on the unit interval $(0,1)$ arise frequently in scientific applications. Proportions, rates, indices, and probabilities for instance naturally fall within this domain. While the Beta distribution [@ferrari2004] and the two-parameter Kumaraswamy distribution [@kumaraswamy1980; @jones2009] serve as standard choices for such data, they may lack flexibility for datasets exhibiting heavy tails, bimodality, or complex boundary behaviors. The `gkwdist` package implements the five-parameter Generalized Kumaraswamy (GKw) distribution [@carrasco2010] and its complete hierarchy of seven nested subfamilies, providing a unified, high-performance framework for modeling bounded data with varying degrees of complexity. All computational routines are implemented in **C++** via `RcppArmadillo` [@Eddelbuettel2014], ensuring numerical stability and computational efficiency for both interactive analysis and large-scale applications.
+`gkwdist` provides the distribution layer of the Generalized Kumaraswamy (GKw)
+family [@carrasco2010] in R: densities, distribution and quantile functions,
+random generation, and — its distinguishing contribution — exact analytical
+log-likelihoods, score vectors and Hessian matrices for the five-parameter GKw
+distribution and each of its seven nested sub-families. All routines are
+implemented in C++ through `RcppArmadillo` [@Eddelbuettel2014; @eddelbuettel2011]
+and evaluated entirely in log space, which keeps them accurate for data
+concentrated near the boundaries of $(0,1)$, where the naive algebra loses every
+significant digit. The analytical derivatives make gradient-based maximum
+likelihood estimation, observed-information standard errors and likelihood ratio
+tests available across the hierarchy without numerical differentiation.
 
 # Statement of Need
 
-Practitioners modeling bounded responses require distributions that balance flexibility with parsimony. The GKw family addresses this through a principled hierarchical structure: analysts can begin with simple two-parameter models (Beta, Kumaraswamy) and systematically evaluate more complex specifications (three to five parameters) only when justified by the data. This approach (starting simple and adding complexity as needed) reduces overfitting risk while accommodating challenging data features such as bimodality, asymmetric tails, and boundary concentration.
+Bounded continuous data on $(0,1)$ — proportions, rates, indices — are
+ubiquitous, and the Beta [@ferrari2004; @smithson2006] and Kumaraswamy
+[@kumaraswamy1980; @jones2009] distributions are the standard tools for them.
+Both struggle with samples that are simultaneously asymmetric, heavy-tailed and
+concentrated near a boundary. The GKw family embeds both as special cases within
+a five-parameter hierarchy, so an analyst can start from a two-parameter model
+and adopt extra parameters only when a likelihood ratio test justifies them.
 
-The target audience includes statisticians and data scientists working with proportions, rates, or indices in fields such as hydrology (the original domain of Kumaraswamy's distribution), econometrics, ecology, health sciences, and finance. By providing exact analytical score vectors and Hessian matrices for all seven subfamilies, `gkwdist` enables efficient maximum likelihood estimation and facilitates principled model selection via likelihood ratio tests or information criteria such as AIC and BIC.
+That workflow needs three things the existing ecosystem does not supply
+together: every member of the hierarchy under one interface, exact derivatives of
+each log-likelihood, and numerics that survive the boundary. The third is not a
+detail. For $x = 10^{-7}$ and $\alpha = 3.5$, the quantity $1 - x^{\alpha}$
+rounds to exactly $1$ in double precision, so $w = 1 - (1-x^{\alpha})^{\beta}$
+collapses to zero and $\log w$ is lost; clamping $w$ at a small constant instead
+of using a $\log(1-e^{u})$ formulation [@machler2012] yields log-likelihoods
+wrong by thousands of units, silently corrupting AIC, BIC and every likelihood
+ratio test built on them. `gkwdist` computes $\log v$, $\log w$ and $\log z$
+through one stable kernel and expresses every derivative as a ratio of
+logarithms, so the score and Hessian inherit that accuracy.
 
 # State of the Field
 
-Existing R packages provide partial coverage of bounded distributions. The `extraDistr` package [@extraDistr] implements basic Kumaraswamy density, distribution, and quantile functions. The `VGAM` package [@yee2015] offers Kumaraswamy regression via the `kumar()` family function. The `betareg` package [@betareg] provides comprehensive Beta regression modeling with diagnostic tools. The `gamlss.dist` package [@rigby2019] includes Beta variants within the GAMLSS framework, supporting distributional regression for location, scale, and shape parameters. However, none of these packages provides the complete GKw hierarchy covering the seven nested distributions ranging from two to five parameters with analytical derivatives essential for efficient inference. The `gkwdist` package fills this gap by offering: (i) all subfamilies in a unified API following standard R conventions; (ii) exact analytical gradients and Hessians for each distribution; and (iii) numerically stable evaluation across challenging parameter regions via robust logarithmic transformations.
+`extraDistr` [@extraDistr] supplies basic Kumaraswamy density, distribution and
+quantile functions but no likelihood derivatives. `VGAM` [@yee2015] offers
+Kumaraswamy regression via its `kumar()` family and `betareg` [@betareg] covers
+Beta regression; both are regression packages exposing no reusable
+distribution-level derivative interface. `gamlss.dist` [@rigby2019] includes Beta
+variants for distributional regression, and `unitquantreg` [@unitquantreg]
+implements quantile regression for several unit-interval distributions. None
+covers the GKw hierarchy, and none exports analytical score and Hessian functions
+that a user can pass directly to an optimiser.
 
-## Mathematical Framework
+`gkwdist` is deliberately the distribution layer only, and that split is not
+incidental. It was made during the review of `gkwreg` [@gkwreg] at the reviewers'
+request, to reduce that package's complexity and improve maintainability;
+`gkwreg` 2.0.0 moved its `d`/`p`/`q`/`r` functions here and now imports them,
+retaining regression with covariates and estimation through `TMB` [@tmb]. The
+separation leaves the densities and derivatives usable — and independently
+testable — by anyone fitting a GKw model with `optim()`, `nlminb()`, or their own
+machinery, which is what made the componentwise audit described below possible.
 
-Let $X \sim \text{GKw}(\alpha, \beta, \gamma, \delta, \lambda)$ with all parameters positive. The probability density function is:
+The family arises from the Kumaraswamy-G construction [@cordeiro2011;
+@nadarajah2012]. Seven sub-families follow from parameter constraints
+(\autoref{tab:subfamilies}); the McDonald case recovers the generalized beta of
+the first kind [@mcdonald1984], and the Beta distribution appears at
+$\alpha=\beta=\lambda=1$ as $\mathrm{Beta}(\gamma,\delta+1)$.
 
-$$f(x; \boldsymbol{\theta}) = \frac{\lambda \alpha \beta}{B(\gamma, \delta+1)} x^{\alpha-1} (1-x^\alpha)^{\beta-1} w^{\gamma\lambda-1} (1-w^\lambda)^\delta$$
+: GKw sub-family hierarchy. \label{tab:subfamilies}
 
-where $w = 1 - (1-x^\alpha)^\beta$, $\boldsymbol{\theta} = (\alpha, \beta, \gamma, \delta, \lambda)^\top$, and $B(\cdot, \cdot)$ denotes the Beta function. The cumulative distribution function is $F(x) = I_{w^\lambda}(\gamma, \delta+1)$, where $I_y(a,b)$ represents the regularized incomplete beta function.
-
-Seven subfamilies arise through parameter constraints (\autoref{tab:subfamilies}). The Kumaraswamy (Kw) and Exponentiated Kumaraswamy (EKw) subfamilies admit closed-form quantile functions, enabling efficient random variate generation via inversion. The Beta distribution emerges as a special case when $\alpha = \beta = \lambda = 1$, establishing a direct connection to the foundational work of @ferrari2004 with a simple variation in its second parameter $\alpha = \gamma$ and $\beta = \delta + 1$.
-
-: GKw subfamily hierarchy with parameter constraints and quantile tractability. \label{tab:subfamilies}
-
-| Subfamily | Parameters | Constraint | Closed Quantile |
-|:----------|:----------:|:-----------|:---------------:|
+| Sub-family | Par. | Constraint | Closed quantile |
+|:-----------|:----:|:-----------|:---------------:|
 | GKw (`gkw`) | 5 | — | No |
 | BKw (`bkw`) | 4 | $\lambda=1$ | No |
 | KKw (`kkw`) | 4 | $\gamma=1$ | Yes |
 | EKw (`ekw`) | 3 | $\gamma=1, \delta=0$ | Yes |
 | Mc (`mc`) | 3 | $\alpha=\beta=1$ | No |
 | Kw (`kw`) | 2 | $\gamma=\delta=0, \lambda=1$ | Yes |
-| Beta (`beta_`)| 2 | $\alpha=\beta=\lambda=1$ | No |
+| Beta (`beta_`) | 2 | $\alpha=\beta=\lambda=1$ | No |
 
-# Software Design
+# Implementation and Validation
 
-The package prioritizes computational efficiency and numerical stability through complete C++ implementation via `RcppArmadillo` [@Eddelbuettel2014]. Key design decisions include:
+The package exports 49 functions following R's distribution conventions:
+`d`/`p`/`q`/`r` for each sub-family, plus `ll`, `gr` and `hs` for the negative
+log-likelihood, its gradient and its Hessian, and `gkwgetstartvalues()` for
+moment-based starting values. The theory vignette develops the score and observed
+information for each sub-family in full.
 
-1. **Unified API**: All distribution functions (`dgkw`, `pgkw`, `qgkw`, `rgkw` and analogous functions for each subfamily) and inference functions (negative log-likelihood `llgkw`, gradient `grgkw`, Hessian `hsgkw`) follow standard R naming conventions.
+Because every sub-family is the GKw distribution with parameters fixed, each
+specialised routine has an exact reference: the general GKw routine evaluated at
+the constrained point. The test suite exploits this. Every gradient component and
+every Hessian entry is compared individually — not through an aggregate norm —
+against both that reference and Richardson extrapolation [@numDeriv], over grids
+including the degenerate values $\gamma=1$, $\beta=1$, $\lambda=1$, $\delta=0$
+and samples with observations near zero. Those points matter: a mixed derivative
+such as $\partial^{2}\ell/\partial\alpha\,\partial\gamma$ loses its $(\gamma-1)$
+factor under differentiation and so does not vanish at $\gamma=1$, precisely
+where a guarded implementation is most likely to be wrong. Across 720
+configurations per family the maximum componentwise relative error is
+$4\times10^{-8}$ against Richardson extrapolation and $10^{-13}$ against the GKw
+reference; log-likelihoods match an independent log-space reference to
+$2\times10^{-12}$. Densities are additionally checked to integrate to one and to
+reproduce base R for the Beta and closed-form Kumaraswamy cases.
 
-2. **Analytical derivatives**: Exact score vectors and Hessian matrices enable gradient-based optimization via `optim()` with method `"BFGS"`, `"L-BFGS-B"` among others, substantially improving convergence speed compared to numerical differentiation.
+At $n = 2\times10^{4}$ the analytical score is about 9 times faster than
+Richardson extrapolation and the analytical Hessian about 38 times faster, and
+supplying the analytical gradient roughly halves the time to convergence in full
+maximum likelihood fits. In a recovery study of 1,400 fits the optimiser reached
+a log-likelihood at least as high as the one at the data-generating parameter in
+essentially every replicate, while individual estimates of the four- and
+five-parameter members were often far from their true values — a direct
+illustration of the weak identifiability of the larger models, and the reason the
+package is built to make the parsimonious members easy to fit and compare.
 
-3. **Numerical stability**: Logarithmic transformations handle extreme parameter values and boundary conditions, preventing underflow/overflow in density calculations.
+# Research Impact
 
-```r
-library(gkwdist)
-x <- rkw(1000, alpha = 2, beta = 3)
-fit <- optim(c(1, 1), fn = llkw, gr = grkw, data = x, method = "BFGS")
-```
-
-Mathematical derivations of all analytical gradients and Hessians are documented in the package vignettes available at the package website.
-
-# Research Impact Statement
-
-The `gkwdist` package serves as the computational foundation for `gkwreg` [@gkwreg], which implements regression models for bounded responses using the GKw family. The package has been available on CRAN since November 2025, with source code hosted on GitHub under the MIT license. The complete test suite achieves over 95% code coverage, and all analytical derivatives have been validated against numerical differentiation via the `numDeriv` package with near zero precision.
-
-Applications span hydrology [@kumaraswamy1980], econometrics, ecology, and health sciences, domains where bounded data modeling is essential. The hierarchical structure facilitates systematic model comparison, allowing researchers to identify the most parsimonious adequate model for their specific application.
+`gkwdist` is the computational foundation of `gkwreg` [@gkwreg], published in
+this journal, which declares it among its imports and relies on it for every
+density, distribution and quantile evaluation. The package has been on CRAN since
+November 2025 and downloaded more than 4,400 times, currently around 160 times a
+month. Development has proceeded publicly since October 2025 across five tagged
+releases, with continuous integration, a changelog, contribution guidelines and
+an issue tracker.
 
 # AI Usage Disclosure
 
-Documentation and manuscript text were refined with assistance from Claude (Anthropic, version Opus 4.5). Mathematical derivations of score vectors and Hessian matrices were independently verified by systematic comparison with numerical differentiation via the `numDeriv` package across multiple parameter configurations. The core C++ implementation represents substantial original development effort by the author.
+Claude (Anthropic) assisted with prose editing of the documentation and this
+manuscript, and with the numerical audit that compared each analytical derivative
+component against independent references. The distribution theory, the derivations
+of the score and Hessian, the C++ implementation and all design decisions are the
+author's own. Every AI-assisted output was reviewed and validated by the author,
+and all numerical claims reported here are reproducible from the scripts and test
+suite in the repository.
 
 # Acknowledgements
 
-The author thanks Prof. Wagner Hugo Bonat (UFPR) for guidance on statistical methodology and the R community for valuable feedback during package development.
+The author thanks Prof. Wagner Hugo Bonat (UFPR) for guidance on statistical
+methodology and the R community for feedback during development.
 
 # References

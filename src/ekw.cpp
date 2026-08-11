@@ -159,7 +159,7 @@ Rcpp::NumericVector dekw(
     double log_xalpha = a * lx;
     
     // Compute log(1 - x^α) using stable log1mexp
-    double log_v = log1mexp(log_xalpha);
+    double log_v = gkw_log1mexp(log_xalpha);
     if (!R_finite(log_v)) {
       continue;
     }
@@ -171,7 +171,7 @@ Rcpp::NumericVector dekw(
     double log_v_beta = b * log_v;
     
     // Compute log(1 - (1-x^α)^β) = log(w) using log1mexp
-    double log_w = log1mexp(log_v_beta);
+    double log_w = gkw_log1mexp(log_v_beta);
     if (!R_finite(log_w)) {
       continue;
     }
@@ -574,82 +574,46 @@ double llekw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   if (arma::any(x <= 0.0) || arma::any(x >= 1.0)) return R_PosInf;
   
   int n = x.n_elem;
-  
+
   // Constant term: n * [log(λ) + log(α) + log(β)]
   double log_alpha = safe_log(alpha);
   double log_beta = safe_log(beta);
   double log_lambda = safe_log(lambda);
   double const_term = n * (log_lambda + log_alpha + log_beta);
-  
+
   // Initialize accumulators
   double sum_term1 = 0.0;  // (α-1) * Σlog(x)
   double sum_term2 = 0.0;  // (β-1) * Σlog(v)
   double sum_term3 = 0.0;  // (λ-1) * Σlog(w)
-  
+
+  // Everything below stays in log space. Forming v = 1 - x^α or w = 1 - v^β as
+  // doubles loses all significance once x^α or v^β rounds to 1, which happens
+  // routinely for small x and moderate α; gkw_log1mexp() keeps full precision there.
   for (int i = 0; i < n; i++) {
-    double xi = x(i);
-    double log_xi = std::log(xi);
-    
+    double log_xi = std::log(x(i));
+
     // Term 1: (α-1) * log(x)
     sum_term1 += (alpha - 1.0) * log_xi;
-    
-    // Compute x^α stably
-    double x_alpha;
-    if (alpha > 100.0 || (alpha * log_xi < -700.0)) {
-      x_alpha = safe_exp(alpha * log_xi);
-    } else {
-      x_alpha = std::pow(xi, alpha);
-    }
-    
-    // Compute v = 1 - x^α with precision for x^α near 1
-    double one_minus_x_alpha;
-    double log_one_minus_x_alpha;
-    
-    if (x_alpha > 0.9995) {
-      one_minus_x_alpha = -std::expm1(alpha * log_xi);
-      log_one_minus_x_alpha = safe_log(one_minus_x_alpha);
-    } else {
-      one_minus_x_alpha = 1.0 - x_alpha;
-      log_one_minus_x_alpha = safe_log(one_minus_x_alpha);
-    }
-    
+
+    // log(v) where v = 1 - x^α
+    double log_x_alpha = alpha * log_xi;
+    double log_v = gkw_log1mexp(log_x_alpha);
+
     // Term 2: (β-1) * log(v)
-    sum_term2 += (beta - 1.0) * log_one_minus_x_alpha;
-    
-    // Compute v^β stably
-    double v_beta;
-    if (beta > 100.0 || (beta * log_one_minus_x_alpha < -700.0)) {
-      v_beta = safe_exp(beta * log_one_minus_x_alpha);
-    } else {
-      v_beta = std::pow(one_minus_x_alpha, beta);
-    }
-    
-    // Compute w = 1 - v^β with precision for v^β near 1
-    double one_minus_v_beta;
-    double log_one_minus_v_beta;
-    
-    if (v_beta > 0.9995) {
-      one_minus_v_beta = -std::expm1(beta * log_one_minus_x_alpha);
-    } else {
-      one_minus_v_beta = 1.0 - v_beta;
-    }
-    
-    // Prevent extreme underflow
-    if (one_minus_v_beta < 1e-300) {
-      one_minus_v_beta = 1e-300;
-    }
-    
-    log_one_minus_v_beta = safe_log(one_minus_v_beta);
-    
-    // Term 3: (λ-1) * log(w); skip when λ is at machine-epsilon distance from 1
-    if (std::abs(lambda - 1.0) > 1e-15) {
-      sum_term3 += (lambda - 1.0) * log_one_minus_v_beta;
-    }
+    sum_term2 += (beta - 1.0) * log_v;
+
+    // log(w) where w = 1 - v^β
+    double log_w = gkw_log1mexp(beta * log_v);
+
+    // Term 3: (λ-1) * log(w)
+    sum_term3 += (lambda - 1.0) * log_w;
   }
-  
+
   // Combine all terms
   double loglike = const_term + sum_term1 + sum_term2 + sum_term3;
-  
+
+  if (!std::isfinite(loglike)) return R_PosInf;
+
   return -loglike;
 }
 
@@ -703,92 +667,48 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   
   int n = x.n_elem;
   Rcpp::NumericVector grad(3, 0.0);
-  
-  // Numerical stability constants
-  const double min_val = 1e-10;
-  
+
   // Initialize gradient accumulators
   double d_alpha = n / alpha;
   double d_beta = n / beta;
   double d_lambda = n / lambda;
-  
+
+  // Notation, all per observation and all evaluated from logarithms:
+  //   P = ∂log(v)/∂α = -log(x) * exp(log(x^α) - log(v))
+  //   S = v^β / w    = exp(β*log(v) - log(w))
+  //   Q = ∂log(w)/∂α = -β * P * S
+  //   R = ∂log(w)/∂β = -log(v) * S
+  // Writing each ratio as a single exp() of a difference of logs avoids the
+  // 0/0 and tiny/tiny divisions that the direct v, w forms degenerate into.
   for (int i = 0; i < n; i++) {
-    double xi = x(i);
-    double log_xi = std::log(xi);
+    double log_xi = std::log(x(i));
     d_alpha += log_xi;
-    
-    // Compute x^α stably
-    double x_alpha;
-    if (alpha > 100.0 || (alpha * log_xi < -700.0)) {
-      x_alpha = safe_exp(alpha * log_xi);
-    } else {
-      x_alpha = std::pow(xi, alpha);
-    }
-    
-    // Compute v = 1 - x^α with precision
-    double v;
-    if (x_alpha > 0.9995) {
-      v = -std::expm1(alpha * log_xi);
-    } else {
-      v = 1.0 - x_alpha;
-    }
-    v = std::max(v, min_val);
-    double log_v = safe_log(v);
+
+    double log_x_alpha = alpha * log_xi;
+    double log_v = gkw_log1mexp(log_x_alpha);
     d_beta += log_v;
-    
-    // Compute v^β and v^(β-1) stably
-    double v_beta, v_beta_m1;
-    if (beta > 100.0 || (beta * log_v < -700.0)) {
-      double log_v_beta = beta * log_v;
-      v_beta = safe_exp(log_v_beta);
-      v_beta_m1 = safe_exp((beta - 1.0) * log_v);
-    } else {
-      v_beta = std::pow(v, beta);
-      v_beta_m1 = std::pow(v, beta - 1.0);
-    }
-    
-    // Compute w = 1 - v^β with precision
-    double w;
-    if (v_beta > 0.9995) {
-      w = -std::expm1(beta * log_v);
-    } else {
-      w = 1.0 - v_beta;
-    }
-    w = std::max(w, min_val);
-    double log_w = safe_log(w);
+
+    double log_v_beta = beta * log_v;
+    double log_w = gkw_log1mexp(log_v_beta);
     d_lambda += log_w;
-    
-    // ---- Alpha gradient component ----
-    double x_alpha_log_x = x_alpha * log_xi;
-    
-    // Calculate (β-1)/v term
-    double alpha_term1 = 0.0;
-    if (std::abs(beta - 1.0) > 1e-14) {
-      alpha_term1 = (beta - 1.0) / v;
-    }
-    
-    // Calculate (λ-1) * β * v^(β-1) / w term
-    double alpha_term2 = 0.0;
-    if (std::abs(lambda - 1.0) > 1e-14) {
-      alpha_term2 = (lambda - 1.0) * beta * v_beta_m1 / w;
-    }
 
-    d_alpha -= x_alpha_log_x * (alpha_term1 - alpha_term2);
+    double P = -log_xi * std::exp(log_x_alpha - log_v);
+    double S = std::exp(log_v_beta - log_w);
+    double Q = -beta * P * S;
+    double R = -log_v * S;
 
-    // ---- Beta gradient component ----
-    double beta_term = 0.0;
-    if (std::abs(lambda - 1.0) > 1e-14) {
-      beta_term = v_beta * log_v * (lambda - 1.0) / w;
-    }
+    // ∂ℓ/∂α += (β-1) * P + (λ-1) * Q
+    d_alpha += (beta - 1.0) * P + (lambda - 1.0) * Q;
 
-    d_beta -= beta_term;
+    // ∂ℓ/∂β += (λ-1) * R
+    d_beta += (lambda - 1.0) * R;
   }
-  
+
   // Return NEGATIVE gradient (for minimization)
   grad[0] = -d_alpha;
   grad[1] = -d_beta;
   grad[2] = -d_lambda;
-  
+
   return grad;
 }
 
@@ -848,123 +768,49 @@ Rcpp::NumericMatrix hsekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   
   // Initialize Hessian matrix
   arma::mat H(3, 3, arma::fill::zeros);
-  
-  // Numerical stability constants
-  const double min_v = 1e-10;
-  const double min_w = 1e-10;
-  
+
   // Constant diagonal terms
-  H(0, 0) = -n / (alpha * alpha);   // -n/α²
-  H(1, 1) = -n / (beta * beta);     // -n/β²
-  H(2, 2) = -n / (lambda * lambda); // -n/λ²
-  
-  // Special handling for λ ≈ 1
-  bool lambda_near_one = std::abs(lambda - 1.0) < 1e-8;
-  
+  H(0, 0) = -n / (alpha * alpha);   // -n/alpha^2
+  H(1, 1) = -n / (beta * beta);     // -n/beta^2
+  H(2, 2) = -n / (lambda * lambda); // -n/lambda^2
+
+  // Same log-space quantities as the gradient:
+  //   P = dlog(v)/dalpha, S = v^beta/w, Q = dlog(w)/dalpha, R = dlog(w)/dbeta
+  // and their derivatives, each obtained by differentiating the logarithms:
+  //   dP/dalpha = P*(log(x) - P)
+  //   dQ/dalpha = Q*(log(x) - P + beta*P - Q)
+  //   dQ/dbeta  = -P*S*(1 + beta*(log(v) - R))
+  //   dR/dbeta  = R*(log(v) - R)
   for (int i = 0; i < n; i++) {
-    double xi = x(i);
-    double log_xi = safe_log(xi);
-    
-    // ---- Compute A = x^α and derivatives ----
-    double A, dA_dalpha, d2A_dalpha2;
-    if (alpha > 100.0 || (alpha * log_xi < -700.0)) {
-      double log_A = alpha * log_xi;
-      A = safe_exp(log_A);
-      dA_dalpha = A * log_xi;
-      d2A_dalpha2 = A * log_xi * log_xi;
-    } else {
-      A = std::pow(xi, alpha);
-      dA_dalpha = A * log_xi;
-      d2A_dalpha2 = A * log_xi * log_xi;
-    }
-    
-    // ---- Compute v = 1 - A and derivatives ----
-    double v;
-    if (A > 0.9995) {
-      v = -std::expm1(alpha * log_xi);
-    } else {
-      v = 1.0 - A;
-    }
-    v = std::max(v, min_v);
-    double log_v = safe_log(v);
-    
-    double dv_dalpha = -dA_dalpha;
-    double d2v_dalpha2 = -d2A_dalpha2;
-    
-    // ---- Derivatives for L5: (β-1)*log(v) ----
-    double d2L5_dalpha2 = 0.0;
-    double d2L5_dalpha_dbeta = 0.0;
-    
-    if (beta != 1.0) {
-      double v_squared = std::max(v * v, 1e-200);
-      d2L5_dalpha2 = (beta - 1.0) * ((d2v_dalpha2 * v - dv_dalpha * dv_dalpha) / v_squared);
-      d2L5_dalpha_dbeta = dv_dalpha / v;
-    }
-    
-    // ---- Compute w = 1 - v^β and derivatives ----
-    double v_beta, v_beta_m1, v_beta_m2;
-    if (beta > 100.0 || (beta * log_v < -700.0)) {
-      v_beta = safe_exp(beta * log_v);
-      v_beta_m1 = safe_exp((beta - 1.0) * log_v);
-      v_beta_m2 = safe_exp((beta - 2.0) * log_v);
-    } else {
-      v_beta = std::pow(v, beta);
-      v_beta_m1 = std::pow(v, beta - 1.0);
-      v_beta_m2 = std::pow(v, beta - 2.0);
-    }
-    
-    double w;
-    if (v_beta > 0.9995) {
-      w = -std::expm1(beta * log_v);
-    } else {
-      w = 1.0 - v_beta;
-    }
-    w = std::max(w, min_w);
-    double w_squared = std::max(w * w, 1e-200);
-    
-    // First derivatives of w
-    double dw_dv = -beta * v_beta_m1;
-    double dw_dalpha = dw_dv * dv_dalpha;
-    double dw_dbeta = -v_beta * log_v;
-    
-    // Second derivatives of w
-    double d2w_dalpha2 = -beta * ((beta - 1.0) * v_beta_m2 * (dv_dalpha * dv_dalpha) +
-                                  v_beta_m1 * d2v_dalpha2);
-    double d2w_dbeta2 = -v_beta * (log_v * log_v);
-    double d_dw_dalpha_dbeta = -v_beta_m1 * (1.0 + beta * log_v) * dv_dalpha;
-    
-    // ---- Derivatives for L6: (λ-1)*log(w) ----
-    double d2L6_dalpha2 = 0.0;
-    double d2L6_dbeta2 = 0.0;
-    double d2L6_dalpha_dbeta = 0.0;
-    double d2L6_dalpha_dlambda = 0.0;
-    double d2L6_dbeta_dlambda = 0.0;
-    
-    if (lambda_near_one) {
-      // For λ ≈ 1, handle carefully
-      if (std::abs(lambda - 1.0) > 1e-15) {
-        double factor = lambda - 1.0;
-        d2L6_dalpha2 = factor * ((d2w_dalpha2 * w - (dw_dalpha * dw_dalpha)) / w_squared);
-        d2L6_dbeta2 = factor * ((d2w_dbeta2 * w - (dw_dbeta * dw_dbeta)) / w_squared);
-        d2L6_dalpha_dbeta = factor * ((d_dw_dalpha_dbeta / w) - (dw_dalpha * dw_dbeta) / w_squared);
-      }
-      d2L6_dalpha_dlambda = dw_dalpha / w;
-      d2L6_dbeta_dlambda = dw_dbeta / w;
-    } else {
-      // Standard case
-      d2L6_dalpha2 = (lambda - 1.0) * ((d2w_dalpha2 * w - (dw_dalpha * dw_dalpha)) / w_squared);
-      d2L6_dbeta2 = (lambda - 1.0) * ((d2w_dbeta2 * w - (dw_dbeta * dw_dbeta)) / w_squared);
-      d2L6_dalpha_dbeta = (lambda - 1.0) * ((d_dw_dalpha_dbeta / w) - (dw_dalpha * dw_dbeta) / w_squared);
-      d2L6_dalpha_dlambda = dw_dalpha / w;
-      d2L6_dbeta_dlambda = dw_dbeta / w;
-    }
-    
-    // ---- Accumulate Hessian contributions (upper triangle only) ----
-    H(0, 0) += d2L5_dalpha2 + d2L6_dalpha2;
-    H(0, 1) += d2L5_dalpha_dbeta + d2L6_dalpha_dbeta;
-    H(1, 1) += d2L6_dbeta2;
-    H(0, 2) += d2L6_dalpha_dlambda;
-    H(1, 2) += d2L6_dbeta_dlambda;
+    double log_xi = std::log(x(i));
+
+    double log_x_alpha = alpha * log_xi;
+    double log_v = gkw_log1mexp(log_x_alpha);
+    double log_v_beta = beta * log_v;
+    double log_w = gkw_log1mexp(log_v_beta);
+
+    double P = -log_xi * std::exp(log_x_alpha - log_v);
+    double S = std::exp(log_v_beta - log_w);
+    double Q = -beta * P * S;
+    double R = -log_v * S;
+
+    double dP_dalpha = P * (log_xi - P);
+    double dQ_dalpha = Q * (log_xi - P + beta * P - Q);
+    double dQ_dbeta  = -P * S * (1.0 + beta * (log_v - R));
+    double dR_dbeta  = R * (log_v - R);
+
+    // d2l/dalpha^2
+    H(0, 0) += (beta - 1.0) * dP_dalpha + (lambda - 1.0) * dQ_dalpha;
+
+    // d2l/dalpha dbeta: P survives at beta = 1, it carries no (beta-1) factor
+    H(0, 1) += P + (lambda - 1.0) * dQ_dbeta;
+
+    // d2l/dbeta^2
+    H(1, 1) += (lambda - 1.0) * dR_dbeta;
+
+    // Mixed derivatives with lambda are the plain log-derivatives of w
+    H(0, 2) += Q;
+    H(1, 2) += R;
   }
 
   // Symmetrize once after accumulation
