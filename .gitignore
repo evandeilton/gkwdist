@@ -12,3 +12,8 @@ TODO.md
 # Dropbox sync conflict copies
 *Cópia em conflito*
 *conflicted copy*
+
+# LaTeX build artefacts from local paper compiles
+inst/paper/*.log
+inst/paper/*.aux
+inst/paper/*.out
