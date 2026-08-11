@@ -8,15 +8,16 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/evandeilton/gkwdist/blob/v1.1.4/inst/CITATION)
+[`inst/CITATION`](https://github.com/evandeilton/gkwdist/blob/main/inst/CITATION)
 
-Lopes, J.E. (2025). gkwdist: Generalized Kumaraswamy Distribution
-Family. R package version 1.0.8. https://github.com/evandeilton/gkwdist
+Lopes, J.E. (2026). gkwdist: Generalized Kumaraswamy Distribution
+Family. R package version 1.1.5.
+https://CRAN.R-project.org/package=gkwdist
 
     @Manual{,
       title = {{gkwdist}: Generalized Kumaraswamy Distribution Family},
       author = {José Evandeilton Lopes},
-      year = {2025},
-      note = {R package version 1.0.8},
-      url = {https://github.com/evandeilton/gkwdist},
+      year = {2026},
+      note = {R package version 1.1.5},
+      url = {https://CRAN.R-project.org/package=gkwdist},
     }

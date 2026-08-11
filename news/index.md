@@ -1,6 +1,155 @@
 # Changelog
 
+## gkwdist 1.1.5
+
+### Critical Bug Fixes
+
+- **[`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md)
+  returned zero for every input** (`gkw.cpp`, `utils.h`): the package’s
+  numerical helpers `log1mexp()` and `log1pexp()` collide with functions
+  of the same name in R’s public `Rmath.h` API, which use the opposite
+  convention (`log(1 - exp(-x))` for `x >= 0`). In translation units
+  where `Rmath.h`’s macro was active, calls bound to R’s version, which
+  returns `NaN` for the negative arguments used here; every density
+  evaluation then failed its finiteness guard and returned 0. The
+  helpers are now named `gkw_log1mexp()` and `gkw_log1pexp()`. The
+  sub-family densities were unaffected, as was
+  [`llgkw()`](https://evandeilton.github.io/gkwdist/reference/llgkw.md),
+  which routes through `vec_log1mexp()`.
+
+- **Log-likelihoods of EKw, KKw and BKw were wrong for data near zero**
+  (`ekw.cpp`, `kkw.cpp`, `bkw.cpp`): these routines clamped
+  `v = 1 - x^alpha` and `w = 1 - v^beta` at `1e-10` instead of working
+  in log space. For small `x` and moderate `alpha`, `x^alpha` rounds to
+  1 in double precision and `w` collapses to zero, so the clamp replaced
+  `log(w) = -53` by `log(1e-10) = -23`. Deviations reached 6,100
+  log-units, which silently corrupts AIC, BIC and likelihood ratio
+  tests. All three families now use the same `gkw_log1mexp()`
+  formulation as `gkw.cpp`, and their scores and Hessians are expressed
+  as ratios of logarithms.
+
+- **Mixed second derivatives were zeroed at degenerate parameter
+  values** (`bkw.cpp`, `ekw.cpp`, `kkw.cpp`): guards of the form
+  `if (abs(p - 1) > eps)` gated mixed partial derivatives that do not
+  carry the vanishing factor. Because `d2l/dalpha dgamma` is obtained by
+  differentiating `(gamma-1)*log(w)` once in `gamma`, the `(gamma-1)`
+  factor is consumed and the term survives at `gamma = 1`.
+  [`hsbkw()`](https://evandeilton.github.io/gkwdist/reference/hsbkw.md)
+  returned 0 where the correct value was 271.12;
+  [`hsekw()`](https://evandeilton.github.io/gkwdist/reference/hsekw.md)
+  and
+  [`hskkw()`](https://evandeilton.github.io/gkwdist/reference/hskkw.md)
+  had the same defect at `beta = 1`.
+
+- **[`grkkw()`](https://evandeilton.github.io/gkwdist/reference/grkkw.md)
+  clamped gradient terms at 1000** (`kkw.cpp`): arbitrary
+  `std::min(..., 1000.0)` caps distorted the score in `beta` by up to
+  5%. The same clamp appeared as `effective_delta` inside
+  [`llkkw()`](https://evandeilton.github.io/gkwdist/reference/llkkw.md),
+  capping the likelihood for `delta > 1000`. This is the defect removed
+  from `ekw.cpp` in 1.1.3, which had survived here.
+
+- **[`grkkw()`](https://evandeilton.github.io/gkwdist/reference/grkkw.md)
+  and
+  [`hskkw()`](https://evandeilton.github.io/gkwdist/reference/hskkw.md)
+  skipped the `z` block at `delta = 0`** (`kkw.cpp`): the shortcut
+  omitted `sum(log(z))` from `dl/ddelta` and zeroed `d2l/dalpha ddelta`,
+  `d2l/dbeta ddelta` and `d2l/ddelta dlambda`, none of which carry a
+  `delta` factor. `delta = 0` is a valid interior value of the
+  likelihood.
+
+- **The Beta sub-family rejected `delta = 0`** (`utils.h`):
+  `check_beta_pars()` required `delta > 0`, unlike the other five
+  validators. Since the sub-family is parameterised as
+  `Beta(gamma, delta + 1)`, `delta = 0` is the legitimate
+  `Beta(gamma, 1)` boundary;
+  [`dbeta_()`](https://evandeilton.github.io/gkwdist/reference/dbeta_.md),
+  [`pbeta_()`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
+  [`qbeta_()`](https://evandeilton.github.io/gkwdist/reference/qbeta_.md),
+  [`rbeta_()`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md),
+  [`llbeta()`](https://evandeilton.github.io/gkwdist/reference/llbeta.md),
+  [`grbeta()`](https://evandeilton.github.io/gkwdist/reference/grbeta.md)
+  and
+  [`hsbeta()`](https://evandeilton.github.io/gkwdist/reference/hsbeta.md)
+  all returned `NA`/`Inf` there.
+
+### Validation
+
+- **`test-boundary-derivatives.R`** (new): every gradient component and
+  every Hessian entry of all seven sub-families is now compared
+  individually against two independent references, the general GKw
+  routines restricted to the constrained parameter point and `numDeriv`
+  Richardson extrapolation, over grids that include the degenerate
+  values `gamma = 1`, `beta = 1`, `lambda = 1` and `delta = 0` and
+  samples containing observations near zero.
+
+- **`test-density-correctness.R`** (new): densities are checked to
+  integrate to one, to agree with the general GKw density at the
+  constrained parameter point, to match base R for the Beta and
+  closed-form Kumaraswamy cases, and to be the derivative of the
+  corresponding distribution function. The previous PDF tests asserted
+  only type, length, non-negativity and finiteness, all of which a
+  vector of zeros satisfies.
+
+### Accuracy after the fixes
+
+Componentwise maximum relative error over 720 parameter configurations
+per family, against the general GKw routines and against `numDeriv`:
+
+| Family | log-likelihood | gradient | Hessian |
+|:-------|---------------:|---------:|--------:|
+| GKw    |        1.5e-11 |  1.5e-08 | 1.5e-07 |
+| BKw    |        1.6e-12 |  3.7e-08 | 3.6e-08 |
+| KKw    |        3.1e-13 |  3.5e-08 | 4.9e-08 |
+| EKw    |        5.4e-14 |  7.8e-09 | 2.7e-08 |
+| Mc     |        3.5e-13 |  2.5e-09 | 9.5e-10 |
+| Kw     |        4.1e-15 |  7.2e-10 | 1.2e-09 |
+| Beta   |        7.2e-15 |  4.6e-10 | 8.9e-11 |
+
+The residual gradient and Hessian errors are at the accuracy limit of
+Richardson extrapolation itself; against the GKw reference all seven
+families agree to 1e-13.
+
+### Documentation and Project Infrastructure
+
+- **`inst/paper/`**: the JOSS manuscript was rewritten. It now positions
+  the package explicitly as the distribution layer of the GKw ecosystem,
+  records that the split from `gkwreg` was made at the request of JOSS
+  reviewers during that package’s review, reports the measured
+  validation and timing results in place of the previous unverified
+  figures, and follows the current JOSS AI disclosure policy. The
+  bibliography was expanded to 19 entries with DOIs verified against
+  Crossref.
+
+- **`CONTRIBUTING.md`** and **`CODE_OF_CONDUCT.md`** (new): contribution
+  workflow, support expectations, governance, and the testing standard
+  numerical contributions are held to. The contributing guide documents
+  the cross-check that makes bug reports actionable: every sub-family
+  routine must agree with the general GKw routine evaluated at the
+  corresponding constrained parameter point.
+
+- **`README`**: the claim that the C++ routines are “10-50x faster than
+  equivalent R implementations” was replaced with measured figures. The
+  original benchmark compared `-sum(log(dkw(x, 2, 3)))` against
+  [`llkw()`](https://evandeilton.github.io/gkwdist/reference/llkw.md),
+  which is C++ against C++ plus R loop overhead, and gives roughly 3x.
+  The genuine gain is in the derivatives: the analytical score is about
+  9x faster than Richardson extrapolation and the analytical Hessian
+  about 38x faster at n = 20,000.
+
+- **`inst/CITATION`**: updated to version 1.1.5 and pointed at the CRAN
+  canonical URL; it had been stale at version 1.0.8.
+
+- Test coverage rose from 70.8% to 74.2% of combined R and C++ lines.
+  The largest single gain is in `src/gkw.cpp` (42.9% to 71.5%), which
+  reflects that
+  [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md)
+  now executes its density computation instead of falling through to its
+  finiteness guard.
+
 ## gkwdist 1.1.4
+
+CRAN release: 2026-05-28
 
 ### CRAN Fix
 

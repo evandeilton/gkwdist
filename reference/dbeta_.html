@@ -17,7 +17,7 @@ The distribution is defined on the interval (0, 1)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,7 @@ The distribution is defined on the interval (0, 1)."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Density of the Beta Distribution (gamma, delta+1 Parameterization)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/v1.1.4/R/beta.R" class="external-link"><code>R/beta.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/beta.R" class="external-link"><code>R/beta.R</code></a></small>
       <div class="d-none name"><code>dbeta_.Rd</code></div>
     </div>
 
@@ -158,7 +158,7 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-in"><span>  delta <span class="op">=</span> <span class="va">delta_par</span>, lambda <span class="op">=</span> <span class="fl">1.0</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Max difference vs dgkw:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">densities</span> <span class="op">-</span> <span class="va">densities_gkw</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Max difference vs dgkw: 2.048"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Max difference vs dgkw: 0"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare with dmc setting lambda=1</span></span></span>
 <span class="r-in"><span><span class="va">densities_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="dmc.html">dmc</a></span><span class="op">(</span><span class="va">x_vals</span>, gamma <span class="op">=</span> <span class="va">gamma_par</span>, delta <span class="op">=</span> <span class="va">delta_par</span>, lambda <span class="op">=</span> <span class="fl">1.0</span><span class="op">)</span></span></span>
@@ -198,7 +198,7 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -701,7 +701,7 @@ For theoretical details and applications, see:
 ``` r
 
 sessionInfo()
-#> R version 4.6.0 (2026-04-24)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -722,17 +722,17 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] gkwdist_1.1.4
+#> [1] gkwdist_1.1.5
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] digest_0.6.39          desc_1.4.3             R6_2.6.1              
-#>  [4] numDeriv_2016.8-1.1    RcppArmadillo_15.2.6-1 fastmap_1.2.0         
-#>  [7] xfun_0.57              magrittr_2.0.5         cachem_1.1.0          
-#> [10] knitr_1.51             htmltools_0.5.9        rmarkdown_2.31        
-#> [13] lifecycle_1.0.5        cli_3.6.6              sass_0.4.10           
-#> [16] pkgdown_2.2.0          textshaping_1.0.5      jquerylib_0.1.4       
-#> [19] systemfonts_1.3.2      compiler_4.6.0         tools_4.6.0           
-#> [22] ragg_1.5.2             evaluate_1.0.5         bslib_0.11.0          
-#> [25] Rcpp_1.1.1-1.1         yaml_2.3.12            jsonlite_2.0.0        
-#> [28] rlang_1.2.0            fs_2.1.0
+#>  [1] cli_3.6.6              knitr_1.51             rlang_1.3.0           
+#>  [4] xfun_0.60              otel_0.2.0             textshaping_1.0.5     
+#>  [7] jsonlite_2.0.0         htmltools_0.5.9        ragg_1.5.2            
+#> [10] sass_0.4.10            rmarkdown_2.31         evaluate_1.0.5        
+#> [13] jquerylib_0.1.4        fastmap_1.2.0          numDeriv_2016.8-1.1   
+#> [16] yaml_2.3.12            lifecycle_1.0.5        compiler_4.6.1        
+#> [19] fs_2.1.0               Rcpp_1.1.2             systemfonts_1.3.2     
+#> [22] digest_0.6.39          R6_2.6.1               magrittr_2.0.5        
+#> [25] bslib_0.12.0           tools_4.6.1            RcppArmadillo_15.4.2-1
+#> [28] pkgdown_2.2.1          cachem_1.1.0           desc_1.4.3
 ```

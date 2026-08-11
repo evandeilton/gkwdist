@@ -16,9 +16,10 @@ for maximum computational efficiency.
 **Key Features:** - Seven flexible distributions for proportions, rates,
 and bounded data - Standard R distribution API: `d*`, `p*`, `q*`, `r*` -
 Analytical log-likelihood, gradient, and Hessian functions - **All
-functions implemented in C++** for optimal performance - 10-50× faster
-than equivalent R implementations - Numerically stable for extreme
-parameter values
+functions implemented in C++** for optimal performance - Analytical
+score and Hessian roughly 9× and 38× faster than Richardson
+extrapolation - Numerically stable in log space for observations near
+the boundaries
 
 ------------------------------------------------------------------------
 
@@ -738,7 +739,18 @@ benchmark <- microbenchmark(
 
 print(benchmark)
 plot(benchmark)
-# Typical results: C++ implementation is 10-50× faster
+# Typical result: the C++ log-likelihood is about 3x faster than
+# accumulating the density in R (n = 10,000)
+
+# The larger gain is in the derivatives, where the analytical forms replace
+# numerical differentiation entirely:
+data5 <- rgkw(20000, 2, 3, 1.5, 0.5, 2)
+microbenchmark(
+  analytical = grgkw(c(2, 3, 1.5, 0.5, 2), data5),
+  numeric    = numDeriv::grad(function(p) llgkw(p, data5), c(2, 3, 1.5, 0.5, 2)),
+  times = 20
+)
+# Typical results: analytical score ~9x faster, analytical Hessian ~38x faster
 ```
 
 **Why C++ Implementation Matters:**

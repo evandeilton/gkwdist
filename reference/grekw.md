@@ -193,9 +193,9 @@ cat("\nGradient at MLE:\n")
 #> 
 #> Gradient at MLE:
 print(gradient_at_mle)
-#> [1] 2.067846e-05 8.446126e-06 1.901243e-05
+#> [1] 2.067845e-05 8.446125e-06 1.901242e-05
 cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
-#> Max absolute component: 2.067846e-05 
+#> Max absolute component: 2.067845e-05 
 cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
 #> Gradient norm: 2.933271e-05 
 
@@ -227,10 +227,10 @@ comparison_grad <- data.frame(
     (abs(grad_analytical) + 1e-10)
 )
 print(comparison_grad, digits = 8)
-#>   Parameter    Analytical     Numerical      Abs_Diff  Rel_Error
-#> 1     alpha 2.0678456e-05 2.6432190e-05 5.7537336e-06 0.27824639
-#> 2      beta 8.4461258e-06 1.6484591e-05 8.0384657e-06 0.95172281
-#> 3    lambda 1.9012426e-05 2.4726887e-05 5.7144614e-06 0.30056298
+#>   Parameter    Analytical     Numerical      Abs_Diff   Rel_Error
+#> 1     alpha 2.0678455e-05 3.9221959e-05 1.8543504e-05 0.896750477
+#> 2      beta 8.4461253e-06 4.5474735e-06 3.8986518e-06 0.461585106
+#> 3    lambda 1.9012424e-05 2.0179414e-05 1.1669895e-06 0.061380038
 
 
 ## Example 5: Score Test Statistic

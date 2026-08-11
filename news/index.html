@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,11 +34,73 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/evandeilton/gkwdist/blob/v1.1.4/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.1.4" id="gkwdist-114">gkwdist 1.1.4<a class="anchor" aria-label="anchor" href="#gkwdist-114"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.1.5" id="gkwdist-115">gkwdist 1.1.5<a class="anchor" aria-label="anchor" href="#gkwdist-115"></a></h2>
+<div class="section level3">
+<h3 id="critical-bug-fixes-1-1-5">Critical Bug Fixes<a class="anchor" aria-label="anchor" href="#critical-bug-fixes-1-1-5"></a></h3>
+<ul><li><p><strong><code><a href="../reference/dgkw.html">dgkw()</a></code> returned zero for every input</strong> (<code>gkw.cpp</code>, <code>utils.h</code>): the package’s numerical helpers <code>log1mexp()</code> and <code>log1pexp()</code> collide with functions of the same name in R’s public <code>Rmath.h</code> API, which use the opposite convention (<code>log(1 - exp(-x))</code> for <code>x &gt;= 0</code>). In translation units where <code>Rmath.h</code>’s macro was active, calls bound to R’s version, which returns <code>NaN</code> for the negative arguments used here; every density evaluation then failed its finiteness guard and returned 0. The helpers are now named <code>gkw_log1mexp()</code> and <code>gkw_log1pexp()</code>. The sub-family densities were unaffected, as was <code><a href="../reference/llgkw.html">llgkw()</a></code>, which routes through <code>vec_log1mexp()</code>.</p></li>
+<li><p><strong>Log-likelihoods of EKw, KKw and BKw were wrong for data near zero</strong> (<code>ekw.cpp</code>, <code>kkw.cpp</code>, <code>bkw.cpp</code>): these routines clamped <code>v = 1 - x^alpha</code> and <code>w = 1 - v^beta</code> at <code>1e-10</code> instead of working in log space. For small <code>x</code> and moderate <code>alpha</code>, <code>x^alpha</code> rounds to 1 in double precision and <code>w</code> collapses to zero, so the clamp replaced <code>log(w) = -53</code> by <code>log(1e-10) = -23</code>. Deviations reached 6,100 log-units, which silently corrupts AIC, BIC and likelihood ratio tests. All three families now use the same <code>gkw_log1mexp()</code> formulation as <code>gkw.cpp</code>, and their scores and Hessians are expressed as ratios of logarithms.</p></li>
+<li><p><strong>Mixed second derivatives were zeroed at degenerate parameter values</strong> (<code>bkw.cpp</code>, <code>ekw.cpp</code>, <code>kkw.cpp</code>): guards of the form <code>if (abs(p - 1) &gt; eps)</code> gated mixed partial derivatives that do not carry the vanishing factor. Because <code>d2l/dalpha dgamma</code> is obtained by differentiating <code>(gamma-1)*log(w)</code> once in <code>gamma</code>, the <code>(gamma-1)</code> factor is consumed and the term survives at <code>gamma = 1</code>. <code><a href="../reference/hsbkw.html">hsbkw()</a></code> returned 0 where the correct value was 271.12; <code><a href="../reference/hsekw.html">hsekw()</a></code> and <code><a href="../reference/hskkw.html">hskkw()</a></code> had the same defect at <code>beta = 1</code>.</p></li>
+<li><p><strong><code><a href="../reference/grkkw.html">grkkw()</a></code> clamped gradient terms at 1000</strong> (<code>kkw.cpp</code>): arbitrary <code>std::min(..., 1000.0)</code> caps distorted the score in <code>beta</code> by up to 5%. The same clamp appeared as <code>effective_delta</code> inside <code><a href="../reference/llkkw.html">llkkw()</a></code>, capping the likelihood for <code>delta &gt; 1000</code>. This is the defect removed from <code>ekw.cpp</code> in 1.1.3, which had survived here.</p></li>
+<li><p><strong><code><a href="../reference/grkkw.html">grkkw()</a></code> and <code><a href="../reference/hskkw.html">hskkw()</a></code> skipped the <code>z</code> block at <code>delta = 0</code></strong> (<code>kkw.cpp</code>): the shortcut omitted <code>sum(log(z))</code> from <code>dl/ddelta</code> and zeroed <code>d2l/dalpha ddelta</code>, <code>d2l/dbeta ddelta</code> and <code>d2l/ddelta dlambda</code>, none of which carry a <code>delta</code> factor. <code>delta = 0</code> is a valid interior value of the likelihood.</p></li>
+<li><p><strong>The Beta sub-family rejected <code>delta = 0</code></strong> (<code>utils.h</code>): <code>check_beta_pars()</code> required <code>delta &gt; 0</code>, unlike the other five validators. Since the sub-family is parameterised as <code>Beta(gamma, delta + 1)</code>, <code>delta = 0</code> is the legitimate <code>Beta(gamma, 1)</code> boundary; <code><a href="../reference/dbeta_.html">dbeta_()</a></code>, <code><a href="../reference/pbeta_.html">pbeta_()</a></code>, <code><a href="../reference/qbeta_.html">qbeta_()</a></code>, <code><a href="../reference/rbeta_.html">rbeta_()</a></code>, <code><a href="../reference/llbeta.html">llbeta()</a></code>, <code><a href="../reference/grbeta.html">grbeta()</a></code> and <code><a href="../reference/hsbeta.html">hsbeta()</a></code> all returned <code>NA</code>/<code>Inf</code> there.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="validation-1-1-5">Validation<a class="anchor" aria-label="anchor" href="#validation-1-1-5"></a></h3>
+<ul><li><p><strong><code>test-boundary-derivatives.R</code></strong> (new): every gradient component and every Hessian entry of all seven sub-families is now compared individually against two independent references, the general GKw routines restricted to the constrained parameter point and <code>numDeriv</code> Richardson extrapolation, over grids that include the degenerate values <code>gamma = 1</code>, <code>beta = 1</code>, <code>lambda = 1</code> and <code>delta = 0</code> and samples containing observations near zero.</p></li>
+<li><p><strong><code>test-density-correctness.R</code></strong> (new): densities are checked to integrate to one, to agree with the general GKw density at the constrained parameter point, to match base R for the Beta and closed-form Kumaraswamy cases, and to be the derivative of the corresponding distribution function. The previous PDF tests asserted only type, length, non-negativity and finiteness, all of which a vector of zeros satisfies.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="accuracy-after-the-fixes-1-1-5">Accuracy after the fixes<a class="anchor" aria-label="anchor" href="#accuracy-after-the-fixes-1-1-5"></a></h3>
+<p>Componentwise maximum relative error over 720 parameter configurations per family, against the general GKw routines and against <code>numDeriv</code>:</p>
+<table class="table"><thead><tr><th align="left">Family</th>
+<th align="right">log-likelihood</th>
+<th align="right">gradient</th>
+<th align="right">Hessian</th>
+</tr></thead><tbody><tr><td align="left">GKw</td>
+<td align="right">1.5e-11</td>
+<td align="right">1.5e-08</td>
+<td align="right">1.5e-07</td>
+</tr><tr><td align="left">BKw</td>
+<td align="right">1.6e-12</td>
+<td align="right">3.7e-08</td>
+<td align="right">3.6e-08</td>
+</tr><tr><td align="left">KKw</td>
+<td align="right">3.1e-13</td>
+<td align="right">3.5e-08</td>
+<td align="right">4.9e-08</td>
+</tr><tr><td align="left">EKw</td>
+<td align="right">5.4e-14</td>
+<td align="right">7.8e-09</td>
+<td align="right">2.7e-08</td>
+</tr><tr><td align="left">Mc</td>
+<td align="right">3.5e-13</td>
+<td align="right">2.5e-09</td>
+<td align="right">9.5e-10</td>
+</tr><tr><td align="left">Kw</td>
+<td align="right">4.1e-15</td>
+<td align="right">7.2e-10</td>
+<td align="right">1.2e-09</td>
+</tr><tr><td align="left">Beta</td>
+<td align="right">7.2e-15</td>
+<td align="right">4.6e-10</td>
+<td align="right">8.9e-11</td>
+</tr></tbody></table><p>The residual gradient and Hessian errors are at the accuracy limit of Richardson extrapolation itself; against the GKw reference all seven families agree to 1e-13.</p>
+</div>
+<div class="section level3">
+<h3 id="documentation-and-project-infrastructure-1-1-5">Documentation and Project Infrastructure<a class="anchor" aria-label="anchor" href="#documentation-and-project-infrastructure-1-1-5"></a></h3>
+<ul><li><p><strong><code>inst/paper/</code></strong>: the JOSS manuscript was rewritten. It now positions the package explicitly as the distribution layer of the GKw ecosystem, records that the split from <code>gkwreg</code> was made at the request of JOSS reviewers during that package’s review, reports the measured validation and timing results in place of the previous unverified figures, and follows the current JOSS AI disclosure policy. The bibliography was expanded to 19 entries with DOIs verified against Crossref.</p></li>
+<li><p><strong><code>CONTRIBUTING.md</code></strong> and <strong><code>CODE_OF_CONDUCT.md</code></strong> (new): contribution workflow, support expectations, governance, and the testing standard numerical contributions are held to. The contributing guide documents the cross-check that makes bug reports actionable: every sub-family routine must agree with the general GKw routine evaluated at the corresponding constrained parameter point.</p></li>
+<li><p><strong><code>README</code></strong>: the claim that the C++ routines are “10-50x faster than equivalent R implementations” was replaced with measured figures. The original benchmark compared <code>-sum(log(dkw(x, 2, 3)))</code> against <code><a href="../reference/llkw.html">llkw()</a></code>, which is C++ against C++ plus R loop overhead, and gives roughly 3x. The genuine gain is in the derivatives: the analytical score is about 9x faster than Richardson extrapolation and the analytical Hessian about 38x faster at n = 20,000.</p></li>
+<li><p><strong><code>inst/CITATION</code></strong>: updated to version 1.1.5 and pointed at the CRAN canonical URL; it had been stale at version 1.0.8.</p></li>
+<li><p>Test coverage rose from 70.8% to 74.2% of combined R and C++ lines. The largest single gain is in <code>src/gkw.cpp</code> (42.9% to 71.5%), which reflects that <code><a href="../reference/dgkw.html">dgkw()</a></code> now executes its density computation instead of falling through to its finiteness guard.</p></li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.4" id="gkwdist-114">gkwdist 1.1.4<a class="anchor" aria-label="anchor" href="#gkwdist-114"></a></h2><p class="text-muted">CRAN release: 2026-05-28</p>
 <div class="section level3">
 <h3 id="cran-fix-1-1-4">CRAN Fix<a class="anchor" aria-label="anchor" href="#cran-fix-1-1-4"></a></h3>
 <ul><li>
@@ -336,7 +398,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

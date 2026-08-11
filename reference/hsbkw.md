@@ -284,12 +284,12 @@ cat("\nHessian Properties at Different Points:\n")
 #> Hessian Properties at Different Points:
 print(hess_properties, digits = 4, row.names = FALSE)
 #>  Alpha  Beta Gamma   Delta Determinant Trace Min_Eigenval Max_Eigenval
-#>   1.50 1.000 1.000 0.30000  -6.191e+10  3261    -134.1926         2027
+#>   1.50 1.000 1.000 0.30000   5.437e+09  3261      32.0307         2652
 #>   2.00 1.500 1.500 0.50000  -2.362e+08  2265     -15.8487         1990
 #>   2.57 2.332 1.122 0.06702   9.813e+04  2279       0.1218         1933
 #>   2.50 2.000 2.000 0.70000  -1.510e+09  1805    -118.6118         1662
 #>  Cond_Number
-#>       -15.10
+#>        82.81
 #>      -125.59
 #>     15873.05
 #>       -14.01
