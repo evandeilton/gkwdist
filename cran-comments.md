@@ -52,8 +52,12 @@ when run with `NOT_CRAN` set. It remains guarded by `skip_on_cran()`.
 0 errors | 0 warnings | 1 note
 ```
 
-The note reports the installed size (libs ~9.6Mb), which is inherent to the
-compiled C++ routines for seven distribution families.
+The only note is local to the checking machine: HTML validation was skipped
+because the `tidy` command is not installed, and math rendering was skipped
+because the `V8` package is unavailable. Neither applies to the package itself.
+
+The check reports the installed size as INFO rather than a note (libs ~9.6Mb),
+which is inherent to the compiled C++ routines for seven distribution families.
 
 ## Downstream dependencies
 
