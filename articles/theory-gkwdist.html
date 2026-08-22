@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">José
 Evandeilton Lopes</h4>
             
-            <h4 data-toc-skip class="date">2026-08-11</h4>
+            <h4 data-toc-skip class="date">2026-08-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/vignettes/theory-gkwdist.Rmd" class="external-link"><code>vignettes/theory-gkwdist.Rmd</code></a></small>
       <div class="d-none name"><code>theory-gkwdist.Rmd</code></div>
@@ -72,15 +72,17 @@ Evandeilton Lopes</h4>
 <p><strong>Abstract.</strong> We present a comprehensive mathematical
 treatment of the Generalized Kumaraswamy (GKw) distribution, a
 five-parameter family for modeling continuous random variables on the
-unit interval by Carrasco et all (2010). We establish the hierarchical
-structure connecting GKw to several nested sub-models including the Beta
-and Kumaraswamy distributions, derive closed-form expressions for the
-log-likelihood function, score vector, and observed information matrix,
-and prove asymptotic properties of maximum likelihood estimators. All
-analytical derivatives are derived from the compositional structure of
-the distribution and written in a form suitable for stable numerical
-implementation. The theoretical results provide the foundation for
-efficient numerical routines in the R package <code>gkwdist</code>.</p>
+unit interval introduced by Carrasco et al. (2010). We establish the
+hierarchical structure connecting GKw to several nested submodels,
+including the package-parameterized Beta subfamily and the Kumaraswamy
+distribution, derive the log-likelihood, score vector, and observed
+information matrix, and state likelihood asymptotics under explicit
+regularity and identifiability conditions. Particular attention is given
+to non-identifiable parameter manifolds, boundary cases, and numerically
+stable evaluation of the cascade transformations. The analytical
+derivatives are written in a form suitable for direct implementation and
+validation. These results provide the mathematical foundation for the
+numerical routines in the R package <code>gkwdist</code>.</p>
 <p><strong>Keywords:</strong> Bounded distributions, Beta distribution,
 Kumaraswamy distribution, Maximum likelihood estimation, Fisher
 information, Numerical stability</p>
@@ -108,12 +110,17 @@ efficiency while maintaining comparable flexibility to the Beta
 distribution. Jones (2009) demonstrated that the Kumaraswamy
 distribution exhibits similar shape characteristics to the Beta family
 while offering superior computational advantages.</p>
-<p>Building upon these foundations, Cordeiro and de Castro (2011)
-developed the Generalized Kumaraswamy (GKw) distribution, a
-five-parameter extension incorporating both Beta and Kumaraswamy
-structures through nested transformations. This distribution encompasses
-a rich hierarchy of submodels, providing substantial flexibility for
-modeling diverse patterns in bounded data.</p>
+<p>Building upon these foundations, Carrasco, Ferrari and Cordeiro
+(2010) introduced the five-parameter Generalized Kumaraswamy (GKw)
+distribution by combining the Kumaraswamy CDF with a generalized-beta
+generator. Cordeiro and de Castro (2011) developed the related
+Kumaraswamy-generated (Kw-G) family, which is conceptually connected but
+is not the five-parameter GKw model studied here. The GKw distribution
+encompasses a rich hierarchy of submodels and provides substantial
+flexibility for modeling diverse patterns in bounded data.
+Identifiability issues for this class were revisited explicitly by
+Carrasco and Cordeiro (2017), so likelihood asymptotics must be stated
+conditionally on a regular identifiable parameter region.</p>
 <p>Despite its theoretical appeal, a fully explicit and internally
 consistent analytical treatment of the GKw family—particularly for
 likelihood-based inference—has remained incomplete in the literature.
@@ -184,14 +191,14 @@ z(x; \alpha, \beta, \lambda) &amp;= 1 - w(x;\alpha,\beta)^\lambda
 </annotation></semantics></math></p>
 <p>Then, for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>λ</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\alpha,\beta,\lambda&gt;0</annotation></semantics></math>,</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><mi>∂</mi><mi>v</mi></mrow><mrow><mi>∂</mi><mi>x</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><mi>α</mi><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><mi>∂</mi><mi>w</mi></mrow><mrow><mi>∂</mi><mi>x</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>α</mi><mi>β</mi><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><mi>∂</mi><mi>z</mi></mrow><mrow><mi>∂</mi><mi>x</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>α</mi><mi>β</mi><mi>λ</mi><mspace width="0.167em"></mspace><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msup><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mi>β</mi></msup><msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">]</mo><mrow><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><mi>∂</mi><mi>v</mi></mrow><mrow><mi>∂</mi><mi>x</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><mi>α</mi><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><mi>∂</mi><mi>w</mi></mrow><mrow><mi>∂</mi><mi>x</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>α</mi><mi>β</mi><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><mi>∂</mi><mi>z</mi></mrow><mrow><mi>∂</mi><mi>x</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><mi>α</mi><mi>β</mi><mi>λ</mi><mspace width="0.167em"></mspace><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msup><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mi>β</mi></msup><msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">]</mo><mrow><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{align}
 \frac{\partial v}{\partial x} &amp;=
   -\alpha x^{\alpha-1}, \tag{1.7}\\[3pt]
 \frac{\partial w}{\partial x} &amp;=
   \alpha\beta x^{\alpha-1}(1-x^\alpha)^{\beta-1}, \tag{1.8}\\[3pt]
 \frac{\partial z}{\partial x} &amp;=
-  \alpha\beta\lambda\,x^{\alpha-1}
+  -\alpha\beta\lambda\,x^{\alpha-1}
   (1-x^\alpha)^{\beta-1}\bigl[1-(1-x^\alpha)^\beta\bigr]^{\lambda-1}. \tag{1.9}
 \end{align}
 </annotation></semantics></math></p>
@@ -210,7 +217,7 @@ is clear from the context.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="the-generalized-kumaraswamy-distribution-and-its-subfamily">2. The Generalized Kumaraswamy Distribution and Its Subfamily<a class="anchor" aria-label="anchor" href="#the-generalized-kumaraswamy-distribution-and-its-subfamily"></a>
+<h2 id="the-generalized-kumaraswamy-distribution-and-its-subfamilies">2. The Generalized Kumaraswamy Distribution and Its Subfamilies<a class="anchor" aria-label="anchor" href="#the-generalized-kumaraswamy-distribution-and-its-subfamilies"></a>
 </h2>
 <div class="section level3">
 <h3 id="definition-and-fundamental-properties">2.1 Definition and Fundamental Properties<a class="anchor" aria-label="anchor" href="#definition-and-fundamental-properties"></a>
@@ -239,24 +246,108 @@ f(x; \boldsymbol{\theta}) =
 v(x) = 1-x^\alpha,\qquad
 w(x) = 1-(1-x^\alpha)^\beta,\qquad
 z(x) = 1-w(x)^\lambda,
-</annotation></semantics></math> and the parameter space is
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Θ</mi><mo>=</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">{</mo><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>⊤</mi></msup><mo>:</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>,</mo><mi>λ</mi><mo>&gt;</mo><mn>0</mn><mo>,</mo><mspace width="0.222em"></mspace><mi>δ</mi><mo>≥</mo><mn>0</mn><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">}</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\Theta = \Bigl\{(\alpha,\beta,\gamma,\delta,\lambda)^\top :
+</annotation></semantics></math> and the extended parameter space used
+by the package is
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi mathvariant="normal">Θ</mi><mo accent="true">¯</mo></mover><mo>=</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">{</mo><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>⊤</mi></msup><mo>:</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>,</mo><mi>λ</mi><mo>&gt;</mo><mn>0</mn><mo>,</mo><mspace width="0.222em"></mspace><mi>δ</mi><mo>≥</mo><mn>0</mn><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">}</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\overline{\Theta} = \Bigl\{(\alpha,\beta,\gamma,\delta,\lambda)^\top :
 \alpha,\beta,\gamma,\lambda&gt;0,\ \delta\ge 0\Bigr\}. \tag{2.2}
-</annotation></semantics></math></p>
-<p>Note that
+</annotation></semantics></math> Its interior with respect to the
+five-dimensional parameterization is
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="normal">Θ</mi><mo>∘</mo></msup><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mi>𝛉</mi><mo>:</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="false" form="postfix">}</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\Theta^\circ=\{\boldsymbol\theta:\alpha,\beta,\gamma,\delta,\lambda&gt;0\}.
+</annotation></semantics></math> Although
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">B(\gamma,\delta+1)</annotation></semantics></math>
-is well-defined for all
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\gamma&gt;0</annotation></semantics></math>
+is well-defined for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>&gt;</mo><mi>−</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">\delta&gt;-1</annotation></semantics></math>,
+the package and the submodel hierarchy considered here use
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta\ge0</annotation></semantics></math>.
+Boundary points and certain interior manifolds require special care
+because the full five-parameter representation is not everywhere
+identifiable.</p>
+<p><strong>Proposition 2.1 (Exact non-identifiability
+manifolds).</strong><br>
+For the full five-parameter GKw representation, at least the following
+parameter manifolds are non-identifiable:</p>
+<ol style="list-style-type: decimal">
+<li>If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta=0</annotation></semantics></math>,
+then the density depends on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\gamma,\lambda)</annotation></semantics></math>
+only through
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi><mo>=</mo><mi>γ</mi><mi>λ</mi></mrow><annotation encoding="application/x-tex">\tau=\gamma\lambda</annotation></semantics></math>:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>τ</mi><mi>α</mi><mi>β</mi><mspace width="0.167em"></mspace><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>v</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>τ</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+f(x)=\tau\alpha\beta\,x^{\alpha-1}v(x)^{\beta-1}w(x)^{\tau-1}.
+\tag{2.2a}
+</annotation></semantics></math>
+</li>
+<li>If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\beta=1</annotation></semantics></math>,
+then the density depends on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\lambda)</annotation></semantics></math>
+only through
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>κ</mi><mo>=</mo><mi>α</mi><mi>λ</mi></mrow><annotation encoding="application/x-tex">\kappa=\alpha\lambda</annotation></semantics></math>:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mi>κ</mi><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><msup><mi>x</mi><mrow><mi>κ</mi><mi>γ</mi><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>κ</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mi>δ</mi></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+f(x)=\frac{\kappa}{B(\gamma,\delta+1)}
+ x^{\kappa\gamma-1}(1-x^{\kappa})^{\delta}.
+\tag{2.2b}
+</annotation></semantics></math>
+</li>
+<li>If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\gamma=1</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>&gt;</mo><mi>−</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">\delta&gt;-1</annotation></semantics></math>;
-we restrict to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta\ge 0</annotation></semantics></math>
-for convenience and consistency with the literature.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda=1</annotation></semantics></math>,
+then the density depends on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo>,</mo><mi>δ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\beta,\delta)</annotation></semantics></math>
+only through
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ξ</mi><mo>=</mo><mi>β</mi><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\xi=\beta(\delta+1)</annotation></semantics></math>:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>α</mi><mi>ξ</mi><mspace width="0.167em"></mspace><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>ξ</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+f(x)=\alpha\xi\,x^{\alpha-1}(1-x^\alpha)^{\xi-1}.
+\tag{2.2c}
+</annotation></semantics></math> Thus the full five-parameter embedding
+is not globally identifiable, even though reduced submodels can be
+identifiable when expressed in their own minimal parameterizations.</li>
+</ol>
+<p><em>Proof.</em> If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta=0</annotation></semantics></math>,
+then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mi>/</mi><mi>γ</mi></mrow><annotation encoding="application/x-tex">B(\gamma,1)=1/\gamma</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>0</mn></msup><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">z(x)^0=1</annotation></semantics></math>,
+so (2.1) reduces immediately to (2.2a). Hence any two pairs
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\gamma,\lambda)</annotation></semantics></math>
+with the same product
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mi>λ</mi></mrow><annotation encoding="application/x-tex">\gamma\lambda</annotation></semantics></math>
+generate the same density. If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\beta=1</annotation></semantics></math>,
+then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>x</mi><mi>α</mi></msup></mrow><annotation encoding="application/x-tex">w(x)=x^\alpha</annotation></semantics></math>,
+and (2.1) becomes (2.2b), which depends on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+only through
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mi>λ</mi></mrow><annotation encoding="application/x-tex">\alpha\lambda</annotation></semantics></math>.
+Finally, if
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\gamma=\lambda=1</annotation></semantics></math>,
+then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">B(1,\delta+1)=1/(\delta+1)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>w</mi><mrow><mi>γ</mi><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">w^{\gamma\lambda-1}=1</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi><mo>=</mo><mn>1</mn><mo>−</mo><mi>w</mi><mo>=</mo><msup><mi>v</mi><mi>β</mi></msup></mrow><annotation encoding="application/x-tex">z=1-w=v^\beta</annotation></semantics></math>.
+Therefore
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>α</mi><mi>β</mi><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>v</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>β</mi><mo>−</mo><mn>1</mn><mo>+</mo><mi>β</mi><mi>δ</mi></mrow></msup><mo>=</mo><mi>α</mi><mi>ξ</mi><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>v</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>ξ</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>,</mo></mrow><annotation encoding="application/x-tex">
+f(x)=\alpha\beta(\delta+1)x^{\alpha-1}v(x)^{\beta-1+\beta\delta}
+     =\alpha\xi x^{\alpha-1}v(x)^{\xi-1},
+</annotation></semantics></math> which is (2.2c). Hence distinct
+parameter vectors can induce exactly the same distribution on each of
+these manifolds. Whenever the usual differentiability conditions hold,
+the Fisher information for the full parameterization is necessarily
+singular there.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
 <p>We now verify that (2.1) defines a proper density.</p>
 <p><strong>Theorem 2.1 (Validity of the pdf).</strong><br>
 For any
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝛉</mi><mo>∈</mo><mi mathvariant="normal">Θ</mi></mrow><annotation encoding="application/x-tex">\boldsymbol{\theta} \in \Theta</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝛉</mi><mo>∈</mo><mover><mi mathvariant="normal">Θ</mi><mo accent="true">¯</mo></mover></mrow><annotation encoding="application/x-tex">\boldsymbol{\theta} \in \overline{\Theta}</annotation></semantics></math>,
 the function
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>⋅</mi><mo>;</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">f(\cdot; \boldsymbol{\theta})</annotation></semantics></math>
 in (2.1) is a valid probability density on
@@ -331,12 +422,47 @@ so
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">F(1)=1</annotation></semantics></math>.
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
+<p><strong>Corollary 2.1 (Quantile function and random
+generation).</strong><br>
+Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>&lt;</mo><mi>p</mi><mo>&lt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0&lt;p&lt;1</annotation></semantics></math>
+and let
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>p</mi></msub><mo>=</mo><msubsup><mi>I</mi><mi>p</mi><mrow><mi>−</mi><mn>1</mn></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+y_p = I^{-1}_p(\gamma,\delta+1)
+</annotation></semantics></math> denote the inverse, with respect to its
+argument, of the regularized incomplete beta function. Then
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><msub><mi>Q</mi><mrow><mi mathvariant="normal">G</mi><mi mathvariant="normal">K</mi><mi mathvariant="normal">w</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>p</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">{</mo><mn>1</mn><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><msubsup><mi>y</mi><mi>p</mi><mrow><mn>1</mn><mi>/</mi><mi>λ</mi></mrow></msubsup><mo stretchy="true" form="postfix">]</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup><mo stretchy="true" form="postfix">}</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>α</mi></mrow></msup><mi>.</mi></mrow></menclose><annotation encoding="application/x-tex">
+\boxed{
+Q_{\mathrm{GKw}}(p)
+ = \left\{1-\left[1-y_p^{1/\lambda}\right]^{1/\beta}\right\}^{1/\alpha}.
+}
+\tag{2.4a}
+</annotation></semantics></math> Consequently, if
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>∼</mo><mrow><mi mathvariant="normal">B</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">a</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Y\sim\mathrm{Beta}(\gamma,\delta+1)</annotation></semantics></math>,
+then
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">{</mo><mn>1</mn><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><msup><mi>Y</mi><mrow><mn>1</mn><mi>/</mi><mi>λ</mi></mrow></msup><mo stretchy="true" form="postfix">]</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup><mo stretchy="true" form="postfix">}</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>α</mi></mrow></msup></mrow><annotation encoding="application/x-tex">
+X=\left\{1-\left[1-Y^{1/\lambda}\right]^{1/\beta}\right\}^{1/\alpha}
+\tag{2.4b}
+</annotation></semantics></math> has the GKw distribution.</p>
+<p><em>Proof.</em> Set
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">F(x)=p</annotation></semantics></math>
+in (2.4). Then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>λ</mi></msup><mo>=</mo><msub><mi>y</mi><mi>p</mi></msub></mrow><annotation encoding="application/x-tex">w(x)^\lambda=y_p</annotation></semantics></math>,
+hence
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>y</mi><mi>p</mi><mrow><mn>1</mn><mi>/</mi><mi>λ</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">w(x)=y_p^{1/\lambda}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>β</mi></msup><mo>=</mo><mn>1</mn><mo>−</mo><msubsup><mi>y</mi><mi>p</mi><mrow><mn>1</mn><mi>/</mi><mi>λ</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">v(x)^\beta=1-y_p^{1/\lambda}</annotation></semantics></math>,
+and inversion of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup></mrow><annotation encoding="application/x-tex">v(x)=1-x^\alpha</annotation></semantics></math>
+yields (2.4a). Equation (2.4b) follows by the probability integral
+transform.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
 </div>
 <div class="section level3">
 <h3 id="the-hierarchical-structure">2.2 The Hierarchical Structure<a class="anchor" aria-label="anchor" href="#the-hierarchical-structure"></a>
 </h3>
 <p>The GKw family exhibits a rich nested structure. Several well-known
-bounded distributions arise as particular choices (and mild
+bounded distributions, or package-restricted portions of their usual
+parameter spaces, arise as particular choices (and mild
 reparameterizations) of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛉</mi><annotation encoding="application/x-tex">\boldsymbol{\theta}</annotation></semantics></math>.</p>
 <p>For a data point
@@ -397,81 +523,63 @@ Theorem 2.2 with
 <div class="section level4">
 <h4 id="kumaraswamykumaraswamy-distribution">2.2.2 Kumaraswamy–Kumaraswamy distribution<a class="anchor" aria-label="anchor" href="#kumaraswamykumaraswamy-distribution"></a>
 </h4>
-<p>The KKw submodel is most naturally obtained via a mild
-reparameterization of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>.</p>
 <p><strong>Theorem 2.4 (Kumaraswamy–Kumaraswamy
 distribution).</strong><br>
-Fix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>λ</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\alpha,\beta,\lambda&gt;0</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\tilde\delta&gt;0</annotation></semantics></math>.
-Consider the GKw submodel
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>∼</mo><mrow><mi mathvariant="normal">G</mi><mi mathvariant="normal">K</mi><mi mathvariant="normal">w</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>δ</mi><mo>=</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo>−</mo><mn>1</mn><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="1.0em"></mspace><mrow><mtext mathvariant="normal">with </mtext><mspace width="0.333em"></mspace></mrow><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo>≥</mo><mn>1</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
-X \sim \mathrm{GKw}(\alpha,\beta,\gamma=1,\delta=\tilde\delta-1,\lambda),
-\quad\text{with }\tilde\delta\ge 1.
-</annotation></semantics></math> Then
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
-has pdf
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><msub><mi>f</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">K</mi><mi mathvariant="normal">w</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mspace width="0.167em"></mspace><mi>λ</mi><mi>α</mi><mi>β</mi><mspace width="0.278em"></mspace><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>v</mi><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>w</mi><mrow><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>z</mi><mrow><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo>−</mo><mn>1</mn></mrow></msup><mo>,</mo></mrow></menclose><annotation encoding="application/x-tex">
+Setting
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\gamma=1</annotation></semantics></math>
+in (2.1) yields the four-parameter Kumaraswamy–Kumaraswamy (KKw)
+submodel, parameterized consistently with <code>gkwdist</code> as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\beta,\delta,\lambda)</annotation></semantics></math>,
+with pdf
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><msub><mi>f</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">K</mi><mi mathvariant="normal">w</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mi>λ</mi><mi>α</mi><mi>β</mi><mspace width="0.167em"></mspace><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>v</mi><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>w</mi><mrow><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>z</mi><mi>δ</mi></msup><mo>,</mo></mrow></menclose><annotation encoding="application/x-tex">
 \boxed{
-f_{\mathrm{KKw}}(x; \alpha,\beta,\tilde\delta,\lambda)
-  = \tilde\delta\,\lambda\alpha\beta\;
-    x^{\alpha-1}v^{\beta-1}w^{\lambda-1}z^{\tilde\delta-1},
+f_{\mathrm{KKw}}(x;\alpha,\beta,\delta,\lambda)
+  =(\delta+1)\lambda\alpha\beta\,
+   x^{\alpha-1}v^{\beta-1}w^{\lambda-1}z^{\delta},
 }
 \tag{2.7}
 </annotation></semantics></math> CDF
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><msub><mi>F</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">K</mi><mi mathvariant="normal">w</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><mi>z</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover></msup><mo>=</mo><mn>1</mn><mo>−</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>λ</mi></msup><msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">]</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover></msup><mo>,</mo></mrow></menclose><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><msub><mi>F</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">K</mi><mi mathvariant="normal">w</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><mi>z</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>δ</mi><mo>+</mo><mn>1</mn></mrow></msup><mo>=</mo><mn>1</mn><mo>−</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>λ</mi></msup><msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">]</mo><mrow><mi>δ</mi><mo>+</mo><mn>1</mn></mrow></msup><mo>,</mo></mrow></menclose><annotation encoding="application/x-tex">
 \boxed{
-F_{\mathrm{KKw}}(x; \alpha,\beta,\tilde\delta,\lambda)
-  = 1 - z(x)^{\tilde\delta}
-  = 1 - \bigl[1-w(x)^\lambda\bigr]^{\tilde\delta},
+F_{\mathrm{KKw}}(x;\alpha,\beta,\delta,\lambda)
+  =1-z(x)^{\delta+1}
+  =1-\bigl[1-w(x)^\lambda\bigr]^{\delta+1},
 }
 \tag{2.8}
 </annotation></semantics></math> and quantile function
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><msub><mi>Q</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">K</mi><mi mathvariant="normal">w</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>p</mi><mo>;</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">{</mo><mn>1</mn><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mn>1</mn><mi>/</mi><mover><mi>δ</mi><mo accent="true">̃</mo></mover></mrow></msup><msup><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">)</mo><mrow><mn>1</mn><mi>/</mi><mi>λ</mi></mrow></msup><mo stretchy="true" form="postfix">]</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup><mo stretchy="true" form="postfix">}</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>α</mi></mrow></msup><mo>,</mo><mspace width="1.0em"></mspace><mn>0</mn><mo>&lt;</mo><mi>p</mi><mo>&lt;</mo><mn>1</mn><mi>.</mi></mrow></menclose><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><msub><mi>Q</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">K</mi><mi mathvariant="normal">w</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>p</mi><mo>;</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">{</mo><mn>1</mn><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mn>1</mn><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><msup><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">)</mo><mrow><mn>1</mn><mi>/</mi><mi>λ</mi></mrow></msup><mo stretchy="true" form="postfix">]</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>β</mi></mrow></msup><mo stretchy="true" form="postfix">}</mo></mrow><mrow><mn>1</mn><mi>/</mi><mi>α</mi></mrow></msup><mo>,</mo><mspace width="2.0em"></mspace><mn>0</mn><mo>&lt;</mo><mi>p</mi><mo>&lt;</mo><mn>1</mn><mi>.</mi></mrow></menclose><annotation encoding="application/x-tex">
 \boxed{
-Q_{\mathrm{KKw}}(p; \alpha,\beta,\tilde\delta,\lambda)
-  = \left\{
-      1-\left[
-           1-\Bigl(1-(1-p)^{1/\tilde\delta}\Bigr)^{1/\lambda}
-         \right]^{1/\beta}
-    \right\}^{1/\alpha},\quad 0&lt;p&lt;1.
+Q_{\mathrm{KKw}}(p;\alpha,\beta,\delta,\lambda)
+ =\left\{
+  1-\left[
+      1-\Bigl(1-(1-p)^{1/(\delta+1)}\Bigr)^{1/\lambda}
+    \right]^{1/\beta}
+ \right\}^{1/\alpha},\qquad 0&lt;p&lt;1.
 }
 \tag{2.9}
 </annotation></semantics></math></p>
-<p><em>Proof.</em> Take
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\gamma=1</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\delta=\tilde\delta-1</annotation></semantics></math>
-in (2.1):
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mi>λ</mi><mi>α</mi><mi>β</mi></mrow><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>v</mi><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>w</mi><mrow><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>z</mi><mrow><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo>−</mo><mn>1</mn></mrow></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
-f(x)
-  = \frac{\lambda\alpha\beta}{B(1,\tilde\delta)}
-      x^{\alpha-1}v^{\beta-1}w^{\lambda-1}z^{\tilde\delta-1}.
-</annotation></semantics></math> Since
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mi>/</mi><mover><mi>δ</mi><mo accent="true">̃</mo></mover></mrow><annotation encoding="application/x-tex">B(1,\tilde\delta) = 1/\tilde\delta</annotation></semantics></math>,
-we obtain (2.7). From (2.4),
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>I</mi><mrow><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>λ</mi></msup></mrow></msub><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>λ</mi></msup><msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover></msup><mo>=</mo><mn>1</mn><mo>−</mo><mi>z</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mover><mi>δ</mi><mo accent="true">̃</mo></mover></msup><mo>,</mo></mrow><annotation encoding="application/x-tex">
-F(x) = I_{w(x)^\lambda}(1,\tilde\delta) = 1 - \bigl(1-w(x)^\lambda\bigr)^{\tilde\delta} = 1 - z(x)^{\tilde\delta},
-</annotation></semantics></math> which is (2.8). Inverting
+<p><em>Proof.</em> With
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\gamma=1</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">B(1,\delta+1)=1/(\delta+1)</annotation></semantics></math>,
+and (2.1) gives (2.7). From (2.4),
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>I</mi><mrow><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>λ</mi></msup></mrow></msub><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>λ</mi></msup><msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mrow><mi>δ</mi><mo>+</mo><mn>1</mn></mrow></msup><mo>,</mo></mrow><annotation encoding="application/x-tex">
+F(x)=I_{w(x)^\lambda}(1,\delta+1)
+    =1-\bigl(1-w(x)^\lambda\bigr)^{\delta+1},
+</annotation></semantics></math> which is (2.8). Solving
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">F(x)=p</annotation></semantics></math>
-yields
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mn>1</mn><mi>/</mi><mover><mi>δ</mi><mo accent="true">̃</mo></mover></mrow></msup><mo>,</mo><mspace width="1.0em"></mspace><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>λ</mi></msup><mo>=</mo><mn>1</mn><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mn>1</mn><mi>/</mi><mover><mi>δ</mi><mo accent="true">̃</mo></mover></mrow></msup><mo>,</mo><mspace width="1.0em"></mspace><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mn>1</mn><mi>/</mi><mover><mi>δ</mi><mo accent="true">̃</mo></mover></mrow></msup><msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">]</mo><mrow><mn>1</mn><mi>/</mi><mi>λ</mi></mrow></msup><mo>,</mo></mrow><annotation encoding="application/x-tex">
-z(x) = (1-p)^{1/\tilde\delta},\quad
-w(x)^\lambda = 1-(1-p)^{1/\tilde\delta},\quad
-w(x) = \bigl[1-(1-p)^{1/\tilde\delta}\bigr]^{1/\lambda},
-</annotation></semantics></math> and
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>β</mi></msup><mo>=</mo><mn>1</mn><mo>−</mo><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mn>1</mn><mi>/</mi><mover><mi>δ</mi><mo accent="true">̃</mo></mover></mrow></msup><msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">]</mo><mrow><mn>1</mn><mi>/</mi><mi>λ</mi></mrow></msup><mo>,</mo></mrow><annotation encoding="application/x-tex">
-v(x)^\beta = 1 - w(x)
-            = 1 - \bigl[1-(1-p)^{1/\tilde\delta}\bigr]^{1/\lambda},
-</annotation></semantics></math> leading to (2.9).
+successively for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+yields (2.9).
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
-<p>For notational simplicity, in the remainder we drop the tilde and
-write
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>
-for the KKw shape parameter; the mapping to the GKw parameters is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mrow><mi mathvariant="normal">G</mi><mi mathvariant="normal">K</mi><mi mathvariant="normal">w</mi></mrow></msub><mo>=</mo><mi>δ</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\delta_{\mathrm{GKw}} = \delta-1</annotation></semantics></math>.</p>
+<p>The standard Kumaraswamy distribution is recovered from KKw at the
+boundary value
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta=0</annotation></semantics></math>
+together with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda=1</annotation></semantics></math>.</p>
 </div>
 <div class="section level4">
 <h4 id="exponentiated-kumaraswamy-distribution">2.2.3 Exponentiated Kumaraswamy distribution<a class="anchor" aria-label="anchor" href="#exponentiated-kumaraswamy-distribution"></a>
@@ -537,10 +645,11 @@ of EKw.</p>
 <div class="section level4">
 <h4 id="mcdonald-distribution">2.2.4 McDonald distribution<a class="anchor" aria-label="anchor" href="#mcdonald-distribution"></a>
 </h4>
-<p><strong>Theorem 2.6 (McDonald distribution).</strong><br>
+<p><strong>Theorem 2.6 (McDonald/GB1 subfamily under the package
+parameterization).</strong><br>
 Setting
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mi>β</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\alpha = \beta = 1</annotation></semantics></math>
-in (2.1) yields the three-parameter McDonald distribution
+in (2.1) yields the package-parameterized McDonald (GB1) subfamily
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><msub><mi>f</mi><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">C</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mi>λ</mi><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mspace width="0.278em"></mspace><msup><mi>x</mi><mrow><mi>γ</mi><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>λ</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mi>δ</mi></msup><mo>,</mo></mrow></menclose><annotation encoding="application/x-tex">
 \boxed{
 f_{\mathrm{MC}}(x; \gamma,\delta,\lambda)
@@ -565,6 +674,13 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>λ</mi></msup></mrow><annotation encoding="application/x-tex">z(x)=1-x^\lambda</annotation></semantics></math>.
 Substituting into (2.1) yields (2.13); the CDF follows from (2.4).
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
+<p>Because
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta\ge0</annotation></semantics></math>,
+the second GB1 shape is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi><mo>=</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo>≥</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\eta=\delta+1\ge1</annotation></semantics></math>.
+Thus, as with the Beta embedding in Theorem 2.8, this is the portion of
+the classical McDonald/GB1 family compatible with the package’s shifted
+parameterization.</p>
 </div>
 <div class="section level4">
 <h4 id="kumaraswamy-distribution">2.2.5 Kumaraswamy distribution<a class="anchor" aria-label="anchor" href="#kumaraswamy-distribution"></a>
@@ -601,7 +717,8 @@ Q_{\mathrm{Kw}}(p; \alpha,\beta)
 \tag{2.17}
 </annotation></semantics></math> and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>-th
-moment
+moment, for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>&gt;</mo><mi>−</mi><mi>α</mi></mrow><annotation encoding="application/x-tex">r&gt;-\alpha</annotation></semantics></math>,
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><mi>𝔼</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>X</mi><mi>r</mi></msup><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>β</mi><mspace width="0.167em"></mspace><mi>B</mi><mspace width="-0.167em"></mspace><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mfrac><mi>r</mi><mi>α</mi></mfrac><mo>,</mo><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mi>β</mi><mspace width="0.167em"></mspace><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mi>/</mi><mi>α</mi><mo stretchy="false" form="postfix">)</mo><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mi>/</mi><mi>α</mi><mo>+</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mi>.</mi></mrow></menclose><annotation encoding="application/x-tex">
 \boxed{
 \mathbb{E}(X^r)
@@ -638,7 +755,8 @@ For the moment,
 <div class="section level4">
 <h4 id="beta-distribution">2.2.6 Beta distribution<a class="anchor" aria-label="anchor" href="#beta-distribution"></a>
 </h4>
-<p><strong>Theorem 2.8 (Beta distribution).</strong><br>
+<p><strong>Theorem 2.8 (Beta subfamily under the package
+parameterization).</strong><br>
 Setting
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mi>β</mi><mo>=</mo><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\alpha=\beta=\lambda=1</annotation></semantics></math>
 in (2.1) yields
@@ -657,7 +775,8 @@ F_{\mathrm{Beta}}(x; \gamma,\delta)
 \tag{2.20}
 </annotation></semantics></math> and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>-th
-moment
+moment, for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>&gt;</mo><mi>−</mi><mi>γ</mi></mrow><annotation encoding="application/x-tex">r&gt;-\gamma</annotation></semantics></math>,
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><mi>𝔼</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>X</mi><mi>r</mi></msup><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>+</mo><mi>r</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo>=</mo><mfrac><mrow><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>+</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>+</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo stretchy="false" form="postfix">)</mo><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>+</mo><mi>δ</mi><mo>+</mo><mi>r</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mi>.</mi></mrow></menclose><annotation encoding="application/x-tex">
 \boxed{
 \mathbb{E}(X^r)
@@ -678,6 +797,20 @@ Substituting into (2.1) gives (2.19); the CDF and moment follow from
 standard Beta distribution theory with shape parameters
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\gamma,\delta+1)</annotation></semantics></math>.
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
+<p><strong>Remark 2.2 (Range of the embedded Beta
+family).</strong><br>
+Because the <code>gkwdist</code> parameterization uses
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta\ge0</annotation></semantics></math>,
+this embedding has Beta shape parameters
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mi>γ</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">a=\gamma&gt;0</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo>≥</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">b=\delta+1\ge1</annotation></semantics></math>.
+It is therefore a genuine Beta subfamily, but it does
+<strong>not</strong> span the entire classical two-shape Beta family
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo stretchy="false" form="postfix">)</mo><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi>∞</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">(a,b)\in(0,\infty)^2</annotation></semantics></math>.
+The latter would require extending the mathematical parameter range to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>&gt;</mo><mi>−</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">\delta&gt;-1</annotation></semantics></math>,
+which is outside the package parameterization used in this vignette.</p>
 <hr>
 </div>
 </div>
@@ -753,121 +886,205 @@ L_8 &amp;= \delta\sum_{i=1}^n \ln z_i. \tag{3.12}
 <h3 id="maximum-likelihood-estimation">3.2 Maximum Likelihood Estimation<a class="anchor" aria-label="anchor" href="#maximum-likelihood-estimation"></a>
 </h3>
 <p><strong>Definition 3.2 (Maximum likelihood estimator).</strong><br>
-The maximum likelihood estimator (MLE) is defined by
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo>=</mo><mrow><mi mathvariant="normal">arg</mi><mo>⁡</mo></mrow><munder><mi mathvariant="normal">max</mi><mrow><mi>𝛉</mi><mo>∈</mo><mi mathvariant="normal">Θ</mi></mrow></munder><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo>;</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+Whenever the likelihood maximum is attained, an MLE is any maximizer
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo>∈</mo><munder><mi mathvariant="normal">arg max</mi><mrow><mi>𝛉</mi><mo>∈</mo><mover><mi mathvariant="normal">Θ</mi><mo accent="true">¯</mo></mover></mrow></munder><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo>;</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \hat{\boldsymbol{\theta}}_n
-  = \arg\max_{\boldsymbol{\theta}\in\Theta}
+  \in \operatorname*{arg\,max}_{\boldsymbol{\theta}\in\overline{\Theta}}
     \ell(\boldsymbol{\theta};\mathbf{x}).
 \tag{3.13}
-</annotation></semantics></math></p>
+</annotation></semantics></math> The set of maximizers need not be a
+singleton on non-identifiable manifolds. In a regular identifiable
+parameterization, the local maximizer considered below is assumed to be
+well defined with probability tending to one.</p>
 <p>We will refer to the true parameter value as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝛉</mi><mn>0</mn></msub><mo>∈</mo><mi mathvariant="normal">Θ</mi></mrow><annotation encoding="application/x-tex">\boldsymbol{\theta}_0\in\Theta</annotation></semantics></math>.</p>
-<p><strong>Theorem 3.2 (Consistency and asymptotic
-normality).</strong><br>
-Assume the usual regularity conditions for likelihood inference hold
-(e.g. Lehmann and Casella, 1998; van der Vaart, 1998), in particular
-that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝛉</mi><mn>0</mn></msub><mo>∈</mo><mrow><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi mathvariant="normal">Θ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\boldsymbol{\theta}_0\in\mathrm{int}(\Theta)</annotation></semantics></math>
-and
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℐ</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>𝔼</mi><msub><mi>𝛉</mi><mn>0</mn></msub></msub><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">[</mo><mo>−</mo><msup><mi>∇</mi><mn>2</mn></msup><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>;</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">
-\mathcal{I}(\boldsymbol{\theta}_0)
-  = \mathbb{E}_{\boldsymbol{\theta}_0}
-       \Bigl[-\nabla^2 \ln f(X;\boldsymbol{\theta})\Bigr]
-</annotation></semantics></math> is positive definite. Then
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mover><mo>→</mo><mi>p</mi></mover><msub><mi>𝛉</mi><mn>0</mn></msub><mo>,</mo><mspace width="2.0em"></mspace><mi>n</mi><mo>→</mo><mi>∞</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
-\hat{\boldsymbol{\theta}}_n
-  \xrightarrow{p} \boldsymbol{\theta}_0, \qquad n\to\infty,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝛉</mi><mn>0</mn></msub><mo>∈</mo><mover><mi mathvariant="normal">Θ</mi><mo accent="true">¯</mo></mover></mrow><annotation encoding="application/x-tex">\boldsymbol{\theta}_0\in\overline{\Theta}</annotation></semantics></math>.</p>
+<p><strong>Theorem 3.2 (Consistency and asymptotic normality on a
+regular identifiable region).</strong><br>
+Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛉</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\boldsymbol\theta_0</annotation></semantics></math>
+belong to an open identifiable parameter region
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Θ</mi><mi>R</mi></msub><mo>⊂</mo><msup><mi mathvariant="normal">Θ</mi><mo>∘</mo></msup></mrow><annotation encoding="application/x-tex">\Theta_R\subset\Theta^\circ</annotation></semantics></math>.
+Assume:</p>
+<ol style="list-style-type: decimal">
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛉</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\boldsymbol\theta_0</annotation></semantics></math>
+is the unique maximizer of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>𝔼</mi><msub><mi>𝛉</mi><mn>0</mn></msub></msub><mo stretchy="false" form="prefix">[</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>;</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">M(\boldsymbol\theta)=\mathbb E_{\boldsymbol\theta_0}[\log f(X;\boldsymbol\theta)]</annotation></semantics></math>
+on the parameter region considered, and the normalized log-likelihood
+obeys a uniform law of large numbers sufficient for M-estimator
+consistency;</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\log f(x;\boldsymbol\theta)</annotation></semantics></math>
+is twice continuously differentiable in a neighborhood of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛉</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\boldsymbol\theta_0</annotation></semantics></math>,
+with domination conditions allowing differentiation under the integral
+sign and a law of large numbers for the Hessian;</li>
+<li>the per-observation score
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>U</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>∇</mi><mi>𝛉</mi></msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>;</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">U_1(\boldsymbol\theta)=\nabla_{\boldsymbol\theta}\log f(X;\boldsymbol\theta)</annotation></semantics></math>
+has finite second moment and
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℐ</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>𝔼</mi><msub><mi>𝛉</mi><mn>0</mn></msub></msub><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>U</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><msub><mi>U</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>⊤</mi></msup><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><mi>−</mi><msub><mi>𝔼</mi><msub><mi>𝛉</mi><mn>0</mn></msub></msub><mrow><mo stretchy="true" form="prefix">[</mo><msup><mi>∇</mi><mn>2</mn></msup><mi mathvariant="normal">log</mi><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>;</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+\mathcal I(\boldsymbol\theta_0)
+ =\mathbb E_{\boldsymbol\theta_0}
+\left[U_1(\boldsymbol\theta_0)U_1(\boldsymbol\theta_0)^\top\right]
+ =-\mathbb E_{\boldsymbol\theta_0}
+\left[\nabla^2\log f(X;\boldsymbol\theta_0)\right]
+</annotation></semantics></math> is positive definite.</li>
+</ol>
+<p>Then any sequence of MLEs in this regular region satisfying the usual
+approximate-maximization condition is consistent,
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mover><mo>→</mo><mi>p</mi></mover><msub><mi>𝛉</mi><mn>0</mn></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\hat{\boldsymbol\theta}_n\xrightarrow{p}\boldsymbol\theta_0,
 \tag{3.14}
 </annotation></semantics></math> and
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><mi>n</mi></msqrt><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo>−</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mover><mo>→</mo><mi>d</mi></mover><msub><mi>𝒩</mi><mn>5</mn></msub><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mi>ℐ</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><mi>n</mi><mo>→</mo><mi>∞</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\sqrt{n}(\hat{\boldsymbol{\theta}}_n - \boldsymbol{\theta}_0)
-  \xrightarrow{d}
-  \mathcal{N}_5\bigl(\mathbf{0}, \mathcal{I}(\boldsymbol{\theta}_0)^{-1}\bigr),
-\qquad n\to\infty.
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><mi>n</mi></msqrt><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo>−</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mover><mo>→</mo><mi>d</mi></mover><msub><mi>𝒩</mi><mn>5</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mi>ℐ</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\sqrt n(\hat{\boldsymbol\theta}_n-\boldsymbol\theta_0)
+ \xrightarrow{d}
+ \mathcal N_5\left(\mathbf 0,\mathcal I(\boldsymbol\theta_0)^{-1}\right).
 \tag{3.15}
 </annotation></semantics></math></p>
-<p><em>Proof.</em> The regularity conditions are satisfied for all
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x\in(0,1)</annotation></semantics></math>
+<p><em>Proof.</em> The first assertion follows from the standard
+consistency theorem for M-estimators because
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>n</mi><mrow><mi>−</mi><mn>1</mn></mrow></msup><msub><mi>ℓ</mi><mi>n</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">n^{-1}\ell_n(\boldsymbol\theta)</annotation></semantics></math>
+converges uniformly to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">M(\boldsymbol\theta)</annotation></semantics></math>,
+whose maximizer is unique at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛉</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\boldsymbol\theta_0</annotation></semantics></math>.
+For asymptotic normality, expand the score around
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛉</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\boldsymbol\theta_0</annotation></semantics></math>:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>𝟎</mn><mo>=</mo><msub><mi>U</mi><mi>n</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>U</mi><mi>n</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><msub><mi>H</mi><mi>n</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̃</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo>−</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\mathbf 0
+ =U_n(\hat{\boldsymbol\theta}_n)
+ =U_n(\boldsymbol\theta_0)
+  +H_n(\tilde{\boldsymbol\theta}_n)
+   (\hat{\boldsymbol\theta}_n-\boldsymbol\theta_0),
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛉</mi><mo accent="true">̃</mo></mover><mi>n</mi></msub><annotation encoding="application/x-tex">\tilde{\boldsymbol\theta}_n</annotation></semantics></math>
+lies between
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><annotation encoding="application/x-tex">\hat{\boldsymbol\theta}_n</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝛉</mi><mo>∈</mo><mrow><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi mathvariant="normal">Θ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\boldsymbol{\theta}\in\mathrm{int}(\Theta)</annotation></semantics></math>:
-the support does not depend on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛉</mi><annotation encoding="application/x-tex">\boldsymbol{\theta}</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">f(x;\boldsymbol{\theta})</annotation></semantics></math>
-is continuously differentiable in a neighborhood of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛉</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\boldsymbol{\theta}_0</annotation></semantics></math>,
-the score has mean zero and finite second moment, and the Fisher
-information is non-singular. The result then follows from standard MLE
-asymptotic theory (see, e.g., van der Vaart, 1998).
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛉</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\boldsymbol\theta_0</annotation></semantics></math>.
+By the multivariate central limit theorem,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>n</mi><mrow><mi>−</mi><mn>1</mn><mi>/</mi><mn>2</mn></mrow></msup><msub><mi>U</mi><mi>n</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>⇒</mo><msub><mi>𝒩</mi><mn>5</mn></msub><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi>ℐ</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">n^{-1/2}U_n(\boldsymbol\theta_0)\Rightarrow\mathcal N_5(0,\mathcal I(\boldsymbol\theta_0))</annotation></semantics></math>,
+while consistency and the Hessian law of large numbers give
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msup><mi>n</mi><mrow><mi>−</mi><mn>1</mn></mrow></msup><msub><mi>H</mi><mi>n</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̃</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo><mover><mo>→</mo><mi>p</mi></mover><mi>ℐ</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">-n^{-1}H_n(\tilde{\boldsymbol\theta}_n)\xrightarrow{p}\mathcal I(\boldsymbol\theta_0)</annotation></semantics></math>.
+Slutsky’s theorem yields (3.15).
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
+<p><strong>Remark 3.1 (Why the qualification is
+essential).</strong><br>
+Theorem 3.2 does not apply to the full five-parameter representation on
+the non-identifiable manifolds in Proposition 2.1. In particular,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta=0</annotation></semantics></math>
+makes
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\gamma,\lambda)</annotation></semantics></math>
+confounded through
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mi>λ</mi></mrow><annotation encoding="application/x-tex">\gamma\lambda</annotation></semantics></math>;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\beta=1</annotation></semantics></math>
+makes
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\lambda)</annotation></semantics></math>
+confounded through
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mi>λ</mi></mrow><annotation encoding="application/x-tex">\alpha\lambda</annotation></semantics></math>;
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\gamma=\lambda=1</annotation></semantics></math>
+makes
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo>,</mo><mi>δ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\beta,\delta)</annotation></semantics></math>
+confounded through
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\beta(\delta+1)</annotation></semantics></math>.
+At such points the information matrix for the full embedding is singular
+and the usual five-dimensional Gaussian limit cannot hold. A reduced
+model can nevertheless possess regular asymptotics when it is written in
+an identifiable minimal parameterization.</p>
 </div>
 <div class="section level3">
 <h3 id="likelihood-ratio-tests">3.3 Likelihood Ratio Tests<a class="anchor" aria-label="anchor" href="#likelihood-ratio-tests"></a>
 </h3>
 <p>For nested models, likelihood ratio tests follow Wilks’ theorem.</p>
-<p><strong>Theorem 3.3 (Wilks’ theorem).</strong><br>
-Consider testing nested hypotheses
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>𝛉</mi><mo>∈</mo><msub><mi mathvariant="normal">Θ</mi><mn>0</mn></msub><mspace width="1.0em"></mspace><mtext mathvariant="normal">vs.</mtext><mspace width="1.0em"></mspace><msub><mi>H</mi><mn>1</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>𝛉</mi><mo>∈</mo><mi mathvariant="normal">Θ</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
-H_0:\ \boldsymbol{\theta}\in\Theta_0
-\quad\text{vs.}\quad
-H_1:\ \boldsymbol{\theta}\in\Theta,
-</annotation></semantics></math> where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Θ</mi><mn>0</mn></msub><mo>⊂</mo><mi mathvariant="normal">Θ</mi></mrow><annotation encoding="application/x-tex">\Theta_0\subset\Theta</annotation></semantics></math>
-is defined by
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
-independent constraints. Let
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mo>=</mo><mn>2</mn><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">{</mo><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mrow><mn>0</mn><mo>,</mo><mi>n</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">}</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+<p><strong>Theorem 3.3 (Wilks’ theorem on a regular interior
+null).</strong><br>
+Consider nested hypotheses
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>𝛉</mi><mo>∈</mo><msub><mi mathvariant="normal">Θ</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">H_0:\ \boldsymbol\theta\in\Theta_0</annotation></semantics></math>
+versus
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mn>1</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>𝛉</mi><mo>∈</mo><msub><mi mathvariant="normal">Θ</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">H_1:\ \boldsymbol\theta\in\Theta_R</annotation></semantics></math>,
+where locally
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi mathvariant="normal">Θ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\Theta_0</annotation></semantics></math>
+is a smooth identifiable submanifold of codimension
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>,
+the true parameter is an interior point relative to the regular
+parameterization, and the Fisher information is nonsingular. Let
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mo>=</mo><mn>2</mn><mo stretchy="false" form="prefix">{</mo><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mrow><mn>0</mn><mo>,</mo><mi>n</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \Lambda_n
-  = 2\Bigl\{
-        \ell(\hat{\boldsymbol{\theta}}_n)
-       -\ell(\hat{\boldsymbol{\theta}}_{0,n})
-     \Bigr\},
+ =2\{\ell(\hat{\boldsymbol\theta}_n)-\ell(\hat{\boldsymbol\theta}_{0,n})\}.
 \tag{3.16}
-</annotation></semantics></math> where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><annotation encoding="application/x-tex">\hat{\boldsymbol{\theta}}_n</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mrow><mn>0</mn><mo>,</mo><mi>n</mi></mrow></msub><annotation encoding="application/x-tex">\hat{\boldsymbol{\theta}}_{0,n}</annotation></semantics></math>
-are the unconstrained and constrained MLEs, respectively. Under
+</annotation></semantics></math> Then, under
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mn>0</mn></msub><annotation encoding="application/x-tex">H_0</annotation></semantics></math>,
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mover><mo>→</mo><mi>d</mi></mover><msubsup><mi>χ</mi><mi>r</mi><mn>2</mn></msubsup><mo>,</mo><mspace width="2.0em"></mspace><mi>n</mi><mo>→</mo><mi>∞</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\Lambda_n \xrightarrow{d} \chi^2_r,\qquad n\to\infty.
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mover><mo>→</mo><mi>d</mi></mover><msubsup><mi>χ</mi><mi>r</mi><mn>2</mn></msubsup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\Lambda_n\xrightarrow{d}\chi_r^2.
 \tag{3.17}
 </annotation></semantics></math></p>
-<p><em>Proof.</em> Standard; see Casella and Berger (2002), Chapter 10.
+<p><em>Proof.</em> This is the standard Wilks expansion of the
+log-likelihood under local asymptotic normality and a regular interior
+constraint. The assumptions exclude boundary points and loss of
+identifiability.
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
-<p>Within the GKw hierarchy we obtain the following tests.</p>
 <p><strong>Corollary 3.1 (LR tests within the GKw
 hierarchy).</strong><br>
-Under the usual regularity conditions and away from parameter
-boundaries, the following likelihood ratio tests are asymptotically
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>χ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\chi^2</annotation></semantics></math>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mtext mathvariant="normal">GKw vs. BKw:</mtext><mspace width="1.0em"></mspace></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>λ</mi><mo>=</mo><mn>1</mn></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>⇒</mo><mspace width="0.222em"></mspace><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mover><mo>→</mo><mi>d</mi></mover><msubsup><mi>χ</mi><mn>1</mn><mn>2</mn></msubsup><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mtext mathvariant="normal">GKw vs. KKw:</mtext><mspace width="1.0em"></mspace></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>γ</mi><mo>=</mo><mn>1</mn></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>⇒</mo><mspace width="0.222em"></mspace><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mover><mo>→</mo><mi>d</mi></mover><msubsup><mi>χ</mi><mn>1</mn><mn>2</mn></msubsup><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mtext mathvariant="normal">BKw vs. Beta:</mtext><mspace width="1.0em"></mspace></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>α</mi><mo>=</mo><mi>β</mi><mo>=</mo><mn>1</mn></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>⇒</mo><mspace width="0.222em"></mspace><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mover><mo>→</mo><mi>d</mi></mover><msubsup><mi>χ</mi><mn>2</mn><mn>2</mn></msubsup><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mtext mathvariant="normal">KKw vs. Kw:</mtext><mspace width="1.0em"></mspace></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>δ</mi><mo>=</mo><mi>λ</mi><mo>=</mo><mn>1</mn></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>⇒</mo><mspace width="0.222em"></mspace><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mover><mo>→</mo><mi>d</mi></mover><msubsup><mi>χ</mi><mn>2</mn><mn>2</mn></msubsup><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+The following regular reductions have the usual chi-squared limit
+provided the null point lies in an identifiable region with nonsingular
+information:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mtext mathvariant="normal">GKw vs. BKw:</mtext><mspace width="1.0em"></mspace></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>λ</mi><mo>=</mo><mn>1</mn></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>⇒</mo><mspace width="0.222em"></mspace><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mover><mo>→</mo><mi>d</mi></mover><msubsup><mi>χ</mi><mn>1</mn><mn>2</mn></msubsup><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mtext mathvariant="normal">GKw vs. KKw:</mtext><mspace width="1.0em"></mspace></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>γ</mi><mo>=</mo><mn>1</mn></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>⇒</mo><mspace width="0.222em"></mspace><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mover><mo>→</mo><mi>d</mi></mover><msubsup><mi>χ</mi><mn>1</mn><mn>2</mn></msubsup><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mtext mathvariant="normal">BKw vs. Beta:</mtext><mspace width="1.0em"></mspace></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>α</mi><mo>=</mo><mi>β</mi><mo>=</mo><mn>1</mn></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>⇒</mo><mspace width="0.222em"></mspace><msub><mi mathvariant="normal">Λ</mi><mi>n</mi></msub><mover><mo>→</mo><mi>d</mi></mover><msubsup><mi>χ</mi><mn>2</mn><mn>2</mn></msubsup><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{align}
 \text{GKw vs. BKw:}\quad
-  &amp;H_0:\ \lambda = 1
-  &amp;&amp;\Rightarrow\ \Lambda_n \xrightarrow{d} \chi^2_1,
-  \tag{3.18}\\[3pt]
+ &amp;H_0:\ \lambda=1
+ &amp;&amp;\Rightarrow\ \Lambda_n\xrightarrow{d}\chi_1^2, \tag{3.18}\\[3pt]
 \text{GKw vs. KKw:}\quad
-  &amp;H_0:\ \gamma = 1
-  &amp;&amp;\Rightarrow\ \Lambda_n \xrightarrow{d} \chi^2_1,
-  \tag{3.19}\\[3pt]
+ &amp;H_0:\ \gamma=1
+ &amp;&amp;\Rightarrow\ \Lambda_n\xrightarrow{d}\chi_1^2, \tag{3.19}\\[3pt]
 \text{BKw vs. Beta:}\quad
-  &amp;H_0:\ \alpha = \beta = 1
-  &amp;&amp;\Rightarrow\ \Lambda_n \xrightarrow{d} \chi^2_2,
-  \tag{3.20}\\[3pt]
-\text{KKw vs. Kw:}\quad
-  &amp;H_0:\ \delta = \lambda = 1
-  &amp;&amp;\Rightarrow\ \Lambda_n \xrightarrow{d} \chi^2_2.
-  \tag{3.21}
+ &amp;H_0:\ \alpha=\beta=1
+ &amp;&amp;\Rightarrow\ \Lambda_n\xrightarrow{d}\chi_2^2. \tag{3.20}
 \end{align}
-</annotation></semantics></math></p>
-<p>The precise mapping between
+</annotation></semantics></math> For the first two comparisons, this
+excludes, in particular, null points at which the full GKw
+representation loses identifiability.</p>
+<p>The comparison KKw versus Kw is different. In distribution space, the
+Kw null inside KKw is the singular slice
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mn>0</mn></msub><mo>:</mo><mspace width="0.222em"></mspace><mi>λ</mi><mo>=</mo><mn>1</mn><mo>,</mo></mrow><annotation encoding="application/x-tex">
+H_0:\ \lambda=1,
+\tag{3.21}
+</annotation></semantics></math> because, when
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\gamma=1</annotation></semantics></math>
+is already fixed by KKw and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda=1</annotation></semantics></math>,
+Proposition 2.1(3) gives
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">K</mi><mi mathvariant="normal">w</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>α</mi><mi>ξ</mi><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>ξ</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>,</mo><mspace width="2.0em"></mspace><mi>ξ</mi><mo>=</mo><mi>β</mi><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+f_{\mathrm{KKw}}(x)=\alpha\xi x^{\alpha-1}(1-x^\alpha)^{\xi-1},
+\qquad \xi=\beta(\delta+1),
+</annotation></semantics></math> which is exactly a
+Kw<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>ξ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\xi)</annotation></semantics></math>
+density for <strong>every</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta\ge0</annotation></semantics></math>.
+The commonly used representative restriction
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>0</mn><mo>,</mo><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\delta=0,\lambda=1</annotation></semantics></math>
+selects one parameterization of the same Kw null but is not its full
+preimage in the redundant KKw coordinates. Consequently, under
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mn>0</mn></msub><annotation encoding="application/x-tex">H_0</annotation></semantics></math>,
+the split of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ξ</mi><annotation encoding="application/x-tex">\xi</annotation></semantics></math>
+into
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>
-in KKw and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>
-in GKw is as described in Theorem 2.4; the dimension reduction in each
-hypothesis is nevertheless
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
-as indicated.</p>
+is unidentified. The null is therefore a singular
+loss-of-identifiability problem (and the representative
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta=0</annotation></semantics></math>
+also lies on the package boundary). Wilks’ ordinary chi-squared theorem
+does <strong>not</strong> apply, and one should not assume a standard
+chi-bar-square mixture without a model-specific derivation of the local
+experiment. In practice, a parametric bootstrap under the fitted
+two-parameter Kw null is a defensible calibration strategy, but its
+finite-sample performance should itself be checked by simulation for the
+intended sample size and parameter region. Self and Liang (1987) provide
+a general boundary-likelihood framework; the unidentified nuisance
+direction present here requires additional care.</p>
 <hr>
 </div>
 </div>
@@ -1063,6 +1280,20 @@ From Lemma 1.1,
   = -\delta\sum_{i=1}^n \frac{w_i^\lambda\ln w_i}{z_i}.
 </annotation></semantics></math> Together these yield (4.6).
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
+<p><strong>Implementation sign convention.</strong><br>
+Equations (4.2)–(4.6) are derivatives of the
+<strong>log-likelihood</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ℓ</mi><annotation encoding="application/x-tex">\ell</annotation></semantics></math>.
+The optimization helpers in <code>gkwdist</code> are written for the
+negative log-likelihood; therefore their gradient and Hessian should
+satisfy
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>∇</mi><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mi>ℓ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>−</mi><mi>U</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><msup><mi>∇</mi><mn>2</mn></msup><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mi>ℓ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>−</mi><mi>H</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>𝒥</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\nabla(-\ell)=-U(\boldsymbol\theta),
+\qquad
+\nabla^2(-\ell)=-H(\boldsymbol\theta)=\mathcal J(\boldsymbol\theta).
+</annotation></semantics></math> This distinction is essential when
+comparing the formulas in this vignette with <code>gr*</code> and
+<code>hs*</code> implementation routines.</p>
 </div>
 <div class="section level3">
 <h3 id="the-hessian-and-observed-information-matrix">4.2 The Hessian and Observed Information Matrix<a class="anchor" aria-label="anchor" href="#the-hessian-and-observed-information-matrix"></a>
@@ -1102,6 +1333,45 @@ D^{u}_{jk}(i)
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><msup><mi>∂</mi><mn>2</mn></msup><mrow><mi>∂</mi><msubsup><mi>θ</mi><mi>j</mi><mn>2</mn></msubsup></mrow></mfrac><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>u</mi><mi>i</mi></msub><mo>=</mo><msubsup><mi>D</mi><mrow><mi>j</mi><mi>j</mi></mrow><mi>u</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \frac{\partial^2}{\partial\theta_j^2}\ln u_i = D^u_{jj}(i).
 </annotation></semantics></math></p>
+<p>For implementation, all raw second derivatives entering
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>D</mi><mrow><mi>j</mi><mi>k</mi></mrow><mi>u</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">D^u_{jk}(i)</annotation></semantics></math>
+can be written explicitly. Let
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mi>i</mi></msub><mo>=</mo><msubsup><mi>x</mi><mi>i</mi><mi>α</mi></msubsup><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>L</mi><mi>i</mi></msub><mo>=</mo><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>x</mi><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+A_i=x_i^\alpha,\qquad L_i=\ln x_i.
+</annotation></semantics></math> Then
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>v</mi><mrow><mi>i</mi><mo>,</mo><mi>α</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><msub><mi>A</mi><mi>i</mi></msub><msub><mi>L</mi><mi>i</mi></msub><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>v</mi><mrow><mi>i</mi><mo>,</mo><mi>α</mi><mi>α</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><msub><mi>A</mi><mi>i</mi></msub><msubsup><mi>L</mi><mi>i</mi><mn>2</mn></msubsup><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>α</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>β</mi><msubsup><mi>v</mi><mi>i</mi><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msubsup><msub><mi>A</mi><mi>i</mi></msub><msub><mi>L</mi><mi>i</mi></msub><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>β</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><msubsup><mi>v</mi><mi>i</mi><mi>β</mi></msubsup><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>v</mi><mi>i</mi></msub><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>α</mi><mi>α</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>β</mi><msub><mi>A</mi><mi>i</mi></msub><msubsup><mi>L</mi><mi>i</mi><mn>2</mn></msubsup><msubsup><mi>v</mi><mi>i</mi><mrow><mi>β</mi><mo>−</mo><mn>2</mn></mrow></msubsup><mo stretchy="false" form="prefix">{</mo><msub><mi>v</mi><mi>i</mi></msub><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><msub><mi>A</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">}</mo><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>α</mi><mi>β</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>A</mi><mi>i</mi></msub><msub><mi>L</mi><mi>i</mi></msub><msubsup><mi>v</mi><mi>i</mi><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>β</mi><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>v</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>β</mi><mi>β</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><msubsup><mi>v</mi><mi>i</mi><mi>β</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>v</mi><mi>i</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{align}
+v_{i,\alpha} &amp;=-A_iL_i,
+&amp;v_{i,\alpha\alpha} &amp;=-A_iL_i^2,\tag{4.7a}\\
+w_{i,\alpha} &amp;=\beta v_i^{\beta-1}A_iL_i,
+&amp;w_{i,\beta} &amp;=-v_i^\beta\ln v_i,\tag{4.7b}\\
+w_{i,\alpha\alpha}
+ &amp;=\beta A_iL_i^2v_i^{\beta-2}\{v_i-(\beta-1)A_i\},
+&amp;w_{i,\alpha\beta}
+ &amp;=A_iL_iv_i^{\beta-1}(1+\beta\ln v_i),\tag{4.7c}\\
+w_{i,\beta\beta}
+ &amp;=-v_i^\beta(\ln v_i)^2.\tag{4.7d}
+\end{align}
+</annotation></semantics></math> For
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>,</mo><mi>k</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">j,k\in\{\alpha,\beta\}</annotation></semantics></math>,
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>z</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><mi>λ</mi><msubsup><mi>w</mi><mi>i</mi><mrow><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msubsup><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>z</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mi>k</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><mi>λ</mi><mrow><mo stretchy="true" form="prefix">[</mo><mo stretchy="false" form="prefix">(</mo><mi>λ</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><msubsup><mi>w</mi><mi>i</mi><mrow><mi>λ</mi><mo>−</mo><mn>2</mn></mrow></msubsup><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>k</mi></mrow></msub><mo>+</mo><msubsup><mi>w</mi><mi>i</mi><mrow><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msubsup><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mi>k</mi></mrow></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>z</mi><mrow><mi>i</mi><mo>,</mo><mi>λ</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><msubsup><mi>w</mi><mi>i</mi><mi>λ</mi></msubsup><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mi>i</mi></msub><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>z</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mi>λ</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><msubsup><mi>w</mi><mi>i</mi><mrow><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msubsup><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>λ</mi><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>z</mi><mrow><mi>i</mi><mo>,</mo><mi>λ</mi><mi>λ</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><msubsup><mi>w</mi><mi>i</mi><mi>λ</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mi>i</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{align}
+z_{i,j}
+ &amp;=-\lambda w_i^{\lambda-1}w_{i,j},\tag{4.7e}\\
+z_{i,jk}
+ &amp;=-\lambda\left[(\lambda-1)w_i^{\lambda-2}w_{i,j}w_{i,k}
+                  +w_i^{\lambda-1}w_{i,jk}\right],\tag{4.7f}\\
+z_{i,\lambda}
+ &amp;=-w_i^\lambda\ln w_i,\tag{4.7g}\\
+z_{i,j\lambda}
+ &amp;=-w_i^{\lambda-1}w_{i,j}(1+\lambda\ln w_i),\tag{4.7h}\\
+z_{i,\lambda\lambda}
+ &amp;=-w_i^\lambda(\ln w_i)^2.\tag{4.7i}
+\end{align}
+</annotation></semantics></math> These formulas, together with the
+definition of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>D</mi><mrow><mi>j</mi><mi>k</mi></mrow><mi>u</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">D^u_{jk}(i)</annotation></semantics></math>,
+give every Hessian entry below without numerical differentiation.</p>
 <div class="section level4">
 <h4 id="diagonal-elements">4.2.1 Diagonal elements<a class="anchor" aria-label="anchor" href="#diagonal-elements"></a>
 </h4>
@@ -1202,7 +1472,7 @@ For
 the mixed second derivatives of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ℓ</mi><annotation encoding="application/x-tex">\ell</annotation></semantics></math>
 are:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>α</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>β</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mn>1</mn><msub><mi>v</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>v</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>α</mi></mrow></mfrac><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mi>λ</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><msubsup><mi>D</mi><mrow><mi>α</mi><mi>β</mi></mrow><mi>w</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>δ</mi><msubsup><mi>D</mi><mrow><mi>α</mi><mi>β</mi></mrow><mi>z</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>γ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>δ</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>n</mi><mspace width="0.167em"></mspace><msub><mi>ψ</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>+</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>γ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>α</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>λ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>w</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>w</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>α</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>γ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>β</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>λ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>w</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>w</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>β</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>δ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>α</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>z</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>α</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>δ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>β</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>z</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>β</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>λ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>α</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>γ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>w</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>w</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>α</mi></mrow></mfrac><mo>+</mo><mi>δ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mi>∂</mi><mrow><mi>∂</mi><mi>α</mi></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>1</mn><msub><mi>z</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>λ</mi></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>λ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>β</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>γ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>w</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>w</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>β</mi></mrow></mfrac><mo>+</mo><mi>δ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mi>∂</mi><mrow><mi>∂</mi><mi>β</mi></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>1</mn><msub><mi>z</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>λ</mi></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>λ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>γ</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mi>i</mi></msub><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>λ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>δ</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>z</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>λ</mi></mrow></mfrac><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>α</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>β</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mn>1</mn><msub><mi>v</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>v</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>α</mi></mrow></mfrac><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mi>λ</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><msubsup><mi>D</mi><mrow><mi>α</mi><mi>β</mi></mrow><mi>w</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>δ</mi><msubsup><mi>D</mi><mrow><mi>α</mi><mi>β</mi></mrow><mi>z</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>γ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>δ</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>n</mi><mspace width="0.167em"></mspace><msub><mi>ψ</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>+</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>γ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>α</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>λ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>w</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>w</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>α</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>γ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>β</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>λ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>w</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>w</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>β</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>δ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>α</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>z</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>α</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>δ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>β</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>z</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>β</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>λ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>α</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>γ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>w</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>w</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>α</mi></mrow></mfrac><mo>+</mo><mi>δ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>D</mi><mrow><mi>α</mi><mi>λ</mi></mrow><mi>z</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>λ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>β</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>γ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>w</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>w</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>β</mi></mrow></mfrac><mo>+</mo><mi>δ</mi><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>D</mi><mrow><mi>β</mi><mi>λ</mi></mrow><mi>z</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>λ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>γ</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mi>i</mi></msub><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>ℓ</mi></mrow><mrow><mi>∂</mi><mi>λ</mi><mspace width="0.167em"></mspace><mi>∂</mi><mi>δ</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mn>1</mn><msub><mi>z</mi><mi>i</mi></msub></mfrac><mfrac><mrow><mi>∂</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><mrow><mi>∂</mi><mi>λ</mi></mrow></mfrac><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{align}
 \frac{\partial^2\ell}{\partial\alpha\,\partial\beta}
  &amp;= \sum_{i=1}^n\left[
@@ -1227,15 +1497,11 @@ are:</p>
 \frac{\partial^2\ell}{\partial\lambda\,\partial\alpha}
  &amp;= \gamma\sum_{i=1}^n
       \frac{1}{w_i}\frac{\partial w_i}{\partial\alpha}
-    + \delta\sum_{i=1}^n
-      \frac{\partial}{\partial\alpha}
-      \left(\frac{1}{z_i}\frac{\partial z_i}{\partial\lambda}\right), \tag{4.23}\\[6pt]
+    + \delta\sum_{i=1}^n D^z_{\alpha\lambda}(i), \tag{4.23}\\[6pt]
 \frac{\partial^2\ell}{\partial\lambda\,\partial\beta}
  &amp;= \gamma\sum_{i=1}^n
       \frac{1}{w_i}\frac{\partial w_i}{\partial\beta}
-    + \delta\sum_{i=1}^n
-      \frac{\partial}{\partial\beta}
-      \left(\frac{1}{z_i}\frac{\partial z_i}{\partial\lambda}\right), \tag{4.24}\\[6pt]
+    + \delta\sum_{i=1}^n D^z_{\beta\lambda}(i), \tag{4.24}\\[6pt]
 \frac{\partial^2\ell}{\partial\lambda\,\partial\gamma}
  &amp;= \sum_{i=1}^n \ln w_i, \tag{4.25}\\[6pt]
 \frac{\partial^2\ell}{\partial\lambda\,\partial\delta}
@@ -1313,9 +1579,9 @@ transformations.</p>
 <div class="section level3">
 <h3 id="asymptotic-variancecovariance-matrix">4.3 Asymptotic Variance–Covariance Matrix<a class="anchor" aria-label="anchor" href="#asymptotic-variancecovariance-matrix"></a>
 </h3>
-<p>Under the conditions of Theorem 3.2, the asymptotic
-variance–covariance matrix of the MLE is governed by the Fisher
-information.</p>
+<p>On a regular identifiable parameter region satisfying Theorem 3.2,
+the asymptotic variance–covariance matrix of the MLE is governed by the
+Fisher information.</p>
 <p>Let
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℐ</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛉</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathcal{I}(\boldsymbol{\theta}_0)</annotation></semantics></math>
 denote the <strong>per-observation</strong> Fisher information,
@@ -1343,8 +1609,8 @@ Under the regularity assumptions of Theorem 3.2,
 </annotation></semantics></math> and the asymptotic standard error of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>j</mi></msub><annotation encoding="application/x-tex">\hat\theta_j</annotation></semantics></math>
 is approximated by
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">SE</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msqrt><mrow><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">[</mo><mi>𝒥</mi><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>−</mi><mn>1</mn></mrow></msup><msub><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">]</mo><mrow><mi>j</mi><mi>j</mi></mrow></msub></mrow></msqrt><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\operatorname{SE}(\hat\theta_j)
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi mathvariant="normal">SE</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msqrt><mrow><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">[</mo><mi>𝒥</mi><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>−</mi><mn>1</mn></mrow></msup><msub><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">]</mo><mrow><mi>j</mi><mi>j</mi></mrow></msub></mrow></msqrt><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\widehat{\operatorname{SE}}(\hat\theta_j)
   = \sqrt{\bigl[\mathcal{J}(\hat{\boldsymbol{\theta}}_n)^{-1}\bigr]_{jj}}.
 \tag{4.28}
 </annotation></semantics></math></p>
@@ -1363,17 +1629,14 @@ follows from a law of large numbers for the Hessian (Cox and Hinkley,
 <div class="section level3">
 <h3 id="numerical-stability">5.1 Numerical Stability<a class="anchor" aria-label="anchor" href="#numerical-stability"></a>
 </h3>
-<p>Direct evaluation of expressions such as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo>−</mo><msubsup><mi>x</mi><mi>i</mi><mi>α</mi></msubsup></mrow><annotation encoding="application/x-tex">v_i = 1-x_i^\alpha</annotation></semantics></math>
-can suffer from catastrophic cancellation when
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>x</mi><mi>i</mi><mi>α</mi></msubsup><mo>≈</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">x_i^\alpha \approx 1</annotation></semantics></math>
-and from underflow when
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>x</mi><mi>i</mi><mi>α</mi></msubsup><annotation encoding="application/x-tex">x_i^\alpha</annotation></semantics></math>
-is very small. To mitigate these issues, the implementation in
-<code>gkwdist</code> works primarily in log-scale.</p>
-<p>For example, we compute
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\ln v_i</annotation></semantics></math>
-via a numerically stable <code>log1mexp</code> transformation.</p>
+<p>Direct evaluation of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo>−</mo><msubsup><mi>x</mi><mi>i</mi><mi>α</mi></msubsup></mrow><annotation encoding="application/x-tex">v_i=1-x_i^\alpha</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo>−</mo><msubsup><mi>v</mi><mi>i</mi><mi>β</mi></msubsup></mrow><annotation encoding="application/x-tex">w_i=1-v_i^\beta</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo>−</mo><msubsup><mi>w</mi><mi>i</mi><mi>λ</mi></msubsup></mrow><annotation encoding="application/x-tex">z_i=1-w_i^\lambda</annotation></semantics></math>
+can suffer catastrophic cancellation when the subtracted quantity is
+close to one. The implementation should therefore propagate the cascade
+on the log scale.</p>
 <p><strong>Algorithm 5.1 (Stable computation of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>e</mi><mi>a</mi></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\log(1-e^a)</annotation></semantics></math>
 for
@@ -1381,97 +1644,137 @@ for
 <p>For
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>&lt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">a&lt;0</annotation></semantics></math>,
 define
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">log1mexp</mtext><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mo>−</mo><mrow><mi mathvariant="normal">expm1</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mo>,</mo></mtd><mtd columnalign="left" style="text-align: left"><mi>a</mi><mo>&lt;</mo><mi>−</mi><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><mn>2</mn><mo>,</mo></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>e</mi><mi>a</mi></msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mo>,</mo></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">otherwise</mtext><mi>.</mi></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
-\text{log1mexp}(a)
-  =
-  \begin{cases}
-    \ln\bigl(-\operatorname{expm1}(a)\bigr),
-      &amp; a &lt; -\ln 2,\\[4pt]
-    \ln\bigl(1 - e^a\bigr),
-      &amp; \text{otherwise}.
-  \end{cases}
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log1mexp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>1</mn><mi>p</mi><mo stretchy="false" form="prefix">(</mo><mi>−</mi><msup><mi>e</mi><mi>a</mi></msup><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mtd><mtd columnalign="left" style="text-align: left"><mi>a</mi><mo>≤</mo><mi>−</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>2</mn><mo>,</mo></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mrow><mi mathvariant="normal">expm1</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mtd><mtd columnalign="left" style="text-align: left"><mi>−</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>2</mn><mo>&lt;</mo><mi>a</mi><mo>&lt;</mo><mn>0</mn><mi>.</mi></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
+\operatorname{log1mexp}(a)=
+\begin{cases}
+\log1p(-e^a), &amp; a\le -\log 2,\\[4pt]
+\log(-\operatorname{expm1}(a)), &amp; -\log 2&lt;a&lt;0.
+\end{cases}
 \tag{5.1}
-</annotation></semantics></math> Then
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>v</mi><mi>i</mi></msub><mo>=</mo><mtext mathvariant="normal">log1mexp</mtext><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\ln v_i = \text{log1mexp}(\alpha \ln x_i). \tag{5.2}
-</annotation></semantics></math></p>
-<p>This strategy ensures high relative accuracy across the full range
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mi>∞</mi><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">a\in(-\infty,0)</annotation></semantics></math>
-(see Mächler, 2012), and analogous transformations are used wherever
-expressions of the form
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mtext mathvariant="normal">something</mtext><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\log(1 - \text{something})</annotation></semantics></math>
-occur.</p>
+</annotation></semantics></math> The first branch avoids loss of
+relative accuracy when
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>e</mi><mi>a</mi></msup><annotation encoding="application/x-tex">e^a</annotation></semantics></math>
+is small, while the second avoids cancellation when
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+is close to zero. Thus
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>v</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mrow><mi mathvariant="normal">log1mexp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mrow><mi mathvariant="normal">log1mexp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>v</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>z</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mrow><mi mathvariant="normal">log1mexp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>λ</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{align}
+\log v_i &amp;=\operatorname{log1mexp}(\alpha\log x_i),\tag{5.2a}\\
+\log w_i &amp;=\operatorname{log1mexp}(\beta\log v_i),\tag{5.2b}\\
+\log z_i &amp;=\operatorname{log1mexp}(\lambda\log w_i).\tag{5.2c}
+\end{align}
+</annotation></semantics></math> This is the stable branch structure
+recommended by Mächler (2012).</p>
+<p>The same principle should be used for ratios appearing in the score
+and Hessian. For example,
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><msubsup><mi>x</mi><mi>i</mi><mi>α</mi></msubsup><msub><mi>v</mi><mi>i</mi></msub></mfrac><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mi>α</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>v</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">}</mo><mo>,</mo><mspace width="2.0em"></mspace><mfrac><msubsup><mi>v</mi><mi>i</mi><mi>β</mi></msubsup><msub><mi>w</mi><mi>i</mi></msub></mfrac><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mi>β</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>v</mi><mi>i</mi></msub><mo>−</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">}</mo><mo>,</mo><mspace width="2.0em"></mspace><mfrac><msubsup><mi>w</mi><mi>i</mi><mi>λ</mi></msubsup><msub><mi>z</mi><mi>i</mi></msub></mfrac><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mi>λ</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mi>i</mi></msub><mo>−</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>z</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">}</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\frac{x_i^\alpha}{v_i}
+ =\exp\{\alpha\log x_i-\log v_i\},\qquad
+\frac{v_i^\beta}{w_i}
+ =\exp\{\beta\log v_i-\log w_i\},\qquad
+\frac{w_i^\lambda}{z_i}
+ =\exp\{\lambda\log w_i-\log z_i\}.
+\tag{5.2d}
+</annotation></semantics></math> Products such as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>v</mi><mi>i</mi><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msubsup><msubsup><mi>w</mi><mi>i</mi><mrow><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msubsup><mi>/</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i^{\beta-1}w_i^{\lambda-1}/z_i</annotation></semantics></math>
+should likewise be assembled from sums and differences of logged factors
+whenever direct powers or divisions would overflow, underflow, or
+magnify cancellation.</p>
 </div>
 <div class="section level3">
 <h3 id="optimization">5.2 Optimization<a class="anchor" aria-label="anchor" href="#optimization"></a>
 </h3>
-<p>The analytic score in Theorem 4.1 allows efficient use of
-quasi-Newton methods such as BFGS.</p>
-<p><strong>Algorithm 5.2 (Maximum likelihood estimation via
-BFGS).</strong></p>
-<p><strong>Input:</strong> data
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐱</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><msup><mo stretchy="false" form="postfix">)</mo><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">\mathbf{x}\in(0,1)^n</annotation></semantics></math>.</p>
-<p><strong>Output:</strong> MLE
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><annotation encoding="application/x-tex">\hat{\boldsymbol{\theta}}_n</annotation></semantics></math>
-and observed information
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝒥</mi><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathcal{J}(\hat{\boldsymbol{\theta}}_n)</annotation></semantics></math>.</p>
+<p>For the regular five-parameter model it is convenient to optimize an
+unconstrained negative log-likelihood. Define
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>η</mi><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>η</mi><mn>5</mn></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>⊤</mi></msup><mo>,</mo><mspace width="2.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msup><mi>e</mi><msub><mi>η</mi><mn>1</mn></msub></msup><mo>,</mo><msup><mi>e</mi><msub><mi>η</mi><mn>2</mn></msub></msup><mo>,</mo><msup><mi>e</mi><msub><mi>η</mi><mn>3</mn></msub></msup><mo>,</mo><msup><mi>e</mi><msub><mi>η</mi><mn>4</mn></msub></msup><mo>,</mo><msup><mi>e</mi><msub><mi>η</mi><mn>5</mn></msub></msup><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\eta=(\eta_1,\ldots,\eta_5)^\top,
+\qquad
+(\alpha,\beta,\gamma,\delta,\lambda)
+=(e^{\eta_1},e^{\eta_2},e^{\eta_3},e^{\eta_4},e^{\eta_5}),
+\tag{5.3}
+</annotation></semantics></math> so that
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta&gt;0</annotation></semantics></math>.
+Boundary submodels such as EKw or Kw should be fitted as their own
+reduced parameterizations rather than approximated by driving
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>
+numerically to zero in the non-identifiable five-parameter
+representation. Let
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mi>η</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>−</mi><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">(</mo><mi>η</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+m(\eta)=-\ell(\theta(\eta)).
+</annotation></semantics></math></p>
+<p><strong>Algorithm 5.2 (Maximum likelihood via BFGS applied to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mi>ℓ</mi></mrow><annotation encoding="application/x-tex">-\ell</annotation></semantics></math>).</strong></p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Initialization.</strong> Obtain starting values
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>𝛉</mi><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">\boldsymbol{\theta}^{(0)}</annotation></semantics></math>
-using method-of-moments, simple submodels (e.g. Beta or Kw), or a coarse
-grid search.</li>
+<strong>Initialization.</strong> Obtain a finite starting vector
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>η</mi><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">\eta^{(0)}</annotation></semantics></math>,
+preferably from a simpler identifiable submodel.</li>
 <li>
-<strong>Quasi-Newton iteration.</strong> For
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mi>…</mi></mrow><annotation encoding="application/x-tex">k=0,1,2,\dots</annotation></semantics></math>:
-<ul>
-<li>Evaluate
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛉</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\ell(\boldsymbol{\theta}^{(k)})</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛉</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">U(\boldsymbol{\theta}^{(k)})</annotation></semantics></math>
-using (3.2)–(3.3) and Theorem 4.1.</li>
-<li>Update
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>𝛉</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>=</mo><msup><mi>𝛉</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>−</mo><msub><mi>ρ</mi><mi>k</mi></msub><msubsup><mi>B</mi><mi>k</mi><mrow><mi>−</mi><mn>1</mn></mrow></msubsup><mi>U</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛉</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
-\boldsymbol{\theta}^{(k+1)}
-  = \boldsymbol{\theta}^{(k)}
-    - \rho_k B_k^{-1} U(\boldsymbol{\theta}^{(k)}),
-</annotation></semantics></math> where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>B</mi><mi>k</mi></msub><annotation encoding="application/x-tex">B_k</annotation></semantics></math>
-is a positive-definite approximation of the Hessian and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\rho_k</annotation></semantics></math>
-is a step size obtained by line search.</li>
-<li>Update
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>B</mi><mi>k</mi></msub><annotation encoding="application/x-tex">B_k</annotation></semantics></math>
-using the standard BFGS formula.</li>
-<li>Stop when
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="postfix">∥</mo><mi>U</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛉</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">∥</mo></mrow><annotation encoding="application/x-tex">\|U(\boldsymbol{\theta}^{(k+1)})\|</annotation></semantics></math>
-is below a specified tolerance.</li>
-</ul>
-</li>
+<strong>BFGS iteration.</strong> At iteration
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>,
+evaluate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>η</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">m(\eta^{(k)})</annotation></semantics></math>
+and its exact gradient. With
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>k</mi></msub><annotation encoding="application/x-tex">H_k</annotation></semantics></math>
+a positive-definite approximation to the inverse Hessian of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>,
+use the descent direction
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>k</mi></msub><mo>=</mo><mi>−</mi><msub><mi>H</mi><mi>k</mi></msub><mi>∇</mi><mi>m</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>η</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+p_k=-H_k\nabla m(\eta^{(k)}),
+</annotation></semantics></math> choose a step length
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mi>k</mi></msub><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\rho_k&gt;0</annotation></semantics></math>
+satisfying standard line-search conditions (e.g. Wolfe conditions), and
+update
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>η</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>=</mo><msup><mi>η</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>+</mo><msub><mi>ρ</mi><mi>k</mi></msub><msub><mi>p</mi><mi>k</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\eta^{(k+1)}=\eta^{(k)}+\rho_kp_k.
+</annotation></semantics></math> Apply the standard BFGS inverse-Hessian
+update to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>k</mi></msub><annotation encoding="application/x-tex">H_k</annotation></semantics></math>.</li>
 <li>
-<strong>Observed information.</strong> At convergence, compute
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝒥</mi><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>−</mi><mi>H</mi><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathcal{J}(\hat{\boldsymbol{\theta}}_n)=-H(\hat{\boldsymbol{\theta}}_n)</annotation></semantics></math>
-using Theorems 4.2–4.3.</li>
+<strong>Convergence checks.</strong> Require a small gradient norm
+together with stable parameter and objective changes; inspect the
+Hessian conditioning and profile likelihood when parameters are weakly
+identified.</li>
 <li>
-<strong>Return</strong>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><annotation encoding="application/x-tex">\hat{\boldsymbol{\theta}}_n</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝒥</mi><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathcal{J}(\hat{\boldsymbol{\theta}}_n)</annotation></semantics></math>.</li>
+<strong>Observed information.</strong> Transform the Hessian back to
+the original parameterization if standard errors are reported on the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>-scale,
+and compute the observed information only at a regular local
+maximum.</li>
 </ol>
-<p><strong>Theorem 5.1 (Superlinear convergence).</strong><br>
-Under standard assumptions (Nocedal and Wright, 2006), if
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>𝛉</mi><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">\boldsymbol{\theta}^{(0)}</annotation></semantics></math>
-is sufficiently close to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><annotation encoding="application/x-tex">\hat{\boldsymbol{\theta}}_n</annotation></semantics></math>,
-the BFGS algorithm with exact analytical gradients achieves superlinear
-convergence:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="postfix">∥</mo><msup><mi>𝛉</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>−</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">∥</mo><mo>=</mo><mi>o</mi><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mo stretchy="false" form="postfix">∥</mo><msup><mi>𝛉</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>−</mo><msub><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="postfix">∥</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\|\boldsymbol{\theta}^{(k+1)} - \hat{\boldsymbol{\theta}}_n\|
-  = o\bigl(\|\boldsymbol{\theta}^{(k)} - \hat{\boldsymbol{\theta}}_n\|\bigr).
-\tag{5.3}
-</annotation></semantics></math></p>
-<p>In practice, the availability of exact gradients greatly improves
-both speed and robustness relative to numerical differentiation.</p>
+<p>This formulation avoids the sign inconsistency that arises if a
+positive-definite BFGS matrix is described as an approximation to the
+Hessian of the <em>maximized</em> log-likelihood, whose Hessian is
+negative definite at a strict local maximum.</p>
+<p><strong>Theorem 5.1 (Local superlinear convergence of
+BFGS).</strong><br>
+Suppose
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
+is twice continuously differentiable in a neighborhood of a local
+minimizer
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>η</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\eta</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>∇</mi><mn>2</mn></msup><mi>m</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>η</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\nabla^2m(\hat\eta)</annotation></semantics></math>
+is positive definite, the Hessian is locally Lipschitz continuous, the
+BFGS iterates converge to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>η</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\eta</annotation></semantics></math>,
+exact gradients are used, and the line search satisfies the standard
+conditions required by BFGS convergence theory. Then the BFGS iterates
+are q-superlinearly convergent:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mo stretchy="false" form="postfix">∥</mo><msup><mi>η</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>−</mo><mover><mi>η</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">∥</mo></mrow><mrow><mo stretchy="false" form="postfix">∥</mo><msup><mi>η</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>−</mo><mover><mi>η</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">∥</mo></mrow></mfrac><mo>→</mo><mn>0</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\frac{\|\eta^{(k+1)}-\hat\eta\|}{\|\eta^{(k)}-\hat\eta\|}\longrightarrow0.
+\tag{5.4}
+</annotation></semantics></math> This is a local convergence statement;
+exact gradients alone do not guarantee global convergence for an
+arbitrary non-concave likelihood.</p>
+<p><em>Justification.</em> Under the stated smoothness, curvature,
+convergence and line-search hypotheses, the standard BFGS theory yields
+the Dennis–Moré condition for the inverse-Hessian approximations, which
+implies q-superlinear convergence of the iterates. This is a theorem
+about the local minimization problem for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>=</mo><mi>−</mi><mi>ℓ</mi></mrow><annotation encoding="application/x-tex">m=-\ell</annotation></semantics></math>,
+not a claim that an arbitrary starting value reaches the global MLE; see
+Nocedal and Wright (2006), Chapter 6.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
 </div>
 <div class="section level3">
 <h3 id="gradient-accuracy">5.3 Gradient Accuracy<a class="anchor" aria-label="anchor" href="#gradient-accuracy"></a>
@@ -1493,31 +1796,57 @@ D_h
   D_h - \frac{\partial\ell}{\partial\theta_j}
 \right|
   = O(h^2) + O\!\left(\frac{\epsilon}{h}\right),
-\tag{5.4}
+\tag{5.5}
 </annotation></semantics></math> where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ϵ</mi><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math>
 is machine precision (approximately
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2.22</mn><mo>×</mo><msup><mn>10</mn><mrow><mi>−</mi><mn>16</mn></mrow></msup></mrow><annotation encoding="application/x-tex">2.22\times10^{-16}</annotation></semantics></math>
-in double precision). The optimal step size is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>h</mi><mo>*</mo></msup><mo>≍</mo><mo stretchy="false" form="prefix">(</mo><mi>ϵ</mi><mi>/</mi><mi>M</mi><msup><mo stretchy="false" form="postfix">)</mo><mrow><mn>1</mn><mi>/</mi><mn>3</mn></mrow></msup></mrow><annotation encoding="application/x-tex">h^* \asymp (\epsilon/M)^{1/3}</annotation></semantics></math>,
-where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
-bounds the third derivative of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ℓ</mi><annotation encoding="application/x-tex">\ell</annotation></semantics></math>
-in a neighborhood of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛉</mi><annotation encoding="application/x-tex">\boldsymbol{\theta}</annotation></semantics></math>.</p>
-<p><em>Proof.</em> Standard finite-difference error analysis; see
-Nocedal and Wright (2006), Chapter 8.
+in double precision). Balancing truncation and roundoff errors gives the
+familiar cube-root scaling
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mi>O</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>ϵ</mi><mrow><mn>1</mn><mi>/</mi><mn>3</mn></mrow></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">h=O(\epsilon^{1/3})</annotation></semantics></math>
+after the objective and parameter have been appropriately scaled. There
+is no universal numerical value of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>,
+because the constants depend on the local third derivative and on the
+scale of the likelihood evaluation.</p>
+<p><em>Proof.</em> Taylor expansion about
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛉</mi><annotation encoding="application/x-tex">\boldsymbol\theta</annotation></semantics></math>
+gives
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo>±</mo><mi>h</mi><msub><mi>𝐞</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛉</mi><mo stretchy="false" form="postfix">)</mo><mo>±</mo><mi>h</mi><msub><mi>ℓ</mi><mi>j</mi></msub><mo>+</mo><mfrac><msup><mi>h</mi><mn>2</mn></msup><mn>2</mn></mfrac><msub><mi>ℓ</mi><mrow><mi>j</mi><mi>j</mi></mrow></msub><mo>±</mo><mfrac><msup><mi>h</mi><mn>3</mn></msup><mn>6</mn></mfrac><msub><mi>ℓ</mi><mrow><mi>j</mi><mi>j</mi><mi>j</mi></mrow></msub><mo>+</mo><mi>O</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>h</mi><mn>4</mn></msup><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\ell(\boldsymbol\theta\pm h\mathbf e_j)
+ =\ell(\boldsymbol\theta)
+ \pm h\ell_j
+ +\frac{h^2}{2}\ell_{jj}
+ \pm\frac{h^3}{6}\ell_{jjj}
+ +O(h^4),
+</annotation></semantics></math> so subtraction and division by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>h</mi></mrow><annotation encoding="application/x-tex">2h</annotation></semantics></math>
+leave a truncation error
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>h</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(h^2)</annotation></semantics></math>.
+If each floating-point objective evaluation has absolute perturbation of
+order
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><mi>ϵ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(\epsilon)</annotation></semantics></math>
+on the working scale, subtracting two such values and dividing by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>h</mi></mrow><annotation encoding="application/x-tex">2h</annotation></semantics></math>
+contributes
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><mi>ϵ</mi><mi>/</mi><mi>h</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(\epsilon/h)</annotation></semantics></math>.
+Balancing these two leading orders gives
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>h</mi><mn>2</mn></msup><mo>≍</mo><mi>ϵ</mi><mi>/</mi><mi>h</mi></mrow><annotation encoding="application/x-tex">h^2\asymp\epsilon/h</annotation></semantics></math>,
+hence
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mi>O</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>ϵ</mi><mrow><mn>1</mn><mi>/</mi><mn>3</mn></mrow></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">h=O(\epsilon^{1/3})</annotation></semantics></math>
+after suitable scaling. See Nocedal and Wright (2006), Chapter 8.
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>▫</mi><annotation encoding="application/x-tex">\square</annotation></semantics></math></p>
 <p>In contrast, the analytical gradients of Theorem 4.1 can be evaluated
 with accuracy limited essentially only by floating-point roundoff and
-require a single evaluation of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>
-per data point, rather than
+can be accumulated in one
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><mi>n</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math>
+pass through the data, whereas a central-difference approximation to the
+full
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>-dimensional
+gradient requires
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>p</mi></mrow><annotation encoding="application/x-tex">2p</annotation></semantics></math>
-evaluations per gradient component
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">p=5</annotation></semantics></math>
-here) for central differences.</p>
+likelihood evaluations (here
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">p=5</annotation></semantics></math>).</p>
 </div>
 <div class="section level3">
 <h3 id="practical-recommendations">5.4 Practical Recommendations<a class="anchor" aria-label="anchor" href="#practical-recommendations"></a>
@@ -1525,58 +1854,66 @@ here) for central differences.</p>
 <p><strong>Guideline 5.1 (Model selection within the GKw
 hierarchy).</strong></p>
 <ol style="list-style-type: decimal">
-<li>Start from the simplest two-parameter models:
-<ul>
-<li>Beta<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\gamma,\delta+1)</annotation></semantics></math>,</li>
-<li>Kumaraswamy<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\beta)</annotation></semantics></math>.</li>
-</ul>
-</li>
-<li>If these are inadequate, consider three-parameter extensions:
-<ul>
-<li>EKw<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\beta,\lambda)</annotation></semantics></math>,</li>
-<li>McDonald<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\gamma,\delta,\lambda)</annotation></semantics></math>.</li>
-</ul>
-</li>
-<li>For more complex patterns, move to four-parameter models:
-<ul>
-<li>BKw<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\beta,\gamma,\delta)</annotation></semantics></math>,</li>
-<li>KKw<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\beta,\delta,\lambda)</annotation></semantics></math>.</li>
-</ul>
-</li>
-<li>Use the full five-parameter GKw model only when the sample size is
-sufficiently large
-(e.g. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≳</mo><mn>500</mn></mrow><annotation encoding="application/x-tex">n\gtrsim 500</annotation></semantics></math>)
-to avoid over-parameterization and numerical instability.</li>
-<li>Compare candidate models using information criteria such as
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">A</mi><mi mathvariant="normal">I</mi><mi mathvariant="normal">C</mi></mrow><mo>=</mo><mi>−</mi><mn>2</mn><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>2</mn><mi>p</mi><mo>,</mo><mspace width="1.0em"></mspace><mrow><mi mathvariant="normal">B</mi><mi mathvariant="normal">I</mi><mi mathvariant="normal">C</mi></mrow><mo>=</mo><mi>−</mi><mn>2</mn><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>p</mi><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><mi>n</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
-\mathrm{AIC} = -2\ell(\hat{\boldsymbol{\theta}}) + 2p,
-\quad
-\mathrm{BIC} = -2\ell(\hat{\boldsymbol{\theta}}) + p\ln n,
-</annotation></semantics></math> where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
-is the number of free parameters.</li>
+<li>Begin with simpler identifiable models such as the embedded Beta
+subfamily or the Kumaraswamy model when they are scientifically
+plausible.</li>
+<li>Consider EKw or McDonald-type extensions when one additional shape
+mechanism is needed.</li>
+<li>Use BKw or KKw when the additional flexibility is supported by the
+data and by stable likelihood geometry.</li>
+<li>Fit the full five-parameter GKw model only when the likelihood is
+well identified: inspect profile likelihoods, the observed-information
+spectrum, sensitivity to starting values, and parametric-bootstrap
+behavior. There is no distribution-free sample-size cutoff such as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≥</mo><mn>500</mn></mrow><annotation encoding="application/x-tex">n\ge500</annotation></semantics></math>
+that guarantees identifiability or numerical stability.</li>
+<li>Compare candidate models with likelihood criteria such as
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">A</mi><mi mathvariant="normal">I</mi><mi mathvariant="normal">C</mi></mrow><mo>=</mo><mi>−</mi><mn>2</mn><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>2</mn><mi>p</mi><mo>,</mo><mspace width="2.0em"></mspace><mrow><mi mathvariant="normal">B</mi><mi mathvariant="normal">I</mi><mi mathvariant="normal">C</mi></mrow><mo>=</mo><mi>−</mi><mn>2</mn><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>p</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mi>n</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\mathrm{AIC}=-2\ell(\hat{\boldsymbol\theta})+2p,
+\qquad
+\mathrm{BIC}=-2\ell(\hat{\boldsymbol\theta})+p\log n,
+</annotation></semantics></math> while remembering that ordinary
+likelihood-ratio reference distributions can fail for boundary or
+non-identifiable reductions.</li>
 </ol>
 <p><strong>Guideline 5.2 (Diagnostics).</strong></p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Q–Q plot.</strong> Compare empirical quantiles with
-theoretical quantiles from the fitted model.</li>
+<strong>Q-Q plot.</strong> Use the quantile representation (2.4a),
+with the inverse beta function evaluated numerically.</li>
 <li>
-<strong>Probability integral transform.</strong> The transformed
-values
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>F</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>;</mo><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo><msubsup><mo stretchy="false" form="postfix">}</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup></mrow><annotation encoding="application/x-tex">\{F(x_i;\hat{\boldsymbol{\theta}})\}_{i=1}^n</annotation></semantics></math>
-should be approximately i.i.d.
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">U</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi></mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{Uniform}(0,1)</annotation></semantics></math>.</li>
+<strong>Probability integral transform.</strong> The fitted values
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>;</mo><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">F(x_i;\hat{\boldsymbol\theta})</annotation></semantics></math>
+should resemble a
+Uniform<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0,1)</annotation></semantics></math>
+sample, but they are not exactly i.i.d. Uniform in finite samples
+because the same data were used to estimate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\boldsymbol\theta}</annotation></semantics></math>.
+Formal calibration should therefore use a parametric bootstrap when
+needed.</li>
 <li>
-<strong>Conditioning of the information matrix.</strong> Check
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>κ</mi><mo stretchy="false" form="prefix">(</mo><mi>𝒥</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\kappa(\mathcal{J}(\hat{\boldsymbol{\theta}}))</annotation></semantics></math>,
-the condition number of the observed information; large values
-(e.g. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><msup><mn>10</mn><mn>8</mn></msup></mrow><annotation encoding="application/x-tex">&gt;10^8</annotation></semantics></math>)
-indicate potential identifiability problems.</li>
+<strong>Information conditioning.</strong> Examine the eigenvalues
+or a suitably scaled condition number of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝒥</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathcal J(\hat{\boldsymbol\theta})</annotation></semantics></math>.
+The raw condition number is parameterization-dependent, so fixed
+thresholds should be treated only as numerical warnings rather than
+universal inferential rules.</li>
 <li>
-<strong>Positive definiteness.</strong> All eigenvalues of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝒥</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>𝛉</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathcal{J}(\hat{\boldsymbol{\theta}})</annotation></semantics></math>
-should be strictly positive for valid standard error estimates.</li>
+<strong>Positive definiteness.</strong> At a strict regular local
+maximum, the Hessian of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ℓ</mi><annotation encoding="application/x-tex">\ell</annotation></semantics></math>
+is negative definite and the observed information is positive definite.
+Failure of this property can indicate a saddle point, a
+flat/non-identifiable direction, a boundary optimum, or numerical
+error.</li>
+<li>
+<strong>Profile likelihood.</strong> For a five-parameter model,
+profile plots are especially useful for detecting ridges involving
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\lambda)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\gamma,\lambda)</annotation></semantics></math>,
+or
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo>,</mo><mi>δ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\beta,\delta)</annotation></semantics></math>
+near the non-identifiable manifolds in Proposition 2.1.</li>
 </ol>
 </div>
 <div class="section level3">
@@ -1586,19 +1923,26 @@ should be strictly positive for valid standard error estimates.</li>
 Generalized Kumaraswamy (GKw) family, including:</p>
 <ol style="list-style-type: decimal">
 <li><p><strong>Hierarchical embedding.</strong><br>
-The GKw family neatly contains Beta, McDonald, Kumaraswamy,
-exponentiated Kumaraswamy, Beta–Kumaraswamy and Kumaraswamy–Kumaraswamy
-distributions as submodels, with explicit parameter mappings.</p></li>
+The GKw family contains the McDonald, Kumaraswamy, exponentiated
+Kumaraswamy, Beta–Kumaraswamy and Kumaraswamy–Kumaraswamy distributions
+as submodels, together with the shifted Beta subfamily described in
+Theorem 2.8, with explicit parameter mappings.</p></li>
 <li><p><strong>Likelihood theory.</strong><br>
 We derived explicit expressions for the log-likelihood, the score vector
 and the full observed information matrix in terms of the cascade
 transformations
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>,</mo><mi>w</mi><mo>,</mo><mi>z</mi></mrow><annotation encoding="application/x-tex">v,w,z</annotation></semantics></math>,
 in a form suitable for stable numerical implementation.</p></li>
-<li><p><strong>Asymptotic properties.</strong><br>
-Under standard regularity conditions, the MLEs are consistent and
-asymptotically normal, with variance–covariance matrix obtained from the
-inverse observed information.</p></li>
+<li><p><strong>Likelihood asymptotics and
+identifiability.</strong><br>
+Standard MLE asymptotics hold only on regular identifiable regions with
+nonsingular Fisher information. The full five-parameter representation
+is non-identifiable on important manifolds including
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta=0</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\beta=1</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\gamma=\lambda=1</annotation></semantics></math>,
+so boundary and reduced models must be handled separately.</p></li>
 <li><p><strong>Computational considerations.</strong><br>
 Log-scale evaluations and carefully structured derivatives provide
 numerical stability and efficiency. In our C++ implementation via
@@ -1606,24 +1950,30 @@ RcppArmadillo, analytical gradients and Hessians yield substantial
 speedups over finite-difference approximations, together with better
 numerical accuracy.</p></li>
 </ol>
-<p>Open problems and possible extensions include:</p>
+<p>Natural extensions and computational developments include:</p>
 <ul>
-<li>Closed-form expressions for moments of the full GKw distribution
-(currently only some sub-families, such as Kw and Beta, admit simple
-formulas).</li>
-<li>Analytic inversion of the BKw CDF (solving
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>y</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">I_y(\gamma,\delta+1)=p</annotation></semantics></math>
-for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>,
-followed by inversion of the cascade).</li>
+<li>Compact and numerically efficient representations for the full GKw
+moments. Carrasco et al. (2010) provide series representations; simple
+elementary closed forms are generally unavailable.</li>
+<li>Higher-order likelihood corrections and profile-likelihood inference
+in weakly identified regions.</li>
+<li>Boundary-aware likelihood-ratio calibration and parametric-bootstrap
+procedures for comparisons such as KKw versus Kw.</li>
 <li>Multivariate generalizations using copulas constructed from GKw
 marginals.</li>
-<li>Fully Bayesian treatments with suitable priors on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\beta,\gamma,\delta,\lambda)</annotation></semantics></math>.</li>
+<li>Fully Bayesian treatments with priors and parameterizations designed
+to avoid or regularize non-identifiable directions.</li>
 </ul>
-<p>The <code>gkwdist</code> R package implements all the theoretical
-results described in this vignette and provides a practical toolkit for
-likelihood-based inference in bounded continuous data models.</p>
+<p>The full GKw quantile is already available computationally through
+the inverse regularized beta function followed by the explicit cascade
+inversion in (2.4a); no elementary inverse-beta formula is required for
+simulation or Q-Q diagnostics.</p>
+<p>The <code>gkwdist</code> R package provides the distributional and
+likelihood-computation routines underlying this vignette. The
+identifiability, singular-null and numerical-stability qualifications
+established here should be treated as part of the mathematical contract
+for interpreting those routines and for future package-level inference
+helpers.</p>
 <hr>
 </div>
 </div>
@@ -1633,6 +1983,9 @@ likelihood-based inference in bounded continuous data models.</p>
 <p>Carrasco, J. M. F., Ferrari, S. L. P., &amp; Cordeiro, G. M. (2010).
 <strong>A new generalized Kumaraswamy distribution.</strong>
 <em>arXiv:1004.0911</em>. <a href="https://arxiv.org/abs/1004.0911" class="external-link">arxiv.org/abs/1004.0911</a></p>
+<p>Carrasco, J. M. F. and Cordeiro, G. M. (2017). An extension of the
+Kumaraswamy distribution. <em>International Journal of Statistics and
+Probability</em>, <strong>6</strong>(3), 61. <a href="doi:10.5539/ijsp.v6n3p61" class="uri">doi:10.5539/ijsp.v6n3p61</a></p>
 <p>Casella, G. and Berger, R. L. (2002). <em>Statistical Inference</em>,
 2nd ed. Duxbury Press, Pacific Grove, CA.</p>
 <p>Cordeiro, G. M. and de Castro, M. (2011). A new family of generalized
@@ -1655,6 +2008,10 @@ Estimation</em>, 2nd ed. Springer, New York.</p>
 R package vignette, <a href="https://CRAN.R-project.org/package=Rmpfr" class="external-link uri">https://CRAN.R-project.org/package=Rmpfr</a>.</p>
 <p>Nocedal, J. and Wright, S. J. (2006). <em>Numerical
 Optimization</em>, 2nd ed. Springer, New York.</p>
+<p>Self, S. G. and Liang, K.-Y. (1987). Asymptotic properties of maximum
+likelihood estimators and likelihood ratio tests under nonstandard
+conditions. <em>Journal of the American Statistical Association</em>,
+<strong>82</strong>(398), 605–610. <a href="doi:10.1080/01621459.1987.10478472" class="uri">doi:10.1080/01621459.1987.10478472</a></p>
 <p>van der Vaart, A. W. (1998). <em>Asymptotic Statistics</em>.
 Cambridge University Press, Cambridge.</p>
 <hr>
