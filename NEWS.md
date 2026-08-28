@@ -397,6 +397,15 @@
   'RcppArmadillo'`. The tag, the `NAMESPACE` entry and the `Imports` line are
   gone; `LinkingTo` is untouched, so the build is unchanged.
 
+* **`numDeriv` moved from `Imports` to `Suggests`.** No function in `R/` calls
+  `grad()` or `hessian()`; the package's own derivatives are analytic and live
+  in `src/`. `numDeriv` is used only by the test suite, as the independent
+  reference the analytic `gr*()` and `hs*()` routines are checked against, and
+  by `\seealso` cross-references in the help pages, which `Suggests` keeps
+  valid. Every test that calls it is guarded by `skip_if_not_installed()`, so
+  the suite runs to completion without it. Installing gkwdist no longer pulls
+  `numDeriv` in.
+
 ## Testing
 
 * New `tests/testthat/test-zero-length-input.R` covers all 28 routines with

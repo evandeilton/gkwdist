@@ -26,13 +26,13 @@ Language: en-US
 Roxygen: list(markdown = TRUE)
 Imports: 
     Rcpp,
-    magrittr,
-    numDeriv
+    magrittr
 LinkingTo: 
     Rcpp,
     RcppArmadillo
 Suggests: 
     knitr,
+    numDeriv,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

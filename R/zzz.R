@@ -23,7 +23,6 @@ NULL
 
 ## usethis namespace: start
 #' @importFrom Rcpp sourceCpp evalCpp
-#' @importFrom numDeriv grad hessian
 #' @import graphics
 ## usethis namespace: end
 NULL

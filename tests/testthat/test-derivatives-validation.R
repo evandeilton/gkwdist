@@ -8,6 +8,10 @@
 # Subfamilies: GKw, BKw, KKw, EKw, Mc, Kw, Beta
 # =============================================================================
 
+# numDeriv is a Suggests dependency: every test in this file needs it, so the
+# whole file is skipped when it is unavailable.
+skip_if_not_installed("numDeriv")
+
 # -----------------------------------------------------------------------------
 # Helper function to generate test parameters for each subfamily
 # -----------------------------------------------------------------------------
