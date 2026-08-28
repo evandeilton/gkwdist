@@ -292,6 +292,18 @@
   `p(q(u))` recovers `u`, that the boundary conventions are unchanged and that
   the nesting identities hold. It fails 28 assertions against 1.1.5.
 
+* `test-mle-performance.R` compared each scenario's mean parameter error over
+  its own converged subset, which penalises the more robust scenario: the
+  analytical gradient fits datasets the numerical baseline gives up on, and
+  those are the hard ones. After the generators changed, a `gkw` run converged
+  on 4 reps the baseline could not touch, whose mean error was 16.1 against 0.50
+  on the 23 shared reps, and the reported ratio went from 0.82 to 4.66. The
+  gradient was in fact the better of the two throughout -- it also reached a
+  lower negative log-likelihood in 21 of those 23 reps. The comparison is now
+  paired over the reps where both converged, which is what the data generation
+  in that file was already written for. The corrected check passes against
+  1.1.5, against the previous commit and against this one.
+
 * New `tests/testthat/test-rng-log-space.R` checks that every generator stays
   inside `(0,1)`, that `rbkw()` reproduces the closed-form inversion of its own
   replayed draw, that `set.seed()` still reproduces, that the sample passes a

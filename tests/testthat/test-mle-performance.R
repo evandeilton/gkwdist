@@ -203,7 +203,12 @@ run_benchmark <- function(subfamily, config_id, n_reps = 20, n_obs = 1000) {
       mean_evals = mean(valid$evals, na.rm = TRUE),
       mean_error = mean(valid$error, na.rm = TRUE),
       convergence_rate = mean(df$converged),
-      raw_evals = valid$evals
+      raw_evals = valid$evals,
+      # kept per rep so the accuracy comparison can be paired: mean_error above
+      # averages each scenario over its own converged subset, which are not the
+      # same reps.
+      raw_error = df$error,
+      converged = df$converged
     )
   })
 
@@ -243,11 +248,26 @@ expect_efficiency_gain <- function(bench_result, dist_name) {
     )
   }
 
-  # 3. Check Accuracy - analytical gradient should give equivalent or better results
-  if (!is.na(bench_result$gr$mean_error) && !is.na(bench_result$none$mean_error)) {
-    expect_lte(bench_result$gr$mean_error, bench_result$none$mean_error * 2.0,
-      label = paste(dist_name, ": Analytical gradient precision is significantly worse")
-    )
+  # 3. Check accuracy, on the reps where both scenarios converged.
+  #
+  # Comparing each scenario's mean over its own converged subset penalises the
+  # more robust one. The analytical gradient fits datasets the numerical
+  # baseline gives up on, and those are precisely the hard ones: in one gkw run
+  # it converged on 4 reps the baseline could not touch, whose mean error was
+  # 16.1 against 0.50 on the shared reps. That pushed the reported ratio from
+  # 0.82 to 4.66 and failed the check while the gradient was in fact the better
+  # of the two -- it also reached a lower negative log-likelihood in 21 of the
+  # 23 shared reps. The data is generated once per rep precisely so that this
+  # comparison can be paired.
+  both <- bench_result$none$converged & bench_result$gr$converged
+  if (sum(both) >= 3) {
+    err_none <- mean(bench_result$none$raw_error[both], na.rm = TRUE)
+    err_gr <- mean(bench_result$gr$raw_error[both], na.rm = TRUE)
+    if (is.finite(err_none) && is.finite(err_gr) && err_none > 0) {
+      expect_lte(err_gr, err_none * 2.0,
+        label = paste(dist_name, ": Analytical gradient precision is significantly worse")
+      )
+    }
   }
 
   # 4. Hessian accuracy check (optional - only warn, don't fail)
