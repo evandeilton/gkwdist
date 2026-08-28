@@ -70,6 +70,84 @@
 #include <RcppArmadillo.h>
 #include "utils.h"
 
+// ----------------------------------------------------------------------------
+// Shared log-space chain for the GKw likelihood family
+// ----------------------------------------------------------------------------
+//
+// The GKw density nests three transformations,
+//
+//     v = 1 - x^alpha        w = 1 - v^beta        z = 1 - w^lambda
+//
+// and llgkw(), grgkw() and hsgkw() all need their logarithms. Two of the three
+// have a regime where the linear quantity underflows to a boundary that
+// gkw_log1mexp() cannot recover from, because its argument arrives as exactly 0
+// and log(1 - exp(0)) is -Inf:
+//
+//   x -> 0 :  v -> 1, so log_v = log1p(-x^alpha) ~ -x^alpha, which underflows
+//             to 0 once x^alpha < 5e-324. Then log1mexp(beta*log_v) is -Inf.
+//             But w = 1 - v^beta -> beta * x^alpha, so
+//             log_w = log(beta) + alpha*log(x).
+//
+//   x -> 1 :  w -> 1 by the same route one level down, and
+//             z = 1 - w^lambda -> lambda * v^beta, so
+//             log_z = log(lambda) + beta*log_v.
+//
+// Each substitution is the first-order limit and agrees with log1mexp() to the
+// last bits wherever both are representable: at log_w = -1e-300 with lambda = 2
+// the two forms give -690.09 and -690.09. The branches fire only where the old
+// code produced -Inf, so ordinary data is bit-identical.
+//
+// This is what made llgkw() return NaN where the likelihood is finite:
+// llgkw(c(1, 300, 1, 0, 1), c(.8,.85,.9,.95)) gave NaN for an exact 2609.84,
+// because log_z came back -Inf and delta was 0, and 0 * -Inf is NaN.
+static inline void gkw_log_chain(double log_x, double alpha, double beta,
+                                 double lambda,
+                                 double& log_x_alpha, double& log_v,
+                                 double& log_v_beta, double& log_w,
+                                 double& log_w_lambda, double& log_z) {
+  log_x_alpha  = alpha * log_x;
+  log_v        = gkw_log1mexp(log_x_alpha);
+  log_v_beta   = beta * log_v;
+  log_w        = (log_v == 0.0) ? (std::log(beta) + log_x_alpha)
+                                : gkw_log1mexp(log_v_beta);
+  log_w_lambda = lambda * log_w;
+  log_z        = (log_w == 0.0) ? (std::log(lambda) + log_v_beta)
+                                : gkw_log1mexp(log_w_lambda);
+}
+
+// log_v and log_w each underflow to 0 in the regime where their true values are
+// -x^alpha and -v^beta. The quotient they multiply has overflowed by exactly the
+// reciprocal amount, so the product is finite while the two factors are 0 and
+// +Inf -- and 0 * Inf is NaN. That is how grgkw() returned an all-NaN gradient
+// where llgkw() was finite and numDeriv gave an ordinary answer:
+//
+//   par = (1, 200, 1.5, 2, 1), x = c(.10,.25,.40,.72,.99)
+//     grgkw           NaN NaN NaN NaN NaN
+//     numDeriv::grad  -1897.99  20.32  -6.76  1354.07  -15.00
+//
+// Substituting the magnitude back inside the exponential keeps the product
+// exact and finite:  log_v * exp(E)  ->  -exp(log_x_alpha + E). The two
+// familiar limits fall out of it: with E = log_v_beta - log_w the result is
+// -1/beta, and the lambda term's -1/lambda likewise.
+static inline double gkw_mul_small_log(double log_small, double log_magnitude,
+                                       double E) {
+  // log_small is a logarithm of something in (0, 1], so it is <= 0 and the
+  // product is <= 0 too.
+  //
+  // Exactly 0 means the linear quantity underflowed completely and the
+  // magnitude has to come from one level up. Short of that, log_small can still
+  // be subnormal while exp(E) has already overflowed to +Inf -- and a subnormal
+  // times +Inf is -Inf, not the finite product it stands for. Both cases are
+  // handled by moving the magnitude inside the exponential, which needs only
+  // the sum of the logs to be representable.
+  //
+  // The direct multiply is kept wherever exp(E) cannot overflow, so ordinary
+  // data is bit-identical and pays nothing for the extra log().
+  if (log_small == 0.0) return -std::exp(log_magnitude + E);
+  if (E < 700.0)        return log_small * std::exp(E);
+  return -std::exp(std::log(-log_small) + E);
+}
+
 
 // ============================================================================
 // PROBABILITY DENSITY FUNCTION
@@ -165,47 +243,31 @@ Rcpp::NumericVector dgkw(
     // guard against x^α >= 1 - sqrt(eps) sidestepped that by returning a
     // density of zero, discarding up to 16.5% of the probability mass of some
     // parameterisations. gkw_log1mexp() below is built for exactly this regime.
-    double log_x_alpha = a * std::log(xi);
-
-    // Compute log(1 - x^α) using stable log1mexp
-    double log_one_minus_x_alpha = gkw_log1mexp(log_x_alpha);
-    if (!R_finite(log_one_minus_x_alpha)) {
-      continue;
-    }
-    
-    // Compute log((1 - x^α)^β) = β * log(1 - x^α)
-    double log_one_minus_x_alpha_beta = b * log_one_minus_x_alpha;
-    if (!R_finite(log_one_minus_x_alpha_beta)) {
-      continue;
-    }
-    
-    // Compute log(1 - (1 - x^α)^β) = log(w)
-    double log_term1 = gkw_log1mexp(log_one_minus_x_alpha_beta);
-    if (!R_finite(log_term1)) {
-      continue;
-    }
-    
-    // Compute log([1-(1-x^α)^β]^λ) = λ * log(w)
-    double log_term1_lambda = l * log_term1;
-    if (!R_finite(log_term1_lambda)) {
-      continue;
-    }
-    
-    // Compute log(1 - [1-(1-x^α)^β]^λ) = log(z)
-    double log_term2 = gkw_log1mexp(log_term1_lambda);
-    if (!R_finite(log_term2)) {
-      continue;
-    }
+    //
+    // The chain is shared with llgkw(), grgkw() and hsgkw(), and bridges the
+    // two points where the linear quantity underflows to a boundary that
+    // log1mexp() cannot recover from. The guards that used to sit between these
+    // steps -- one `continue` per intermediate -- dropped the observation
+    // entirely and left the fill value, 0 or -Inf in log. That is what made
+    // -sum(dgkw(c(1e-300, 0.5, 1-1e-15), 1, 70, 1.5, 2, 1, log = TRUE)) return
+    // Inf where llbkw() gives the exact 7688.513058854.
+    double log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z;
+    gkw_log_chain(std::log(xi), a, b, l,
+                  log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z);
     
     // Assemble log-density:
     // log(f) = log_const + (α-1)*log(x) + (β-1)*log(v) + (γλ-1)*log(w) + δ*log(z)
-    double logdens = log_const +
-      (a - 1.0) * std::log(xi) +
-      (b - 1.0) * log_one_minus_x_alpha +
-      (gamma_lambda - 1.0) * log_term1 +
-      d * log_term2;
+    //
+    // A coefficient that is exactly zero contributes nothing even where its
+    // log is -Inf at the boundary of the support; writing 0 * -Inf gives NaN.
+    double logdens = log_const;
+    if (a != 1.0)             logdens += (a - 1.0) * std::log(xi);
+    if (b != 1.0)             logdens += (b - 1.0) * log_v;
+    if (gamma_lambda != 1.0)  logdens += (gamma_lambda - 1.0) * log_w;
+    if (d != 0.0)             logdens += d * log_z;
     
-    // Validate final result
+    // A density that is still not finite here is a genuine boundary value:
+    // -Inf in log, 0 on the natural scale, which is what the fill already holds.
     if (!R_finite(logdens)) {
       continue;
     }
@@ -567,31 +629,35 @@ double llgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   double log_beta_term = R::lbeta(gamma, delta + 1);
   double constant_term = n * (std::log(lambda) + std::log(alpha) + std::log(beta) - log_beta_term);
   
-  // Term 1: (α-1) * Σ log(x_i)
-  arma::vec log_x = vec_safe_log(x);
-  double term1 = arma::sum((alpha - 1.0) * log_x);
+  // ---- Accumulate the four data terms ----
+  //
+  // log(x^alpha) is alpha*log(x) directly. The former code went through
+  // vec_safe_log(vec_safe_pow(x, alpha)), a round trip that loses digits and
+  // that made llgkw() disagree with dgkw(), which already used std::log(x).
+  //
+  // Each coefficient is tested against zero before it multiplies its log. At
+  // the boundary of the support a log legitimately reaches -Inf, and a zero
+  // coefficient must then contribute nothing -- 0 * -Inf is NaN, which is how
+  // llgkw(c(1, 300, 1, 0, 1), c(.8,.85,.9,.95)) returned NaN for an exact
+  // 2609.84 with delta = 0.
+  const double c1 = alpha - 1.0;
+  const double c2 = beta - 1.0;
+  const double c3 = gamma * lambda - 1.0;
+  const double c4 = delta;
   
-  // Compute v = 1 - x^α in log-space
-  arma::vec x_alpha = vec_safe_pow(x, alpha);
-  arma::vec log_x_alpha = vec_safe_log(x_alpha);
-  arma::vec log_v = vec_log1mexp(log_x_alpha);
+  double term1 = 0.0, term2 = 0.0, term3 = 0.0, term4 = 0.0;
   
-  // Term 2: (β-1) * Σ log(v_i)
-  double term2 = arma::sum((beta - 1.0) * log_v);
-  
-  // Compute w = 1 - v^β in log-space
-  arma::vec log_v_beta = beta * log_v;
-  arma::vec log_w = vec_log1mexp(log_v_beta);
-  
-  // Term 3: (γλ-1) * Σ log(w_i)
-  double term3 = arma::sum((gamma * lambda - 1.0) * log_w);
-  
-  // Compute z = 1 - w^λ in log-space
-  arma::vec log_w_lambda = lambda * log_w;
-  arma::vec log_z = vec_log1mexp(log_w_lambda);
-  
-  // Term 4: δ * Σ log(z_i)
-  double term4 = arma::sum(delta * log_z);
+  for (int i = 0; i < n; i++) {
+    double log_xi = std::log(x(i));
+    double log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z;
+    gkw_log_chain(log_xi, alpha, beta, lambda,
+                  log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z);
+    
+    if (c1 != 0.0) term1 += c1 * log_xi;
+    if (c2 != 0.0) term2 += c2 * log_v;
+    if (c3 != 0.0) term3 += c3 * log_w;
+    if (c4 != 0.0) term4 += c4 * log_z;
+  }
   
   // Return negative log-likelihood
   return -(constant_term + term1 + term2 + term3 + term4);
@@ -644,93 +710,92 @@ Rcpp::NumericVector grgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   int n = x.n_elem;
   Rcpp::NumericVector grad(5, 0.0);
   
-  // ---- Compute intermediate quantities in log-space ----
-  
-  arma::vec log_x = vec_safe_log(x);
-  arma::vec x_alpha = vec_safe_pow(x, alpha);
-  arma::vec log_x_alpha = vec_safe_log(x_alpha);
-  
-  // v = 1 - x^α (computed in log-space, but we only need log_v)
-  arma::vec log_v = vec_log1mexp(log_x_alpha);
-  
-  // v^β and v^(β-1)
-  arma::vec log_v_beta = beta * log_v;
-  arma::vec v_beta = vec_safe_exp(log_v_beta);
-  arma::vec log_v_beta_m1 = (beta - 1.0) * log_v;
-  arma::vec v_beta_m1 = vec_safe_exp(log_v_beta_m1);
-  
-  // w = 1 - v^β (computed in log-space)
-  arma::vec log_w = vec_log1mexp(log_v_beta);
-  
-  // w^λ and w^(λ-1)
-  arma::vec log_w_lambda = lambda * log_w;
-  arma::vec w_lambda = vec_safe_exp(log_w_lambda);
-  arma::vec log_w_lambda_m1 = (lambda - 1.0) * log_w;
-  arma::vec w_lambda_m1 = vec_safe_exp(log_w_lambda_m1);
-  
-  // z = 1 - w^λ (computed in log-space)
-  arma::vec log_z = vec_log1mexp(log_w_lambda);
-  
-  // Validate intermediate calculations
-  if (!log_v.is_finite() || !log_w.is_finite() || !log_z.is_finite()) {
-    return Rcpp::NumericVector(5, R_NaN);
-  }
-  
   // ---- Compute gradient components ----
+  //
+  // Every ratio below is written as a single exp() of a difference of logs.
+  // The former code built the reciprocals separately -- vec_safe_exp(-log_v),
+  // vec_safe_exp(-log_w), vec_safe_exp(-log_z) -- and each of those overflowed
+  // to +Inf on its own, long before the product it belonged to was large. The
+  // whole gradient then came back NaN where llgkw() was finite and correct:
+  //
+  //   par = (1, 70, 1.5, 2, 1), x = c(.10,.25,.40,.72,.99)
+  //     llgkw           1386.78983044      (finite, correct)
+  //     grgkw           NaN NaN NaN NaN NaN
+  //     numDeriv::grad  -662.27 20.27 -6.76 472.41 -15.00
+  //
+  // Correcting LOG_DBL_MAX moved that boundary out by a factor of 2.3 but did
+  // not remove it: beta = 70 recovered, beta = 200 still broke. Keeping the
+  // quotient inside one exponential removes it entirely, since only the
+  // difference of the logs has to be representable, not the reciprocal.
+  //
+  // As in llgkw(), a coefficient that is exactly zero never multiplies a log,
+  // so a -Inf at the boundary of the support cannot become NaN.
+  double d_alpha  = n / alpha;
+  double d_beta   = n / beta;
+  double d_lambda = n / lambda;
+  double sum_log_w = 0.0, sum_log_z = 0.0;
   
-  // ∂ℓ/∂α = n/α + Σ log(x_i) - complex_term
-  double d_alpha = n / alpha + arma::sum(log_x);
+  const double ca2 = (gamma * lambda - 1.0) * beta;   // alpha, w term
+  const double ca3 = delta * lambda * beta;           // alpha, z term
+  const double cb1 = gamma * lambda - 1.0;            // beta,  w term
+  const double cb2 = delta * lambda;                  // beta,  z term
   
-  // Complex term for α gradient
-  arma::vec x_alpha_log_x = x_alpha % log_x;  // x^α * log(x)
-  
-  // Term 1: (β-1) / v
-  arma::vec alpha_term1 = (beta - 1.0) * vec_safe_exp(-log_v);
-  
-  // Term 2: (γλ-1) * β * v^(β-1) / w
-  double coeff2 = (gamma * lambda - 1.0) * beta;
-  arma::vec alpha_term2 = coeff2 * v_beta_m1 % vec_safe_exp(-log_w);
-  
-  // Term 3: δ * λ * β * v^(β-1) * w^(λ-1) / z
-  double coeff3 = delta * lambda * beta;
-  arma::vec alpha_term3 = coeff3 * v_beta_m1 % w_lambda_m1 % vec_safe_exp(-log_z);
-  
-  d_alpha -= arma::sum(x_alpha_log_x % (alpha_term1 - alpha_term2 + alpha_term3));
-  
-  // ∂ℓ/∂β = n/β + Σ log(v) - complex_term
-  double d_beta = n / beta + arma::sum(log_v);
-  
-  arma::vec v_beta_log_v = v_beta % log_v;  // v^β * log(v)
-  
-  // Term 1: (γλ-1) / w
-  double coeff_b1 = gamma * lambda - 1.0;
-  arma::vec beta_term1 = coeff_b1 * vec_safe_exp(-log_w);
-  
-  // Term 2: δ * λ * w^(λ-1) / z
-  double coeff_b2 = delta * lambda;
-  arma::vec beta_term2 = coeff_b2 * w_lambda_m1 % vec_safe_exp(-log_z);
-  
-  d_beta -= arma::sum(v_beta_log_v % (beta_term1 - beta_term2));
-  
-  // ∂ℓ/∂γ = -n[ψ(γ) - ψ(γ+δ+1)] + λ Σ log(w)
-  double d_gamma = -n * (R::digamma(gamma) - R::digamma(gamma + delta + 1.0)) + 
-    lambda * arma::sum(log_w);
-  
-  // ∂ℓ/∂δ = -n[ψ(δ+1) - ψ(γ+δ+1)] + Σ log(z)
-  double d_delta = -n * (R::digamma(delta + 1.0) - R::digamma(gamma + delta + 1.0)) + 
-    arma::sum(log_z);
-  
-  // ∂ℓ/∂λ = n/λ + γ Σ log(w) - δ Σ [(w^λ * log(w)) / z]
-  double d_lambda = n / lambda + gamma * arma::sum(log_w);
-  
-  if (delta > 0.0) {
-    arma::vec w_lambda_log_w = w_lambda % log_w;
-    d_lambda -= delta * arma::sum(w_lambda_log_w % vec_safe_exp(-log_z));
+  for (int i = 0; i < n; i++) {
+    double log_xi = std::log(x(i));
+    double log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z;
+    gkw_log_chain(log_xi, alpha, beta, lambda,
+                  log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z);
+    
+    double log_v_beta_m1  = (beta - 1.0) * log_v;
+    double log_w_lambda_m1 = (lambda - 1.0) * log_w;
+    
+    // dl/dalpha = n/alpha + sum log(x)
+    //             - sum x^a log(x) [ (b-1)/v - (gl-1) b v^(b-1)/w
+    //                                        + d l b v^(b-1) w^(l-1)/z ]
+    d_alpha += log_xi;
+    double a_acc = 0.0;
+    if (beta != 1.0) a_acc += (beta - 1.0) * std::exp(log_x_alpha - log_v);
+    if (ca2 != 0.0)  a_acc -= ca2 * std::exp(log_x_alpha + log_v_beta_m1 - log_w);
+    if (ca3 != 0.0)  a_acc += ca3 * std::exp(log_x_alpha + log_v_beta_m1 +
+                                             log_w_lambda_m1 - log_z);
+    d_alpha -= log_xi * a_acc;
+    
+    // dl/dbeta = n/beta + sum log(v)
+    //            - sum v^b log(v) [ (gl-1)/w - d l w^(l-1)/z ]
+    d_beta += log_v;
+    if (cb1 != 0.0)
+      d_beta -= cb1 * gkw_mul_small_log(log_v, log_x_alpha, log_v_beta - log_w);
+    if (cb2 != 0.0)
+      d_beta += cb2 * gkw_mul_small_log(log_v, log_x_alpha,
+                                        log_v_beta + log_w_lambda_m1 - log_z);
+    
+    sum_log_w += log_w;
+    sum_log_z += log_z;
+    
+    // dl/dlambda = n/lambda + gamma sum log(w) - delta sum w^l log(w) / z
+    if (delta != 0.0) {
+      d_lambda -= delta * gkw_mul_small_log(log_w, log_v_beta,
+                                            log_w_lambda - log_z);
+    }
   }
   
-  // Validate gradient components
+  // dl/dgamma = -n[psi(g) - psi(g+d+1)] + lambda sum log(w)
+  double d_gamma = -n * (R::digamma(gamma) - R::digamma(gamma + delta + 1.0)) +
+    lambda * sum_log_w;
+  
+  // dl/ddelta = -n[psi(d+1) - psi(g+d+1)] + sum log(z)
+  double d_delta = -n * (R::digamma(delta + 1.0) - R::digamma(gamma + delta + 1.0)) +
+    sum_log_z;
+  
+  d_lambda += gamma * sum_log_w;
+  
+  // Validate gradient components. A component that is still not finite here is
+  // a genuine boundary, not a lost quotient, so say so rather than returning a
+  // silent NaN vector.
   if (!R_finite(d_alpha) || !R_finite(d_beta) || !R_finite(d_gamma) || 
       !R_finite(d_delta) || !R_finite(d_lambda)) {
+      Rcpp::warning("grgkw: the log-space chain reached the boundary of the "
+                    "support for at least one observation; returning NaN");
       return Rcpp::NumericVector(5, R_NaN);
   }
   

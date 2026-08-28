@@ -2,6 +2,58 @@
 
 ## Critical Bug Fixes
 
+* **`dgkw()`, `llgkw()` and `grgkw()` broke down along the same log-space
+  chain** (`gkw.cpp`): all three walk `v = 1 - x^alpha`, `w = 1 - v^beta`,
+  `z = 1 - w^lambda`, and each lost the chain in its own way.
+
+  `llgkw()` computed `log(x^alpha)` as `vec_safe_log(vec_safe_pow(x, alpha))`, a
+  round trip that both lost digits and made it disagree with `dgkw()`, which
+  already used `alpha * log(x)`.
+
+  Two of the three transformations underflow to a boundary that `log1mexp()`
+  cannot recover from: its argument arrives as exactly 0 and `log(1 - exp(0))`
+  is `-Inf`. With a zero coefficient in front -- `delta = 0`, or
+  `gamma*lambda = 1` -- `0 * -Inf` is `NaN`:
+
+  ```
+  llgkw(c(1, 300, 1, 0, 1), c(.8, .85, .9, .95))   NaN, for an exact 2609.84
+  ```
+
+  Both regimes have a first-order limit that is exact to the last representable
+  bit: as `x -> 0`, `log_w = log(beta) + alpha*log(x)`; as `x -> 1`,
+  `log_z = log(lambda) + beta*log_v`. These are now used where the direct form
+  underflows, and a coefficient of exactly zero never multiplies a logarithm.
+
+  `grgkw()` built `1/v`, `1/w` and `1/z` as separate reciprocals, each of which
+  overflowed on its own long before the product it belonged to was large:
+
+  ```
+  par = (1, 70, 1.5, 2, 1), x = c(.10, .25, .40, .72, .99)
+    llgkw           1386.78983044        (finite, correct)
+    grgkw           NaN NaN NaN NaN NaN
+    numDeriv::grad  -662.27 20.27 -6.76 472.41 -15.00
+  ```
+
+  Correcting `LOG_DBL_MAX` in 1.1.6 moved that boundary out by 2.3x but did not
+  remove it; `beta = 70` recovered while `beta = 200` still failed. Every ratio
+  is now a single `exp()` of a difference of logs, so only the difference has to
+  be representable, not the reciprocal.
+
+  Over 96 parameter/data blocks: `llgkw()` was non-finite in 30 and is now
+  non-finite in none; `grgkw()` returned `NaN` in 30 and now in none. Adjudicated
+  against a 900-digit reference and against `grbkw()`, an independent
+  implementation of the same gradient at `lambda = 1`: the maximum error in
+  `llgkw()` fell from 8.7e-05 to 7.5e-16, and `grgkw()` agrees with `grbkw()` to
+  5.4e-08. `dgkw()` dropped 812 spurious `-Inf` log-densities across eight
+  parameter settings while leaving every already-finite value bit-identical.
+
+  Note on references: `numDeriv` is not usable as an arbiter in part of this
+  region. For `beta = 1000` the intermediate `log_w` becomes subnormal, with 15
+  significant bits left, and `lambda * log_w` is then bit-identical for
+  `lambda = 1 +/- 1e-6` -- the finite difference sees no dependence at all and
+  reports a `lambda` component short by exactly `delta/lambda`. The analytic
+  value is correct there; `grbkw()` and the 900-digit reference confirm it.
+
 * **`grkw()` and `hskw()` were not the gradient and Hessian of `llkw()`**
   (`kw.cpp`): `kw.cpp` was the last family file whose derivatives were still
   evaluated in linear arithmetic. It formed `v = 1 - x^alpha` and then applied
