@@ -406,6 +406,17 @@
   the suite runs to completion without it. Installing gkwdist no longer pulls
   `numDeriv` in.
 
+* **The `utils::globalVariables()` registration in `R/zzz.R` is gone.** It
+  listed 39 names, all 39 of which also appear in the sibling package
+  `gkwreg`'s own registration -- regression-diagnostic artefacts such as
+  `cook_dist`, `leverage`, `linpred` and `model_label` that no distributions
+  package produces, plus `"::"`, `":::"` and `"log"`, which are functions, not
+  variables. The list had been copied across and never pruned. With the whole
+  call removed, `R CMD check` still reports
+  `checking R code for possible problems ... OK`, so not one of the 39 was
+  suppressing a real finding. Removing it restores the check's ability to
+  notice a genuine undefined global in future.
+
 ## Testing
 
 * New `tests/testthat/test-zero-length-input.R` covers all 28 routines with
