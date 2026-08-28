@@ -17,6 +17,47 @@
   happened to be empty, such as `dkw(x[x > 1], 2, 3)`, was enough to trigger the
   crash. Numerical output is unchanged for every non-empty input.
 
+* **The McDonald log-likelihood was unbounded below, and silently rewrote the
+  data** (`src/bpmc.cpp`): `llmc()`, `grmc()` and `hsmc()` clamped every
+  observation to `[1e-10, 1-1e-10]` before use. For a legitimate observation at
+  `1e-20` that moved the likelihood by 23 nats, and it broke the identity
+  `llmc(gamma, delta, 1) == llbeta(gamma, delta)`, where the two are the same
+  model: the disagreement reached 1140 nats.
+
+  Separately, for `delta > 1000` the term `delta * log(1 - x^lambda)` was
+  floored at `-700` per observation, so it stopped growing with `delta` while
+  the constant term `n(log lambda - log B(gamma, delta+1))` kept growing. The
+  negative log-likelihood became **unbounded below**:
+  `llmc(c(1e300, 1e300, 1e-6), x)` returned `-2.77e+302`, a global minimum at
+  absurd parameters, with a visible step at `delta = 1000`. It now returns
+  `+2.58e+303`.
+
+  `grmc()` and `hsmc()` additionally floored `v = 1 - x^lambda` at `1e-10` and
+  capped their lambda terms at `±1e6`, so the gradient plateaued where the
+  objective kept moving. `llmc()` also computed `log(1 - x^lambda)` as
+  `log1p(-x^lambda)`, which cannot recover digits `x^lambda` has already lost,
+  while `grmc()` and `hsmc()` already used `-expm1(lambda * log(x))`; the
+  objective and its gradient therefore disagreed as `x` approached 1. All three
+  now use `-expm1` of the same exponent.
+
+  These clamps were removed together rather than one at a time: `llmc()` shared
+  them with `grmc()` and `hsmc()`, so removing only the documented subset would
+  have introduced an objective/gradient mismatch that did not previously exist.
+
+  Because the three functions shared the same clamps, checking the analytic
+  gradient against `numDeriv::grad(llmc)` passed even with the defect present.
+  Validation therefore used a closed-form reference written independently in R.
+  Against it, the largest relative error falls from `Inf` to `1.0e-14` for
+  `llmc()`, from `1.12` to `3.1e-05` for `grmc()`, and `hsmc()` now agrees with
+  the jacobian of the analytic gradient to `6.0e-08`. The nesting identity with
+  `stats::dbeta()` goes from 1140 nats of error to `9.1e-13`. Maximum-likelihood
+  fits on well-behaved data are bit-identical, under both BFGS with the analytic
+  gradient and Nelder-Mead.
+
+  The residual `3.1e-05` in `grmc()` appears only for `gamma + delta > 100` and
+  is unchanged by this commit: it comes from the asymptotic digamma expansions,
+  a separate defect.
+
 * **`hsgkw()` silently returned the Hessian of a smaller sample**
   (`src/gkw.cpp`): the observation loop skipped past any point whose
   `log(1-x^alpha)`, `log(1-v^beta)` or `log(1-w^lambda)` came out non-finite,
@@ -130,6 +171,11 @@
 * New `tests/testthat/test-hessian-degenerate.R` pins the degenerate cases of
   `hsgkw()` and checks that healthy parameters keep their finite, symmetric
   matrices. It fails 8 assertions against 1.1.5.
+
+* New `tests/testthat/test-mcdonald-no-clamping.R` pins `llmc()`, `grmc()` and
+  `hsmc()` against a closed-form reference, checks the Beta nesting identity and
+  the boundedness of the objective, and fits a model end to end. It fails 45
+  assertions against 1.1.5.
 
 # gkwdist 1.1.5
 

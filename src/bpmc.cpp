@@ -543,10 +543,7 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   if (arma::any(x <= 0.0) || arma::any(x >= 1.0)) return R_PosInf;
   
   int n = x.n_elem;
-  
-  // Numerical stability constant
-  const double eps = 1e-10;
-  
+
   // Compute log(B(γ, δ+1)) stably
   double log_B;
   if (gamma > 100.0 || delta > 100.0) {
@@ -567,38 +564,23 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   double sum_term2 = 0.0;  // δ * Σlog(1-x^λ)
   
   for (int i = 0; i < n; i++) {
-    double xi = x(i);
-    
-    // Handle observations near boundaries
-    xi = std::max(eps, std::min(1.0 - eps, xi));
-    
-    double log_xi = std::log(xi);
-    
+    // Observations are used as given. Clamping them to [1e-10, 1-1e-10] moved
+    // the likelihood by (γλ-1)(log(1e-10) - log(x)) nats -- 23 nats for a
+    // single observation at 1e-20 -- and made llmc() disagree with llbeta()
+    // at λ = 1, where the two are the same model. Validation above already
+    // guarantees x is strictly inside (0,1), so log(x) is finite.
+    double log_xi = std::log(x(i));
+
     // Term 1: (γλ-1) * log(x)
     sum_term1 += gl_minus_1 * log_xi;
-    
-    // Calculate x^λ stably
-    double x_lambda;
-    if (lambda * std::abs(log_xi) > 1.0) {
-      x_lambda = safe_exp(lambda * log_xi);
-    } else {
-      x_lambda = std::pow(xi, lambda);
-    }
-    
-    // Term 2: δ * log(1-x^λ)
-    double log_1_minus_x_lambda;
-    if (x_lambda > 0.9995) {
-      log_1_minus_x_lambda = std::log1p(-x_lambda);
-    } else {
-      log_1_minus_x_lambda = safe_log(1.0 - x_lambda);
-    }
-    
-    // Scale for large δ
-    if (delta > 1000.0 && log_1_minus_x_lambda < -0.01) {
-      double scaled_term = std::max(log_1_minus_x_lambda, -700.0 / delta);
-      sum_term2 += delta * scaled_term;
-    } else {
-      sum_term2 += delta * log_1_minus_x_lambda;
+
+    // Term 2: δ * log(1-x^λ), formed from λ*log(x) so the subtraction never
+    // happens in linear space. grmc() and hsmc() already use -expm1() here;
+    // llmc() used log1p(-x^λ), which cannot recover the digits x^λ has already
+    // lost, so the objective and its gradient disagreed as x approached 1.
+    // Guarded on δ because δ = 0 with an underflowing term would give 0 * -Inf.
+    if (delta > 0.0) {
+      sum_term2 += delta * std::log(-std::expm1(lambda * log_xi));
     }
   }
   
@@ -660,10 +642,7 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   
   int n = x.n_elem;
   Rcpp::NumericVector grad(3, 0.0);
-  
-  // Numerical stability constant
-  const double eps = 1e-10;
-  
+
   // Calculate digamma terms stably
   double digamma_gamma, digamma_delta_plus_1, digamma_gamma_delta_plus_1;
   
@@ -691,37 +670,22 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   double sum_term_lambda = 0.0;
   
   for (int i = 0; i < n; i++) {
-    double xi = x(i);
-    
-    // Handle boundary values
-    xi = std::max(eps, std::min(1.0 - eps, xi));
-    
-    double log_xi = std::log(xi);
+    // Observations are used as given; see the note in llmc().
+    double log_xi = std::log(x(i));
     sum_log_x += log_xi;
-    
-    // Calculate x^λ stably
-    double x_lambda;
-    if (lambda > 100.0 || lambda * std::abs(log_xi) > 1.0) {
-      x_lambda = safe_exp(lambda * log_xi);
-    } else {
-      x_lambda = std::pow(xi, lambda);
-    }
-    
-    // Calculate v = 1-x^λ with precision
-    double v;
-    if (x_lambda > 0.9995) {
-      v = -std::expm1(lambda * log_xi);
-    } else {
-      v = 1.0 - x_lambda;
-    }
-    v = std::max(v, eps);
-    double log_v = safe_log(v);
-    sum_log_v += log_v;
-    
-    // Calculate term for λ gradient: (x^λ * log(x)) / (1-x^λ)
-    double lambda_term = (x_lambda * log_xi) / v;
-    lambda_term = std::min(std::max(lambda_term, -1e6), 1e6);
-    sum_term_lambda += lambda_term;
+
+    // v = 1 - x^λ, always via -expm1 of the same exponent that produces x^λ,
+    // so the two never drift apart. The former v = max(v, 1e-10) froze log(v)
+    // at -23.03: for x = 1 - 1e-15 the true log(v) is -34.28.
+    double log_x_lambda = lambda * log_xi;
+    double x_lambda = std::exp(log_x_lambda);
+    double v = -std::expm1(log_x_lambda);
+    sum_log_v += std::log(v);
+
+    // Term for the λ gradient: x^λ log(x) / (1 - x^λ). It tends to -1/λ as
+    // x -> 1, so it carries its own ceiling; the former ±1e6 clamp truncated
+    // legitimate values once λ dropped below 1e-6.
+    sum_term_lambda += (x_lambda * log_xi) / v;
   }
   
   // =========================================================================
@@ -801,11 +765,7 @@ Rcpp::NumericMatrix hsmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   
   int n = x.n_elem;
   Rcpp::NumericMatrix hess(3, 3);
-  
-  // Numerical stability constants
-  const double eps = 1e-10;
-  const double max_contrib = 1e6;
-  
+
   // Compute trigamma values stably
   double trigamma_gamma, trigamma_delta_plus_1, trigamma_gamma_plus_delta_plus_1;
   
@@ -834,45 +794,21 @@ Rcpp::NumericMatrix hsmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   double sum_lambda_term = 0.0;
   
   for (int i = 0; i < n; i++) {
-    double xi = x(i);
-    
-    // Handle boundary values
-    xi = std::max(eps, std::min(1.0 - eps, xi));
-    
-    double log_xi = safe_log(xi);
+    // Observations are used as given; see the note in llmc().
+    double log_xi = std::log(x(i));
     sum_log_x += log_xi;
-    
-    // Calculate x^λ stably
-    double x_lambda;
-    if (lambda > 100.0 || lambda * std::abs(log_xi) > 1.0) {
-      double log_x_lambda = lambda * log_xi;
-      x_lambda = safe_exp(log_x_lambda);
-    } else {
-      x_lambda = std::pow(xi, lambda);
-    }
-    
-    // Calculate v = 1-x^λ with precision
-    double v;
-    if (x_lambda > 0.9995) {
-      v = -std::expm1(lambda * log_xi);
-    } else {
-      v = 1.0 - x_lambda;
-    }
-    v = std::max(v, eps);
-    
+
+    // v = 1 - x^λ, as in grmc(): via -expm1 of the same exponent as x^λ, and
+    // no floor, so the Hessian tracks the objective into the upper tail.
+    double log_x_lambda = lambda * log_xi;
+    double x_lambda = std::exp(log_x_lambda);
+    double v = -std::expm1(log_x_lambda);
+
     // Term for H[δ,λ]: Σ[x^λ*log(x)/(1-x^λ)]
-    double term1 = (x_lambda * log_xi) / v;
-    term1 = std::min(std::max(term1, -max_contrib), max_contrib);
-    sum_x_lambda_log_x_div_v += term1;
-    
-    // Term for H[λ,λ]: Σ[x^λ*(log(x))²/(1-x^λ)² * (1-x^λ+x^λ)]
-    //                = Σ[x^λ*(log(x))²/(1-x^λ)²]
-    double log_xi_squared = log_xi * log_xi;
-    double v_squared = v * v;
-    
-    double lambda_term = x_lambda * log_xi_squared / v_squared;
-    lambda_term = std::min(std::max(lambda_term, -max_contrib), max_contrib);
-    sum_lambda_term += lambda_term;
+    sum_x_lambda_log_x_div_v += (x_lambda * log_xi) / v;
+
+    // Term for H[λ,λ]: Σ[x^λ*(log(x))²/(1-x^λ)²]
+    sum_lambda_term += x_lambda * (log_xi * log_xi) / (v * v);
   }
   
   // =========================================================================
