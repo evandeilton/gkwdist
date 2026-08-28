@@ -331,9 +331,9 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 }
 \seealso{
 \code{\link{llgkw}}, \code{\link{llmc}} (related negative log-likelihoods),
-\code{dbeta_}, \code{pbeta_}, \code{qbeta_}, \code{rbeta_},
-\code{grbeta} (gradient, if available),
-\code{hsbeta} (Hessian, if available),
+\code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}},
+\code{\link{grbeta}} (gradient),
+\code{\link{hsbeta}} (Hessian),
 \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}.
 }
 \author{

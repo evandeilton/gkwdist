@@ -100,7 +100,7 @@ Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verla
 \code{\link[stats]{rbeta}} (standard R implementation),
 \code{\link{rgkw}} (parent distribution random generation),
 \code{\link{rmc}} (McDonald/Beta Power random generation),
-\code{dbeta_}, \code{pbeta_}, \code{qbeta_} (other functions for this parameterization, if they exist).
+\code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}.
 }
 \author{
 Lopes, J. E.

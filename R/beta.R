@@ -91,7 +91,7 @@
 #' \code{\link[stats]{dbeta}} (standard R implementation),
 #' \code{\link{dgkw}} (parent distribution density),
 #' \code{\link{dmc}} (McDonald/Beta Power density),
-#' \code{pbeta_}, \code{qbeta_}, \code{rbeta_} (other functions for this parameterization, if they exist).
+#' \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}}.
 #'
 #' @examples
 #' \donttest{
@@ -239,7 +239,7 @@ dbeta_ <- function(x, gamma = 1, delta = 0, log = FALSE) {
 #' \code{\link[stats]{pbeta}} (standard R implementation),
 #' \code{\link{pgkw}} (parent distribution CDF),
 #' \code{\link{pmc}} (McDonald/Beta Power CDF),
-#' \code{dbeta_}, \code{qbeta_}, \code{rbeta_} (other functions for this parameterization, if they exist).
+#' \code{\link{dbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}}.
 #'
 #' @examples
 #' \donttest{
@@ -395,7 +395,7 @@ pbeta_ <- function(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #' \code{\link[stats]{qbeta}} (standard R implementation),
 #' \code{\link{qgkw}} (parent distribution quantile function),
 #' \code{\link{qmc}} (McDonald/Beta Power quantile function),
-#' \code{dbeta_}, \code{pbeta_}, \code{rbeta_} (other functions for this parameterization, if they exist).
+#' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{rbeta_}}.
 #'
 #' @examples
 #' \donttest{
@@ -544,7 +544,7 @@ qbeta_ <- function(p, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #' \code{\link[stats]{rbeta}} (standard R implementation),
 #' \code{\link{rgkw}} (parent distribution random generation),
 #' \code{\link{rmc}} (McDonald/Beta Power random generation),
-#' \code{dbeta_}, \code{pbeta_}, \code{qbeta_} (other functions for this parameterization, if they exist).
+#' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}.
 #'
 #' @examples
 #' \donttest{
@@ -672,9 +672,9 @@ rbeta_ <- function(n, gamma = 1, delta = 0) {
 #'
 #' @seealso
 #' \code{\link{llgkw}}, \code{\link{llmc}} (related negative log-likelihoods),
-#' \code{dbeta_}, \code{pbeta_}, \code{qbeta_}, \code{rbeta_},
-#' \code{grbeta} (gradient, if available),
-#' \code{hsbeta} (Hessian, if available),
+#' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}},
+#' \code{\link{grbeta}} (gradient),
+#' \code{\link{hsbeta}} (Hessian),
 #' \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}.
 #'
 #' @examples
@@ -1036,8 +1036,8 @@ llbeta <- function(par, data) {
 #' @seealso
 #' \code{\link{grgkw}}, \code{\link{grmc}} (related gradients),
 #' \code{\link{llbeta}} (negative log-likelihood function),
-#' \code{hsbeta} (Hessian, if available),
-#' \code{dbeta_}, \code{pbeta_}, \code{qbeta_}, \code{rbeta_},
+#' \code{\link{hsbeta}} (Hessian),
+#' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}},
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
 #' \code{\link[base]{digamma}}.
@@ -1318,8 +1318,8 @@ grbeta <- function(par, data) {
 #' @seealso
 #' \code{\link{hsgkw}}, \code{\link{hsmc}} (related Hessians),
 #' \code{\link{llbeta}} (negative log-likelihood function),
-#' \code{grbeta} (gradient, if available),
-#' \code{dbeta_}, \code{pbeta_}, \code{qbeta_}, \code{rbeta_},
+#' \code{\link{grbeta}} (gradient),
+#' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}},
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),
 #' \code{\link[base]{trigamma}}.

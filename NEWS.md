@@ -337,6 +337,22 @@
 
 ## Documentation Fixes
 
+* **Editorial hedging in the rendered help pages** (all seven family files):
+  29 `\seealso` entries qualified functions that exist and are exported --
+  "(if these exist)", "(gradient, if available)", "(other functions for this
+  parameterization, if they exist)". A CRAN help page should not speculate about
+  its own package's contents. The qualifiers are removed and the informative
+  half of each label is kept, so `\code{grbkw} (gradient, if available)` reads
+  `\code{\link{grbkw}} (gradient)`.
+
+  41 cross-references in those same blocks used `\code{}` where `\link{}` was
+  meant, so they rendered as plain text and the help pages could not be
+  navigated between. All 50 distinct `\link{}` targets now resolve to an alias
+  in the package.
+
+  Documentation only; no executable code changes and no numerical result is
+  affected.
+
 * **Confidence-region examples were undrawable where the observed information
   was not positive definite** (29 `@examples` blocks across the seven families):
   every one built a confidence region from

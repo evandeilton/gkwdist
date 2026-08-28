@@ -555,7 +555,7 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 }
 \seealso{
 \code{\link{dgkw}}, \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
-\code{\link{grgkw}}, \code{\link{hsgkw}} (gradient and Hessian functions, if available),
+\code{\link{grgkw}}, \code{\link{hsgkw}} (gradient and Hessian),
 \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}, \code{\link[base]{log1p}}
 }
 \author{

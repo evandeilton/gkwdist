@@ -360,7 +360,7 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \seealso{
 \code{\link{grgkw}} (parent distribution gradient),
 \code{\link{llekw}} (negative log-likelihood for EKw),
-\code{hsekw} (Hessian for EKw, if available),
+\code{\link{hsekw}} (Hessian for EKw),
 \code{\link{dekw}} (density for EKw),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{grad}} (for numerical gradient comparison).

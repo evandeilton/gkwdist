@@ -113,7 +113,7 @@ Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
 }
 \seealso{
-\code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}} (if these exist),
+\code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
 \code{\link[stats]{dbeta}}, \code{\link[stats]{integrate}}
 }
 \author{

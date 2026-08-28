@@ -604,8 +604,8 @@ rkw <- function(n, alpha = 1, beta = 1) {
 #' @seealso
 #' \code{\link{llgkw}} (parent distribution negative log-likelihood),
 #' \code{\link{dkw}}, \code{\link{pkw}}, \code{\link{qkw}}, \code{\link{rkw}},
-#' \code{grkw} (gradient, if available),
-#' \code{hskw} (Hessian, if available),
+#' \code{\link{grkw}} (gradient),
+#' \code{\link{hskw}} (Hessian),
 #' \code{\link[stats]{optim}}
 #'
 #' @examples
@@ -1070,7 +1070,7 @@ llkw <- function(par, data) {
 #' @seealso
 #' \code{\link{grgkw}} (parent distribution gradient),
 #' \code{\link{llkw}} (negative log-likelihood for Kw),
-#' \code{hskw} (Hessian for Kw, if available),
+#' \code{\link{hskw}} (Hessian for Kw),
 #' \code{\link{dkw}} (density for Kw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison).
@@ -1364,7 +1364,7 @@ grkw <- function(par, data) {
 #' @seealso
 #' \code{\link{hsgkw}} (parent distribution Hessian),
 #' \code{\link{llkw}} (negative log-likelihood for Kw),
-#' \code{grkw} (gradient for Kw, if available),
+#' \code{\link{grkw}} (gradient for Kw),
 #' \code{\link{dkw}} (density for Kw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).

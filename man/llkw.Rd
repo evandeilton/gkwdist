@@ -438,8 +438,8 @@ with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 
 \seealso{
 \code{\link{llgkw}} (parent distribution negative log-likelihood),
 \code{\link{dkw}}, \code{\link{pkw}}, \code{\link{qkw}}, \code{\link{rkw}},
-\code{grkw} (gradient, if available),
-\code{hskw} (Hessian, if available),
+\code{\link{grkw}} (gradient),
+\code{\link{hskw}} (Hessian),
 \code{\link[stats]{optim}}
 }
 \author{

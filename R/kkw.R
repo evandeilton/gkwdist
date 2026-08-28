@@ -73,7 +73,7 @@
 #'
 #' @seealso
 #' \code{\link{dgkw}} (parent distribution density),
-#' \code{\link{pkkw}}, \code{\link{qkkw}}, \code{\link{rkkw}} (if they exist),
+#' \code{\link{pkkw}}, \code{\link{qkkw}}, \code{\link{rkkw}},
 #' \code{\link[stats]{dbeta}}
 #'
 #' @examples
@@ -678,8 +678,8 @@ rkkw <- function(n, alpha = 1, beta = 1, delta = 0, lambda = 1) {
 #' @seealso
 #' \code{\link{llgkw}} (parent distribution negative log-likelihood),
 #' \code{\link{dkkw}}, \code{\link{pkkw}}, \code{\link{qkkw}}, \code{\link{rkkw}},
-#' \code{\link{grkkw}} (gradient, if available),
-#' \code{\link{hskkw}} (Hessian, if available),
+#' \code{\link{grkkw}} (gradient),
+#' \code{\link{hskkw}} (Hessian),
 #' \code{\link[stats]{optim}}
 #'
 #' @examples

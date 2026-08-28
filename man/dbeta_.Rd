@@ -113,7 +113,7 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \code{\link[stats]{dbeta}} (standard R implementation),
 \code{\link{dgkw}} (parent distribution density),
 \code{\link{dmc}} (McDonald/Beta Power density),
-\code{pbeta_}, \code{qbeta_}, \code{rbeta_} (other functions for this parameterization, if they exist).
+\code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}}.
 }
 \author{
 Lopes, J. E.

@@ -444,7 +444,7 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \seealso{
 \code{\link{hsgkw}} (parent distribution Hessian),
 \code{\link{llmc}} (negative log-likelihood for Mc),
-\code{\link{grmc}} (gradient for Mc, if available),
+\code{\link{grmc}} (gradient for Mc),
 \code{\link{dmc}} (density for Mc),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),

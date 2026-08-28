@@ -640,8 +640,8 @@ rekw <- function(n, alpha = 1, beta = 1, lambda = 1) {
 #' @seealso
 #' \code{\link{llgkw}} (parent distribution negative log-likelihood),
 #' \code{\link{dekw}}, \code{\link{pekw}}, \code{\link{qekw}}, \code{\link{rekw}},
-#' \code{grekw} (gradient, if available),
-#' \code{hsekw} (Hessian, if available),
+#' \code{\link{grekw}} (gradient),
+#' \code{\link{hsekw}} (Hessian),
 #' \code{\link[stats]{optim}}
 #'
 #' @examples
@@ -1138,7 +1138,7 @@ llekw <- function(par, data) {
 #' @seealso
 #' \code{\link{grgkw}} (parent distribution gradient),
 #' \code{\link{llekw}} (negative log-likelihood for EKw),
-#' \code{hsekw} (Hessian for EKw, if available),
+#' \code{\link{hsekw}} (Hessian for EKw),
 #' \code{\link{dekw}} (density for EKw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison).
@@ -1519,7 +1519,7 @@ grekw <- function(par, data) {
 #' @seealso
 #' \code{\link{hsgkw}} (parent distribution Hessian),
 #' \code{\link{llekw}} (negative log-likelihood for EKw),
-#' \code{grekw} (gradient for EKw, if available),
+#' \code{\link{grekw}} (gradient for EKw),
 #' \code{\link{dekw}} (density for EKw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).

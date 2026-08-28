@@ -331,7 +331,7 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \seealso{
 \code{\link{grgkw}} (parent distribution gradient),
 \code{\link{llbkw}} (negative log-likelihood for BKw),
-\code{\link{hsbkw}} (Hessian for BKw, if available),
+\code{\link{hsbkw}} (Hessian for BKw),
 \code{\link{dbkw}} (density for BKw),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{grad}} (for numerical gradient comparison),

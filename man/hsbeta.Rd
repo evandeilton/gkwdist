@@ -309,8 +309,8 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \seealso{
 \code{\link{hsgkw}}, \code{\link{hsmc}} (related Hessians),
 \code{\link{llbeta}} (negative log-likelihood function),
-\code{grbeta} (gradient, if available),
-\code{dbeta_}, \code{pbeta_}, \code{qbeta_}, \code{rbeta_},
+\code{\link{grbeta}} (gradient),
+\code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}},
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),
 \code{\link[base]{trigamma}}.

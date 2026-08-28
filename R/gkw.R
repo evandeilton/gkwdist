@@ -85,7 +85,7 @@
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
 #'
 #' @seealso
-#' \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}} (if these exist),
+#' \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
 #' \code{\link[stats]{dbeta}}, \code{\link[stats]{integrate}}
 #'
 #' @examples
@@ -691,7 +691,7 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'
 #' @seealso
 #' \code{\link{dgkw}}, \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
-#' \code{\link{grgkw}}, \code{\link{hsgkw}} (gradient and Hessian functions, if available),
+#' \code{\link{grgkw}}, \code{\link{hsgkw}} (gradient and Hessian),
 #' \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}, \code{\link[base]{log1p}}
 #'
 #' @examples

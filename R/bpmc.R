@@ -694,8 +694,8 @@ rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
 #' @seealso
 #' \code{\link{llgkw}} (parent distribution negative log-likelihood),
 #' \code{\link{dmc}}, \code{\link{pmc}}, \code{\link{qmc}}, \code{\link{rmc}},
-#' \code{grmc} (gradient, if available),
-#' \code{hsmc} (Hessian, if available),
+#' \code{\link{grmc}} (gradient),
+#' \code{\link{hsmc}} (Hessian),
 #' \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}
 #'
 #' @examples
@@ -1130,7 +1130,7 @@ llmc <- function(par, data) {
 #' @seealso
 #' \code{\link{grgkw}} (parent distribution gradient),
 #' \code{\link{llmc}} (negative log-likelihood for Mc),
-#' \code{hsmc} (Hessian for Mc, if available),
+#' \code{\link{hsmc}} (Hessian for Mc),
 #' \code{\link{dmc}} (density for Mc),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
@@ -1601,7 +1601,7 @@ grmc <- function(par, data) {
 #' @seealso
 #' \code{\link{hsgkw}} (parent distribution Hessian),
 #' \code{\link{llmc}} (negative log-likelihood for Mc),
-#' \code{\link{grmc}} (gradient for Mc, if available),
+#' \code{\link{grmc}} (gradient for Mc),
 #' \code{\link{dmc}} (density for Mc),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),

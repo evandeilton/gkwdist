@@ -690,8 +690,8 @@ rbkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0) {
 #' @seealso
 #' \code{\link{llgkw}} (parent distribution negative log-likelihood),
 #' \code{\link{dbkw}}, \code{\link{pbkw}}, \code{\link{qbkw}}, \code{\link{rbkw}},
-#' \code{grbkw} (gradient, if available),
-#' \code{hsbkw} (Hessian, if available),
+#' \code{\link{grbkw}} (gradient),
+#' \code{\link{hsbkw}} (Hessian),
 #' \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}
 #'
 #' @examples
@@ -1173,7 +1173,7 @@ llbkw <- function(par, data) {
 #' @seealso
 #' \code{\link{grgkw}} (parent distribution gradient),
 #' \code{\link{llbkw}} (negative log-likelihood for BKw),
-#' \code{\link{hsbkw}} (Hessian for BKw, if available),
+#' \code{\link{hsbkw}} (Hessian for BKw),
 #' \code{\link{dbkw}} (density for BKw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
@@ -1523,7 +1523,7 @@ grbkw <- function(par, data) {
 #' @seealso
 #' \code{\link{hsgkw}} (parent distribution Hessian),
 #' \code{\link{llbkw}} (negative log-likelihood for BKw),
-#' \code{\link{grbkw}} (gradient for BKw, if available),
+#' \code{\link{grbkw}} (gradient for BKw),
 #' \code{\link{dbkw}} (density for BKw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).

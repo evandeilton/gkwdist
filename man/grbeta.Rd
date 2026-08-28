@@ -251,8 +251,8 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \seealso{
 \code{\link{grgkw}}, \code{\link{grmc}} (related gradients),
 \code{\link{llbeta}} (negative log-likelihood function),
-\code{hsbeta} (Hessian, if available),
-\code{dbeta_}, \code{pbeta_}, \code{qbeta_}, \code{rbeta_},
+\code{\link{hsbeta}} (Hessian),
+\code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}},
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
 \code{\link[base]{digamma}}.

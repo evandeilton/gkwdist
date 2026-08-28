@@ -442,8 +442,8 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \seealso{
 \code{\link{llgkw}} (parent distribution negative log-likelihood),
 \code{\link{dbkw}}, \code{\link{pbkw}}, \code{\link{qbkw}}, \code{\link{rbkw}},
-\code{grbkw} (gradient, if available),
-\code{hsbkw} (Hessian, if available),
+\code{\link{grbkw}} (gradient),
+\code{\link{hsbkw}} (Hessian),
 \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}
 }
 \author{
