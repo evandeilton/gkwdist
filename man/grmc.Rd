@@ -37,11 +37,11 @@ The components of the gradient vector of the negative log-likelihood
 model are:
 
 \deqn{
--\frac{\partial \ell}{\partial \gamma} = n[\psi(\gamma+\delta+1) - \psi(\gamma)] -
+-\frac{\partial \ell}{\partial \gamma} = n[\psi(\gamma) - \psi(\gamma+\delta+1)] -
 \lambda\sum_{i=1}^{n}\ln(x_i)
 }
 \deqn{
--\frac{\partial \ell}{\partial \delta} = n[\psi(\gamma+\delta+1) - \psi(\delta+1)] -
+-\frac{\partial \ell}{\partial \delta} = n[\psi(\delta+1) - \psi(\gamma+\delta+1)] -
 \sum_{i=1}^{n}\ln(1-x_i^{\lambda})
 }
 \deqn{

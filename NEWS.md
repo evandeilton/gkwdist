@@ -17,6 +17,30 @@
   happened to be empty, such as `dkw(x[x > 1], 2, 3)`, was enough to trigger the
   crash. Numerical output is unchanged for every non-empty input.
 
+## Documentation Fixes
+
+* **`grmc()` gradient formula had inverted digamma signs** (`R/bpmc.R`): the
+  `@details` block documented `psi(gamma + delta + 1) - psi(gamma)` for the gamma
+  component and `psi(gamma + delta + 1) - psi(delta + 1)` for delta. Since
+  `d log B(gamma, delta+1) / d gamma = psi(gamma) - psi(gamma + delta + 1)`, both
+  signs were reversed, and the documented formula disagreed with the returned
+  value by two orders of magnitude. `R/beta.R` documented the opposite sign for
+  the same quantity. The implementation was correct throughout; only the
+  documentation is changed. The same block's Hessian entry for
+  `d2l/dgamma ddelta` in `hsmc()` had the same sign reversal.
+
+* **README example 6 inverted the sign of the observed information matrix**
+  (`README.Rmd`): `hsekw()` already returns the Hessian of the negative
+  log-likelihood, so negating it again produced a negative definite matrix and
+  printed `NaN` for every asymptotic standard error. Example 3 of the same README
+  and the vignettes were already correct.
+
+* **GKw attribution corrected** (`R/gkw.R`): the main help page credited Cordeiro
+  & de Castro (2011), which introduces the Kw-G family, rather than Carrasco,
+  Ferrari & Cordeiro (2010), which introduces the five-parameter generalized
+  Kumaraswamy distribution implemented here. `DESCRIPTION`, the README and the
+  vignettes already cited the latter.
+
 ## Testing
 
 * New `tests/testthat/test-zero-length-input.R` covers all 28 routines with

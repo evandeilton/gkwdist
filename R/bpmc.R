@@ -1101,11 +1101,11 @@ llmc <- function(par, data) {
 #' model are:
 #'
 #' \deqn{
-#' -\frac{\partial \ell}{\partial \gamma} = n[\psi(\gamma+\delta+1) - \psi(\gamma)] -
+#' -\frac{\partial \ell}{\partial \gamma} = n[\psi(\gamma) - \psi(\gamma+\delta+1)] -
 #' \lambda\sum_{i=1}^{n}\ln(x_i)
 #' }
 #' \deqn{
-#' -\frac{\partial \ell}{\partial \delta} = n[\psi(\gamma+\delta+1) - \psi(\delta+1)] -
+#' -\frac{\partial \ell}{\partial \delta} = n[\psi(\delta+1) - \psi(\gamma+\delta+1)] -
 #' \sum_{i=1}^{n}\ln(1-x_i^{\lambda})
 #' }
 #' \deqn{
@@ -1547,13 +1547,12 @@ grmc <- function(par, data) {
 #'
 #' **Note:** The formulas below represent the second derivatives of the positive
 #' log-likelihood (\eqn{\ell}). The function returns the **negative** of these values.
-#' Users should verify these formulas independently if using for critical applications.
 #'
 #' \deqn{
 #' \frac{\partial^2 \ell}{\partial \gamma^2} = -n[\psi'(\gamma) - \psi'(\gamma+\delta+1)]
 #' }
 #' \deqn{
-#' \frac{\partial^2 \ell}{\partial \gamma \partial \delta} = -n\psi'(\gamma+\delta+1)
+#' \frac{\partial^2 \ell}{\partial \gamma \partial \delta} = n\psi'(\gamma+\delta+1)
 #' }
 #' \deqn{
 #' \frac{\partial^2 \ell}{\partial \gamma \partial \lambda} = \sum_{i=1}^{n}\ln(x_i)

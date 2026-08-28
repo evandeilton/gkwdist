@@ -39,13 +39,12 @@ The components are based on the second derivatives of the log-likelihood \eqn{\e
 
 \strong{Note:} The formulas below represent the second derivatives of the positive
 log-likelihood (\eqn{\ell}). The function returns the \strong{negative} of these values.
-Users should verify these formulas independently if using for critical applications.
 
 \deqn{
 \frac{\partial^2 \ell}{\partial \gamma^2} = -n[\psi'(\gamma) - \psi'(\gamma+\delta+1)]
 }
 \deqn{
-\frac{\partial^2 \ell}{\partial \gamma \partial \delta} = -n\psi'(\gamma+\delta+1)
+\frac{\partial^2 \ell}{\partial \gamma \partial \delta} = n\psi'(\gamma+\delta+1)
 }
 \deqn{
 \frac{\partial^2 \ell}{\partial \gamma \partial \lambda} = \sum_{i=1}^{n}\ln(x_i)
