@@ -383,57 +383,34 @@ Rcpp::NumericVector qkkw(
       continue;
     }
     
-    // ---- Convert probability to linear scale ----
+    // ---- Normalise the probability, without leaving log space ----
+    // The former code did exp(log p) and then 1 - p in linear space. The first
+    // flushed the deep tail to zero (qbeta_(-1000, 2, 3, log.p = TRUE) gave 0
+    // against a true 2.25e-218); the second cost the upper tail. Out-of-range p
+    // keeps the saturating result it has always returned -- whether that should
+    // be NaN instead is a separate, still-open question.
+    if (log_p && pp > 0.0) { out(i) = NA_REAL; continue; }
+    if (!log_p && (pp < 0.0 || pp > 1.0)) {
+      out(i) = (lower_tail == (pp > 1.0)) ? 1.0 : 0.0;
+      continue;
+    }
+
+    // log(u) and log(1-u) for the lower-tail probability u, whichever scale and
+    // tail the caller used, so neither has to be recovered by subtraction.
+    double log_u, log_1mu;
     if (log_p) {
-      if (pp > 0.0) {
-        out(i) = NA_REAL;
-        continue;
-      }
-      pp = safe_exp(pp);
+      if (lower_tail) { log_u = pp;               log_1mu = gkw_log1mexp(pp); }
+      else            { log_u = gkw_log1mexp(pp); log_1mu = pp; }
+    } else {
+      if (lower_tail) { log_u = std::log(pp);     log_1mu = std::log1p(-pp); }
+      else            { log_u = std::log1p(-pp);  log_1mu = std::log(pp); }
     }
-    
-    // Handle upper tail (pp is now always linear scale)
-    if (!lower_tail) {
-      pp = 1.0 - pp;
-    }
-    
-    // Handle boundary cases
-    if (pp <= 0.0) {
-      out(i) = 0.0;
-      continue;
-    }
-    if (pp >= 1.0) {
-      out(i) = 1.0;
-      continue;
-    }
-    
-    // ---- Compute quantile via inverse transformations ----
-    
-    // Step 1: tmp1 = 1 - (1-p)^(1/(δ+1))
-    double tmp1 = 1.0 - safe_pow(1.0 - pp, 1.0 / (dd + 1.0));
-    tmp1 = std::max(0.0, std::min(1.0, tmp1));
-    
-    // Step 2: T = tmp1^(1/λ)
-    double T = (ll == 1.0) ? tmp1 : safe_pow(tmp1, 1.0 / ll);
-    
-    // Step 3: M = 1 - T  →  (1 - x^α)^β = M
-    double M = 1.0 - T;
-    M = std::max(0.0, std::min(1.0, M));
-    
-    // Step 4: Mpow = M^(1/β)  →  1 - x^α = Mpow
-    double Mpow = safe_pow(M, 1.0 / b);
-    
-    // Step 5: xalpha = 1 - Mpow  →  x^α = xalpha
-    double xalpha = 1.0 - Mpow;
-    xalpha = std::max(0.0, std::min(1.0, xalpha));
-    
-    // Step 6: x = xalpha^(1/α)
-    double xx = (a == 1.0) ? xalpha : safe_pow(xalpha, 1.0 / a);
-    
-    // Clamp to valid support
-    xx = std::max(0.0, std::min(1.0, xx));
-    
-    out(i) = xx;
+    if (log_u   == R_NegInf) { out(i) = 0.0; continue; }
+    if (log_1mu == R_NegInf) { out(i) = 1.0; continue; }
+
+    // 1 - y^lambda = (1-u)^(1/(delta+1)), then y = 1 - (1 - x^alpha)^beta
+    double log_y = gkw_log1mexp(log_1mu / (dd + 1.0)) / ll;
+    out(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_y) / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

@@ -17,6 +17,40 @@
   happened to be empty, such as `dkw(x[x > 1], 2, 3)`, was enough to trigger the
   crash. Numerical output is unchanged for every non-empty input.
 
+* **All seven quantile functions returned values outside the open support**
+  (`gkw.cpp`, `bkw.cpp`, `kkw.cpp`, `ekw.cpp`, `bpmc.cpp`, `kw.cpp`,
+  `beta_.cpp`): each `q*()` undid `log.p` with `exp()`, folded the upper tail
+  with `1 - p`, and then inverted using `1 - u` in linear space at every step.
+  The result was not merely imprecise -- it left `(0,1)` altogether:
+
+  ```
+  qekw(0.02, 20, 0.1, 0.1)       returned 0   true value 0.1587
+  qekw(1e-08, 5, 2, 0.5)         returned 0   true value 5.49e-04
+  qkw(1e-16, 0.2, 2)             returned 0   true value 3.125e-82
+  qbeta_(-1000, 2, 3, log.p=T)   returned 0   true value 2.25e-218
+  ```
+
+  A quantile of exactly 0 or 1 then feeds `d*()` and `ll*()` a value outside the
+  support they accept, so the damage propagates into simulation by inversion and
+  into any likelihood built on it.
+
+  The inversion now carries `log(u)` and `log(1-u)` from whatever scale and tail
+  the caller used, so neither is recovered by subtraction, and the four families
+  that route through the incomplete beta hand `lower_tail`/`log_p` to
+  `R::qbeta`. `qbkw()` needs `log(1-z)`: it takes `log1p(-z)` while `z <= 1/2`
+  and otherwise gets `1-z` directly from `R::qbeta` through the symmetry
+  `I_z(a,b) = 1 - I_{1-z}(b,a)`.
+
+  Judged against closed-form inversions written independently in R: of 22,236
+  values, 8,311 changed and every one improved. The largest relative error falls
+  from `2.06` to `5.7e-14`. The boundary conventions of 1.1.5 are preserved
+  exactly, including the saturating result for out-of-range `p`.
+
+  One limit remains: below about `log(p) = -745`, `exp(log u)` underflows, `1-u`
+  rounds to exactly 1 and the inversion has nothing left to invert, so the
+  quantile is still 0. Recovering it needs each step to carry both `log(q)` and
+  `log(1-q)`. 1.1.5 already returned 0 from `log(p) = -40` downward.
+
 * **All seven cumulative distribution functions collapsed to 0 or 1**
   (`gkw.cpp`, `bkw.cpp`, `kkw.cpp`, `ekw.cpp`, `bpmc.cpp`, `kw.cpp`,
   `beta_.cpp`): each `p*()` formed `1 - x^alpha` and `1 - (1 - x^alpha)^beta`
@@ -220,6 +254,11 @@
   log-space references, checks monotonicity, range, `F + S = 1`, the nesting
   identities and agreement with the integral of the density. It fails 9
   assertions against 1.1.5.
+
+* New `tests/testthat/test-quantile-log-space.R` pins the seven quantiles
+  against closed-form inversions, checks that they stay inside `(0,1)`, that
+  `p(q(u))` recovers `u`, that the boundary conventions are unchanged and that
+  the nesting identities hold. It fails 28 assertions against 1.1.5.
 
 # gkwdist 1.1.5
 

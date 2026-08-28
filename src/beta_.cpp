@@ -350,35 +350,21 @@ Rcpp::NumericVector qbeta_(
       continue;
     }
     
-    // ---- Convert probability to linear scale ----
-    if (log_p) {
-      if (pp > 0.0) {
-        out(i) = NA_REAL;
-        continue;
-      }
-      pp = safe_exp(pp);
-    }
-    
-    // Handle upper tail (pp is now always linear scale)
-    if (!lower_tail) {
-      pp = 1.0 - pp;
-    }
-    
-    // Handle boundary cases
-    if (pp <= 0.0) {
-      out(i) = 0.0;
+    // ---- Normalise the probability, without leaving log space ----
+    // The former code did exp(log p) and then 1 - p in linear space. The first
+    // flushed the deep tail to zero (qbeta_(-1000, 2, 3, log.p = TRUE) gave 0
+    // against a true 2.25e-218); the second cost the upper tail. Out-of-range p
+    // keeps the saturating result it has always returned -- whether that should
+    // be NaN instead is a separate, still-open question.
+    if (log_p && pp > 0.0) { out(i) = NA_REAL; continue; }
+    if (!log_p && (pp < 0.0 || pp > 1.0)) {
+      out(i) = (lower_tail == (pp > 1.0)) ? 1.0 : 0.0;
       continue;
     }
-    if (pp >= 1.0) {
-      out(i) = 1.0;
-      continue;
-    }
-    
-    // ---- Compute quantile via R's qbeta with adjusted parameters ----
-    // Beta_GKw(γ, δ) = Beta_standard(γ, δ+1)
-    double val = R::qbeta(pp, g, d + 1.0, true, false);
-    
-    out(i) = val;
+
+    // The Beta quantile is R::qbeta itself; lower_tail and log_p belong to it
+    // rather than being undone beforehand.
+    out(i) = R::qbeta(pp, g, d + 1.0, lower_tail, log_p);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

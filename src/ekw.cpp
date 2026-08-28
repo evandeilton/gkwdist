@@ -369,58 +369,33 @@ Rcpp::NumericVector qekw(
       continue;
     }
     
-    // ---- Convert probability to linear scale ----
+    // ---- Normalise the probability, without leaving log space ----
+    // The former code did exp(log p) and then 1 - p in linear space. The first
+    // flushed the deep tail to zero (qbeta_(-1000, 2, 3, log.p = TRUE) gave 0
+    // against a true 2.25e-218); the second cost the upper tail. Out-of-range p
+    // keeps the saturating result it has always returned -- whether that should
+    // be NaN instead is a separate, still-open question.
+    if (log_p && pp > 0.0) { out(i) = NA_REAL; continue; }
+    if (!log_p && (pp < 0.0 || pp > 1.0)) {
+      out(i) = (lower_tail == (pp > 1.0)) ? 1.0 : 0.0;
+      continue;
+    }
+
+    // log(u) and log(1-u) for the lower-tail probability u, whichever scale and
+    // tail the caller used, so neither has to be recovered by subtraction.
+    double log_u, log_1mu;
     if (log_p) {
-      if (pp > 0.0) {
-        out(i) = NA_REAL;
-        continue;
-      }
-      pp = safe_exp(pp);
-    }
-    
-    // Handle upper tail (pp is now always linear scale)
-    if (!lower_tail) {
-      pp = 1.0 - pp;
-    }
-    
-    // Handle boundary cases
-    if (pp <= 0.0) {
-      out(i) = 0.0;
-      continue;
-    }
-    if (pp >= 1.0) {
-      out(i) = 1.0;
-      continue;
-    }
-    
-    // ---- Compute quantile via inverse transformations ----
-    
-    // Step 1: p^(1/λ)
-    double step1 = safe_pow(pp, 1.0 / l);
-    
-    // Step 2: 1 - p^(1/λ)
-    double step2 = 1.0 - step1;
-    step2 = std::max(0.0, step2);
-    
-    // Step 3: [1 - p^(1/λ)]^(1/β)
-    double step3 = safe_pow(step2, 1.0 / b);
-    
-    // Step 4: 1 - [1 - p^(1/λ)]^(1/β)
-    double step4 = 1.0 - step3;
-    step4 = std::max(0.0, step4);
-    
-    // Step 5: {1 - [1 - p^(1/λ)]^(1/β)}^(1/α)
-    double x;
-    if (a == 1.0) {
-      x = step4;
+      if (lower_tail) { log_u = pp;               log_1mu = gkw_log1mexp(pp); }
+      else            { log_u = gkw_log1mexp(pp); log_1mu = pp; }
     } else {
-      x = safe_pow(step4, 1.0 / a);
+      if (lower_tail) { log_u = std::log(pp);     log_1mu = std::log1p(-pp); }
+      else            { log_u = std::log1p(-pp);  log_1mu = std::log(pp); }
     }
-    
-    // Clamp to valid support
-    x = std::max(0.0, std::min(1.0, x));
-    
-    out(i) = x;
+    if (log_u   == R_NegInf) { out(i) = 0.0; continue; }
+    if (log_1mu == R_NegInf) { out(i) = 1.0; continue; }
+
+    // Q(u) = [1 - (1 - u^(1/lambda))^(1/beta)]^(1/alpha)
+    out(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_u / l) / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

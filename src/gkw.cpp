@@ -396,126 +396,24 @@ Rcpp::NumericVector qgkw(
       continue;
     }
     
-    // ---- Convert probability to linear scale ----
-    // Handle log_p: convert from log-probability to probability
-    if (log_p) {
-      if (pp > 0.0) {
-        // log(p) > 0 implies p > 1, which is invalid
-        result(i) = NA_REAL;
-        continue;
-      }
-      pp = safe_exp(pp);
-      if (!R_finite(pp)) {
-        // Handle extreme values: exp(-Inf) = 0, edge cases
-        result(i) = (pp == 0.0) ? 0.0 : 1.0;
-        continue;
-      }
-    }
-    
-    // Handle lower_tail: convert upper-tail to lower-tail probability
-    // NOTE: At this point pp is ALWAYS in linear scale [0, 1]
-    if (!lower_tail) {
-      pp = 1.0 - pp;
-    }
-    
-    // Validate probability bounds
-    if (!R_finite(pp)) {
-      result(i) = NA_REAL;
+    // ---- Normalise the probability, without leaving log space ----
+    // The former code did exp(log p) and then 1 - p in linear space. The first
+    // flushed the deep tail to zero (qbeta_(-1000, 2, 3, log.p = TRUE) gave 0
+    // against a true 2.25e-218); the second cost the upper tail. Out-of-range p
+    // keeps the saturating result it has always returned -- whether that should
+    // be NaN instead is a separate, still-open question.
+    if (log_p && pp > 0.0) { result(i) = NA_REAL; continue; }
+    if (!log_p && (pp < 0.0 || pp > 1.0)) {
+      result(i) = (lower_tail == (pp > 1.0)) ? 1.0 : 0.0;
       continue;
     }
-    
-    if (pp <= 0.0) {
-      result(i) = 0.0;
-      continue;
-    }
-    
-    if (pp >= 1.0) {
-      result(i) = 1.0;
-      continue;
-    }
-    
-    // ---- Compute quantile via inverse transformations ----
-    
-    // Step 1: y = Q_Beta(p, γ, δ+1)
-    double y = R::qbeta(pp, g, d + 1.0, true, false);
-    
-    if (!R_finite(y)) {
-      result(i) = (y == R_PosInf) ? 1.0 : 0.0;
-      continue;
-    }
-    
-    if (y <= 0.0) {
-      result(i) = 0.0;
-      continue;
-    }
-    
-    if (y >= 1.0) {
-      result(i) = 1.0;
-      continue;
-    }
-    
-    // Step 2: v = y^(1/λ)
-    double v = (l == 1.0) ? y : safe_pow(y, 1.0/l);
-    if (!R_finite(v)) {
-      result(i) = (v == R_PosInf) ? 1.0 : 0.0;
-      continue;
-    }
-    
-    // Step 3: tmp = 1 - v
-    double tmp = 1.0 - v;
-    if (!R_finite(tmp)) {
-      result(i) = (tmp == R_PosInf) ? 0.0 : 1.0;
-      continue;
-    }
-    
-    if (tmp <= 0.0) {
-      result(i) = 1.0;
-      continue;
-    }
-    
-    if (tmp >= 1.0) {
-      result(i) = 0.0;
-      continue;
-    }
-    
-    // Step 4: tmp2 = tmp^(1/β)
-    double tmp2 = (b == 1.0) ? tmp : safe_pow(tmp, 1.0/b);
-    if (!R_finite(tmp2)) {
-      result(i) = (tmp2 == R_PosInf) ? 0.0 : 1.0;
-      continue;
-    }
-    
-    if (tmp2 <= 0.0) {
-      result(i) = 1.0;
-      continue;
-    }
-    
-    if (tmp2 >= 1.0) {
-      result(i) = 0.0;
-      continue;
-    }
-    
-    // Step 5: q = (1 - tmp2)^(1/α)
-    double one_minus_tmp2 = 1.0 - tmp2;
-    if (!R_finite(one_minus_tmp2)) {
-      result(i) = (one_minus_tmp2 == R_PosInf) ? 0.0 : 1.0;
-      continue;
-    }
-    
-    double qq = (a == 1.0) ? one_minus_tmp2 : safe_pow(one_minus_tmp2, 1.0/a);
-    if (!R_finite(qq)) {
-      result(i) = (qq == R_PosInf) ? 1.0 : 0.0;
-      continue;
-    }
-    
-    // Clamp result to valid support [0, 1]
-    if (qq < 0.0) {
-      qq = 0.0;
-    } else if (qq > 1.0) {
-      qq = 1.0;
-    }
-    
-    result(i) = qq;
+
+    // y = I^-1_{gamma,delta+1}(u); w = y^(1/lambda); x = [1-(1-w)^(1/beta)]^(1/alpha).
+    // lower_tail and log_p go straight to R::qbeta instead of being undone by
+    // exp() and 1 - p first.
+    double y = R::qbeta(pp, g, d + 1.0, lower_tail, log_p);
+    double log_w = std::log(y) / l;
+    result(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_w) / b) / a);
   }
   
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);

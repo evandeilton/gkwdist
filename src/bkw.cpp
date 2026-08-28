@@ -380,69 +380,29 @@ Rcpp::NumericVector qbkw(
       continue;
     }
     
-    // ---- Convert probability to linear scale ----
-    if (log_p) {
-      if (pp > 0.0) {
-        res(i) = NA_REAL;
-        continue;
-      }
-      pp = safe_exp(pp);
-    }
-    
-    // Handle upper tail (pp is now always linear scale)
-    if (!lower_tail) {
-      pp = 1.0 - pp;
-    }
-    
-    // Handle boundary cases
-    if (pp <= 0.0) {
-      res(i) = 0.0;
+    // ---- Normalise the probability, without leaving log space ----
+    // The former code did exp(log p) and then 1 - p in linear space. The first
+    // flushed the deep tail to zero (qbeta_(-1000, 2, 3, log.p = TRUE) gave 0
+    // against a true 2.25e-218); the second cost the upper tail. Out-of-range p
+    // keeps the saturating result it has always returned -- whether that should
+    // be NaN instead is a separate, still-open question.
+    if (log_p && pp > 0.0) { res(i) = NA_REAL; continue; }
+    if (!log_p && (pp < 0.0 || pp > 1.0)) {
+      res(i) = (lower_tail == (pp > 1.0)) ? 1.0 : 0.0;
       continue;
     }
-    if (pp >= 1.0) {
-      res(i) = 1.0;
-      continue;
-    }
-    
-    // ---- Compute quantile via inverse transformations ----
-    
-    // Step 1: y = Q_Beta(p, γ, δ+1)
-    double y = R::qbeta(pp, g, d + 1.0, true, false);
-    
-    if (y <= 0.0) {
-      res(i) = 0.0;
-      continue;
-    }
-    if (y >= 1.0) {
-      res(i) = 1.0;
-      continue;
-    }
-    
-    // Step 2: part = 1 - y
-    double part = 1.0 - y;
-    if (part <= 0.0) {
-      res(i) = 1.0;
-      continue;
-    }
-    if (part >= 1.0) {
-      res(i) = 0.0;
-      continue;
-    }
-    
-    // Step 3: inner = (1 - y)^(1/β)
-    double inner = safe_pow(part, 1.0 / b);
-    
-    // Step 4: xval = 1 - inner
-    double xval = 1.0 - inner;
-    xval = std::max(0.0, std::min(1.0, xval));
-    
-    // Step 5: x = xval^(1/α)
-    double qv = (a == 1.0) ? xval : safe_pow(xval, 1.0 / a);
-    
-    // Clamp to valid support
-    qv = std::max(0.0, std::min(1.0, qv));
-    
-    res(i) = qv;
+
+    // z = I^-1_{gamma,delta+1}(u), then x = [1 - (1-z)^(1/beta)]^(1/alpha).
+    // What the chain needs is log(1-z), and which route keeps its digits
+    // depends on where z sits: log1p(-z) is exact while z is small, and once
+    // z passes 1/2 the accurate value of 1-z comes straight from R::qbeta via
+    // the symmetry I_z(a,b) = 1 - I_{1-z}(b,a). Taking the symmetry in both
+    // regimes is what returns 1 for small u and loses the quantile entirely.
+    double z = R::qbeta(pp, g, d + 1.0, lower_tail, log_p);
+    double log_1mz = (z <= 0.5)
+      ? std::log1p(-z)
+      : std::log(R::qbeta(pp, d + 1.0, g, !lower_tail, log_p));
+    res(i) = std::exp(gkw_log1mexp(log_1mz / b) / a);
   }
   
   return Rcpp::NumericVector(res.memptr(), res.memptr() + res.n_elem);
