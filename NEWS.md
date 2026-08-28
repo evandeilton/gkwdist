@@ -2,6 +2,32 @@
 
 ## Critical Bug Fixes
 
+* **`grkw()` and `hskw()` were not the gradient and Hessian of `llkw()`**
+  (`kw.cpp`): `kw.cpp` was the last family file whose derivatives were still
+  evaluated in linear arithmetic. It formed `v = 1 - x^alpha` and then applied
+  `arma::clamp(v, eps, 1 - eps)` with `eps = 2.22e-14`, freezing `log(v)` at
+  `-31.4384832` for every observation near 1 regardless of the data:
+
+  ```
+  par = (0.5, 2), x = 1 - 1e-14        d/dalpha            d/dbeta
+    grkw                            -2.44999999999999   30.938483203129
+    numDeriv::grad(llkw)            -3.99999999995549   32.430138079912
+    grekw(lambda = 1), same dist.   -3.99999999999997   32.430138079907
+  ```
+
+  The relative error reached 38.75% in the gradient, 47% in `H[alpha,alpha]` and
+  78% in `H[alpha,beta]`, and ordinary data was enough to show it:
+  `c(1-1e-9, 1-1e-11, 0.5)` already diverged by 3.4e-05. Standard errors and
+  confidence intervals were wrong whenever the sample held observations close
+  to 1.
+
+  Both routines are now `grekw()` / `hsekw()` with `lambda` fixed at 1, evaluated
+  from logarithms. Adjudicated over 80 parameter/data blocks against two
+  independent references: the maximum relative disagreement with the EKw path
+  fell from 3.93 to exactly 0 in the gradient and from 4.00 to 1.4e-14 in the
+  Hessian, and against `numDeriv` from 3.93 to 1.6e-09, which is numDeriv's own
+  noise. No block moved in the wrong direction and no sign changed.
+
 * **`llgkw()` returned `-Inf` for data outside the open support** (`gkw.cpp`):
   `ll*()` is the negative log-likelihood, so an invalid point must be `+Inf` --
   the value `optim()` moves away from. `llgkw()` returned `-Inf`, making data
