@@ -506,6 +506,16 @@ std::vector<arma::vec> generate_initial_points(const arma::vec &sample_moments,
   alpha_init = std::min(20.0, std::max(0.1, alpha_init));
   beta_init = std::min(20.0, std::max(0.1, beta_init));
 
+  // Deliberately a fixed, self-contained seed rather than R's RNG.  The grid
+  // below is a search design, not a statistical sample: the function is a
+  // method-of-moments estimator whose output seeds optimisers elsewhere, so two
+  // calls on the same data must return the same starting values.  Drawing
+  // through R's stream would make every fit depend on the ambient seed and
+  // would consume draws the caller did not ask to spend.  set.seed() therefore
+  // has no effect here, and R's RNG state is neither read nor advanced -- both
+  // documented in the roxygen block below.  Do not "fix" this to R::unif_rand()
+  // without changing that contract.  Users who want a wider search raise
+  // n_starts, which is monotone: more starts can only lower the objective.
   std::mt19937 gen(42);
 
   if (family == "gkw") {
@@ -732,6 +742,16 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //' candidate with the smallest objective is returned. Because the candidate set grows
 //' with \code{n_starts}, the returned objective is non-increasing in \code{n_starts}.
 //'
+//' Determinism: the extra starting points are drawn from a generator with a fixed
+//' internal seed, deliberately not from R's random number stream. The function is
+//' therefore deterministic -- two calls with the same \code{x}, \code{family} and
+//' \code{n_starts} return the same vector, so a fit seeded by these values is
+//' reproducible without any further precaution. Two consequences are worth stating
+//' explicitly: \code{\link[base]{set.seed}} has no effect on \code{gkwgetstartvalues},
+//' and the function neither reads nor advances \code{.Random.seed}, so it cannot
+//' perturb simulations running alongside it. To widen the search, raise
+//' \code{n_starts} rather than looking for a seed argument.
+//'
 //' Parameter Constraints:
 //' All parameters are constrained to positive values. Additionally, family-specific
 //' constraints are enforced: alpha and beta in (0.1, 50.0), gamma in (0.1, 10.0) for
@@ -743,7 +763,9 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //'
 //' @examples
 //' \donttest{
-//' # Generate sample data from Beta distribution
+//' # Generate sample data from a Beta distribution. set.seed() here makes the
+//' # SAMPLE reproducible; gkwgetstartvalues() itself is deterministic and is
+//' # unaffected by the seed (see the Determinism note in Details).
 //' set.seed(123)
 //' x <- rbeta(100, shape1 = 2, shape2 = 3)
 //'
@@ -758,6 +780,17 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //' # Estimate GKw parameters with more starting points
 //' params_gkw <- gkwgetstartvalues(x, family = "gkw", n_starts = 10)
 //' print(params_gkw)
+//'
+//' # Deterministic: the seed in force does not change the answer, and the
+//' # function does not consume draws from R's stream.
+//' set.seed(1)
+//' identical(gkwgetstartvalues(x, family = "kw"), params_kw)
+//' set.seed(9999)
+//' identical(gkwgetstartvalues(x, family = "kw"), params_kw)
+//'
+//' before <- .Random.seed
+//' invisible(gkwgetstartvalues(x, family = "kw"))
+//' identical(before, .Random.seed)
 //' }
 //'
 //' @references

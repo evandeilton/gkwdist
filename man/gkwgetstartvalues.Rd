@@ -56,6 +56,16 @@ point in the grid, each result is clipped to the parameter box, and the clipped
 candidate with the smallest objective is returned. Because the candidate set grows
 with \code{n_starts}, the returned objective is non-increasing in \code{n_starts}.
 
+Determinism: the extra starting points are drawn from a generator with a fixed
+internal seed, deliberately not from R's random number stream. The function is
+therefore deterministic -- two calls with the same \code{x}, \code{family} and
+\code{n_starts} return the same vector, so a fit seeded by these values is
+reproducible without any further precaution. Two consequences are worth stating
+explicitly: \code{\link[base]{set.seed}} has no effect on \code{gkwgetstartvalues},
+and the function neither reads nor advances \code{.Random.seed}, so it cannot
+perturb simulations running alongside it. To widen the search, raise
+\code{n_starts} rather than looking for a seed argument.
+
 Parameter Constraints:
 All parameters are constrained to positive values. Additionally, family-specific
 constraints are enforced: alpha and beta in (0.1, 50.0), gamma in (0.1, 10.0) for
@@ -67,7 +77,9 @@ The function will issue warnings for empty input vectors, sample sizes less than
 }
 \examples{
 \donttest{
-# Generate sample data from Beta distribution
+# Generate sample data from a Beta distribution. set.seed() here makes the
+# SAMPLE reproducible; gkwgetstartvalues() itself is deterministic and is
+# unaffected by the seed (see the Determinism note in Details).
 set.seed(123)
 x <- rbeta(100, shape1 = 2, shape2 = 3)
 
@@ -82,6 +94,17 @@ print(params_kw)
 # Estimate GKw parameters with more starting points
 params_gkw <- gkwgetstartvalues(x, family = "gkw", n_starts = 10)
 print(params_gkw)
+
+# Deterministic: the seed in force does not change the answer, and the
+# function does not consume draws from R's stream.
+set.seed(1)
+identical(gkwgetstartvalues(x, family = "kw"), params_kw)
+set.seed(9999)
+identical(gkwgetstartvalues(x, family = "kw"), params_kw)
+
+before <- .Random.seed
+invisible(gkwgetstartvalues(x, family = "kw"))
+identical(before, .Random.seed)
 }
 
 }

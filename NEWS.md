@@ -410,6 +410,38 @@
 
 ## Documentation Fixes
 
+* **`gkwgetstartvalues()` is deterministic, and now says so** (`gkwinit.cpp`):
+  the help page described "multiple random starting points" without stating that
+  the randomness is internal and fixed. The extra starting points come from a
+  generator seeded with a constant, so `set.seed()` has no effect on the returned
+  value and `.Random.seed` is neither read nor advanced:
+
+  ```
+  set.seed(1);    a <- gkwgetstartvalues(x, "gkw", 20)
+  set.seed(9999); b <- gkwgetstartvalues(x, "gkw", 20)
+  identical(a, b)                                        TRUE
+  .Random.seed unchanged across the call                 TRUE
+  the caller's next runif(1) unchanged                   TRUE
+  ```
+
+  This is deliberate and is being documented, not changed. The function is a
+  method-of-moments estimator whose output seeds optimisers elsewhere in a fit;
+  two calls on the same data must agree, or every downstream fit would inherit a
+  dependence on the ambient seed and would silently consume draws the caller did
+  not ask to spend. The lever for a wider search is `n_starts`, which since the
+  fix above is both effective and monotone -- more starts can only lower the
+  objective -- so a seed argument would add a lottery where a monotone control
+  already exists. A `Determinism` paragraph in `Details` now states all three
+  facts, the `@examples` block demonstrates them, and a comment at the generator
+  in `gkwinit.cpp` records the intent so the constant seed is not mistaken for an
+  oversight.
+
+  The `set.seed(123)` opening the example is correct and is kept: it makes the
+  `rbeta()` sample on the next line reproducible. Its comment now says which of
+  the two calls it governs.
+
+  Documentation only; no numerical result changes.
+
 * **Confidence-region examples were undrawable where the observed information
   was not positive definite** (29 `@examples` blocks across the seven families):
   every one built a confidence region from
