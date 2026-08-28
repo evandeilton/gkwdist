@@ -158,13 +158,15 @@ Rcpp::NumericVector dgkw(
     double log_const = std::log(l) + std::log(a) + std::log(b) - log_beta_val;
     double gamma_lambda = g * l;
     
-    // Compute x^α in log-space
-    double x_alpha = safe_pow(xi, a);
-    if (!R_finite(x_alpha) || x_alpha >= 1.0 - SQRT_EPSILON) {
-      continue;
-    }
-    double log_x_alpha = safe_log(x_alpha);
-    
+    // Compute log(x^α) directly. Forming x^α in linear space and taking its
+    // logarithm loses the digits that matter as x approaches 1: doubles are
+    // spaced 2.2e-16 apart there, so log(x^α) carries a relative error of
+    // 2.2e-16 / (1 - x^α), which reaches 4e-6 by 1 - x = 1e-12. The former
+    // guard against x^α >= 1 - sqrt(eps) sidestepped that by returning a
+    // density of zero, discarding up to 16.5% of the probability mass of some
+    // parameterisations. gkw_log1mexp() below is built for exactly this regime.
+    double log_x_alpha = a * std::log(xi);
+
     // Compute log(1 - x^α) using stable log1mexp
     double log_one_minus_x_alpha = gkw_log1mexp(log_x_alpha);
     if (!R_finite(log_one_minus_x_alpha)) {

@@ -17,6 +17,29 @@
   happened to be empty, such as `dkw(x[x > 1], 2, 3)`, was enough to trigger the
   crash. Numerical output is unchanged for every non-empty input.
 
+* **`dgkw()` returned a density of zero as `x` approached 1** (`src/gkw.cpp`):
+  the density formed `x^alpha` in linear space and bailed out whenever
+  `x^alpha >= 1 - sqrt(.Machine$double.eps)`. The guard was there because
+  `log(x^alpha)` loses its significant digits in that band -- doubles are spaced
+  `2.2e-16` apart near 1, so the relative error reaches `4e-6` by
+  `1 - x = 1e-12` -- but returning zero is a far worse answer than an imprecise
+  one. It also broke the nesting identity: `dgkw(1 - 1e-9, 1, 0.1, 1, 0, 1)`
+  returned 0 while `dkw(1 - 1e-9, 1, 0.1)`, the same density, returned
+  `1.26e+07`. For `GKw(0.1, 0.1, 10, 0.1, 0.1)` the discarded band held 13% of
+  the probability mass, and for `beta < 1`, where the density diverges at 1, the
+  rising tail was replaced by a cliff to zero.
+
+  `log(x^alpha)` is now taken as `alpha * log(x)`, which is exact and removes the
+  need for the guard; `gkw_log1mexp()` already covers the resulting regime. Over
+  the regression grid, 6,780 of 47,104 `dgkw()` values changed, every one closer
+  to an independent log-space reference and none further away; no other family
+  moved. Recovered mass shows up in the integral: `GKw(0.1, 0.1, 10, 0.1, 0.1)`
+  goes from 0.8671 to 0.9998.
+
+  Two `continue` guards further down `dgkw()` still discard a point when
+  `log(1 - w^lambda)` underflows, even where `delta = 0` makes that term vanish
+  from the density. That is unchanged here and belongs with the log-space rework.
+
 * **Two logarithmic bound constants held the wrong quantity** (`src/utils.h`):
   `LOG_DBL_MAX` was documented as `log(DBL_MAX_SAFE)` but held
   `log10(DBL_MAX) = 308.2547`, while the correct natural logarithm is `707.4801`.
@@ -80,6 +103,10 @@
 * New `tests/testthat/test-deep-tail-precision.R` pins the subnormal and
   large-density regimes against a log-space reference. It fails 37 assertions
   against 1.1.5.
+
+* New `tests/testthat/test-density-near-upper-bound.R` pins `dgkw()` in the band
+  the old guard rejected, together with the nesting identities and the total
+  mass. It fails 17 assertions against 1.1.5.
 
 # gkwdist 1.1.5
 
