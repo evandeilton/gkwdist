@@ -26,7 +26,6 @@ Language: en-US
 Roxygen: list(markdown = TRUE)
 Imports: 
     Rcpp,
-    RcppArmadillo,
     magrittr,
     numDeriv
 LinkingTo: 

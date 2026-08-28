@@ -385,6 +385,18 @@
   Kumaraswamy distribution implemented here. `DESCRIPTION`, the README and the
   vignettes already cited the latter.
 
+## Packaging
+
+* **`RcppArmadillo` moved out of `Imports`.** It was listed there only because
+  `R/zzz.R` carried `@import RcppArmadillo`, which put `import(RcppArmadillo)`
+  in `NAMESPACE`. Armadillo is header-only for a client package: everything
+  gkwdist uses from it is compiled into `gkwdist.so` at install time through
+  `LinkingTo`, where `RcppArmadillo` already appeared. Loading its R namespace
+  at run time bought nothing, and `R CMD check --as-cran` reported
+  `Package in Depends/Imports which should probably only be in LinkingTo:
+  'RcppArmadillo'`. The tag, the `NAMESPACE` entry and the `Imports` line are
+  gone; `LinkingTo` is untouched, so the build is unchanged.
+
 ## Testing
 
 * New `tests/testthat/test-zero-length-input.R` covers all 28 routines with
