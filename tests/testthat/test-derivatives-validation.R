@@ -362,6 +362,19 @@ test_that("BKw Hessian matches numerical derivative - config 2", {
   )
 })
 
+test_that("BKw Hessian matches numerical derivative - config 3", {
+  params <- generate_test_params("bkw", 3)
+  data <- simulate_data("bkw", params, n = 1800, seed = 2203)
+  par_vec <- params_to_vector("bkw", params)
+
+  analytical_hess <- hsbkw(par_vec, data)
+  numerical_hess <- numDeriv::hessian(llbkw, par_vec, data = data)
+
+  expect_equal(analytical_hess, numerical_hess,
+    tolerance = HESS_TOL,
+    info = "BKw Hessian config 3: analytical vs numerical"
+  )
+})
 
 test_that("BKw Hessian matches numerical derivative - config 4", {
   params <- generate_test_params("bkw", 4)
