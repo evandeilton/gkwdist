@@ -281,50 +281,24 @@ Rcpp::NumericVector pekw(
       continue;
     }
     
-    // ---- Compute CDF ----
-    
-    // Step 1: x^α
-    double lx = safe_log(xx);
-    double xalpha = safe_exp(a * lx);
-    
-    // Step 2: 1 - x^α
-    double omx = 1.0 - xalpha;
-    if (omx <= 0.0) {
-      double val1 = lower_tail ? 1.0 : 0.0;
-      out(i) = log_p ? safe_log(val1) : val1;
-      continue;
-    }
-    
-    // Step 3: (1 - x^α)^β
-    double omx_beta = safe_pow(omx, b);
-    
-    // Step 4: t = 1 - (1 - x^α)^β
-    double t = 1.0 - omx_beta;
-    if (t <= 0.0) {
-      double val0 = lower_tail ? 0.0 : 1.0;
-      out(i) = log_p ? safe_log(val0) : val0;
-      continue;
-    }
-    if (t >= 1.0) {
-      double val1 = lower_tail ? 1.0 : 0.0;
-      out(i) = log_p ? safe_log(val1) : val1;
-      continue;
-    }
-    
-    // Step 5: F(x) = t^λ
-    double val = safe_pow(t, l);
-    
-    // Apply tail adjustment
-    if (!lower_tail) {
-      val = 1.0 - val;
-    }
-    
-    // Apply log transformation
-    if (log_p) {
-      val = safe_log(val);
-    }
-    
-    out(i) = val;
+    // ---- Cumulative probability, computed entirely in log space ----
+    // Every step below is a log(1 - exp(u)), never a 1 - u in linear space.
+    // The former chain formed 1 - x^alpha and 1 - (1 - x^alpha)^beta directly:
+    // once x^alpha fell below 1.1e-16 the first rounded to exactly 1, the
+    // second to exactly 0, and the CDF collapsed to 0 or 1. That is not a
+    // last-digit loss -- pekw(5.6e-09, 2, 5, 0.02) returned 0 where the true
+    // value is 0.483.
+    double log_x_alpha = a * std::log(xx);
+
+    // F = [1 - (1 - x^alpha)^beta]^lambda
+    double log_t    = gkw_log1mexp(b * gkw_log1mexp(log_x_alpha));
+    double log_cdf  = l * log_t;
+    double log_surv = gkw_log1mexp(log_cdf);
+
+    // Emit the requested tail on the requested scale without ever forming
+    // 1 - p or log(p) from a value that has already lost its digits.
+    double lg = lower_tail ? log_cdf : log_surv;
+    out(i) = log_p ? lg : std::exp(lg);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

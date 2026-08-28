@@ -17,6 +17,45 @@
   happened to be empty, such as `dkw(x[x > 1], 2, 3)`, was enough to trigger the
   crash. Numerical output is unchanged for every non-empty input.
 
+* **All seven cumulative distribution functions collapsed to 0 or 1**
+  (`gkw.cpp`, `bkw.cpp`, `kkw.cpp`, `ekw.cpp`, `bpmc.cpp`, `kw.cpp`,
+  `beta_.cpp`): each `p*()` formed `1 - x^alpha` and `1 - (1 - x^alpha)^beta`
+  in linear space. Once `x^alpha` fell below `1.1e-16` the first rounded to
+  exactly 1 and the second to exactly 0, and the CDF returned 0 or 1. The error
+  was absolute, not a lost digit:
+
+  ```
+  pekw(5.62e-09, 2, 5, 0.02)   returned 0     true value 0.483
+  pekw(0.14, 20, 20, 0.1)      returned 0     true value 0.0264
+  pkw(1e-09, 2, 5, log.p=TRUE) returned -Inf  true value -39.84
+  ```
+
+  The second sits at `x = 0.14`, nowhere near a tail: a small `lambda`
+  compresses the result toward 1 and pulls the collapse into the body of the
+  distribution. A systematic sweep found 8,917 affected points for `pgkw()`
+  alone, with a maximum absolute error of 1.0 -- the largest a probability can
+  be wrong by.
+
+  `lower.tail` and `log.p` were also applied afterwards, as `1 - p` and
+  `log(p)`, instead of being passed to `R::pbeta`, which implements both without
+  ever forming those quantities. That cost the opposite tail:
+  `pmc(1 - 1e-06, 2, 3, 2.5, lower.tail = FALSE)` returned exactly 0 against a
+  true `1.95e-22`, and `pbeta_(1e-200, 2, 3, log.p = TRUE)` returned `-Inf`
+  against a true `-918.73`.
+
+  Every chain now runs in log space through `gkw_log1mexp()`, the survival
+  function is computed directly rather than as `1 - F`, and `lower_tail`/`log_p`
+  go straight to `R::pbeta` where the family routes through the incomplete beta.
+
+  Judged against log-space references written independently in R: of 61,100
+  values over a grid spanning `1e-300` to `1 - 1e-16`, 23,720 changed, 23,719
+  improved and one moved by a single ulp. The largest relative error falls from
+  `5.9e+305` to `1.6e-01`, and only 14 values of the 61,100 still exceed `1e-9`.
+  Those 14 sit at `x >= 0.999`, where `x^lambda` is within an ulp of 1 and the
+  argument handed to `R::pbeta` cannot carry more precision. All seven CDFs are
+  monotone, stay within `[0, 1]`, satisfy `F + S = 1` to `1.1e-16`, and
+  reproduce their nesting identities exactly.
+
 * **The McDonald log-likelihood was unbounded below, and silently rewrote the
   data** (`src/bpmc.cpp`): `llmc()`, `grmc()` and `hsmc()` clamped every
   observation to `[1e-10, 1-1e-10]` before use. For a legitimate observation at
@@ -175,6 +214,11 @@
 * New `tests/testthat/test-mcdonald-no-clamping.R` pins `llmc()`, `grmc()` and
   `hsmc()` against a closed-form reference, checks the Beta nesting identity and
   the boundedness of the objective, and fits a model end to end. It fails 45
+  assertions against 1.1.5.
+
+* New `tests/testthat/test-cdf-log-space.R` pins the seven CDFs against
+  log-space references, checks monotonicity, range, `F + S = 1`, the nesting
+  identities and agreement with the integral of the density. It fails 9
   assertions against 1.1.5.
 
 # gkwdist 1.1.5

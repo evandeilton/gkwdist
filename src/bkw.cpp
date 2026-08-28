@@ -291,50 +291,20 @@ Rcpp::NumericVector pbkw(
       continue;
     }
     
-    // ---- Compute CDF ----
-    
-    // Step 1: x^α
-    double lx = safe_log(xx);
-    double xalpha = safe_exp(a * lx);
-    
-    // Step 2: 1 - x^α
-    double one_minus_xalpha = 1.0 - xalpha;
-    if (one_minus_xalpha <= 0.0) {
-      double prob1 = lower_tail ? 1.0 : 0.0;
-      res(i) = log_p ? safe_log(prob1) : prob1;
-      continue;
-    }
-    
-    // Step 3: (1 - x^α)^β
-    double v_beta = safe_pow(one_minus_xalpha, b);
-    
-    // Step 4: z = 1 - (1 - x^α)^β
-    double z = 1.0 - v_beta;
-    if (z <= 0.0) {
-      double prob0 = lower_tail ? 0.0 : 1.0;
-      res(i) = log_p ? safe_log(prob0) : prob0;
-      continue;
-    }
-    if (z >= 1.0) {
-      double prob1 = lower_tail ? 1.0 : 0.0;
-      res(i) = log_p ? safe_log(prob1) : prob1;
-      continue;
-    }
-    
-    // Step 5: F(x) = I_z(γ, δ+1) via pbeta
-    double val = R::pbeta(z, g, d + 1.0, true, false);
-    
-    // Apply tail adjustment
-    if (!lower_tail) {
-      val = 1.0 - val;
-    }
-    
-    // Apply log transformation
-    if (log_p) {
-      val = safe_log(val);
-    }
-    
-    res(i) = val;
+    // ---- Cumulative probability, computed entirely in log space ----
+    // Every step below is a log(1 - exp(u)), never a 1 - u in linear space.
+    // The former chain formed 1 - x^alpha and 1 - (1 - x^alpha)^beta directly:
+    // once x^alpha fell below 1.1e-16 the first rounded to exactly 1, the
+    // second to exactly 0, and the CDF collapsed to 0 or 1. That is not a
+    // last-digit loss -- pekw(5.6e-09, 2, 5, 0.02) returned 0 where the true
+    // value is 0.483.
+    double log_x_alpha = a * std::log(xx);
+
+    // F = I_z(gamma, delta+1) with z = 1 - (1 - x^alpha)^beta. z is formed
+    // with -expm1 so it keeps its digits, and lower_tail/log_p go straight to
+    // R::pbeta, which implements both without forming 1 - p or log(p).
+    double z = -std::expm1(b * gkw_log1mexp(log_x_alpha));
+    res(i) = R::pbeta(z, g, d + 1.0, lower_tail, log_p);
   }
   
   return Rcpp::NumericVector(res.memptr(), res.memptr() + res.n_elem);

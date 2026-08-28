@@ -290,64 +290,24 @@ Rcpp::NumericVector pkkw(
       continue;
     }
     
-    // ---- Compute CDF ----
-    
-    // Step 1: x^α
-    double log_xalpha = a * safe_log(xx);
-    double xalpha = safe_exp(log_xalpha);
-    
-    // Step 2: 1 - x^α
-    double one_minus_xalpha = 1.0 - xalpha;
-    if (one_minus_xalpha <= 0.0) {
-      double val1 = lower_tail ? 1.0 : 0.0;
-      out(i) = log_p ? safe_log(val1) : val1;
-      continue;
-    }
-    
-    // Step 3: (1 - x^α)^β
-    double vbeta = safe_pow(one_minus_xalpha, b);
-    
-    // Step 4: y = 1 - (1 - x^α)^β
-    double y = 1.0 - vbeta;
-    if (y <= 0.0) {
-      double val0 = lower_tail ? 0.0 : 1.0;
-      out(i) = log_p ? safe_log(val0) : val0;
-      continue;
-    }
-    if (y >= 1.0) {
-      double val1 = lower_tail ? 1.0 : 0.0;
-      out(i) = log_p ? safe_log(val1) : val1;
-      continue;
-    }
-    
-    // Step 5: y^λ = [1-(1-x^α)^β]^λ
-    double ylambda = safe_pow(y, ll);
-    if (ylambda <= 0.0) {
-      double val0 = lower_tail ? 0.0 : 1.0;
-      out(i) = log_p ? safe_log(val0) : val0;
-      continue;
-    }
-    if (ylambda >= 1.0) {
-      double val1 = lower_tail ? 1.0 : 0.0;
-      out(i) = log_p ? safe_log(val1) : val1;
-      continue;
-    }
-    
-    // Step 6: F(x) = 1 - (1 - y^λ)^(δ+1)
-    double outer = 1.0 - ylambda;
-    double cdfval = 1.0 - safe_pow(outer, dd + 1.0);
-    
-    // Apply tail adjustment
-    if (!lower_tail) {
-      cdfval = 1.0 - cdfval;
-    }
-    
-    // Apply log transformation
-    if (log_p) {
-      cdfval = safe_log(cdfval);
-    }
-    
-    out(i) = cdfval;
+    // ---- Cumulative probability, computed entirely in log space ----
+    // Every step below is a log(1 - exp(u)), never a 1 - u in linear space.
+    // The former chain formed 1 - x^alpha and 1 - (1 - x^alpha)^beta directly:
+    // once x^alpha fell below 1.1e-16 the first rounded to exactly 1, the
+    // second to exactly 0, and the CDF collapsed to 0 or 1. That is not a
+    // last-digit loss -- pekw(5.6e-09, 2, 5, 0.02) returned 0 where the true
+    // value is 0.483.
+    double log_x_alpha = a * std::log(xx);
+
+    // F = 1 - (1 - y^lambda)^(delta+1), y = 1 - (1 - x^alpha)^beta
+    double log_y    = gkw_log1mexp(b * gkw_log1mexp(log_x_alpha));
+    double log_surv = (dd + 1.0) * gkw_log1mexp(ll * log_y);
+    double log_cdf  = gkw_log1mexp(log_surv);
+
+    // Emit the requested tail on the requested scale without ever forming
+    // 1 - p or log(p) from a value that has already lost its digits.
+    double lg = lower_tail ? log_cdf : log_surv;
+    out(i) = log_p ? lg : std::exp(lg);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

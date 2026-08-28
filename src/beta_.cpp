@@ -277,14 +277,11 @@ Rcpp::NumericVector pbeta_(
     
     // ---- Compute CDF via R's pbeta with adjusted parameters ----
     // Beta_GKw(γ, δ) = Beta_standard(γ, δ+1)
-    double val = R::pbeta(qq, g, d + 1.0, lower_tail, false);
-    
-    // Apply log transformation if requested
-    if (log_p) {
-      val = safe_log(val);
-    }
-    
-    out(i) = val;
+    // log_p goes to R::pbeta rather than being applied afterwards: taking
+    // log() of an already underflowed probability returned -Inf where the log
+    // scale still has room (pbeta_(1e-200, 2, 3, log.p = TRUE) gave -Inf
+    // against a true -918.73).
+    out(i) = R::pbeta(qq, g, d + 1.0, lower_tail, log_p);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

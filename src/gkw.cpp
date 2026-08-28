@@ -305,81 +305,16 @@ Rcpp::NumericVector pgkw(
       continue;
     }
     
-    // ---- Compute CDF via Beta function ----
-    
-    // Step 1: q^α
-    double qi_alpha = safe_pow(qi, a);
-    if (!R_finite(qi_alpha)) {
-      result(i) = lower_tail ? (log_p ? R_NegInf : 0.0) : (log_p ? 0.0 : 1.0);
-      continue;
-    }
-    
-    // Step 2: log(1 - q^α)
-    double log_qi_alpha = safe_log(qi_alpha);
-    double log_one_minus_qi_alpha = gkw_log1mexp(log_qi_alpha);
-    if (!R_finite(log_one_minus_qi_alpha)) {
-      result(i) = lower_tail ? (log_p ? 0.0 : 1.0) : (log_p ? R_NegInf : 0.0);
-      continue;
-    }
-    
-    // Step 3: (1 - q^α)^β - use log_one_minus_qi_alpha directly (avoid redundant log)
-    double log_oma_beta = b * log_one_minus_qi_alpha;
-    if (!R_finite(log_oma_beta)) {
-      result(i) = lower_tail ? (log_p ? R_NegInf : 0.0) : (log_p ? 0.0 : 1.0);
-      continue;
-    }
-    double oma_beta = safe_exp(log_oma_beta);
-    
-    // Step 4: 1 - (1 - q^α)^β
-    double term = 1.0 - oma_beta;
-    if (term <= 0.0) {
-      result(i) = lower_tail ? (log_p ? R_NegInf : 0.0) : (log_p ? 0.0 : 1.0);
-      continue;
-    }
-    if (term >= 1.0) {
-      result(i) = lower_tail ? (log_p ? 0.0 : 1.0) : (log_p ? R_NegInf : 0.0);
-      continue;
-    }
-    
-    // Step 5: [1 - (1 - q^α)^β]^λ
-    double log_term = safe_log(term);
-    double log_y = l * log_term;
-    if (!R_finite(log_y)) {
-      result(i) = lower_tail ? (log_p ? R_NegInf : 0.0) : (log_p ? 0.0 : 1.0);
-      continue;
-    }
-    double y = safe_exp(log_y);
-    
-    // Boundary validation for y
-    if (y <= 0.0) {
-      result(i) = lower_tail ? (log_p ? R_NegInf : 0.0) : (log_p ? 0.0 : 1.0);
-      continue;
-    }
-    if (y >= 1.0) {
-      result(i) = lower_tail ? (log_p ? 0.0 : 1.0) : (log_p ? R_NegInf : 0.0);
-      continue;
-    }
-    
-    // Step 6: Compute I_y(γ, δ+1) via R's pbeta
-    double prob = R::pbeta(y, g, d + 1.0, true, false);
-    
-    // Apply tail adjustment
-    if (!lower_tail) {
-      prob = 1.0 - prob;
-    }
-    
-    // Apply log transformation if requested
-    if (log_p) {
-      if (prob <= 0.0) {
-        prob = R_NegInf;
-      } else if (prob >= 1.0) {
-        prob = 0.0;
-      } else {
-        prob = std::log(prob);
-      }
-    }
-    
-    result(i) = prob;
+    // ---- Cumulative probability ----
+    // Every step is a log(1 - exp(u)); the former chain formed 1 - q^alpha and
+    // 1 - (1 - q^alpha)^beta in linear space, which cost the whole lower tail
+    // (pgkw at q = 1e-09 returned exactly 0 against a true 4.1e-21).
+    // F = I_y(gamma, delta+1) with y = [1 - (1 - q^alpha)^beta]^lambda, and
+    // lower_tail/log_p go straight to R::pbeta rather than being applied by
+    // forming 1 - p or log(p) afterwards.
+    double log_w = gkw_log1mexp(b * gkw_log1mexp(a * std::log(qi)));
+    double y = std::exp(l * log_w);
+    result(i) = R::pbeta(y, g, d + 1.0, lower_tail, log_p);
   }
   
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);

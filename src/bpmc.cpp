@@ -278,25 +278,13 @@ Rcpp::NumericVector pmc(
       continue;
     }
     
-    // ---- Compute CDF ----
-    
-    // Step 1: x^λ
-    double xpow = safe_pow(xx, ll);
-    
-    // Step 2: F(x) = I_{x^λ}(γ, δ+1) via pbeta
-    double val = R::pbeta(xpow, gg, dd + 1.0, true, false);
-    
-    // Apply tail adjustment
-    if (!lower_tail) {
-      val = 1.0 - val;
-    }
-    
-    // Apply log transformation
-    if (log_p) {
-      val = safe_log(val);
-    }
-    
-    out(i) = val;
+    // ---- Cumulative probability ----
+    // F = I_{x^lambda}(gamma, delta+1). lower_tail and log_p go straight to
+    // R::pbeta: computing p first and then forming 1 - p or log(p) lost the
+    // whole upper tail (pmc(1 - 1e-06, 2, 3, 2.5, lower.tail = FALSE) returned
+    // exactly 0 against a true 1.95e-22).
+    double xpow = std::exp(ll * std::log(xx));
+    out(i) = R::pbeta(xpow, gg, dd + 1.0, lower_tail, log_p);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

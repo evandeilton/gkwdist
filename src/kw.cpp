@@ -268,42 +268,23 @@ Rcpp::NumericVector pkw(
       continue;
     }
     
-    // ---- Compute CDF ----
-    
-    // Step 1: x^α
-    double xalpha = safe_pow(xx, a);
-    
-    // Step 2: (1 - x^α)^β
-    double one_minus_xalpha_beta = safe_pow(1.0 - xalpha, b);
-    
-    // Step 3: F(x) = 1 - (1 - x^α)^β
-    double tmp = 1.0 - one_minus_xalpha_beta;
-    
-    // Boundary checks after computation
-    if (tmp <= 0.0) {
-      double val0 = lower_tail ? 0.0 : 1.0;
-      out(i) = log_p ? safe_log(val0) : val0;
-      continue;
-    }
-    if (tmp >= 1.0) {
-      double val1 = lower_tail ? 1.0 : 0.0;
-      out(i) = log_p ? safe_log(val1) : val1;
-      continue;
-    }
-    
-    double val = tmp;
-    
-    // Apply tail adjustment
-    if (!lower_tail) {
-      val = 1.0 - val;
-    }
-    
-    // Apply log transformation
-    if (log_p) {
-      val = safe_log(val);
-    }
-    
-    out(i) = val;
+    // ---- Cumulative probability, computed entirely in log space ----
+    // Every step below is a log(1 - exp(u)), never a 1 - u in linear space.
+    // The former chain formed 1 - x^alpha and 1 - (1 - x^alpha)^beta directly:
+    // once x^alpha fell below 1.1e-16 the first rounded to exactly 1, the
+    // second to exactly 0, and the CDF collapsed to 0 or 1. That is not a
+    // last-digit loss -- pkw(1e-06, 3, 100) returned 0 where the true
+    // value is 1e-16.
+    double log_x_alpha = a * std::log(xx);
+
+    // F = 1 - (1 - x^alpha)^beta
+    double log_surv = b * gkw_log1mexp(log_x_alpha);
+    double log_cdf  = gkw_log1mexp(log_surv);
+
+    // Emit the requested tail on the requested scale without ever forming
+    // 1 - p or log(p) from a value that has already lost its digits.
+    double lg = lower_tail ? log_cdf : log_surv;
+    out(i) = log_p ? lg : std::exp(lg);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
