@@ -130,6 +130,13 @@ Rcpp::NumericVector dmc(
   arma::vec l_vec(lambda.begin(), lambda.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (x.n_elem == 0 || g_vec.n_elem == 0 || d_vec.n_elem == 0 || l_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({x.n_elem, g_vec.n_elem, d_vec.n_elem, l_vec.n_elem});
   
   // Initialize result with appropriate default
@@ -233,6 +240,13 @@ Rcpp::NumericVector pmc(
   arma::vec l_vec(lambda.begin(), lambda.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (q.n_elem == 0 || g_vec.n_elem == 0 || d_vec.n_elem == 0 || l_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({q.n_elem, g_vec.n_elem, d_vec.n_elem, l_vec.n_elem});
   
   arma::vec out(N);
@@ -329,6 +343,13 @@ Rcpp::NumericVector qmc(
   arma::vec l_vec(lambda.begin(), lambda.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (p.n_elem == 0 || g_vec.n_elem == 0 || d_vec.n_elem == 0 || l_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({p.n_elem, g_vec.n_elem, d_vec.n_elem, l_vec.n_elem});
   
   arma::vec out(N);
@@ -433,6 +454,14 @@ Rcpp::NumericVector rmc(
   arma::vec d_vec(delta.begin(), delta.size());
   arma::vec l_vec(lambda.begin(), lambda.size());
   
+  // A zero-length parameter cannot be recycled. Match R's convention
+  // (rbeta(3, numeric(0), 1) is NA NA NA with a warning) instead of
+  // reaching the `i % vec.n_elem` recycling with a zero divisor.
+  if (g_vec.n_elem == 0 || d_vec.n_elem == 0 || l_vec.n_elem == 0) {
+    Rcpp::warning("rmc: NAs produced");
+    return Rcpp::NumericVector(n, NA_REAL);
+  }
+
   arma::vec out(n);
   
   for (int i = 0; i < n; i++) {

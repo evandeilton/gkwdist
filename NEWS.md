@@ -1,3 +1,28 @@
+# gkwdist 1.1.6
+
+## Critical Bug Fixes
+
+* **Zero-length arguments crashed the R process** (all seven families): the
+  vectorised `d*()`, `p*()`, `q*()` and `r*()` routines size their output as the
+  maximum length of their inputs and then recycle with `i % vec.n_elem`. When one
+  argument had length zero while another did not, the output length stayed at one
+  or more and the recycling evaluated `i % 0`. Integer division by zero is
+  undefined behaviour; on x86-64 it raises `SIGFPE`, terminating the R process
+  with no error, no message and nothing for `tryCatch()` to catch. The R-level
+  validation did not intercept it either, because `any(numeric(0) <= 0)` is
+  `FALSE`. All 28 exported routines now short-circuit before the loop:
+  `d*()`, `p*()` and `q*()` return `numeric(0)`, matching
+  `stats::dbeta(numeric(0), 1, 1)`, and `r*()` return `n` missing values with a
+  warning, matching `stats::rbeta(3, numeric(0), 1)`. A filtered vector that
+  happened to be empty, such as `dkw(x[x > 1], 2, 3)`, was enough to trigger the
+  crash. Numerical output is unchanged for every non-empty input.
+
+## Testing
+
+* New `tests/testthat/test-zero-length-input.R` covers all 28 routines with
+  zero-length data and zero-length parameters, the empty-subset idiom, and the
+  correspondence with the `stats` package's convention.
+
 # gkwdist 1.1.5
 
 ## Critical Bug Fixes
