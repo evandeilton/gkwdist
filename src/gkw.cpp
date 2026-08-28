@@ -1048,7 +1048,15 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   double acc_delta_lambda = 0.0;
   double acc_alpha_lambda = 0.0;
   double acc_beta_lambda = 0.0;
-  
+
+  // Set when an observation cannot be evaluated. Skipping such an observation
+  // would silently compute the Hessian of a smaller sample: with beta = 500 and
+  // four observations every one of them was dropped and the result was the
+  // constant terms alone, H(alpha,alpha) = n/alpha^2 = 4 against a true 1996.3
+  // -- finite, symmetric, free of NaN, and wrong by a factor of 499. A visible
+  // failure is the correct answer until the chain is reworked in log space.
+  bool degenerate = false;
+
   // ---- Observation-dependent terms ----
   for (int i = 0; i < n; i++) {
     double xi = x(i);
@@ -1062,7 +1070,7 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
     // v = 1 - A and derivatives (using log-space for v)
     double log_A = alpha * ln_xi;
     double log_v = gkw_log1mexp(log_A);
-    if (!R_finite(log_v)) continue;
+    if (!R_finite(log_v)) { degenerate = true; break; }
     double v = safe_exp(log_v);
     double ln_v = log_v;
     double dv_dalpha = -dA_dalpha;
@@ -1075,7 +1083,7 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
     // --- L7: (γλ - 1) ln(w), where w = 1 - v^β ---
     double log_v_beta = beta * log_v;
     double log_w = gkw_log1mexp(log_v_beta);
-    if (!R_finite(log_w)) continue;
+    if (!R_finite(log_w)) { degenerate = true; break; }
     double w = safe_exp(log_w);
     double ln_w = log_w;
     
@@ -1098,7 +1106,7 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
     // --- L8: δ ln(z), where z = 1 - w^λ ---
     double log_w_lambda = lambda * log_w;
     double log_z = gkw_log1mexp(log_w_lambda);
-    if (!R_finite(log_z)) continue;
+    if (!R_finite(log_z)) { degenerate = true; break; }
     double z = safe_exp(log_z);
     
     double w_lambda_m1 = safe_pow(w, lambda - 1.0);
@@ -1155,6 +1163,17 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
     acc_beta_lambda  += gamma * (dw_dbeta  / w) + d2L8_dbeta_dlambda;
     acc_gamma_lambda += ln_w;
     acc_delta_lambda += dz_dlambda / z;
+  }
+
+  // An observation that could not be evaluated must not simply be left out of
+  // the sum: the remaining terms would still be returned as a finite, symmetric
+  // matrix that silently describes a smaller sample. Report the failure the same
+  // way the intermediate-value check below already does.
+  if (degenerate) {
+    Rcpp::warning("hsgkw: the log-space chain underflowed for at least one observation; returning NaN");
+    Rcpp::NumericMatrix nanH(5, 5);
+    nanH.fill(R_NaN);
+    return nanH;
   }
 
   // Apply accumulated λ mixed derivatives (upper triangle)

@@ -17,6 +17,25 @@
   happened to be empty, such as `dkw(x[x > 1], 2, 3)`, was enough to trigger the
   crash. Numerical output is unchanged for every non-empty input.
 
+* **`hsgkw()` silently returned the Hessian of a smaller sample**
+  (`src/gkw.cpp`): the observation loop skipped past any point whose
+  `log(1-x^alpha)`, `log(1-v^beta)` or `log(1-w^lambda)` came out non-finite,
+  leaving the remaining terms to be returned as a finite, symmetric matrix with
+  no `NaN` and no warning. For a quantity whose purpose is to produce standard
+  errors, that is the worst available failure mode. With `beta = 500` and four
+  observations every point was dropped and only the parameter-only terms
+  survived, so `H(alpha, alpha)` came back as `n / alpha^2 = 4` against a true
+  `1996.3` -- wrong by a factor of 499, and indistinguishable from a valid
+  result. With five observations one survived and the function returned the
+  Hessian of a single point as if it described all five.
+
+  The loop now stops on the first such observation and returns a `NaN` matrix
+  with a warning, matching what the function's own intermediate-value check
+  already did. Matrices are bit-identical wherever they were finite before.
+  Computing those terms correctly requires the log-space rework and is not
+  attempted here. `grgkw()` is unaffected: it is fully vectorised and propagates
+  `NaN` rather than dropping observations.
+
 * **`dgkw()` returned a density of zero as `x` approached 1** (`src/gkw.cpp`):
   the density formed `x^alpha` in linear space and bailed out whenever
   `x^alpha >= 1 - sqrt(.Machine$double.eps)`. The guard was there because
@@ -107,6 +126,10 @@
 * New `tests/testthat/test-density-near-upper-bound.R` pins `dgkw()` in the band
   the old guard rejected, together with the nesting identities and the total
   mass. It fails 17 assertions against 1.1.5.
+
+* New `tests/testthat/test-hessian-degenerate.R` pins the degenerate cases of
+  `hsgkw()` and checks that healthy parameters keep their finite, symmetric
+  matrices. It fails 8 assertions against 1.1.5.
 
 # gkwdist 1.1.5
 
