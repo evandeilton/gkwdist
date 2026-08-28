@@ -1397,7 +1397,11 @@ llmc <- function(par, data) {
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
 #' # Gamma vs Delta ellipse
-#' eig_decomp_gd <- eigen(vcov_gd)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_gd <- eigen(vcov_gd, symmetric = TRUE)
+#' eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
 #' ellipse_gd <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1406,7 +1410,11 @@ llmc <- function(par, data) {
 #' }
 #'
 #' # Gamma vs Lambda ellipse
-#' eig_decomp_gl <- eigen(vcov_gl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_gl <- eigen(vcov_gl, symmetric = TRUE)
+#' eig_decomp_gl$values <- pmax(eig_decomp_gl$values, 0)
 #' ellipse_gl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1415,7 +1423,11 @@ llmc <- function(par, data) {
 #' }
 #'
 #' # Delta vs Lambda ellipse
-#' eig_decomp_dl <- eigen(vcov_dl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_dl <- eigen(vcov_dl, symmetric = TRUE)
+#' eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
 #' ellipse_dl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1855,7 +1867,11 @@ grmc <- function(par, data) {
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
 #' # Gamma vs Delta ellipse
-#' eig_decomp_gd <- eigen(vcov_gd)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_gd <- eigen(vcov_gd, symmetric = TRUE)
+#' eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
 #' ellipse_gd <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1864,7 +1880,11 @@ grmc <- function(par, data) {
 #' }
 #'
 #' # Gamma vs Lambda ellipse
-#' eig_decomp_gl <- eigen(vcov_gl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_gl <- eigen(vcov_gl, symmetric = TRUE)
+#' eig_decomp_gl$values <- pmax(eig_decomp_gl$values, 0)
 #' ellipse_gl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1873,7 +1893,11 @@ grmc <- function(par, data) {
 #' }
 #'
 #' # Delta vs Lambda ellipse
-#' eig_decomp_dl <- eigen(vcov_dl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_dl <- eigen(vcov_dl, symmetric = TRUE)
+#' eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
 #' ellipse_dl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))

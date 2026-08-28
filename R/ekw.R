@@ -1289,7 +1289,11 @@ llekw <- function(par, data) {
 #' theta <- seq(0, 2 * pi, length.out = 100)
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
-#' eig_decomp <- eigen(vcov_2d)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #' ellipse <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1334,7 +1338,11 @@ llekw <- function(par, data) {
 #' vcov_2d_al <- vcov_full[c(1, 3), c(1, 3)]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_al <- eigen(vcov_2d_al)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_al <- eigen(vcov_2d_al, symmetric = TRUE)
+#' eig_decomp_al$values <- pmax(eig_decomp_al$values, 0)
 #' ellipse_al <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1379,7 +1387,11 @@ llekw <- function(par, data) {
 #' vcov_2d_bl <- vcov_full[2:3, 2:3]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_bl <- eigen(vcov_2d_bl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_bl <- eigen(vcov_2d_bl, symmetric = TRUE)
+#' eig_decomp_bl$values <- pmax(eig_decomp_bl$values, 0)
 #' ellipse_bl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1702,7 +1714,11 @@ grekw <- function(par, data) {
 #' theta <- seq(0, 2 * pi, length.out = 100)
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
-#' eig_decomp <- eigen(vcov_2d)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #' ellipse <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1747,7 +1763,11 @@ grekw <- function(par, data) {
 #' vcov_2d_al <- vcov_matrix[c(1, 3), c(1, 3)]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_al <- eigen(vcov_2d_al)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_al <- eigen(vcov_2d_al, symmetric = TRUE)
+#' eig_decomp_al$values <- pmax(eig_decomp_al$values, 0)
 #' ellipse_al <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1792,7 +1812,11 @@ grekw <- function(par, data) {
 #' vcov_2d_bl <- vcov_matrix[2:3, 2:3]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_bl <- eigen(vcov_2d_bl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_bl <- eigen(vcov_2d_bl, symmetric = TRUE)
+#' eig_decomp_bl$values <- pmax(eig_decomp_bl$values, 0)
 #' ellipse_bl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))

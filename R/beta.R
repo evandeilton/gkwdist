@@ -1186,7 +1186,11 @@ llbeta <- function(par, data) {
 #' theta <- seq(0, 2 * pi, length.out = 100)
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
-#' eig_decomp <- eigen(vcov_full)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(vcov_full, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #' ellipse <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1517,7 +1521,11 @@ grbeta <- function(par, data) {
 #' theta <- seq(0, 2 * pi, length.out = 100)
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
-#' eig_decomp <- eigen(vcov_2d)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #' ellipse <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))

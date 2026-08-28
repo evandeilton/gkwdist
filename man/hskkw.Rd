@@ -251,7 +251,11 @@ vcov_2d <- vcov_matrix[1:2, 1:2]
 theta <- seq(0, 2 * pi, length.out = round(n / 2))
 chi2_val <- qchisq(0.95, df = 2)
 
-eig_decomp <- eigen(vcov_2d)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+eig_decomp$values <- pmax(eig_decomp$values, 0)
 ellipse <- matrix(NA, nrow = round(n / 2), ncol = 2)
 for (i in 1:round(n / 2)) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -295,7 +299,11 @@ grid(col = "gray90")
 vcov_2d_dl <- vcov_matrix[3:4, 3:4]
 
 # Create confidence ellipse
-eig_decomp_dl <- eigen(vcov_2d_dl)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_dl <- eigen(vcov_2d_dl, symmetric = TRUE)
+eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
 ellipse_dl <- matrix(NA, nrow = round(n / 2), ncol = 2)
 for (i in 1:round(n / 2)) {
   v <- c(cos(theta[i]), sin(theta[i]))

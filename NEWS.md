@@ -237,6 +237,32 @@
 
 ## Documentation Fixes
 
+* **Confidence-region examples were undrawable where the observed information
+  was not positive definite** (29 `@examples` blocks across the seven families):
+  every one built a confidence region from
+  `eigen(solve(hs*(mle, data))[1:2, 1:2])` and then took
+  `diag(sqrt(eig_decomp$values))`, with nothing to guarantee the eigenvalues were
+  non-negative. `solve()` of an observed information matrix is a covariance
+  matrix only where that information is positive definite; `optim()` reports
+  `convergence = 0` on a flat likelihood ridge without establishing it. When an
+  eigenvalue came back negative, `sqrt()` produced `NaN`, the whole region became
+  `NaN`, and `plot()` aborted with `need finite 'xlim' values`.
+
+  The fit these examples rest on is weakly identified -- the observed information
+  has a condition number between `4.4e+06` and `1.3e+07` -- so which side of the
+  boundary it lands on depends on the BLAS and the optimiser's path. The examples
+  passed on Linux and macOS and failed on Windows under `--run-donttest`.
+
+  `eigen()` is now called with `symmetric = TRUE`, which is what a covariance
+  matrix warrants and which keeps the eigenvalues real and ordered, and the
+  eigenvalues are clamped at zero, so the region degenerates rather than
+  vanishing. Reproduced against the indefinite block directly: 500 of 500 ellipse
+  coordinates were `NaN` before and none are after, and `plot()` raises the same
+  `need finite 'xlim' values` before and succeeds after.
+
+  Documentation only; no executable code in `R/` or `src/` is changed, and every
+  numerical result is unaffected.
+
 * **`grmc()` gradient formula had inverted digamma signs** (`R/bpmc.R`): the
   `@details` block documented `psi(gamma + delta + 1) - psi(gamma)` for the gamma
   component and `psi(gamma + delta + 1) - psi(delta + 1)` for delta. Since

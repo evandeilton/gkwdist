@@ -1564,7 +1564,11 @@ grkw <- function(par, data) {
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
 #' # Eigendecomposition
-#' eig_decomp <- eigen(asymp_cov)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(asymp_cov, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #'
 #' # Ellipse points
 #' ellipse <- matrix(NA, nrow = 100, ncol = 2)
