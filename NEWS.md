@@ -17,6 +17,36 @@
   happened to be empty, such as `dkw(x[x > 1], 2, 3)`, was enough to trigger the
   crash. Numerical output is unchanged for every non-empty input.
 
+* **Two logarithmic bound constants held the wrong quantity** (`src/utils.h`):
+  `LOG_DBL_MAX` was documented as `log(DBL_MAX_SAFE)` but held
+  `log10(DBL_MAX) = 308.2547`, while the correct natural logarithm is `707.4801`.
+  Since it is used as the overflow threshold of `safe_exp()` and `safe_pow()`,
+  every result above `exp(308.25)` was returned as `+Inf`, discarding roughly 174
+  orders of magnitude of representable double range. Reachable from the public
+  API: `dkw(1e-300, 0.5, 2)` returned `Inf` instead of `1e+150`.
+
+  Separately, `safe_log()` scaled its underflow branch by `LOG_DBL_MIN`, which is
+  `log(DBL_MIN)`, while dividing by `DBL_MIN_SAFE`, which is `10 * DBL_MIN`. Every
+  result below `2.225e-307` was therefore off by exactly `log(10) = 2.302585` --
+  a finite, plausible, wrong number rather than a visible failure. It propagated
+  into `dkw(x, log = TRUE)`, `llkw()`, `llgkw()` and `pmc(log.p = TRUE)`, and made
+  `llgkw()` disagree with `dgkw()`, which takes `log(x)` directly.
+
+  The constants are now named for what they are -- `LOG_DBL_MIN`,
+  `LOG_DBL_MIN_SAFE` and `LOG_DBL_MAX` -- and `safe_log()` scales by the logarithm
+  of the divisor it actually uses. Over a regression grid of 401,373 values, 328
+  density values, 16 log-likelihoods and 3 tail probabilities changed; every one
+  moved closer to an independent log-space reference, and none moved away. The
+  largest relative error against that reference fell from `Inf` to `1.6e-16` for
+  densities and from 4.5% to `1.2e-10` for `llgkw()`. As a side effect the
+  all-`NaN` region of `grgkw()` recedes: with `x_max = 0.99` it began at
+  `beta = 80` and now extends past `beta = 130`, with the newly finite values
+  agreeing with `numDeriv::grad()` to 1.3e-9 or better.
+
+  `safe_exp()` still saturates above `log(DBL_MAX_SAFE)`, i.e. one order of
+  magnitude below the true double maximum. That headroom is the documented intent
+  of the `DBL_MAX_SAFE` constant and is left in place.
+
 ## Documentation Fixes
 
 * **`grmc()` gradient formula had inverted digamma signs** (`R/bpmc.R`): the
@@ -46,6 +76,10 @@
 * New `tests/testthat/test-zero-length-input.R` covers all 28 routines with
   zero-length data and zero-length parameters, the empty-subset idiom, and the
   correspondence with the `stats` package's convention.
+
+* New `tests/testthat/test-deep-tail-precision.R` pins the subnormal and
+  large-density regimes against a log-space reference. It fails 37 assertions
+  against 1.1.5.
 
 # gkwdist 1.1.5
 

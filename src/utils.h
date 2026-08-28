@@ -36,10 +36,13 @@ constexpr double EPSILON      = std::numeric_limits<double>::epsilon();        /
   constexpr double DBL_MIN_SAFE = std::numeric_limits<double>::min() * 10.0;   // ~2.225074e-307
   constexpr double DBL_MAX_SAFE = std::numeric_limits<double>::max() / 10.0;   // ~1.797693e+307
   
-  // Logarithmic bounds (pre-calculated for performance)
-  // NOTE: LOG_DBL_MIN = log(DBL_MIN) = log(numeric_limits<double>::min()), NOT log(DBL_MIN_SAFE)
-  constexpr double LOG_DBL_MIN  = -708.3964185322641;  // log(std::numeric_limits<double>::min())
-  constexpr double LOG_DBL_MAX  = 308.2547155599167;   // log(DBL_MAX_SAFE)
+  // Logarithmic bounds (pre-calculated for performance). Each name states which
+  // quantity it is the natural logarithm of; they are not interchangeable.
+  // LOG_DBL_MIN is log(DBL_MIN) and LOG_DBL_MIN_SAFE is log(DBL_MIN_SAFE); the two
+  // differ by log(10), so safe_exp() and safe_log() must each use their own.
+  constexpr double LOG_DBL_MIN      = -708.3964185322641;  // log(std::numeric_limits<double>::min())
+  constexpr double LOG_DBL_MIN_SAFE = -706.09383343927004; // log(DBL_MIN_SAFE)
+  constexpr double LOG_DBL_MAX      = 707.48012780038994;  // log(DBL_MAX_SAFE)
   
   // Mathematical constants (maximum precision)
   constexpr double LN2          = 0.6931471805599453094172321214581766;  // log(2)
@@ -188,11 +191,12 @@ inline double safe_log(double x) {
     return R_NegInf;
   }
   
-  // Handle potential underflow with scaled computation
-  // For x = ε * DBL_MIN_SAFE where ε is small,
-  // log(x) = log(ε) + log(DBL_MIN_SAFE) = log(ε) + LOG_DBL_MIN
+  // Handle potential underflow with scaled computation.
+  // For x = ε * DBL_MIN_SAFE with ε small,
+  // log(x) = log(ε) + log(DBL_MIN_SAFE) = log(ε) + LOG_DBL_MIN_SAFE.
+  // The scaling constant must be the logarithm of the divisor used just below.
   if (x < DBL_MIN_SAFE) {
-    return LOG_DBL_MIN + std::log(x / DBL_MIN_SAFE);
+    return LOG_DBL_MIN_SAFE + std::log(x / DBL_MIN_SAFE);
   }
   
   return std::log(x);
