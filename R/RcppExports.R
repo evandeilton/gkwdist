@@ -161,8 +161,10 @@
 #'   \code{"beta"} (Beta - 2 parameters).
 #'   The string is case-insensitive. Default is \code{"gkw"}.
 #' @param n_starts Integer specifying the number of different initial parameter values
-#'   to try during optimization. More starting points increase the probability of finding
-#'   the global optimum at the cost of longer computation time. Default is 5.
+#'   to try during optimization. Every starting point is optimized and the candidate with
+#'   the smallest objective is returned, so more starting points can only improve the fit,
+#'   at a cost that grows linearly in \code{n_starts}. Default is 5. Four fixed,
+#'   family-specific starting points are always used, so values below 4 behave as 4.
 #'
 #' @return Named numeric vector containing the estimated parameters for the specified
 #'   distribution family. Parameter names correspond to the distribution specification.
@@ -176,9 +178,16 @@
 #'
 #' Key implementation features: logarithmic calculations for numerical stability,
 #' adaptive numerical integration using Simpson's rule with fallback to trapezoidal rule,
-#' multiple random starting points to avoid local minima, decreasing weights for
+#' multiple starting points to avoid local minima, decreasing weights for
 #' higher-order moments (1.0, 0.8, 0.6, 0.4, 0.2), and automatic parameter constraint
 #' enforcement.
+#'
+#' Multiple starts: the grid of starting points is built from four fixed, family-specific
+#' points -- one of them derived from the sample moments -- plus \code{n_starts - 4}
+#' further points drawn over the family's parameter box. Nelder-Mead is run from every
+#' point in the grid, each result is clipped to the parameter box, and the clipped
+#' candidate with the smallest objective is returned. Because the candidate set grows
+#' with \code{n_starts}, the returned objective is non-increasing in \code{n_starts}.
 #'
 #' Parameter Constraints:
 #' All parameters are constrained to positive values. Additionally, family-specific

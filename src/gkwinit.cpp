@@ -704,8 +704,10 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //'   \code{"beta"} (Beta - 2 parameters).
 //'   The string is case-insensitive. Default is \code{"gkw"}.
 //' @param n_starts Integer specifying the number of different initial parameter values
-//'   to try during optimization. More starting points increase the probability of finding
-//'   the global optimum at the cost of longer computation time. Default is 5.
+//'   to try during optimization. Every starting point is optimized and the candidate with
+//'   the smallest objective is returned, so more starting points can only improve the fit,
+//'   at a cost that grows linearly in \code{n_starts}. Default is 5. Four fixed,
+//'   family-specific starting points are always used, so values below 4 behave as 4.
 //'
 //' @return Named numeric vector containing the estimated parameters for the specified
 //'   distribution family. Parameter names correspond to the distribution specification.
@@ -719,9 +721,16 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //'
 //' Key implementation features: logarithmic calculations for numerical stability,
 //' adaptive numerical integration using Simpson's rule with fallback to trapezoidal rule,
-//' multiple random starting points to avoid local minima, decreasing weights for
+//' multiple starting points to avoid local minima, decreasing weights for
 //' higher-order moments (1.0, 0.8, 0.6, 0.4, 0.2), and automatic parameter constraint
 //' enforcement.
+//'
+//' Multiple starts: the grid of starting points is built from four fixed, family-specific
+//' points -- one of them derived from the sample moments -- plus \code{n_starts - 4}
+//' further points drawn over the family's parameter box. Nelder-Mead is run from every
+//' point in the grid, each result is clipped to the parameter box, and the clipped
+//' candidate with the smallest objective is returned. Because the candidate set grows
+//' with \code{n_starts}, the returned objective is non-increasing in \code{n_starts}.
 //'
 //' Parameter Constraints:
 //' All parameters are constrained to positive values. Additionally, family-specific
@@ -811,20 +820,37 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
    double best_obj = std::numeric_limits<double>::max();
    bool found_valid_solution = false;
 
+   // Every candidate is optimized and only the OPTIMIZED objectives are
+   // compared.  Gating the Nelder-Mead call on the raw objective at the
+   // starting point, against a best_obj that already holds an optimized
+   // value, discarded every start that did not happen to begin below the
+   // incumbent -- in practice only the first point was ever optimized and
+   // n_starts had no effect at all.
+   const double kSentinel = std::numeric_limits<double>::max();
+
    for (size_t i = 0; i < initial_points.size(); i++) {
      try {
-       double obj_val = objective_function(initial_points[i], sample_moments, family);
+       // Skip only points the objective cannot score at all; a merely poor
+       // start is exactly the case multi-start exists to rescue.
+       const double start_obj = objective_function(initial_points[i], sample_moments, family);
+       if (!std::isfinite(start_obj) || start_obj >= kSentinel) {
+         continue;
+       }
+
+       // Score the candidate AFTER the box constraints, because that is the
+       // vector the function returns.  Nelder-Mead is unconstrained and can
+       // leave the family box; comparing the pre-clamp objective and then
+       // clamping the winner could hand back a worse fit than a rival that
+       // stayed inside, and made the reported error non-monotone in n_starts.
+       arma::vec optimized = constrain_parameters(
+         optimize_nelder_mead(initial_points[i], sample_moments, family), family);
+
+       const double obj_val = objective_function(optimized, sample_moments, family);
 
        if (std::isfinite(obj_val) && obj_val < best_obj) {
-         arma::vec optimized = optimize_nelder_mead(initial_points[i], sample_moments, family);
-
-         obj_val = objective_function(optimized, sample_moments, family);
-
-         if (std::isfinite(obj_val) && obj_val < best_obj) {
-           best_theta = optimized;
-           best_obj = obj_val;
-           found_valid_solution = true;
-         }
+         best_theta = optimized;
+         best_obj = obj_val;
+         found_valid_solution = true;
        }
      } catch (...) {
        continue;
