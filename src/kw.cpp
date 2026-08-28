@@ -448,30 +448,14 @@ Rcpp::NumericVector rkw(
     
     // Generate U ~ Uniform(0,1)
     double U = R::runif(0.0, 1.0);
-    
-    // Step 1: 1 - U
-    double step1 = 1.0 - U;
-    step1 = std::max(0.0, step1);
-    
-    // Step 2: (1 - U)^(1/β)
-    double step2 = safe_pow(step1, 1.0 / b);
-    
-    // Step 3: 1 - (1 - U)^(1/β)
-    double step3 = 1.0 - step2;
-    step3 = std::max(0.0, step3);
-    
-    // Step 4: {1 - (1 - U)^(1/β)}^(1/α)
-    double x;
-    if (a == 1.0) {
-      x = step3;
-    } else {
-      x = safe_pow(step3, 1.0 / a);
-    }
-    
-    // Clamp to valid support
-    x = std::max(0.0, std::min(1.0, x));
-    
-    out(i) = x;
+
+    // x = [1 - (1-U)^(1/beta)]^(1/alpha), inverted in log space. Forming
+    // 1 - U and then 1 - (1-U)^(1/beta) in linear arithmetic is what drove the
+    // draw out of the open support: once either subtraction rounded to 0 the
+    // generator returned exactly 0 or 1.
+    // The draw itself is untouched, so the RNG stream is identical to
+    // before; only the inversion that follows it changes.
+    out(i) = std::exp(gkw_log1mexp(std::log1p(-U) / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

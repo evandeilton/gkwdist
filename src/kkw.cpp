@@ -487,36 +487,13 @@ Rcpp::NumericVector rkkw(
     
     // Generate V ~ Uniform(0,1)
     double V = R::runif(0.0, 1.0);
-    
-    // Step 1: U = 1 - (1-V)^(1/(δ+1))
-    double U = 1.0 - safe_pow(1.0 - V, 1.0 / (dd + 1.0));
-    U = std::max(0.0, std::min(1.0, U));
-    
-    // Step 2: u_pow = U^(1/λ)
-    double u_pow = (ll == 1.0) ? U : safe_pow(U, 1.0 / ll);
-    
-    // Step 3: bracket = 1 - u_pow
-    double bracket = 1.0 - u_pow;
-    bracket = std::max(0.0, std::min(1.0, bracket));
-    
-    // Step 4: bracket2 = bracket^(1/β)
-    double bracket2 = safe_pow(bracket, 1.0 / b);
-    
-    // Step 5: xalpha = 1 - bracket2
-    double xalpha = 1.0 - bracket2;
-    xalpha = std::max(0.0, std::min(1.0, xalpha));
-    
-    // Step 6: x = xalpha^(1/α)
-    double xx;
-    if (a == 1.0) {
-      xx = xalpha;
-    } else {
-      xx = safe_pow(xalpha, 1.0 / a);
-      if (!R_finite(xx) || xx < 0.0) xx = 0.0;
-      if (xx > 1.0) xx = 1.0;
-    }
-    
-    out(i) = xx;
+
+    // 1 - y^lambda = (1-V)^(1/(delta+1)), then y = 1 - (1 - x^alpha)^beta.
+    // Four linear subtractions used to stand between the draw and the variate.
+    // The draw itself is untouched, so the RNG stream is identical to
+    // before; only the inversion that follows it changes.
+    double log_y = gkw_log1mexp(std::log1p(-V) / (dd + 1.0)) / ll;
+    out(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_y) / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

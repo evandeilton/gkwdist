@@ -476,37 +476,18 @@ Rcpp::NumericVector rbkw(
       continue;
     }
     
-    // Generate V ~ Beta(γ, δ+1)
+    // Generate V ~ Beta(gamma, delta+1)
     double V = R::rbeta(g, d + 1.0);
-    
-    // Handle boundary cases
-    double one_minus_V = 1.0 - V;
-    if (one_minus_V <= 0.0) {
-      out(i) = 1.0;
-      continue;
-    }
-    if (one_minus_V >= 1.0) {
-      out(i) = 0.0;
-      continue;
-    }
-    
-    // Transform: (1 - V)^(1/β)
-    double temp = safe_pow(one_minus_V, 1.0 / b);
-    
-    // Transform: 1 - (1 - V)^(1/β)
-    double xval = 1.0 - temp;
-    xval = std::max(0.0, std::min(1.0, xval));
-    
-    // Transform: {1 - (1 - V)^(1/β)}^(1/α)
-    double rv;
-    if (a == 1.0) {
-      rv = xval;
-    } else {
-      rv = safe_pow(xval, 1.0 / a);
-      rv = std::max(0.0, std::min(1.0, rv));
-    }
-    
-    out(i) = rv;
+
+    // V is the incomplete-beta variate z, and x = [1 - (1-z)^(1/beta)]^(1/alpha).
+    // The former code formed 1.0 - V: for V below 1.1e-16 that rounds to exactly
+    // 1 and the generator returned 0, a value outside the open support that
+    // llbkw() then rejects. With gamma = 0.02 it fabricated a zero for 48.6% of
+    // the sample, while R::rbeta itself never returned one. log1p(-V) keeps the
+    // digits that subtraction threw away.
+    // The draw itself is untouched, so the RNG stream is identical to
+    // before; only the inversion that follows it changes.
+    out(i) = std::exp(gkw_log1mexp(std::log1p(-V) / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

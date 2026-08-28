@@ -467,32 +467,11 @@ Rcpp::NumericVector rekw(
     
     // Generate U ~ Uniform(0,1)
     double U = R::runif(0.0, 1.0);
-    
-    // Step 1: U^(1/λ)
-    double step1 = safe_pow(U, 1.0 / l);
-    
-    // Step 2: 1 - U^(1/λ)
-    double step2 = 1.0 - step1;
-    step2 = std::max(0.0, step2);
-    
-    // Step 3: [1 - U^(1/λ)]^(1/β)
-    double step3 = safe_pow(step2, 1.0 / b);
-    
-    // Step 4: 1 - [1 - U^(1/λ)]^(1/β)
-    double step4 = 1.0 - step3;
-    step4 = std::max(0.0, step4);
-    
-    // Step 5: {1 - [1 - U^(1/λ)]^(1/β)}^(1/α)
-    double x;
-    if (a == 1.0) {
-      x = step4;
-    } else {
-      x = safe_pow(step4, 1.0 / a);
-      if (!R_finite(x) || x < 0.0) x = 0.0;
-      if (x > 1.0) x = 1.0;
-    }
-    
-    out(i) = x;
+
+    // x = [1 - (1 - U^(1/lambda))^(1/beta)]^(1/alpha), inverted in log space.
+    // The draw itself is untouched, so the RNG stream is identical to
+    // before; only the inversion that follows it changes.
+    out(i) = std::exp(gkw_log1mexp(gkw_log1mexp(std::log(U) / l) / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

@@ -487,82 +487,15 @@ Rcpp::NumericVector rgkw(
       continue;
     }
     
-    // Generate V ~ Beta(γ, δ+1)
+    // Generate V ~ Beta(gamma, delta+1)
     double vi = R::rbeta(g, d + 1.0);
-    
-    // Handle boundary cases
-    if (vi <= 0.0) {
-      result(i) = 0.0;
-      continue;
-    }
-    
-    if (vi >= 1.0) {
-      result(i) = 1.0;
-      continue;
-    }
-    
-    // Transform: v = V^(1/λ)
-    double vl = (l == 1.0) ? vi : safe_pow(vi, 1.0/l);
-    if (!R_finite(vl)) {
-      result(i) = (vl == R_PosInf) ? 1.0 : 0.0;
-      continue;
-    }
-    
-    // Transform: tmp = 1 - v
-    double tmp = 1.0 - vl;
-    if (!R_finite(tmp)) {
-      result(i) = (tmp == R_PosInf) ? 0.0 : 1.0;
-      continue;
-    }
-    
-    if (tmp <= 0.0) {
-      result(i) = 1.0;
-      continue;
-    }
-    
-    if (tmp >= 1.0) {
-      result(i) = 0.0;
-      continue;
-    }
-    
-    // Transform: tmp2 = tmp^(1/β)
-    double tmp2 = (b == 1.0) ? tmp : safe_pow(tmp, 1.0/b);
-    if (!R_finite(tmp2)) {
-      result(i) = (tmp2 == R_PosInf) ? 0.0 : 1.0;
-      continue;
-    }
-    
-    if (tmp2 <= 0.0) {
-      result(i) = 1.0;
-      continue;
-    }
-    
-    if (tmp2 >= 1.0) {
-      result(i) = 0.0;
-      continue;
-    }
-    
-    // Transform: x = (1 - tmp2)^(1/α)
-    double one_minus_tmp2 = 1.0 - tmp2;
-    if (!R_finite(one_minus_tmp2)) {
-      result(i) = (one_minus_tmp2 == R_PosInf) ? 0.0 : 1.0;
-      continue;
-    }
-    
-    double xx = (a == 1.0) ? one_minus_tmp2 : safe_pow(one_minus_tmp2, 1.0/a);
-    if (!R_finite(xx)) {
-      result(i) = (xx == R_PosInf) ? 1.0 : 0.0;
-      continue;
-    }
-    
-    // Clamp to valid support
-    if (xx < 0.0) {
-      xx = 0.0;
-    } else if (xx > 1.0) {
-      xx = 1.0;
-    }
-    
-    result(i) = xx;
+
+    // vi is y = [1 - (1 - x^alpha)^beta]^lambda; invert in log space rather
+    // than through 1 - v and 1 - v^(1/beta) in linear arithmetic.
+    // The draw itself is untouched, so the RNG stream is identical to
+    // before; only the inversion that follows it changes.
+    double log_w = std::log(vi) / l;
+    result(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_w) / b) / a);
   }
   
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);

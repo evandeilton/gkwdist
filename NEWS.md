@@ -17,6 +17,38 @@
   happened to be empty, such as `dkw(x[x > 1], 2, 3)`, was enough to trigger the
   crash. Numerical output is unchanged for every non-empty input.
 
+* **`rbkw()` and `rkkw()` generated values outside the open support**
+  (`gkw.cpp`, `bkw.cpp`, `kkw.cpp`, `ekw.cpp`, `kw.cpp`): `rbkw()` drew
+  `V ~ Beta(gamma, delta+1)` and then formed `1.0 - V`. For `V` below `1.1e-16`
+  that rounds to exactly 1 and the generator returned 0. `R::rbeta` itself never
+  returned a zero -- every one was fabricated by the subtraction:
+
+  ```
+  rbkw(1e5, 2, 3, 0.02, 0)    48,602 exact zeros    48.6% of the sample
+  rbkw(1e5, 2, 3, 0.05, 0)    16,440 exact zeros
+  rkkw(1e5, 0.2, 3, 0, 0.3)        6 exact zeros
+  ```
+
+  A zero is outside the `(0,1)` the likelihood accepts, so the package's own
+  simulate-then-fit workflow broke on six zeros in a hundred thousand:
+  `llkkw()` at the *true* parameters returned `Inf` and `optim()` stopped with
+  "L-BFGS-B needs finite values of 'fn'". Kolmogorov-Smirnov against the
+  package's own CDF rejected the `gamma = 0.02` sample outright, `D = 0.486`.
+
+  The five generators that formed `1 - u` -- `rgkw()`, `rbkw()`, `rkkw()`,
+  `rekw()`, `rkw()` -- now invert in log space, the same chain the quantile
+  functions use. `rmc()` and `rbeta_()` never had the defect and are untouched.
+
+  The draws themselves are unchanged, so `set.seed()` reproduces exactly the
+  stream it did before: `.Random.seed` after 100,000 variates is bit-identical
+  for all seven generators. Only the inversion that follows differs. Replaying
+  the same Beta draws, 97,559 of 100,000 `rbkw()` values changed and every one
+  moved closer to the closed-form inversion, none away; the largest relative
+  error falls from `1.0` to `7.2e-15`, and for `rkkw()` from `1.0` to `8.5e-14`.
+  The Kolmogorov-Smirnov statistic for `gamma = 0.02` goes from `D = 0.486`
+  (`p < 1e-16`, 24,277 variates outside the support) to `D = 0.0042`,
+  `p = 0.336`, none outside. The fit now converges and recovers the parameters.
+
 * **All seven quantile functions returned values outside the open support**
   (`gkw.cpp`, `bkw.cpp`, `kkw.cpp`, `ekw.cpp`, `bpmc.cpp`, `kw.cpp`,
   `beta_.cpp`): each `q*()` undid `log.p` with `exp()`, folded the upper tail
@@ -259,6 +291,12 @@
   against closed-form inversions, checks that they stay inside `(0,1)`, that
   `p(q(u))` recovers `u`, that the boundary conventions are unchanged and that
   the nesting identities hold. It fails 28 assertions against 1.1.5.
+
+* New `tests/testthat/test-rng-log-space.R` checks that every generator stays
+  inside `(0,1)`, that `rbkw()` reproduces the closed-form inversion of its own
+  replayed draw, that `set.seed()` still reproduces, that the sample passes a
+  Kolmogorov-Smirnov test against its own CDF, and that simulate-then-fit runs
+  end to end. It fails 8 assertions against 1.1.5.
 
 # gkwdist 1.1.5
 
