@@ -546,8 +546,17 @@ double llgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   arma::vec x = Rcpp::as<arma::vec>(data);
   
   // Validate data support
+  //
+  // llgkw() returns the NEGATIVE log-likelihood, so an invalid point must be
+  // +Inf: the value optim() moves away from. Returning -Inf made data outside
+  // the open support the global minimum of the objective, and left llgkw() the
+  // only one of the seven families with that sign -- llbkw(), llkkw(), llekw(),
+  // llkw(), llmc() and llbeta() all return +Inf here. The practical damage was
+  // in comparing likelihoods rather than in optim(), which refuses to start at
+  // either infinity: on data holding a single 0, the GKw family won every
+  // selection by nll = -Inf and AIC = -Inf.
   if (arma::any(x <= 0) || arma::any(x >= 1)) {
-    return R_NegInf;
+    return R_PosInf;
   }
   
   int n = x.n_elem;

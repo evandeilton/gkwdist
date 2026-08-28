@@ -2,6 +2,28 @@
 
 ## Critical Bug Fixes
 
+* **`llgkw()` returned `-Inf` for data outside the open support** (`gkw.cpp`):
+  `ll*()` is the negative log-likelihood, so an invalid point must be `+Inf` --
+  the value `optim()` moves away from. `llgkw()` returned `-Inf`, making data
+  outside `(0, 1)` the global minimum of the function being minimised, and it
+  was the only one of the seven families with that sign; `llbkw()`, `llkkw()`,
+  `llekw()`, `llkw()`, `llmc()` and `llbeta()` all returned `+Inf`. The parameter
+  path in `llgkw()` was already `+Inf` and is unchanged.
+
+  The practical damage was in comparing likelihoods rather than in optimisation:
+  `optim()` refuses to start at either infinity, so no optimiser silently
+  converged on bad data. But on a sample holding a single `0` -- ordinary in
+  untransformed proportions -- the GKw family won every comparison:
+
+  ```
+  gkw  nll = -Inf     <- wins        argmin = gkw
+  bkw  nll =  Inf                    AIC    = -Inf
+  ...  nll =  Inf
+  ```
+
+  Values for valid data are bit-identical, and the nesting identities against
+  `llkw()`, `llbkw()` and `llekw()` still agree to 1e-12.
+
 * **Zero-length arguments crashed the R process** (all seven families): the
   vectorised `d*()`, `p*()`, `q*()` and `r*()` routines size their output as the
   maximum length of their inputs and then recycle with `i % vec.n_elem`. When one
