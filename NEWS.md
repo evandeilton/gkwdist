@@ -417,6 +417,27 @@
   suppressing a real finding. Removing it restores the check's ability to
   notice a genuine undefined global in future.
 
+## Deprecated
+
+* **The re-exported pipe, `%>%`, is deprecated and will be removed in a future
+  release. Nothing changes in this one:** it is still exported and still
+  behaves exactly as before.
+
+  gkwdist does not use the pipe anywhere -- not in `R/`, not in the tests, not
+  in the vignettes. It re-exports `magrittr`'s operator and nothing else, which
+  is the sole reason `magrittr` is a hard dependency, so every installation of
+  a distributions package pulls in a package it never calls. R has had a native
+  pipe, `|>`, since 4.1.0, and users who want `%>%` can attach it from its own
+  source.
+
+  This is announced a release ahead rather than done now because
+  `export("%>%")` is public API: code that reads `library(gkwdist)` and then
+  uses `%>%` without attaching magrittr or a tidyverse package would stop
+  working the moment the export went away, with `could not find function
+  "%>%"`. If your code depends on gkwdist supplying it, switch now to
+  `library(magrittr)` (or any tidyverse package that re-exports it), or to
+  `|>`. The change is invisible if you already attach magrittr yourself.
+
 ## Testing
 
 * New `tests/testthat/test-zero-length-input.R` covers all 28 routines with
