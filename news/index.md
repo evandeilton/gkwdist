@@ -51,6 +51,88 @@
   overflow and underflow before they happen – and points callers who do
   not need that to `std::pow`.
 
+### Base R Contract
+
+- **`Rcpp::warning()` fired once per element inside the vectorised
+  loops** (`dgkw`, `pgkw`, `qgkw`, `rgkw`, and the six nested `r*`): on
+  50,000 values with half the parameters invalid that cost 51x, and
+  under `options(warn = 2)` each call longjmps out of the loop through
+  C++ frames holding live Armadillo objects. R’s own convention is a
+  single warning per call. Each routine now sets a flag and warns once
+  after the loop.
+
+      50,000 values, half invalid      before      after
+      elapsed                          0.514 s     0.005 s
+      warnings raised                  25,000      1
+
+  The message now also names what the routine actually returns, which
+  base R pairs up: `dbeta(0.5, -1, 1)` is `NaN` and warns *“NaNs
+  produced”*, while `rbeta(2, -1, 1)` is `NA` and warns *“NAs
+  produced”*. `p*`, `q*` and `r*` fill `NA_REAL` and say so.
+  [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md)
+  leaves its fill value, 0, so it says *“invalid parameters”* and claims
+  no return value at all – promising a `NaN` that is not there is the
+  defect this release fixed for `q*()`.
+
+  Values are bit-identical over the 238,140-value regression grid. The
+  path is reachable from the exported API only through an `Inf`
+  parameter, since every wrapper
+  [`stop()`](https://rdrr.io/r/base/stop.html)s on `<= 0`, `NA` and
+  `NaN`.
+
+  **Known inconsistency, recorded rather than papered over:**
+  `man/dgkw.Rd` says the function returns `NaN` for invalid parameters.
+  It returns 0. The other six families document and return the same 0.
+  Aligning the two is a behaviour decision and is deliberately not made
+  here.
+
+- **`d*()` returned 0 at `x = 0` and `x = 1`, where base R returns the
+  limit** (all seven families): the GKw support is the open interval,
+  but base R’s density functions carry the limiting value at the closed
+  boundary – `dbeta(0, 0.5, 1)` is `Inf` and `dbeta(1, 2, 1)` is 2 – and
+  any code that plots a density across `[0, 1]` depends on it. Curves
+  fell to zero exactly where they should have diverged.
+
+  Substituting the first-order forms the log chain already uses, the
+  log-density at each boundary collapses to a constant plus one power of
+  the vanishing quantity, so a single exponent decides the answer:
+
+      at x = 0:  alpha*gamma*lambda - 1        at x = 1:  beta*(delta + 1) - 1
+          > 0  ->  0        = 0  ->  the constant        < 0  ->  Inf
+
+  Each nested family reaches this through its own fixed parameters. The
+  rule was checked against
+  [`stats::dbeta`](https://rdrr.io/r/stats/Beta.html) at all ten
+  combinations the Beta parameterisation can express, and against the
+  nesting identities at both boundaries for the other six.
+
+      dkw(0, 0.5, 1)     0  ->  Inf        dbeta_(1, 2, 0)     0  ->  2
+
+  Anything strictly outside `[0, 1]` is still 0, as in base R, and the
+  interior is bit-identical over the 238,140-value regression grid.
+
+- **`d*()`, `p*()` and `q*()` dropped `dim`, `dimnames` and `names`**
+  (all seven families): base R carries the first argument’s attributes
+  through to the output, so code that indexes or plots the result by
+  shape keeps working.
+
+                                        before   after   stats::dbeta
+      dim(d(matrix(x, 2, 2), 2, 3))      NULL     2 2     2 2
+      names(d(c(a = .2, b = .5), 2, 3))  NULL     a b     a b
+
+  The copy is conditional on the lengths agreeing, which is also what
+  base R does: once a recycled parameter makes the output longer than
+  the first argument, [`dim()`](https://rdrr.io/r/base/dim.html) is
+  `NULL` in both. Values are bit-identical over the 238,140-value
+  regression grid.
+
+- **`r*(0)` raised an error instead of returning `numeric(0)`** (all
+  seven families): `stats::rbeta(0, 2, 3)` is `numeric(0)`, and a
+  generator that errors instead breaks any loop or
+  [`replicate()`](https://rdrr.io/r/base/lapply.html) that reaches an
+  empty case. All seven now return `numeric(0)`. A negative or missing
+  `n` is still an error, as in base R.
+
 ### Critical Bug Fixes
 
 - **[`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md)
