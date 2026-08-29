@@ -417,6 +417,25 @@
   suppressing a real finding. Removing it restores the check's ability to
   notice a genuine undefined global in future.
 
+* **New `.github/workflows/sanitizers.yaml` runs the compiled code under
+  runtime sanitizers.** CI had none: no ASan, UBSan, valgrind or rhub job
+  anywhere. That gap is what let the worst defect of this release through. The
+  `SIGFPE` from `i % 0` on zero-length input, which killed the R process
+  outright, produced no diagnostic under `-Wall -Wextra -Wformat=2`, passed
+  `R CMD check` cleanly, and kept the whole five-platform `R-CMD-check` matrix
+  green. UBSan names it on the first call, with a stack trace:
+
+  ```
+  gkw.cpp:134:21: runtime error: division by zero
+      #0 ... in dgkw(...) src/gkw.cpp:134
+      #1 ... in _gkwdist_dgkw   src/RcppExports.cpp:415
+  ```
+
+  The workflow has two jobs: UBSan on stock R with GCC, which links `libubsan`
+  into `gkwdist.so` and needs no instrumented R, and R-hub's `clang-asan`
+  container, which adds AddressSanitizer. Both are `continue-on-error: true`
+  for now, so a finding reports without blocking a pull request.
+
 ## Deprecated
 
 * **The re-exported pipe, `%>%`, is deprecated and will be removed in a future

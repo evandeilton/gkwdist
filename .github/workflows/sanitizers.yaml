@@ -1,0 +1,154 @@
+# Runtime sanitizer checks for the compiled code in src/.
+#
+# Why this exists: the most severe defect found in the 1.1.6 audit was a SIGFPE
+# from an `i % 0` on zero-length input, which killed the R process outright. It
+# produced no compiler diagnostic under -Wall -Wextra -Wformat=2 and a clean
+# R CMD check, and the ordinary R-CMD-check.yaml matrix was green throughout.
+# UBSan names it on the first call:
+#
+#   gkw.cpp:134:21: runtime error: division by zero
+#
+# Both jobs are continue-on-error: true, so a sanitizer finding reports without
+# blocking a pull request. Remove that line once the jobs have been green for a
+# few runs and you want them to gate merges.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  schedule:
+    # Weekly, so the containers get exercised even in quiet periods.
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+name: sanitizers.yaml
+
+permissions: read-all
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # UBSan on stock R with GCC. Fast and self-contained: libubsan is linked into
+  # gkwdist.so itself, so no instrumented R build is needed. Catches the
+  # integer-divide-by-zero, shift, bounds and null classes.
+  # ---------------------------------------------------------------------------
+  ubsan:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    name: UBSan (gcc, R release)
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      NOT_CRAN: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+
+      # Dependencies are installed BEFORE the sanitizer flags are written, so
+      # only gkwdist itself is instrumented.
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          needs: check
+
+      - name: Write sanitizer Makevars
+        run: |
+          mkdir -p ~/.R
+          cat > ~/.R/Makevars <<'EOF'
+          CXX = g++ -fsanitize=undefined -fno-omit-frame-pointer
+          CXX14 = g++ -std=gnu++14 -fsanitize=undefined -fno-omit-frame-pointer
+          CXX17 = g++ -std=gnu++17 -fsanitize=undefined -fno-omit-frame-pointer
+          CXX20 = g++ -std=gnu++20 -fsanitize=undefined -fno-omit-frame-pointer
+          CXXFLAGS = -g -O1
+          CXX14FLAGS = -g -O1
+          CXX17FLAGS = -g -O1
+          CXX20FLAGS = -g -O1
+          EOF
+          cat ~/.R/Makevars
+
+      - name: Install gkwdist with UBSan
+        run: R CMD INSTALL --no-multiarch --preclean .
+
+      - name: Run the test suite under UBSan
+        env:
+          UBSAN_OPTIONS: print_stacktrace=1
+        run: |
+          set -o pipefail
+          Rscript -e 'library(gkwdist); testthat::test_dir("tests/testthat", stop_on_failure = TRUE)' 2>&1 | tee ubsan-tests.log
+
+      - name: Run the examples under UBSan
+        env:
+          UBSAN_OPTIONS: print_stacktrace=1
+        run: |
+          set -o pipefail
+          Rscript -e 'library(gkwdist); tools::testInstalledPackage("gkwdist", types = "examples", outDir = ".")' 2>&1 | tee ubsan-examples.log
+          if [ -f gkwdist-Ex.Rout.fail ]; then cat gkwdist-Ex.Rout.fail; fi
+          if [ -f gkwdist-Ex.Rout ]; then cat gkwdist-Ex.Rout >> ubsan-examples.log; fi
+
+      - name: Fail if UBSan reported anything
+        run: |
+          if grep -h "runtime error:" ubsan-*.log; then
+            echo "::error::UBSan reported the runtime errors listed above."
+            exit 1
+          fi
+          echo "UBSan clean: no 'runtime error:' in the test or example output."
+
+      - name: Upload sanitizer logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubsan-logs
+          path: ubsan-*.log
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # ASan + UBSan in R-hub's clang-asan container, where R itself is instrumented.
+  # This is the only way to get AddressSanitizer coverage (heap overflows,
+  # use-after-free), which the stock-R job above cannot provide.
+  # ---------------------------------------------------------------------------
+  rhub-setup:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    name: R-hub setup
+    outputs:
+      containers: ${{ steps.rhub-setup.outputs.containers }}
+
+    steps:
+      - uses: r-hub/actions/setup@v1
+        with:
+          config: clang-asan
+        id: rhub-setup
+
+  clang-asan:
+    needs: rhub-setup
+    if: ${{ needs.rhub-setup.outputs.containers != '' && needs.rhub-setup.outputs.containers != '[]' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    name: ${{ matrix.config.label }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config: ${{ fromJson(needs.rhub-setup.outputs.containers) }}
+
+    container:
+      image: ${{ matrix.config.container }}
+
+    steps:
+      - uses: r-hub/actions/checkout@v1
+
+      - uses: r-hub/actions/platform-info@v1
+        with:
+          job-config: ${{ matrix.config.job-config }}
+
+      - uses: r-hub/actions/setup-deps@v1
+        with:
+          job-config: ${{ matrix.config.job-config }}
+
+      - uses: r-hub/actions/run-check@v1
+        with:
+          job-config: ${{ matrix.config.job-config }}
