@@ -390,9 +390,30 @@ Rcpp::NumericVector pgkw(
     // F = I_y(gamma, delta+1) with y = [1 - (1 - q^alpha)^beta]^lambda, and
     // lower_tail/log_p go straight to R::pbeta rather than being applied by
     // forming 1 - p or log(p) afterwards.
+    //
+    // The remaining loss was in the argument rather than the tail flag. Once y
+    // passes 1/2 a double holds it no more finely than 1.1e-16, and the upper
+    // tail is a function of 1 - y alone, so it was quantised to whatever that
+    // left -- and once l*log_w fell below 1.1e-16, exp() returned exactly 1 and
+    // R::pbeta(1, ., ., lower = FALSE) returned exactly 0. Against a 300-digit
+    // incomplete beta, pgkw(x, 2, 3, 1.5, 2, 0.8, lower.tail = FALSE) was 1.9%
+    // in error by x = 1 - 1e-05 and exactly 0 from 1 - 1e-06 on, where the true
+    // value is 5.7e-52 and stays representable down to 1.5e-141.
+    //
+    // I_y(a,b) = 1 - I_{1-y}(b,a) is exact, and 1 - y is -expm1 of the same
+    // exponent that produces y, at full relative accuracy. Reflecting sends the
+    // small quantity into pbeta and the large one out of it. Below the crossover
+    // the direct form already holds the small quantity, so it is left exactly as
+    // it was: the lower tail never changes, and neither does any upper tail with
+    // y <= 1/2. LOG1MEXP_CROSSOVER is -log(2), the same point gkw_log1mexp()
+    // uses to decide which of y and 1 - y a double can hold.
     double log_w = gkw_log1mexp(b * gkw_log1mexp(a * std::log(qi)));
-    double y = std::exp(l * log_w);
-    result(i) = R::pbeta(y, g, d + 1.0, lower_tail, log_p);
+    double log_y = l * log_w;
+    if (!lower_tail && log_y > LOG1MEXP_CROSSOVER) {
+      result(i) = R::pbeta(-std::expm1(log_y), d + 1.0, g, /*lower*/ 1, log_p);
+    } else {
+      result(i) = R::pbeta(std::exp(log_y), g, d + 1.0, lower_tail, log_p);
+    }
   }
   
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);
