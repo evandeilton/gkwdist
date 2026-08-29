@@ -43,8 +43,10 @@ A vector of density values (\\f(x)\\) or log-density values
 (\\\log(f(x))\\). The length of the result is determined by the
 recycling rule applied to the arguments (`x`, `alpha`, `beta`,
 `lambda`). Returns `0` (or `-Inf` if `log = TRUE`) for `x` outside the
-interval (0, 1), or `NaN` if parameters are invalid (e.g., `alpha <= 0`,
-`beta <= 0`, `lambda <= 0`).
+interval (0, 1). An out-of-bound or missing parameter is an error, not a
+return value: the wrapper stops with a message naming the parameter. An
+infinite parameter is not currently intercepted there and reaches the
+C++ layer, which treats it as invalid.
 
 ## Details
 

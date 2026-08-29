@@ -118,8 +118,10 @@ when <code>lower.tail = TRUE</code>).</p></li>
 <li><p><code>1</code> for <code>p = 1</code> (or <code>p = 0</code> if <code>log.p = TRUE</code>,
 when <code>lower.tail = TRUE</code>).</p></li>
 <li><p><code>NaN</code> for <code>p &lt; 0</code> or <code>p &gt; 1</code> (or corresponding log scale).</p></li>
-<li><p><code>NaN</code> for invalid parameters (e.g., <code>alpha &lt;= 0</code>,
-<code>beta &lt;= 0</code>, <code>delta &lt; 0</code>, <code>lambda &lt;= 0</code>).</p></li>
+<li><p>An out-of-bound or missing parameter is an error, not a
+return value: the wrapper stops with a message naming the parameter.
+An infinite parameter is not currently intercepted there and reaches
+the C++ layer, which treats it as invalid.</p></li>
 </ul><p>Boundary return values are adjusted accordingly for <code>lower.tail = FALSE</code>.</p>
     </div>
     <div class="section level2">

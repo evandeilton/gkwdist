@@ -38,9 +38,11 @@ rekw(n, alpha = 1, beta = 1, lambda = 1)
 
 A vector of length `n` containing random deviates from the EKw
 distribution. The length of the result is determined by `n` and the
-recycling rule applied to the parameters (`alpha`, `beta`, `lambda`).
-Returns `NaN` if parameters are invalid (e.g., `alpha <= 0`,
-`beta <= 0`, `lambda <= 0`).
+recycling rule applied to the parameters (`alpha`, `beta`, `lambda`). An
+out-of-bound or missing parameter is an error, not a return value: the
+wrapper stops with a message naming the parameter. An infinite parameter
+is not currently intercepted there and reaches the C++ layer, which
+treats it as invalid.
 
 ## Details
 

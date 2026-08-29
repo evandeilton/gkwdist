@@ -53,6 +53,41 @@
 
 ### Base R Contract
 
+- **The `@return` contract said `NaN`, the wrappers said
+  [`stop()`](https://rdrr.io/r/base/stop.html)** (all 28 `d*`, `p*`,
+  `q*` and `r*` functions): the audit asked for one contract chosen and
+  propagated. [`stop()`](https://rdrr.io/r/base/stop.html) is the one
+  kept – it is what the package has shipped for its whole CRAN life, a
+  named error is a better diagnostic than a `NaN` for the case that
+  actually occurs, and switching to `NaN` would break every
+  `tryCatch(..., error = )` guard written against it. All 28 `@return`
+  blocks now describe the behaviour the functions have. `gr*()` and
+  `hs*()` genuinely do return `NaN`, and their 14 blocks are unchanged.
+
+  Documentation only. No guard, message or value changes.
+
+  **Known and deliberately left open:** an infinite parameter is not
+  intercepted by the wrapper – `any(alpha <= 0)` is `FALSE` for `Inf`
+  and [`anyNA()`](https://rdrr.io/r/base/NA.html) does not catch it – so
+  it reaches C++, where `check_*_pars()` has always rejected it, and the
+  routine leaves its fill value. Tightening the R guard is correct in
+  principle but is a behaviour change with a reverse-dependency cost:
+  `gkwreg::predict()` clamps only the lower bound of its linear
+  predictor, so `exp(eta)` can overflow to `Inf` on extrapolated
+  `newdata`, and one such row would abort the whole prediction vector.
+  The value it gets today is 0, which is the correct limit –
+  `Kw(alpha, beta)` concentrates at 1 as `alpha` grows – so nothing is
+  currently wrong, only silent. An upper clamp in `gkwreg` is the
+  prerequisite. The current behaviour is pinned in
+  `tests/testthat/test-return-contract.R` so the eventual change is
+  visible.
+
+- **Only two of seven `ll*()` warned about data outside the open
+  support** (`llekw` and `llbeta`): `ll*()` returns `+Inf` there – an
+  infinite objective with no gradient direction, which an optimiser can
+  only sit on – and five of the seven announced a corrupted sample not
+  at all. All seven warn now.
+
 - **`Rcpp::warning()` fired once per element inside the vectorised
   loops** (`dgkw`, `pgkw`, `qgkw`, `rgkw`, and the six nested `r*`): on
   50,000 values with half the parameters invalid that cost 51x, and
@@ -80,11 +115,10 @@
   [`stop()`](https://rdrr.io/r/base/stop.html)s on `<= 0`, `NA` and
   `NaN`.
 
-  **Known inconsistency, recorded rather than papered over:**
-  `man/dgkw.Rd` says the function returns `NaN` for invalid parameters.
-  It returns 0. The other six families document and return the same 0.
-  Aligning the two is a behaviour decision and is deliberately not made
-  here.
+  **Known inconsistency:** `man/dgkw.Rd` said the function returns `NaN`
+  for invalid parameters; it returns 0, and the other six families
+  document and return 0 too. The `@return` contract entry above corrects
+  the documentation.
 
 - **`d*()` returned 0 at `x = 0` and `x = 1`, where base R returns the
   limit** (all seven families): the GKw support is the open interval,
@@ -273,9 +307,9 @@
   valid. All seven now raise the package’s own error:
 
       dkw(0.5, NA, 3)        before  Error: missing value where TRUE/FALSE needed
-                             after   Error: 'alpha' must be positive
       dekw(0.5, NA, 3, 1)    before  0
-                             after   Error: 'alpha' must be positive (alpha > 0)
+
+  Both now raise the package’s own error.
 
   Valid calls are unaffected: `dgkw(0.5, 2, 3, 1.5, 0.5, 2)` is still
   2.343797, and `delta = 0` is still accepted.
@@ -1308,6 +1342,14 @@
   invisible if you already attach magrittr yourself.
 
 ### Testing
+
+- `test-return-contract.R` – sweeps every parameter of every family
+  through `d`, `p`, `q` and `r` with `-1`, `0`, `NA` and `NaN`,
+  asserting they take the identical route, and asserts separately that
+  `delta = 0` is still accepted – `delta` is the one parameter whose
+  bound is `>= 0`, and the only place the change could have gone off by
+  one. Also covers the out-of-support warning in all seven `ll*()`.
+  Fails 60 assertions and errors on 1 against the preceding commit.
 
 - New `tests/testthat/test-zero-length-input.R` covers all 28 routines
   with zero-length data and zero-length parameters, the empty-subset

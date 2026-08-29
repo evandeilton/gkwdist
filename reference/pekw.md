@@ -50,8 +50,11 @@ A vector of probabilities, \\F(q)\\, or their logarithms/complements
 depending on `lower.tail` and `log.p`. The length of the result is
 determined by the recycling rule applied to the arguments (`q`, `alpha`,
 `beta`, `lambda`). Returns `0` (or `-Inf` if `log.p = TRUE`) for
-`q <= 0` and `1` (or `0` if `log.p = TRUE`) for `q >= 1`. Returns `NaN`
-for invalid parameters.
+`q <= 0` and `1` (or `0` if `log.p = TRUE`) for `q >= 1`. An
+out-of-bound or missing parameter is an error, not a return value: the
+wrapper stops with a message naming the parameter. An infinite parameter
+is not currently intercepted there and reaches the C++ layer, which
+treats it as invalid.
 
 ## Details
 

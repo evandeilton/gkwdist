@@ -94,8 +94,11 @@ returned. Default: <code>FALSE</code>.</p></dd>
 (\(\log(f(x))\)). The length of the result is determined by the recycling
 rule applied to the arguments (<code>x</code>, <code>alpha</code>, <code>beta</code>,
 <code>gamma</code>, <code>delta</code>, <code>lambda</code>). Returns <code>0</code> (or <code>-Inf</code>
-if <code>log = TRUE</code>) for <code>x</code> outside the interval (0, 1), or
-<code>NaN</code> if parameters are invalid.</p>
+if <code>log = TRUE</code>) for <code>x</code> outside the interval (0, 1).
+An out-of-bound or missing parameter is an error, not a return value: the
+wrapper stops with a message naming the parameter. An infinite parameter
+is not currently intercepted there and reaches the C++ layer, which
+treats it as invalid.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

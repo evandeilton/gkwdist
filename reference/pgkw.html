@@ -112,8 +112,10 @@ Default: 1.0.</p></dd>
 rule applied to the arguments (<code>q</code>, <code>alpha</code>, <code>beta</code>,
 <code>gamma</code>, <code>delta</code>, <code>lambda</code>). Returns <code>0</code> (or <code>-Inf</code>
 if <code>log.p = TRUE</code>) for <code>q &lt;= 0</code> and <code>1</code> (or <code>0</code> if
-<code>log.p = TRUE</code>) for <code>q &gt;= 1</code>. Returns <code>NaN</code> for invalid
-parameters.</p>
+<code>log.p = TRUE</code>) for <code>q &gt;= 1</code>. An out-of-bound or missing parameter is an
+error, not a return value: the wrapper stops with a message naming the
+parameter. An infinite parameter is not currently intercepted there and
+reaches the C++ layer, which treats it as invalid.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

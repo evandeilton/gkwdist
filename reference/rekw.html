@@ -88,8 +88,10 @@ Can be a scalar or a vector. Default: 1.0.</p></dd>
     <p>A vector of length <code>n</code> containing random deviates from the EKw
 distribution. The length of the result is determined by <code>n</code> and the
 recycling rule applied to the parameters (<code>alpha</code>, <code>beta</code>,
-<code>lambda</code>). Returns <code>NaN</code> if parameters
-are invalid (e.g., <code>alpha &lt;= 0</code>, <code>beta &lt;= 0</code>, <code>lambda &lt;= 0</code>).</p>
+<code>lambda</code>). An out-of-bound or missing parameter is an
+error, not a return value: the wrapper stops with a message naming the
+parameter. An infinite parameter is not currently intercepted there and
+reaches the C++ layer, which treats it as invalid.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

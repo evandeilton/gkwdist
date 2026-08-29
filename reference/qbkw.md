@@ -71,8 +71,10 @@ arguments (`p`, `alpha`, `beta`, `gamma`, `delta`). Returns:
 
 - `NaN` for `p < 0` or `p > 1` (or corresponding log scale).
 
-- `NaN` for invalid parameters (e.g., `alpha <= 0`, `beta <= 0`,
-  `gamma <= 0`, `delta < 0`).
+- An out-of-bound or missing parameter is an error, not a return value:
+  the wrapper stops with a message naming the parameter. An infinite
+  parameter is not currently intercepted there and reaches the C++
+  layer, which treats it as invalid.
 
 Boundary return values are adjusted accordingly for
 `lower.tail = FALSE`.

@@ -90,8 +90,10 @@ Default: 0.0 (leading to <code>shape2 = 1</code>, i.e., Uniform).</p></dd>
     <p>A numeric vector of length <code>n</code> containing random deviates from the
 Beta(\(\gamma, \delta+1\)) distribution, with values in (0, 1). The length
 of the result is determined by <code>n</code> and the recycling rule applied to
-the parameters (<code>gamma</code>, <code>delta</code>). Returns <code>NaN</code> if parameters
-are invalid (e.g., <code>gamma &lt;= 0</code>, <code>delta &lt; 0</code>).</p>
+the parameters (<code>gamma</code>, <code>delta</code>). An out-of-bound or missing parameter is an
+error, not a return value: the wrapper stops with a message naming the
+parameter. An infinite parameter is not currently intercepted there and
+reaches the C++ layer, which treats it as invalid.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
