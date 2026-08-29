@@ -4,6 +4,50 @@
 
 ### Critical Bug Fixes
 
+- **`NA`, `NaN` and infinite input did not propagate** (all seven
+  families, 21 routines): `NA_REAL` is a `NaN`, so every comparison
+  against it is false and `!R_finite()` is true. Missing input therefore
+  fell into the “outside the support” branch and was silently replaced
+  by the fill value:
+
+                        before            after      base R
+      d*(NA)              0              NA          NA
+      d*(NaN)             0             NaN         NaN
+      p*(NA)              0              NA          NA
+      p*(NaN)             0             NaN         NaN
+      p*(+Inf)            0               1           1
+      p*(-Inf)            0               0           0
+
+  `p*(Inf) = 0` also violated monotonicity outright: `pkw(2, 2, 3)` was
+  1 while `pkw(Inf, 2, 3)` was 0. The fix needed no new branch –
+  dropping `!R_finite()` from the lower boundary test lets `+Inf` fall
+  through to the `q >= 1` case that was already there.
+
+  `NA` and `NaN` are distinguished, as base R distinguishes them:
+  `R_IsNA()` is asked before `R_IsNaN()`, so
+  [`is.na()`](https://rdrr.io/r/base/NA.html) and
+  [`is.nan()`](https://rdrr.io/r/base/is.finite.html) both answer
+  correctly.
+
+- **`q*(p)` saturated at 0 or 1 for probabilities outside `[0, 1]`**
+  (all seven families): the R wrappers have always warned that such a
+  value *“will produce NaN”*, while the C++ returned a bound. Defensive
+  code testing [`is.nan()`](https://rdrr.io/r/base/is.finite.html) –
+  exactly what the warning tells the caller to expect – saw nothing, and
+  0 and 1 are outside the open support, so the value flowed on into
+  `d*()` and `ll*()` as valid data.
+
+      qkw(-0.5, 2, 3)   0  ->  NaN        qkw(1.5, 2, 3)   1  ->  NaN
+      qkw(-Inf, 2, 3)   0  ->  NaN        qkw(Inf, 2, 3)   1  ->  NaN
+
+  The closed boundary is unchanged: `q*(0)` is still 0 and `q*(1)` still
+  1, in both tails and on both scales.
+
+  Confinement was checked by bit-comparison rather than adjudication,
+  since no in-range value should move: 238,140 values over the seven
+  families, both tails, both scales, and x from 1e-320 to 1 - 1e-16 are
+  **bit-identical**.
+
 - **`log`, `lower.tail` and `log.p` silently accepted `NA` and read it
   as `TRUE`** (all seven families, 35 guards): the check was
   `!is.logical(flag) || length(flag) != 1`, and `NA` passes both halves

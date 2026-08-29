@@ -42,6 +42,25 @@
 <div class="section level3">
 <h3 id="critical-bug-fixes-1-1-6">Critical Bug Fixes<a class="anchor" aria-label="anchor" href="#critical-bug-fixes-1-1-6"></a></h3>
 <ul><li>
+<p><strong><code>NA</code>, <code>NaN</code> and infinite input did not propagate</strong> (all seven families, 21 routines): <code>NA_REAL</code> is a <code>NaN</code>, so every comparison against it is false and <code>!R_finite()</code> is true. Missing input therefore fell into the “outside the support” branch and was silently replaced by the fill value:</p>
+<pre><code>                  before            after      base R
+d*(NA)              0              NA          NA
+d*(NaN)             0             NaN         NaN
+p*(NA)              0              NA          NA
+p*(NaN)             0             NaN         NaN
+p*(+Inf)            0               1           1
+p*(-Inf)            0               0           0</code></pre>
+<p><code>p*(Inf) = 0</code> also violated monotonicity outright: <code>pkw(2, 2, 3)</code> was 1 while <code>pkw(Inf, 2, 3)</code> was 0. The fix needed no new branch – dropping <code>!R_finite()</code> from the lower boundary test lets <code>+Inf</code> fall through to the <code>q &gt;= 1</code> case that was already there.</p>
+<p><code>NA</code> and <code>NaN</code> are distinguished, as base R distinguishes them: <code>R_IsNA()</code> is asked before <code>R_IsNaN()</code>, so <code><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na()</a></code> and <code><a href="https://rdrr.io/r/base/is.finite.html" class="external-link">is.nan()</a></code> both answer correctly.</p>
+</li>
+<li>
+<p><strong><code>q*(p)</code> saturated at 0 or 1 for probabilities outside <code>[0, 1]</code></strong> (all seven families): the R wrappers have always warned that such a value <em>“will produce NaN”</em>, while the C++ returned a bound. Defensive code testing <code><a href="https://rdrr.io/r/base/is.finite.html" class="external-link">is.nan()</a></code> – exactly what the warning tells the caller to expect – saw nothing, and 0 and 1 are outside the open support, so the value flowed on into <code>d*()</code> and <code>ll*()</code> as valid data.</p>
+<pre><code>qkw(-0.5, 2, 3)   0  -&gt;  NaN        qkw(1.5, 2, 3)   1  -&gt;  NaN
+qkw(-Inf, 2, 3)   0  -&gt;  NaN        qkw(Inf, 2, 3)   1  -&gt;  NaN</code></pre>
+<p>The closed boundary is unchanged: <code>q*(0)</code> is still 0 and <code>q*(1)</code> still 1, in both tails and on both scales.</p>
+<p>Confinement was checked by bit-comparison rather than adjudication, since no in-range value should move: 238,140 values over the seven families, both tails, both scales, and x from 1e-320 to 1 - 1e-16 are <strong>bit-identical</strong>.</p>
+</li>
+<li>
 <p><strong><code>log</code>, <code>lower.tail</code> and <code>log.p</code> silently accepted <code>NA</code> and read it as <code>TRUE</code></strong> (all seven families, 35 guards): the check was <code>!is.logical(flag) || length(flag) != 1</code>, and <code>NA</code> passes both halves – <code>is.logical(NA)</code> is <code>TRUE</code> and <code>length(NA)</code> is 1. The value reached C++ as <code>NA_LOGICAL</code>, which is a non-zero integer, so it was read as <code>TRUE</code>:</p>
 <pre><code>dgkw(0.5, 2, 3, 1.5, 0.5, 2, log = NA)   0.8517722   &lt;- the LOG density
 dgkw(0.5, 2, 3, 1.5, 0.5, 2)             2.343797    &lt;- the density</code></pre>
