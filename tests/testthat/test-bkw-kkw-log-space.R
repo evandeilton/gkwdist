@@ -209,6 +209,52 @@ test_that("hsbkw and hskkw stay finite and symmetric where the likelihood is", {
 })
 
 
+test_that("grkkw and hskkw refuse bad input the way grbkw and hsbkw do", {
+  # grkkw() and hskkw() returned a silent NaN for a refused input, so the caller
+  # could not tell a rejected call from a genuine boundary.
+  x <- c(0.2, 0.5, 0.8)
+  expect_warning(g <- grkkw(c(-1, 3, 0.5, 1.5), x), "Invalid parameters in grkkw")
+  expect_true(all(is.nan(g)))
+  expect_warning(H <- hskkw(c(-1, 3, 0.5, 1.5), x), "Invalid parameters in hskkw")
+  expect_true(all(is.nan(H)))
+
+  # A NaN compares false against both bounds, so it passed the support test
+  # untouched. hskkw() then returned a matrix with fifteen NaN entries and one
+  # finite one, which looks partly usable.
+  xn <- c(0.2, NaN, 0.7)
+  expect_warning(g <- grkkw(c(2, 3, 0.5, 1.5), xn), "strictly in \\(0,1\\)")
+  expect_true(all(is.nan(g)))
+  expect_warning(H <- hskkw(c(2, 3, 0.5, 1.5), xn), "strictly in \\(0,1\\)")
+  expect_true(all(is.nan(H)))
+
+  # the BKw pair, which is the behaviour being matched
+  expect_warning(gb <- grbkw(c(2, 3, 1.5, 0.5), xn), "strictly in \\(0,1\\)")
+  expect_true(all(is.nan(gb)))
+  expect_warning(Hb <- hsbkw(c(2, 3, 1.5, 0.5), xn), "strictly in \\(0,1\\)")
+  expect_true(all(is.nan(Hb)))
+})
+
+
+test_that("grkkw and hskkw fail uniformly at a genuine boundary", {
+  # alpha = beta = 1e-8 with lambda = 1e300 is past what the chain can carry.
+  # grkkw() returned c(1.378417e+307, -Inf, -2, 31.43853) -- a gradient with a
+  # finite delta component sitting next to an -Inf -- and said nothing; hskkw()
+  # returned a matrix with two NaN entries among fourteen finite ones, which
+  # would have been inverted for a standard error.
+  x <- c(0.01, 0.3, 0.6, 0.9)
+  p <- c(1e-8, 1e-8, 0, 1e300)          # KKw: (alpha, beta, delta, lambda)
+  expect_warning(g <- grkkw(p, x), "non-finite values in grkkw")
+  expect_true(all(is.nan(g)))
+  expect_warning(H <- hskkw(p, x), "non-finite values in hskkw")
+  expect_true(all(is.nan(H)))
+
+  # the same distribution through BKw, which has always failed uniformly
+  pb <- c(1e-8, 1e-8, 1e300, 0)         # BKw: (alpha, beta, gamma, delta)
+  expect_warning(gb <- grbkw(pb, x), "non-finite values in grbkw")
+  expect_true(all(is.nan(gb)))
+})
+
+
 test_that("the likelihood surface has no plateau for an optimiser to sit on", {
   # alpha = 300 is inside the region that used to return +Inf, so L-BFGS-B
   # could not even start there ("L-BFGS-B needs finite values of 'fn'"), and a

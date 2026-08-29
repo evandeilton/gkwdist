@@ -697,27 +697,38 @@ double llkkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 // [[Rcpp::export(.grkkw_cpp)]]
 Rcpp::NumericVector grkkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   // Validate parameter vector length
+  //
+  // Every rejection below says why, as grbkw() has always done. Returning a
+  // silent NaN vector left the caller unable to tell a refused input from a
+  // genuine boundary.
   if (par.size() < 4) {
+    Rcpp::warning("Parameter vector must have at least 4 elements for KKw");
     return Rcpp::NumericVector(4, R_NaN);
   }
-  
+
   // Extract parameters
   double alpha = par[0];
   double beta = par[1];
   double delta = par[2];
   double lambda = par[3];
-  
+
   // Validate parameters using consistent checker
   if (!check_kkw_pars(alpha, beta, delta, lambda)) {
+    Rcpp::warning("Invalid parameters in grkkw");
     return Rcpp::NumericVector(4, R_NaN);
   }
-  
+
   // Convert and validate data
+  //
+  // has_nan() is part of the test: a NaN compares false against both bounds, so
+  // without it NaN data passed straight through and the gradient came back NaN
+  // with nothing said.
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (x.n_elem < 1 || arma::any(x <= 0) || arma::any(x >= 1)) {
+  if (x.n_elem < 1 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
+    Rcpp::warning("Data must be strictly in (0,1) and non-empty for grkkw");
     return Rcpp::NumericVector(4, R_NaN);
   }
-  
+
   int n = x.n_elem;
   Rcpp::NumericVector grad(4, 0.0);
 
@@ -773,12 +784,26 @@ Rcpp::NumericVector grkkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
     d_lambda += log_w + delta * W;
   }
 
+  // Final validity check
+  //
+  // A component that is still not finite here is a genuine boundary, and the
+  // whole vector goes with it. Returning the surviving components alongside a
+  // NaN or an Inf is worse than returning nothing: the caller gets a gradient
+  // that looks partly usable and is not. grbkw() has always failed uniformly,
+  // and grkkw() did not -- with alpha = beta = 1e-8 and lambda = 1e300 it
+  // returned c(1.378417e+307, -Inf, -2, 31.43853) and said nothing.
+  if (!std::isfinite(d_alpha) || !std::isfinite(d_beta) ||
+      !std::isfinite(d_delta) || !std::isfinite(d_lambda)) {
+    Rcpp::warning("Gradient calculation produced non-finite values in grkkw");
+    return Rcpp::NumericVector(4, R_NaN);
+  }
+
   // Return NEGATIVE gradient (for minimization)
   grad[0] = -d_alpha;
   grad[1] = -d_beta;
   grad[2] = -d_delta;
   grad[3] = -d_lambda;
-  
+
   return grad;
 }
 
@@ -809,34 +834,43 @@ Rcpp::NumericVector grkkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
  */
 // [[Rcpp::export(.hskkw_cpp)]]
 Rcpp::NumericMatrix hskkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
+  // Initialize NaN matrix for error cases
+  Rcpp::NumericMatrix nanH(4, 4);
+  nanH.fill(R_NaN);
+
   // Validate parameter vector length
+  //
+  // Every rejection below says why, as hsbkw() has always done. Returning a
+  // silent NaN matrix left the caller unable to tell a refused input from a
+  // genuine boundary.
   if (par.size() < 4) {
-    Rcpp::NumericMatrix nanH(4, 4);
-    nanH.fill(R_NaN);
+    Rcpp::warning("Parameter vector must have at least 4 elements for KKw");
     return nanH;
   }
-  
+
   // Extract parameters
   double alpha = par[0];
   double beta = par[1];
   double delta = par[2];
   double lambda = par[3];
-  
+
   // Validate parameters using consistent checker
   if (!check_kkw_pars(alpha, beta, delta, lambda)) {
-    Rcpp::NumericMatrix nanH(4, 4);
-    nanH.fill(R_NaN);
+    Rcpp::warning("Invalid parameters in hskkw");
     return nanH;
   }
-  
+
   // Convert and validate data
+  //
+  // has_nan() is part of the test: a NaN compares false against both bounds, so
+  // without it NaN data passed straight through and hskkw() returned a matrix
+  // with 15 NaN entries and one finite one -- which looks partly usable.
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (x.n_elem < 1 || arma::any(x <= 0) || arma::any(x >= 1)) {
-    Rcpp::NumericMatrix nanH(4, 4);
-    nanH.fill(R_NaN);
+  if (x.n_elem < 1 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
+    Rcpp::warning("Data must be strictly in (0,1) and non-empty for hskkw");
     return nanH;
   }
-  
+
   int n = x.n_elem;
 
   // Initialize Hessian matrix
@@ -923,6 +957,18 @@ Rcpp::NumericMatrix hskkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   // Only the upper triangle is accumulated above; mirror it
   H = arma::symmatu(H);
 
+  // Final validity check
+  //
+  // An entry that is still not finite here is a genuine boundary, and the whole
+  // matrix goes with it. A Hessian holding two NaN entries among fourteen finite
+  // ones is not a smaller, weaker answer -- it is one that will be inverted for
+  // a standard error and silently produce nonsense. hsbkw() has always failed
+  // uniformly, and hskkw() did not: with alpha = beta = 1e-8 and lambda = 1e300
+  // it returned exactly that, and said nothing.
+  if (!H.is_finite()) {
+    Rcpp::warning("Hessian calculation produced non-finite values in hskkw");
+    return nanH;
+  }
 
   // Return NEGATIVE Hessian (for minimization)
   return Rcpp::wrap(-H);

@@ -2,6 +2,34 @@
 
 ## Critical Bug Fixes
 
+* **`grkkw()` and `hskkw()` failed silently and only partly** (`kkw.cpp`):
+  alone among the seven families, they carried none of the guards their BKw
+  counterparts have. A refused input -- a short parameter vector, an invalid
+  parameter, data outside `(0,1)` -- returned a `NaN` result with nothing said,
+  so the caller could not tell a rejected call from a genuine boundary. Neither
+  function checked its result at all, so where the chain did reach a boundary
+  they returned whatever survived:
+
+  ```
+  par = (1e-8, 1e-8, 0, 1e300), x = c(0.01, 0.3, 0.6, 0.9)
+    grkkw   1.378417e+307   -Inf   -2.000000   31.43853     (no warning)
+    hskkw   2 of 16 entries NaN, 14 finite                  (no warning)
+    grbkw at the corresponding BKw point: warns, and every component is NaN
+  ```
+
+  A gradient with a finite component next to an `-Inf`, or a Hessian with two
+  `NaN` entries among fourteen, is worse than no answer: it looks partly usable,
+  and the Hessian would have been inverted for a standard error. Both now warn
+  and return a uniformly `NaN` result, matching `grbkw()` and `hsbkw()`.
+
+  The support test also gained `has_nan()`. A `NaN` compares false against both
+  bounds, so `NaN` data passed straight through; `hskkw()` returned a matrix
+  with fifteen `NaN` entries and one finite one.
+
+  This is a reporting change only. Over the same 43,792-value grid used above,
+  no value differs from the previous fix -- every case the guards catch was
+  already `NaN` or `Inf`.
+
 * **The BKw and KKw likelihoods collapsed to `+Inf` on ordinary data**
   (`bkw.cpp`, `kkw.cpp`): both families walk the same log-space chain as their
   GKw parent -- `v = 1 - x^alpha`, `w = 1 - v^beta`, `z = 1 - w^lambda`, with
