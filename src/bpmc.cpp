@@ -182,17 +182,24 @@ Rcpp::NumericVector dmc(
     
     // Term 1: (γλ - 1) * log(x)
     double term1 = exponent * lx;
-    
-    // Compute x^λ
-    double x_pow_l = safe_pow(xx, ll);
-    if (x_pow_l >= 1.0) {
-      continue;
+
+    // Term 2: δ * log(1 - x^λ), formed from λ·log(x) so the subtraction never
+    // happens in linear space. Building x^λ first and then log(1 - x^λ) throws
+    // away exactly the digits that matter as x approaches 1: doubles are spaced
+    // 2.2e-16 apart there, so 1 - x^λ carries an absolute error of one ulp of 1
+    // however small it is, and x^λ rounds to 1 outright at 1 - x ~ 1e-16. The
+    // former `if (x_pow_l >= 1.0) continue;` then returned a density of zero
+    // where the true density is finite. At γ=1.5, δ=2, λ=0.8 the log-density
+    // was off by 0.446 nats at x = 1 - 1e-16 and dmc() disagreed with
+    // dgkw(x, 1, 1, γ, δ, λ), which is the same distribution.
+    //
+    // Guarded on δ because δ = 0 with log(1 - x^λ) at the boundary would give
+    // 0 * -Inf = NaN; the same guard llmc(), grmc() and dgkw() already carry.
+    double term2 = 0.0;
+    if (dd != 0.0) {
+      term2 = dd * gkw_log1mexp(ll * lx);
     }
-    
-    // Term 2: δ * log(1 - x^λ)
-    double log_1_minus_xpow = safe_log(1.0 - x_pow_l);
-    double term2 = dd * log_1_minus_xpow;
-    
+
     // Assemble log-density
     double log_pdf = logCst + term1 + term2;
     
@@ -299,8 +306,28 @@ Rcpp::NumericVector pmc(
     // R::pbeta: computing p first and then forming 1 - p or log(p) lost the
     // whole upper tail (pmc(1 - 1e-06, 2, 3, 2.5, lower.tail = FALSE) returned
     // exactly 0 against a true 1.95e-22).
-    double xpow = std::exp(ll * std::log(xx));
-    out(i) = R::pbeta(xpow, gg, dd + 1.0, lower_tail, log_p);
+    //
+    // The remaining loss is in the argument rather than the tail flag. Once
+    // x^lambda passes 1/2 a double can hold it no more finely than 1.1e-16, so
+    // the upper tail -- which is a function of 1 - x^lambda alone -- is
+    // quantised to whatever that leaves. Against a 120-digit incomplete beta,
+    // pmc(x, 1.5, 2, 0.8, lower.tail = FALSE) was 95% relative in error by
+    // x = 1 - 1.1e-16, and 8.3e-04 out by 1 - 1e-13.
+    //
+    // I_y(a,b) = 1 - I_{1-y}(b,a) is exact, and 1 - x^lambda comes from -expm1
+    // of the same exponent that produces x^lambda, at full relative accuracy.
+    // Reflecting sends the small quantity into pbeta and the large one out of
+    // it. Below the crossover the direct form is already the one holding the
+    // small quantity, so it is left exactly as it was: the lower tail never
+    // changes, and neither does any upper tail with x^lambda <= 1/2.
+    // LOG1MEXP_CROSSOVER is -log(2), the same crossover gkw_log1mexp() uses to
+    // decide which of x^lambda and 1 - x^lambda a double can hold.
+    double log_xpow = ll * std::log(xx);
+    if (!lower_tail && log_xpow > LOG1MEXP_CROSSOVER) {
+      out(i) = R::pbeta(-std::expm1(log_xpow), dd + 1.0, gg, /*lower*/ 1, log_p);
+    } else {
+      out(i) = R::pbeta(std::exp(log_xpow), gg, dd + 1.0, lower_tail, log_p);
+    }
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -529,14 +556,20 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   
   int n = x.n_elem;
 
-  // Compute log(B(γ, δ+1)) stably
-  double log_B;
-  if (gamma > 100.0 || delta > 100.0) {
-    log_B = lgamma(gamma) + lgamma(delta + 1.0) - lgamma(gamma + delta + 1.0);
-  } else {
-    log_B = R::lbeta(gamma, delta + 1.0);
-  }
-  
+  // log B(γ, δ+1) via R::lbeta, at every γ and δ. The former code switched to
+  // lgamma(γ) + lgamma(δ+1) - lgamma(γ+δ+1) above 100, which is the very
+  // cancellation R::lbeta exists to avoid. At γ = 1e12, δ = 2 the two outer
+  // lgamma values are 2.66e13, where one ulp is 3.9e-03, so their difference
+  // cannot resolve an answer of -82.2 any better than that:
+  //
+  //   R::lbeta(1e12, 3)                       -82.1999161672287  (exact)
+  //   lgamma(1e12) + lgamma(3) - lgamma(1e12+3)  -82.203125      (off by 3.2e-03)
+  //
+  // dmc() and llbeta() always called R::lbeta, so llmc() also disagreed with
+  // -sum(dmc(..., log = TRUE)) and with llbeta() at λ = 1, where the two are
+  // the same model.
+  double log_B = R::lbeta(gamma, delta + 1.0);
+
   // Constant term: n * [log(λ) - log(B(γ, δ+1))]
   double log_lambda = safe_log(lambda);
   double const_term = n * (log_lambda - log_B);
@@ -560,12 +593,18 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
     sum_term1 += gl_minus_1 * log_xi;
 
     // Term 2: δ * log(1-x^λ), formed from λ*log(x) so the subtraction never
-    // happens in linear space. grmc() and hsmc() already use -expm1() here;
-    // llmc() used log1p(-x^λ), which cannot recover the digits x^λ has already
-    // lost, so the objective and its gradient disagreed as x approached 1.
+    // happens in linear space. llmc() used log1p(-x^λ), which cannot recover
+    // the digits x^λ has already lost, so the objective and its gradient
+    // disagreed as x approached 1.
+    //
+    // log(-expm1(u)) covers x -> 1 but not x -> 0: there 1 - exp(u) is a value
+    // just below 1, which doubles cannot resolve more finely than 1.1e-16, so
+    // log(1 - x^λ) came back one ulp of 1 wide however small x^λ actually was.
+    // gkw_log1mexp() switches to log1p(-exp(u)) past -log(2) and keeps the full
+    // relative accuracy; at δ = 1e12 that ulp was worth 2.6e-05 nats.
     // Guarded on δ because δ = 0 with an underflowing term would give 0 * -Inf.
     if (delta > 0.0) {
-      sum_term2 += delta * std::log(-std::expm1(lambda * log_xi));
+      sum_term2 += delta * gkw_log1mexp(lambda * log_xi);
     }
   }
   
@@ -628,27 +667,29 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   int n = x.n_elem;
   Rcpp::NumericVector grad(3, 0.0);
 
-  // Calculate digamma terms stably
-  double digamma_gamma, digamma_delta_plus_1, digamma_gamma_delta_plus_1;
-  
-  if (gamma > 100.0) {
-    digamma_gamma = std::log(gamma) - 1.0 / (2.0 * gamma);
-  } else {
-    digamma_gamma = R::digamma(gamma);
-  }
-  
-  if (delta > 100.0) {
-    digamma_delta_plus_1 = std::log(delta + 1.0) - 1.0 / (2.0 * (delta + 1.0));
-  } else {
-    digamma_delta_plus_1 = R::digamma(delta + 1.0);
-  }
-  
-  if (gamma + delta > 100.0) {
-    digamma_gamma_delta_plus_1 = std::log(gamma + delta + 1.0) - 1.0 / (2.0 * (gamma + delta + 1.0));
-  } else {
-    digamma_gamma_delta_plus_1 = R::digamma(gamma + delta + 1.0);
-  }
-  
+  // ψ via R::digamma at every argument. The former code substituted the
+  // two-term asymptotic form log(z) - 1/(2z) above three different thresholds
+  // -- γ > 100, δ > 100, γ+δ > 100 -- which truncates the expansion before the
+  // 1/(12z²) term and so is wrong by 8.33e-06 at z = 100, and by 1.30e-03 at
+  // z = 8 (a threshold on γ+δ can be crossed with γ itself as small as that).
+  // Each threshold put a step of n times that size into a different gradient
+  // component, at a different place. With the seven observations
+  // c(.1,.25,.4,.5,.6,.75,.9):
+  //
+  //   grmc(c(γ, 3, 1), x)[1]   γ = 99.999   5.9262333798
+  //                            γ = 100.001  5.9262971512
+  //     jump 6.38e-05, of which 5.83e-05 = 7 * 8.33e-06 is the discontinuity;
+  //     the largest step between neighbouring γ falls from 6.11e-05 to 2.72e-06
+  //     once the branch is gone. The step scales with n: at n = 2160 it is 0.018.
+  //
+  // Optimisers see a gradient that disagrees with its own objective across the
+  // step. R::digamma is accurate to 1e-16 over the whole range -- it uses the
+  // same asymptotic expansion with enough terms, after shifting the argument up
+  // -- so the substitution bought nothing.
+  double digamma_gamma = R::digamma(gamma);
+  double digamma_delta_plus_1 = R::digamma(delta + 1.0);
+  double digamma_gamma_delta_plus_1 = R::digamma(gamma + delta + 1.0);
+
   // Initialize accumulators
   double sum_log_x = 0.0;
   double sum_log_v = 0.0;
@@ -662,10 +703,14 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
     // v = 1 - x^λ, always via -expm1 of the same exponent that produces x^λ,
     // so the two never drift apart. The former v = max(v, 1e-10) froze log(v)
     // at -23.03: for x = 1 - 1e-15 the true log(v) is -34.28.
+    // log(v) goes through gkw_log1mexp() rather than log(-expm1(u)): the latter
+    // has to represent a number just below 1, which costs the whole value of
+    // log(v) once x^λ drops under 1.1e-16. This is the same term llmc()
+    // accumulates, and the two now agree bit for bit.
     double log_x_lambda = lambda * log_xi;
     double x_lambda = std::exp(log_x_lambda);
     double v = -std::expm1(log_x_lambda);
-    sum_log_v += std::log(v);
+    sum_log_v += gkw_log1mexp(log_x_lambda);
 
     // Term for the λ gradient: x^λ log(x) / (1 - x^λ). It tends to -1/λ as
     // x -> 1, so it carries its own ceiling; the former ±1e6 clamp truncated
@@ -751,28 +796,25 @@ Rcpp::NumericMatrix hsmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   int n = x.n_elem;
   Rcpp::NumericMatrix hess(3, 3);
 
-  // Compute trigamma values stably
-  double trigamma_gamma, trigamma_delta_plus_1, trigamma_gamma_plus_delta_plus_1;
-  
-  if (gamma > 100.0) {
-    trigamma_gamma = 1.0 / gamma + 1.0 / (2.0 * gamma * gamma);
-  } else {
-    trigamma_gamma = R::trigamma(gamma);
-  }
-  
-  if (delta > 100.0) {
-    trigamma_delta_plus_1 = 1.0 / (delta + 1.0) + 1.0 / (2.0 * (delta + 1.0) * (delta + 1.0));
-  } else {
-    trigamma_delta_plus_1 = R::trigamma(delta + 1.0);
-  }
-  
-  if (gamma + delta > 100.0) {
-    double z = gamma + delta + 1.0;
-    trigamma_gamma_plus_delta_plus_1 = 1.0 / z + 1.0 / (2.0 * z * z);
-  } else {
-    trigamma_gamma_plus_delta_plus_1 = R::trigamma(gamma + delta + 1.0);
-  }
-  
+  // ψ' via R::trigamma at every argument, for the reason given in grmc():
+  // 1/z + 1/(2z²) drops the 1/(6z³) term and is wrong by 1.67e-07 at z = 100
+  // and by 3.25e-04 at z = 8. The three thresholds put three steps of that size
+  // into the Hessian, which is what the standard errors are read off; the
+  // largest step in H[γ,γ] between neighbouring γ near 100 falls from 1.22e-06
+  // to 5.38e-08 once the branch is gone.
+  //
+  // One regime is left worse and is worth naming: H[γ,γ] and H[δ,δ] subtract
+  // two ψ' values that agree to eleven digits when γ or δ reaches 1e12, so the
+  // result -- around 1.8e-23 -- can carry no better than 1e-04 relative in
+  // double precision whatever ψ' returns. The smooth asymptotic form used to
+  // land inside that band by luck; R::trigamma's rounding does not. The
+  // measured relative error there goes from 1.9e-05 to 7.2e-04, both inside
+  // the floor the subtraction imposes, while the same form was 5.1e-04 wrong
+  // and discontinuous at the far more plausible γ = 100.
+  double trigamma_gamma = R::trigamma(gamma);
+  double trigamma_delta_plus_1 = R::trigamma(delta + 1.0);
+  double trigamma_gamma_plus_delta_plus_1 = R::trigamma(gamma + delta + 1.0);
+
   // Initialize accumulators for data-dependent terms
   double sum_log_x = 0.0;
   double sum_x_lambda_log_x_div_v = 0.0;

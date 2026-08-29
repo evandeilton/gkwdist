@@ -210,6 +210,134 @@
   to 1,716 (Hessian). `pbkw()`, `qbkw()`, `pkkw()` and `qkkw()` are untouched
   and bit-identical.
 
+* **`pmc()`'s upper tail was quantised by the argument it handed to
+  `R::pbeta`** (`bpmc.cpp`): `F(x) = I_{x^lambda}(gamma, delta+1)`, and `pmc()`
+  formed `x^lambda` in linear arithmetic. Once `x^lambda` passes 1/2 a double
+  holds it no more finely than 1.1e-16, and the upper tail is a function of
+  `1 - x^lambda` alone, so it was quantised to whatever that left -- and to
+  exactly 0 once `x^lambda` reached 1:
+
+  ```
+  pmc(x, 4, 2, 0.25, lower.tail = FALSE)      before             exact
+    x = 1 - 1e-15                       2.1895288505e-46   3.1175127579e-46
+    x = 1 - 1.1e-16                     0                  4.2764235361e-49
+  ```
+
+  a relative error of 700%, then of 100%. `I_y(a,b) = 1 - I_{1-y}(b,a)` is
+  exact, and `1 - x^lambda` comes from `-expm1` of the same exponent at full
+  relative accuracy, so reflecting sends the small quantity into `pbeta`. The
+  reflection is applied only where the direct form is the one holding the large
+  quantity: the lower tail never changes, and neither does any upper tail with
+  `x^lambda <= 1/2`.
+
+  Over 8942 grid cells whose exact tail is representable at all, 8494 are
+  bit-identical, 353 improved and 76 moved the other way. The maximum relative
+  error fell from 7.00 to 1.36e-13, and that residual sits on a cell this change
+  did not touch. The 76 that moved the other way went from at most 2.67e-14 to
+  at most 4.10e-14 relative, which is `R::pbeta`'s own accuracy at tail
+  probabilities of 1e-71: both routes hand it an argument good to one ulp there,
+  and they round differently. `dmc()`, `qmc()`, `rmc()`, `llmc()`, `grmc()` and
+  `hsmc()` are bit-identical, as is every lower tail and every `lambda = 1`
+  result, which stays identical to `stats::pbeta` to the bit.
+
+* **`grmc()` and `hsmc()` swapped `R::digamma` and `R::trigamma` for two-term
+  asymptotic expansions above three separate thresholds** (`bpmc.cpp`):
+  `gamma > 100`, `delta > 100` and `gamma + delta > 100`. `log(z) - 1/(2z)`
+  truncates psi's expansion before the `1/(12z^2)` term and is wrong by 8.33e-06
+  at `z = 100` and by 1.30e-03 at `z = 8`, which the `gamma + delta` threshold
+  can reach with `gamma` that small; `1/z + 1/(2z^2)` drops psi'-s `1/(6z^3)`
+  term and is wrong by 1.67e-07 at `z = 100`.
+
+  Each threshold put a step of `n` times that error into a different component,
+  at a different place. On the seven observations `c(.1,.25,.4,.5,.6,.75,.9)`:
+
+  ```
+  grmc(c(gamma, 3, 1), x)[1]   gamma = 99.999    5.9262333798
+                               gamma = 100.001   5.9262971512
+  ```
+
+  a jump of 6.38e-05, of which 5.83e-05 is discontinuity rather than slope; the
+  step scales with `n` and reaches 0.018 at `n = 2160`. The largest step between
+  neighbouring `gamma` falls from 6.11e-05 to 2.72e-06 in the gradient and from
+  1.22e-06 to 5.38e-08 in `H[gamma, gamma]`. `R::digamma` and `R::trigamma` are
+  accurate to 1e-16 over the whole range, so the substitution bought nothing.
+
+  Over 330 gradient cells the maximum relative error fell from 3.85e-04 to
+  1.07e-12 and no cell got worse; over 660 Hessian cells 105 improved and 20
+  moved the other way. Ten of those twenty are `H[gamma, delta]` moving by one
+  ulp. The other ten are `H[gamma, gamma]` and `H[delta, delta]` at
+  `gamma` or `delta = 1e12`, where the entry is a difference of two psi' values
+  that agree to eleven digits: the result, around 1.8e-23, can carry no better
+  than 1e-04 relative in double precision whatever psi' returns, and the
+  measured relative error moves from 1.9e-05 to 7.2e-04, both inside that floor.
+  The smooth asymptotic form landed inside it by luck at that one point while
+  being 5.1e-04 wrong and discontinuous at the far more plausible `gamma = 100`.
+  `dmc()`, `pmc()`, `qmc()`, `rmc()` and `llmc()` are bit-identical.
+
+* **`llmc()` swapped `R::lbeta` for a difference of `lgamma` above
+  `gamma = 100` or `delta = 100`** (`bpmc.cpp`): that difference is the
+  cancellation `R::lbeta` exists to avoid. At `gamma = 1e12`, `delta = 2` the
+  two outer `lgamma` values are 2.66e13, where one ulp is 3.9e-03, so their
+  difference cannot resolve an answer of -82.2 any better than that:
+
+  ```
+  R::lbeta(1e12, 3)                          -82.1999161672287   (exact)
+  lgamma(1e12) + lgamma(3) - lgamma(1e12+3)  -82.203125          (off by 3.2e-03)
+  ```
+
+  `dmc()` and `llbeta()` always called `R::lbeta`, so `llmc()` also disagreed
+  with `-sum(dmc(..., log = TRUE))`, the objective it is supposed to be, and
+  with `llbeta()` at `lambda = 1`, where the two are the same model:
+
+  ```
+  llmc(c(1e12, 2, 1), 1 - 1e-12)   before -25.9371543959   exact -25.9378518132
+  llmc(c(2, 1e12, 1), 1e-12)       before -26.6306976341   exact -26.6310211159
+  ```
+
+  `R::lbeta` is now called at every `gamma` and `delta`. Over 110
+  likelihood cells the maximum error fell from 16283 ulps of the working
+  magnitude to 3.00, which is where the branch-free regimes already sat; 91
+  cells are bit-identical, 16 improved and 2 moved by at most 2 ulps.
+  `dmc()`, `pmc()`, `qmc()`, `rmc()`, `grmc()` and `hsmc()` are bit-identical.
+
+* **`dmc()` lost the density as `x` approached 1** (`bpmc.cpp`): it formed
+  `x^lambda` in linear arithmetic and then took `log(1 - x^lambda)`. Doubles are
+  spaced 2.2e-16 apart just below 1, so `1 - x^lambda` carries an absolute error
+  of one ulp of 1 however small it truly is, and `x^lambda` rounds to exactly 1
+  once `1 - x` drops under about 1e-16, at which point a guard returned a density
+  of zero.
+
+  `Mc(gamma, delta, lambda)` is `GKw(1, 1, gamma, delta, lambda)`, so `dgkw()`
+  with `alpha = beta = 1` is the same density computed a different way, and it
+  was already right:
+
+  ```
+  gamma = 1.5, delta = 2, lambda = 0.8
+                       exact (400 digits)   dgkw(x,1,1,..)          dmc
+    x = 1 - 1e-13         -58.65464965      -58.65464965     -58.65409479
+    x = 1 - 1e-15         -67.86721101      -67.86721101     -67.92355276
+    x = 1 - 1e-16         -72.26166017      -72.26166017     -71.81537306
+  ```
+
+  `log(1 - x^lambda)` now goes through `gkw_log1mexp(lambda * log(x))`, the
+  helper `dgkw()` already uses, and the guard is gone.
+
+  `llmc()` and `grmc()` carried the mirror image of the same defect at the other
+  end of the support: `log(-expm1(u))` has to represent a number just below 1
+  and so reported `log(1 - x^lambda)` as a multiple of 1.11e-16 -- usually as
+  exactly 0 -- for every `x^lambda` under one ulp. At `delta = 1e12` the missing
+  term is worth 2e-05 nats an observation. All four functions now share
+  `gkw_log1mexp()`.
+
+  Adjudicated against a 120-digit `decimal` reference over 9130 density cells
+  (22 parameter settings x 415 quantiles from 5e-324 to 1 - 1.1e-16): 8424 cells
+  are bit-identical, 512 improved, 143 moved by at most 4 ulps of the working
+  magnitude, and the maximum error fell from infinite -- six cells returned
+  `-Inf` for a finite density -- to 10 ulps. The nesting identity
+  `dmc(x, g, d, l) == dgkw(x, 1, 1, g, d, l)` closed from 9.8e13 ulps to 10.
+  `pmc()`, `qmc()`, `rmc()`, `hsmc()`, `dgkw()`, `llgkw()` and `llbeta()` are
+  bit-identical across the whole grid.
+
 * **`dgkw()`, `llgkw()` and `grgkw()` broke down along the same log-space
   chain** (`gkw.cpp`): all three walk `v = 1 - x^alpha`, `w = 1 - v^beta`,
   `z = 1 - w^lambda`, and each lost the chain in its own way.
