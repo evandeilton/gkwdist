@@ -155,6 +155,16 @@ Rcpp::NumericVector dmc(
       continue;
     }
     
+    // Missing and undefined input propagates, as base R does: dbeta(NA) is NA
+    // and dbeta(NaN) is NaN. Both used to fall into the "outside the support"
+    // branch below -- !R_finite() is true for a NaN -- and were silently
+    // replaced by the fill value, 0 or -Inf in log. NA_REAL is itself a NaN
+    // carrying a distinguishing payload, so R_IsNA() must be asked first.
+    if (ISNAN(xx)) {
+      out(i) = R_IsNA(xx) ? NA_REAL : R_NaN;
+      continue;
+    }
+    
     // Check support: x must be in (0, 1)
     if (xx <= 0.0 || xx >= 1.0 || !R_finite(xx)) {
       continue;
@@ -264,8 +274,14 @@ Rcpp::NumericVector pmc(
       continue;
     }
     
+    // Missing and undefined input propagates, as in d*() above.
+    if (ISNAN(xx)) {
+      out(i) = R_IsNA(xx) ? NA_REAL : R_NaN;
+      continue;
+    }
+    
     // Handle boundary: q ≤ 0
-    if (!R_finite(xx) || xx <= 0.0) {
+    if (xx <= 0.0) {
       double val0 = lower_tail ? 0.0 : 1.0;
       out(i) = log_p ? safe_log(val0) : val0;
       continue;
@@ -358,12 +374,19 @@ Rcpp::NumericVector qmc(
     // ---- Normalise the probability, without leaving log space ----
     // The former code did exp(log p) and then 1 - p in linear space. The first
     // flushed the deep tail to zero (qbeta_(-1000, 2, 3, log.p = TRUE) gave 0
-    // against a true 2.25e-218); the second cost the upper tail. Out-of-range p
-    // keeps the saturating result it has always returned -- whether that should
-    // be NaN instead is a separate, still-open question.
-    if (log_p && pp > 0.0) { out(i) = NA_REAL; continue; }
-    if (!log_p && (pp < 0.0 || pp > 1.0)) {
-      out(i) = (lower_tail == (pp > 1.0)) ? 1.0 : 0.0;
+    // against a true 2.25e-218); the second cost the upper tail.
+    // Missing and undefined input propagates.
+    if (ISNAN(pp)) {
+      out(i) = R_IsNA(pp) ? NA_REAL : R_NaN;
+      continue;
+    }
+    
+    // A probability outside its range has no quantile. The wrappers have
+    // always warned that such a value "will produce NaN"; the C++ saturated
+    // at 0 or 1 instead, which are outside the open support and which
+    // defensive code testing is.nan() could not detect.
+    if (log_p ? (pp > 0.0) : (pp < 0.0 || pp > 1.0)) {
+      out(i) = R_NaN;
       continue;
     }
 

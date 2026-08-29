@@ -360,19 +360,15 @@ test_that("q* does not warn at the closed boundary p = 0 and p = 1", {
 })
 
 # =============================================================================
-# SECTION 4 -- TARGET STATE FOR THE OPEN NA-PROPAGATION DEFECT
+# SECTION 4 -- NON-FINITE INPUT PROPAGATES, AS IN BASE R
 #
-# Every test below is skipped. Each asserts the behaviour the function SHOULD
-# have. Delete the skip() line when the fix lands; change nothing else.
+# These were written as the target state while NA propagation was still open,
+# and were skipped until it landed. They now run: d*(NA) is NA and d*(NaN) is
+# NaN, p*(+Inf) is 1, and a probability outside [0, 1] gives NaN rather than
+# saturating at a bound outside the open support.
 # =============================================================================
 
-OPEN_DEFECT <- paste(
-  "open defect: non-finite input does not propagate;",
-  "delete this skip() when the NA-propagation fix lands"
-)
-
 test_that("d* propagates NA and NaN like base R", {
-  skip(OPEN_DEFECT)
   # Currently returns 0 for both. base R: dbeta(NA) is NA, dbeta(NaN) is NaN.
   for (f in FAMILIES) {
     v <- call_fn("d", f$dpq, c(list(c(NA_real_, NaN)), f$pars))
@@ -382,7 +378,6 @@ test_that("d* propagates NA and NaN like base R", {
 })
 
 test_that("p* propagates NA and NaN like base R", {
-  skip(OPEN_DEFECT)
   # Currently returns 0 for both.
   for (f in FAMILIES) {
     v <- call_fn("p", f$dpq, c(list(c(NA_real_, NaN)), f$pars))
@@ -392,7 +387,6 @@ test_that("p* propagates NA and NaN like base R", {
 })
 
 test_that("p*(+Inf) is 1, like base R", {
-  skip(OPEN_DEFECT)
   # Currently returns 0. The support is (0, 1), so every mass lies below +Inf
   # and the CDF there is 1: pbeta(Inf, 1.5, 0.5) is 1.
   expect_equal(pbeta(Inf, 1.5, 0.5), 1)
@@ -402,7 +396,6 @@ test_that("p*(+Inf) is 1, like base R", {
 })
 
 test_that("q* returns NaN for probabilities outside [0, 1], as it warns it will", {
-  skip(OPEN_DEFECT)
   # Currently clamps: q(-0.5) and q(-Inf) give 0, q(1.5) and q(Inf) give 1,
   # each with a warning that says NaN will be produced.
   expect_true(all(is.nan(suppressWarnings(qbeta(c(-0.5, 1.5, Inf, -Inf), 1.5, 0.5)))))
