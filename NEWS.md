@@ -2,6 +2,40 @@
 
 ## Critical Bug Fixes
 
+* **`grmc()` and `hsmc()` swapped `R::digamma` and `R::trigamma` for two-term
+  asymptotic expansions above three separate thresholds** (`bpmc.cpp`):
+  `gamma > 100`, `delta > 100` and `gamma + delta > 100`. `log(z) - 1/(2z)`
+  truncates psi's expansion before the `1/(12z^2)` term and is wrong by 8.33e-06
+  at `z = 100` and by 1.30e-03 at `z = 8`, which the `gamma + delta` threshold
+  can reach with `gamma` that small; `1/z + 1/(2z^2)` drops psi'-s `1/(6z^3)`
+  term and is wrong by 1.67e-07 at `z = 100`.
+
+  Each threshold put a step of `n` times that error into a different component,
+  at a different place. On the seven observations `c(.1,.25,.4,.5,.6,.75,.9)`:
+
+  ```
+  grmc(c(gamma, 3, 1), x)[1]   gamma = 99.999    5.9262333798
+                               gamma = 100.001   5.9262971512
+  ```
+
+  a jump of 6.38e-05, of which 5.83e-05 is discontinuity rather than slope; the
+  step scales with `n` and reaches 0.018 at `n = 2160`. The largest step between
+  neighbouring `gamma` falls from 6.11e-05 to 2.72e-06 in the gradient and from
+  1.22e-06 to 5.38e-08 in `H[gamma, gamma]`. `R::digamma` and `R::trigamma` are
+  accurate to 1e-16 over the whole range, so the substitution bought nothing.
+
+  Over 330 gradient cells the maximum relative error fell from 3.85e-04 to
+  1.07e-12 and no cell got worse; over 660 Hessian cells 105 improved and 20
+  moved the other way. Ten of those twenty are `H[gamma, delta]` moving by one
+  ulp. The other ten are `H[gamma, gamma]` and `H[delta, delta]` at
+  `gamma` or `delta = 1e12`, where the entry is a difference of two psi' values
+  that agree to eleven digits: the result, around 1.8e-23, can carry no better
+  than 1e-04 relative in double precision whatever psi' returns, and the
+  measured relative error moves from 1.9e-05 to 7.2e-04, both inside that floor.
+  The smooth asymptotic form landed inside it by luck at that one point while
+  being 5.1e-04 wrong and discontinuous at the far more plausible `gamma = 100`.
+  `dmc()`, `pmc()`, `qmc()`, `rmc()` and `llmc()` are bit-identical.
+
 * **`llmc()` swapped `R::lbeta` for a difference of `lgamma` above
   `gamma = 100` or `delta = 100`** (`bpmc.cpp`): that difference is the
   cancellation `R::lbeta` exists to avoid. At `gamma = 1e12`, `delta = 2` the

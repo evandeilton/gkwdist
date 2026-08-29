@@ -624,27 +624,29 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   int n = x.n_elem;
   Rcpp::NumericVector grad(3, 0.0);
 
-  // Calculate digamma terms stably
-  double digamma_gamma, digamma_delta_plus_1, digamma_gamma_delta_plus_1;
-  
-  if (gamma > 100.0) {
-    digamma_gamma = std::log(gamma) - 1.0 / (2.0 * gamma);
-  } else {
-    digamma_gamma = R::digamma(gamma);
-  }
-  
-  if (delta > 100.0) {
-    digamma_delta_plus_1 = std::log(delta + 1.0) - 1.0 / (2.0 * (delta + 1.0));
-  } else {
-    digamma_delta_plus_1 = R::digamma(delta + 1.0);
-  }
-  
-  if (gamma + delta > 100.0) {
-    digamma_gamma_delta_plus_1 = std::log(gamma + delta + 1.0) - 1.0 / (2.0 * (gamma + delta + 1.0));
-  } else {
-    digamma_gamma_delta_plus_1 = R::digamma(gamma + delta + 1.0);
-  }
-  
+  // ψ via R::digamma at every argument. The former code substituted the
+  // two-term asymptotic form log(z) - 1/(2z) above three different thresholds
+  // -- γ > 100, δ > 100, γ+δ > 100 -- which truncates the expansion before the
+  // 1/(12z²) term and so is wrong by 8.33e-06 at z = 100, and by 1.30e-03 at
+  // z = 8 (a threshold on γ+δ can be crossed with γ itself as small as that).
+  // Each threshold put a step of n times that size into a different gradient
+  // component, at a different place. With the seven observations
+  // c(.1,.25,.4,.5,.6,.75,.9):
+  //
+  //   grmc(c(γ, 3, 1), x)[1]   γ = 99.999   5.9262333798
+  //                            γ = 100.001  5.9262971512
+  //     jump 6.38e-05, of which 5.83e-05 = 7 * 8.33e-06 is the discontinuity;
+  //     the largest step between neighbouring γ falls from 6.11e-05 to 2.72e-06
+  //     once the branch is gone. The step scales with n: at n = 2160 it is 0.018.
+  //
+  // Optimisers see a gradient that disagrees with its own objective across the
+  // step. R::digamma is accurate to 1e-16 over the whole range -- it uses the
+  // same asymptotic expansion with enough terms, after shifting the argument up
+  // -- so the substitution bought nothing.
+  double digamma_gamma = R::digamma(gamma);
+  double digamma_delta_plus_1 = R::digamma(delta + 1.0);
+  double digamma_gamma_delta_plus_1 = R::digamma(gamma + delta + 1.0);
+
   // Initialize accumulators
   double sum_log_x = 0.0;
   double sum_log_v = 0.0;
@@ -751,28 +753,25 @@ Rcpp::NumericMatrix hsmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   int n = x.n_elem;
   Rcpp::NumericMatrix hess(3, 3);
 
-  // Compute trigamma values stably
-  double trigamma_gamma, trigamma_delta_plus_1, trigamma_gamma_plus_delta_plus_1;
-  
-  if (gamma > 100.0) {
-    trigamma_gamma = 1.0 / gamma + 1.0 / (2.0 * gamma * gamma);
-  } else {
-    trigamma_gamma = R::trigamma(gamma);
-  }
-  
-  if (delta > 100.0) {
-    trigamma_delta_plus_1 = 1.0 / (delta + 1.0) + 1.0 / (2.0 * (delta + 1.0) * (delta + 1.0));
-  } else {
-    trigamma_delta_plus_1 = R::trigamma(delta + 1.0);
-  }
-  
-  if (gamma + delta > 100.0) {
-    double z = gamma + delta + 1.0;
-    trigamma_gamma_plus_delta_plus_1 = 1.0 / z + 1.0 / (2.0 * z * z);
-  } else {
-    trigamma_gamma_plus_delta_plus_1 = R::trigamma(gamma + delta + 1.0);
-  }
-  
+  // ψ' via R::trigamma at every argument, for the reason given in grmc():
+  // 1/z + 1/(2z²) drops the 1/(6z³) term and is wrong by 1.67e-07 at z = 100
+  // and by 3.25e-04 at z = 8. The three thresholds put three steps of that size
+  // into the Hessian, which is what the standard errors are read off; the
+  // largest step in H[γ,γ] between neighbouring γ near 100 falls from 1.22e-06
+  // to 5.38e-08 once the branch is gone.
+  //
+  // One regime is left worse and is worth naming: H[γ,γ] and H[δ,δ] subtract
+  // two ψ' values that agree to eleven digits when γ or δ reaches 1e12, so the
+  // result -- around 1.8e-23 -- can carry no better than 1e-04 relative in
+  // double precision whatever ψ' returns. The smooth asymptotic form used to
+  // land inside that band by luck; R::trigamma's rounding does not. The
+  // measured relative error there goes from 1.9e-05 to 7.2e-04, both inside
+  // the floor the subtraction imposes, while the same form was 5.1e-04 wrong
+  // and discontinuous at the far more plausible γ = 100.
+  double trigamma_gamma = R::trigamma(gamma);
+  double trigamma_delta_plus_1 = R::trigamma(delta + 1.0);
+  double trigamma_gamma_plus_delta_plus_1 = R::trigamma(gamma + delta + 1.0);
+
   // Initialize accumulators for data-dependent terms
   double sum_log_x = 0.0;
   double sum_x_lambda_log_x_div_v = 0.0;

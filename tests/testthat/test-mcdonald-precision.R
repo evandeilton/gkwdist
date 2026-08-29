@@ -240,3 +240,102 @@ test_that("llmc equals llbeta at lambda = 1 above the former cut-off", {
     expect_equal(llmc(c(gd, 1), data), llbeta(gd, data), tolerance = 1e-13,
                  info = sprintf("gamma=%g delta=%g", gd[1], gd[2]))
 })
+
+
+# ---------------------------------------------------------------------------
+# 3. grmc() and hsmc() swapped R::digamma and R::trigamma for two-term
+#    asymptotic expansions above three separate thresholds: gamma > 100,
+#    delta > 100 and gamma + delta > 100.
+#
+# log(z) - 1/(2z) truncates psi's expansion before the 1/(12z^2) term and so is
+# wrong by 8.33e-06 at z = 100 and by 1.30e-03 at z = 8, which the gamma+delta
+# threshold can reach with gamma that small. 1/z + 1/(2z^2) drops psi'-s
+# 1/(6z^3) term and is wrong by 1.67e-07 at z = 100.
+#
+# Each threshold put a step of n times that error into a different component,
+# at a different place. On c(.1,.25,.4,.5,.6,.75,.9):
+#
+#   grmc(c(gamma, 3, 1), x)[1]   gamma = 99.999    5.9262333798
+#                                gamma = 100.001   5.9262971512
+#
+# a jump of 6.38e-05, of which 5.83e-05 is discontinuity rather than slope. The
+# step scales with n and reaches 0.018 at n = 2160. R::digamma and R::trigamma
+# are accurate to 1e-16 over the whole range, so the substitution bought
+# nothing and cost the gradient its agreement with the objective.
+
+sweep_pars <- c(99.9, 99.99, 99.999, 99.9999, 100, 100.0001, 100.001, 100.01, 100.1)
+sweep_data <- c(0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9)
+
+test_that("grmc has no step at the gamma = 100 or delta = 100 thresholds", {
+  # A jump shows up as a second difference far larger than the neighbouring
+  # ones. Away from the threshold the sequence is smooth to 1e-9.
+  for (slot in 1:2) {
+    at <- function(v, k) {
+      p <- if (slot == 1) c(v, 3, 1) else c(3, v, 1)
+      as.numeric(grmc(p, sweep_data))[k]
+    }
+    for (k in 1:3) {
+      v <- vapply(sweep_pars, at, 0, k = k)
+      # curvature across the threshold, against curvature just to the side
+      across <- v[7] - 2 * v[5] + v[3]          # 100.001, 100, 99.999
+      side <- at(80.001, k) - 2 * at(80, k) + at(79.999, k)
+      expect_lt(abs(across), abs(side) + 1e-9)
+    }
+  }
+})
+
+test_that("hsmc has no step at the gamma = 100 or delta = 100 thresholds", {
+  for (slot in 1:2) {
+    at <- function(v, i, j) {
+      p <- if (slot == 1) c(v, 3, 1) else c(3, v, 1)
+      hsmc(p, sweep_data)[i, j]
+    }
+    for (ij in list(c(1, 1), c(1, 2), c(2, 2))) {
+      i <- ij[1]; j <- ij[2]
+      across <- at(100.001, i, j) - 2 * at(100, i, j) + at(99.999, i, j)
+      side <- at(80.001, i, j) - 2 * at(80, i, j) + at(79.999, i, j)
+      expect_lt(abs(across), abs(side) + 1e-11)
+    }
+  }
+})
+
+test_that("grmc and hsmc use the exact digamma and trigamma above 100", {
+  # The digamma and trigamma terms of the gradient and Hessian are exactly
+  # these expressions; anything else is the truncated expansion.
+  for (p in list(c(150, 20, 1), c(20, 150, 1), c(150, 150, 2), c(101, 3, 1),
+                 c(3, 101, 1), c(60, 60, 1.5))) {
+    g <- p[1]; d <- p[2]; l <- p[3]
+    n <- length(sweep_data)
+    got <- as.numeric(grmc(p, sweep_data))
+    expect_equal(got[1], n * (digamma(g) - digamma(g + d + 1)) -
+                   l * sum(log(sweep_data)),
+                 tolerance = 1e-12, info = sprintf("gamma=%g delta=%g", g, d))
+    expect_equal(got[2], n * (digamma(d + 1) - digamma(g + d + 1)) -
+                   sum(log1mexp_ref(l * log(sweep_data))),
+                 tolerance = 1e-12, info = sprintf("gamma=%g delta=%g", g, d))
+    H <- hsmc(p, sweep_data)
+    expect_equal(H[1, 1], n * (trigamma(g) - trigamma(g + d + 1)),
+                 tolerance = 1e-12, info = sprintf("gamma=%g delta=%g", g, d))
+    expect_equal(H[1, 2], -n * trigamma(g + d + 1),
+                 tolerance = 1e-12, info = sprintf("gamma=%g delta=%g", g, d))
+    expect_equal(H[2, 2], n * (trigamma(d + 1) - trigamma(g + d + 1)),
+                 tolerance = 1e-12, info = sprintf("gamma=%g delta=%g", g, d))
+  }
+})
+
+test_that("grmc is the gradient of llmc above the former thresholds", {
+  skip_if_not_installed("numDeriv")
+  # numDeriv is the arbiter only where the objective is smooth on the scale of
+  # its step: gamma and delta of order 100, not 1e12.
+  for (p in list(c(150, 20, 1), c(20, 150, 1), c(150, 150, 2), c(101, 3, 1.5),
+                 c(3, 101, 0.7), c(99.999, 3, 1), c(100.001, 3, 1))) {
+    fd <- numDeriv::grad(function(q) llmc(q, sweep_data), p,
+                         method = "Richardson")
+    expect_equal(as.numeric(grmc(p, sweep_data)), fd, tolerance = 1e-6,
+                 info = sprintf("gamma=%g delta=%g lambda=%g", p[1], p[2], p[3]))
+    H <- numDeriv::jacobian(function(q) as.numeric(grmc(q, sweep_data)), p)
+    expect_equal(max(abs(hsmc(p, sweep_data) - H) / pmax(abs(H), 1e-6)), 0,
+                 tolerance = 1e-5,
+                 info = sprintf("gamma=%g delta=%g lambda=%g", p[1], p[2], p[3]))
+  }
+})
