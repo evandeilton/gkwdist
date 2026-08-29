@@ -56,8 +56,57 @@ The only note is local to the checking machine: HTML validation was skipped
 because the `tidy` command is not installed, and math rendering was skipped
 because the `V8` package is unavailable. Neither applies to the package itself.
 
-The check reports the installed size as INFO rather than a note (libs ~9.6Mb),
-which is inherent to the compiled C++ routines for seven distribution families.
+## Installed size
+
+The check reports the installed size as INFO on this machine and may report it
+as a NOTE on yours:
+
+```
+* checking installed package size ... INFO
+  installed size is 10.5Mb
+  sub-directories of 1Mb or more:
+    libs   9.1Mb
+```
+
+Almost none of that is code. Of the 9,525,168 bytes of `libs/gkwdist.so`,
+`.text` accounts for 391,164 -- about 4% -- and the eight `.debug_*` sections
+account for 8,951,368, or 94.5%. The size is debug information the toolchain
+emits because R compiles packages with `-g -O2`, not the compiled routines for
+the seven distribution families.
+
+The package does not try to remove it, for three reasons.
+
+`-g0` in `src/Makevars` cannot work. R appends its own `$(CXXFLAGS)` after
+`$(PKG_CXXFLAGS)`, so the later flag wins:
+
+```
+g++ ... -fopenmp -g0 -fpic  -g -O2  -c gkw.cpp -o gkw.o
+              PKG_CXXFLAGS ^^^     ^^ R's CXXFLAGS
+```
+
+Measured: identical output, 9,525,200 bytes against 9,525,168.
+
+A post-link `strip --strip-debug` rule in `src/Makevars` does work -- it brings
+the shared object to 572,816 bytes and the installed size to 1.5Mb, and
+`R CMD check --as-cran` then reports `checking installed package size ... OK`
+with no complaint from any of the Makevars checks. It is not used because
+`--strip-debug` is GNU binutils syntax that the `strip` on macOS does not
+accept, and a failing recipe aborts `make` and takes the whole installation
+with it. Trading a size NOTE for a broken macOS build is not a good trade.
+
+Stripping also destroys the sanitizer diagnostics the package now relies on.
+`.github/workflows/sanitizers.yaml` runs the test suite under UBSan and ASan,
+and those reports are only actionable with debug information present:
+
+```
+gkw.cpp:134:21: runtime error: division by zero
+    #0 ... in dgkw(...)     src/gkw.cpp:134
+```
+
+Anyone who wants the smaller installation can ask for it at install time,
+which is where the choice belongs: `R CMD INSTALL --strip` gives 516,712 bytes
+and a 1.5Mb installed size, with the full test suite passing (0 failures,
+9,644 assertions).
 
 ## Downstream dependencies
 
