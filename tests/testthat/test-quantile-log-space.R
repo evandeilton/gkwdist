@@ -94,20 +94,28 @@ test_that("log.p reaches quantiles the linear scale cannot", {
   expect_equal(qkw(-1000, 2, 3, log.p = TRUE), 0)   # documented limit
 })
 
-test_that("the boundary conventions are unchanged", {
-  # These are the values 1.1.5 returned; whether out-of-range p should be NaN
-  # is a separate question and is deliberately not settled here.
+test_that("the closed boundary p = 0 and p = 1 is unchanged", {
+  # These are in range, and are the values 1.1.5 returned.
   expect_equal(qkw(0, 2, 3), 0)
   expect_equal(qkw(1, 2, 3), 1)
   expect_equal(qkw(0, 2, 3, lower.tail = FALSE), 1)
   expect_equal(qkw(1, 2, 3, lower.tail = FALSE), 0)
-  expect_equal(suppressWarnings(qkw(-0.5, 2, 3)), 0)
-  expect_equal(suppressWarnings(qkw(1.5, 2, 3)), 1)
-  expect_equal(suppressWarnings(qkw(-0.5, 2, 3, lower.tail = FALSE)), 1)
-  expect_equal(suppressWarnings(qkw(1.5, 2, 3, lower.tail = FALSE)), 0)
   expect_equal(qkw(-Inf, 2, 3, log.p = TRUE), 0)
   expect_equal(qkw(0, 2, 3, log.p = TRUE), 1)
-  expect_true(is.na(suppressWarnings(qkw(1, 2, 3, log.p = TRUE))))
+})
+
+test_that("a probability outside its range gives NaN", {
+  # When this file was written the saturating result was left in place and the
+  # comment here said the question was deliberately unsettled. It is settled
+  # now: 0 and 1 are outside the open support, and defensive code testing
+  # is.nan() -- which is exactly what the wrappers' own warning tells the caller
+  # to expect -- could not see the saturated value.
+  expect_true(is.nan(suppressWarnings(qkw(-0.5, 2, 3))))
+  expect_true(is.nan(suppressWarnings(qkw(1.5, 2, 3))))
+  expect_true(is.nan(suppressWarnings(qkw(-0.5, 2, 3, lower.tail = FALSE))))
+  expect_true(is.nan(suppressWarnings(qkw(1.5, 2, 3, lower.tail = FALSE))))
+  expect_true(is.nan(suppressWarnings(qkw(1, 2, 3, log.p = TRUE))))
+  expect_true(all(is.nan(suppressWarnings(qkw(c(-Inf, Inf), 2, 3)))))
 })
 
 test_that("the quantile nesting identities hold", {
