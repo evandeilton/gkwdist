@@ -408,6 +408,49 @@
   family-specific starting points are always used, so `n_starts` below 4 still
   behaves as 4; this is now documented rather than silently true.
 
+* **`gkwgetstartvalues()` truncated out-of-support data without saying so**
+  (`gkwinit.cpp`): every observation was clamped into `[1e-10, 1 - 1e-10]` in
+  silence. Truncation moves every sample moment and therefore every estimate the
+  function returns, and its commonest cause -- data on a percentage or 0-100
+  scale -- is exactly the case a caller needs to be told about. On that input the
+  function did not fail; it answered, and the answer was both wrong and
+  unremarkable-looking:
+
+  ```
+  set.seed(1); y <- rkw(300, 2, 3)
+  gkwgetstartvalues(y, "kw")                alpha 2.137549   beta 3.506511
+  gkwgetstartvalues(c(y, 5, -3), "kw")      alpha 2.047567   beta 3.251306
+  gkwgetstartvalues(y * 100, "kw")          alpha 50.000000  beta 50.000000
+  ```
+
+  The last line is the whole problem in one row: a sample handed over on a 0-100
+  scale came back with both parameters pinned at the upper edge of the parameter
+  box, with nothing to distinguish it from a fit. `tryCatch(..., warning = )`
+  caught no condition in any of the three calls.
+
+  Observations outside the open interval `(0,1)` -- exact 0 and exact 1 included,
+  matching the support `ll*()` enforces since the fix earlier in this release --
+  now raise a warning naming how many were truncated and the range they spanned:
+
+  ```
+  gkwgetstartvalues: 300 of 300 observations lie outside the open interval (0,1)
+  (observed range [6.6169, 89.7703]) and were clamped to it; the estimates below
+  are those of the clamped sample. Data on a percentage or 0-100 scale must be
+  rescaled before use.
+  ```
+
+  The clamp itself is kept, so a single boundary observation still does not abort
+  a fit and no existing call changes its return value; only the silence is
+  removed. `NA` and non-finite values continue to be dropped without a warning,
+  which the `@param x` entry now states.
+
+  Verified: the warning fires on `c(y, 5, -3)`, on a lone exact 0, on a lone
+  exact 1 and on `y * 100`, reporting 2, 1, 1 and 300 offenders respectively with
+  the correct observed range in each; it does not fire on the clean sample, nor
+  on samples carrying `NA` or `Inf`. Every returned vector is unchanged. The full
+  test suite, whose data are all strictly inside the support, still reports 0
+  warnings.
+
 ## Documentation Fixes
 
 * **`gkwgetstartvalues()` is deterministic, and now says so** (`gkwinit.cpp`):

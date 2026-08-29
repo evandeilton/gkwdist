@@ -703,7 +703,13 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //' numerical integration.
 //'
 //' @param x Numeric vector of observations. All values must be in the open interval (0,1).
-//'   Values outside this range will be automatically truncated to avoid numerical issues.
+//'   Values outside it -- including exact 0 and exact 1 -- are truncated to the interval
+//'   so that a single boundary observation does not abort a fit, and a warning naming the
+//'   number of truncated observations and their observed range is issued. Truncation
+//'   shifts every sample moment and therefore every estimate returned, so treat the
+//'   warning as a signal to check the scale of the data rather than as noise: values such
+//'   as 5 or -3 usually mean a percentage or 0-100 scale that has to be rescaled first.
+//'   \code{NA} and non-finite values are dropped without a warning.
 //' @param family Character string specifying the distribution family. Valid options are:
 //'   \code{"gkw"} (Generalized Kumaraswamy - 5 parameters),
 //'   \code{"bkw"} (Beta-Kumaraswamy - 4 parameters),
@@ -758,8 +764,9 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //' GKw-related families or (0.1, 50.0) for Beta, delta in (0.01, 10.0), and lambda in
 //' (0.1, 20.0).
 //'
-//' The function will issue warnings for empty input vectors, sample sizes less than 10
-//' (unreliable estimation), or failure to find valid parameter estimates (returns defaults).
+//' The function will issue warnings for empty input vectors, observations outside the
+//' open interval (0,1) (truncated to it), sample sizes less than 10 (unreliable
+//' estimation), or failure to find valid parameter estimates (returns defaults).
 //'
 //' @examples
 //' \donttest{
@@ -819,12 +826,36 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
 
  try {
    // Filter NAs and clamp to (0,1) — std::max(1e-10, NaN) is platform-dependent
+   //
+   // The clamp is retained so that a boundary observation does not abort a fit,
+   // but it is no longer silent.  Moving an observation to the edge of the
+   // support changes every sample moment and therefore every estimate, and the
+   // commonest cause is data on the wrong scale (0-100 rather than 0-1), which
+   // the caller has to be told about.  Count the offenders and report the
+   // observed range so the scale is visible in the message.
    std::vector<double> clean;
    clean.reserve(x.size());
+   int n_outside = 0;
+   double lo = std::numeric_limits<double>::infinity();
+   double hi = -std::numeric_limits<double>::infinity();
    for (int i = 0; i < x.size(); i++) {
      if (!Rcpp::NumericVector::is_na(x[i]) && std::isfinite(x[i])) {
-       clean.push_back(std::max(1e-10, std::min(1.0 - 1e-10, (double)x[i])));
+       const double xi = x[i];
+       if (xi <= 0.0 || xi >= 1.0) {
+         n_outside++;
+         if (xi < lo) lo = xi;
+         if (xi > hi) hi = xi;
+       }
+       clean.push_back(std::max(1e-10, std::min(1.0 - 1e-10, xi)));
      }
+   }
+   if (n_outside > 0) {
+     Rcpp::warning(
+       "gkwgetstartvalues: %d of %d observations lie outside the open interval "
+       "(0,1) (observed range [%g, %g]) and were clamped to it; the estimates "
+       "below are those of the clamped sample. Data on a percentage or 0-100 "
+       "scale must be rescaled before use.",
+       n_outside, (int)clean.size(), lo, hi);
    }
    if (clean.empty()) {
      Rcpp::warning("No valid (non-NA, finite, in (0,1)) observations found.");

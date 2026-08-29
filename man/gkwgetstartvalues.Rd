@@ -8,7 +8,13 @@ gkwgetstartvalues(x, family = "gkw", n_starts = 5L)
 }
 \arguments{
 \item{x}{Numeric vector of observations. All values must be in the open interval (0,1).
-Values outside this range will be automatically truncated to avoid numerical issues.}
+Values outside it -- including exact 0 and exact 1 -- are truncated to the interval
+so that a single boundary observation does not abort a fit, and a warning naming the
+number of truncated observations and their observed range is issued. Truncation
+shifts every sample moment and therefore every estimate returned, so treat the
+warning as a signal to check the scale of the data rather than as noise: values such
+as 5 or -3 usually mean a percentage or 0-100 scale that has to be rescaled first.
+\code{NA} and non-finite values are dropped without a warning.}
 
 \item{family}{Character string specifying the distribution family. Valid options are:
 \code{"gkw"} (Generalized Kumaraswamy - 5 parameters),
@@ -72,8 +78,9 @@ constraints are enforced: alpha and beta in (0.1, 50.0), gamma in (0.1, 10.0) fo
 GKw-related families or (0.1, 50.0) for Beta, delta in (0.01, 10.0), and lambda in
 (0.1, 20.0).
 
-The function will issue warnings for empty input vectors, sample sizes less than 10
-(unreliable estimation), or failure to find valid parameter estimates (returns defaults).
+The function will issue warnings for empty input vectors, observations outside the
+open interval (0,1) (truncated to it), sample sizes less than 10 (unreliable
+estimation), or failure to find valid parameter estimates (returns defaults).
 }
 \examples{
 \donttest{
