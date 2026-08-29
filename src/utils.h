@@ -103,12 +103,20 @@ inline double gkw_log1mexp(double u) {
   }
   
   // Region 1: Very small |u| - use Taylor series with correction
-  // For u ≈ 0⁻, 1 - exp(u) ≈ -u - u²/2 + O(u³)
-  // Therefore log(1 - exp(u)) ≈ log(-u) + log(1 + u/2) ≈ log(-u) - u/2
+  //
+  //   1 - exp(u) = -(u + u²/2 + u³/6 + ...) = -u * (1 + u/2 + u²/6 + ...)
+  //
+  // so log(1 - exp(u)) = log(-u) + log(1 + u/2 + ...) ≈ log(-u) + u/2.
+  //
+  // The correction is +u/2, not -u/2: the previous line of this derivation
+  // read "log(1 + u/2) ≈ -u/2", which drops a sign. Since u < 0 here the two
+  // differ by |u|, so the returned value was displaced by up to 1e-14 -- about
+  // 1.4 ulp at this magnitude, but in the wrong direction, and it put a step at
+  // the boundary with region 2 where the function should be smooth. That also
+  // broke the "< 2*EPSILON" guarantee documented above.
   if (u > LOG1MEXP_TINY) {
     double neg_u = -u;
-    // Second-order correction for improved accuracy
-    return std::log(neg_u) - 0.5 * u;
+    return std::log(neg_u) + 0.5 * u;
   }
   
   // Region 2: -log(2) < u <= -1e-14 - use expm1 formulation
@@ -241,8 +249,21 @@ inline double safe_exp(double x) {
  * - x < 0: Requires y to be effectively integer; handles sign correctly
  * - Extreme exponents: Prevents overflow/underflow with early detection
  * 
- * For positive x, uses logarithmic transformation: x^y = exp(y * log(x))
- * This provides better numerical stability than direct pow() for extreme values.
+ * For positive x, uses logarithmic transformation: x^y = exp(y * log(x)).
+ * This is what allows the overflow and underflow of an extreme exponent to be
+ * detected before it happens, which is the reason the routine exists.
+ *
+ * It is NOT more accurate than std::pow, and this note used to claim it was.
+ * exp(y*log(x)) carries a relative error of roughly |y*log(x)| * EPSILON, while
+ * std::pow on a conforming libm is very nearly correctly rounded. Measured
+ * against a 60-digit reference:
+ *
+ *     x     y      exp(y*log x)     std::pow
+ *     10    100    1.11e-14         0
+ *     10    300    9.00e-14         0
+ *     2     1000   6.85e-14         0
+ *
+ * Callers that do not need the overflow interception should prefer std::pow.
  * 
  * @param x Base value
  * @param y Exponent value
@@ -276,9 +297,15 @@ inline double safe_pow(double x, double y) {
       return R_NaN;  // Non-integer power of negative number is undefined in reals
     }
     
-    // y is integer - compute |x|^|y| then apply sign
-    int y_int = static_cast<int>(y_rounded);
-    bool y_is_odd = (y_int % 2 != 0);
+    // y is integer - compute |x|^|y| then apply sign.
+    //
+    // Parity comes from fmod rather than a cast to int. static_cast<int> is
+    // undefined behaviour once |y_rounded| exceeds INT_MAX, which UBSan flags,
+    // and clamping to int would also answer the parity question wrongly: an odd
+    // integer between INT_MAX and 2^53 is exactly representable as a double.
+    // fmod is correct at every magnitude -- above 2^53 every double is even,
+    // and fmod says so.
+    bool y_is_odd = (std::fmod(std::abs(y_rounded), 2.0) == 1.0);
     double abs_x = -x;  // x is negative, so -x is positive
     
     // Compute absolute result using logarithmic method for stability
@@ -455,10 +482,11 @@ inline arma::vec vec_safe_pow(const arma::vec& x, double y) {
   // Check if y is effectively an integer (for negative base handling)
   double y_rounded = std::round(y);
   bool y_is_integer = (std::abs(y - y_rounded) <= INTEGER_TOLERANCE);
-  // Guard against UB: static_cast<int> is UB when y_rounded > INT_MAX
-  bool y_fits_in_int = (std::abs(y_rounded) <= static_cast<double>(std::numeric_limits<int>::max()));
-  int y_int = y_fits_in_int ? static_cast<int>(y_rounded) : 0;
-  bool y_is_odd = y_is_integer && y_fits_in_int && (y_int % 2 != 0);
+  // Parity from fmod, matching safe_pow above. The former guard avoided the
+  // undefined cast but answered the parity question wrongly in the process: it
+  // reported "even" for every |y| above INT_MAX, and an odd integer between
+  // INT_MAX and 2^53 is exactly representable as a double.
+  bool y_is_odd = y_is_integer && (std::fmod(std::abs(y_rounded), 2.0) == 1.0);
   
   // Element-wise computation with shared exponent logic
   for (size_t i = 0; i < n; ++i) {

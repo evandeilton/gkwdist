@@ -1,5 +1,58 @@
 # gkwdist 1.1.6
 
+## Numerical Utilities
+
+* **`gkw_log1mexp()` had the sign of its second-order correction inverted**
+  (`utils.h`): the Taylor branch, used for `-1e-14 < u <= 0`, returned
+  `log(-u) - u/2` where the expansion gives `log(-u) + u/2`. Since
+  `1 - exp(u) = -u (1 + u/2 + u^2/6 + ...)`, the correction is
+  `log(1 + u/2) ~ +u/2`, and the derivation in the comment above the line
+  carried the same slip. With `u < 0` the two forms differ by `|u|`. Against a
+  400-digit reference:
+
+  ```
+  u          reference                err before   err after
+  -9.9e-15   -32.246241637770147      1.42e-14     0
+  -5.0e-15   -32.929338482476588      0            0
+  ```
+
+  About 1.4 ulp at this magnitude, but in the wrong direction, and it left a
+  step where the function crosses into the `expm1` branch -- breaking the
+  "relative error < 2*EPSILON" the header promises.
+
+  Downstream the effect is at the noise floor, and is reported as such: 56 of
+  238,140 grid values move, by at most 2.3e-13 relative, and adjudicating the
+  changed densities against a 400-digit reference gives 4 closer and 2 farther,
+  all between 1e-15 and 2e-14. The defensible claim is the direct one, on the
+  function itself.
+
+* **`safe_pow()` cast a `double` exponent to `int` without a range check**
+  (`utils.h`): undefined behaviour once `|y| > INT_MAX`, which UBSan flags.
+  `vec_safe_pow()` had a guard for it, but that guard answered the parity
+  question wrongly in the process, reporting "even" for every `|y|` above
+  `INT_MAX` -- and an odd integer between `INT_MAX` and `2^53` is exactly
+  representable as a `double`. Both now take the parity from
+  `fmod(|y|, 2) == 1`, which is correct at every magnitude: above `2^53` every
+  `double` is even, and `fmod` says so.
+
+* **`safe_pow()`'s documentation claimed an accuracy it does not have**
+  (`utils.h`): it said the `exp(y * log(x))` form "provides better numerical
+  stability than direct `pow()`". The reverse is true. That form carries a
+  relative error of roughly `|y log x| * EPSILON`, while `std::pow` on a
+  conforming libm is very nearly correctly rounded. Measured against a 60-digit
+  reference:
+
+  ```
+  x     y      exp(y*log x)   std::pow
+  10    100    1.11e-14       0
+  10    300    9.00e-14       0
+  2     1000   6.85e-14       0
+  ```
+
+  The note now says what the form is actually for -- intercepting overflow and
+  underflow before they happen -- and points callers who do not need that to
+  `std::pow`.
+
 ## Critical Bug Fixes
 
 * **`NA`, `NaN` and infinite input did not propagate** (all seven families, 21
