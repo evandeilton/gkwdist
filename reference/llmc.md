@@ -222,7 +222,7 @@ for (method in methods) {
 print(comparison, digits = 4, row.names = FALSE)
 #>       Method Gamma Delta Lambda NegLogLik Convergence
 #>         BFGS 1.458 2.644  1.956    -310.1           0
-#>     L-BFGS-B 1.460 2.644  1.954    -310.1           0
+#>     L-BFGS-B 1.461 2.643  1.953    -310.1           0
 #>  Nelder-Mead 1.460 2.643  1.954    -310.1           0
 #>           CG 1.878 2.522  1.596    -310.0           1
 

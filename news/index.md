@@ -2,7 +2,128 @@
 
 ## gkwdist 1.1.6
 
+### Numerical Utilities
+
+- **`gkw_log1mexp()` had the sign of its second-order correction
+  inverted** (`utils.h`): the Taylor branch, used for `-1e-14 < u <= 0`,
+  returned `log(-u) - u/2` where the expansion gives `log(-u) + u/2`.
+  Since `1 - exp(u) = -u (1 + u/2 + u^2/6 + ...)`, the correction is
+  `log(1 + u/2) ~ +u/2`, and the derivation in the comment above the
+  line carried the same slip. With `u < 0` the two forms differ by
+  `|u|`. Against a 400-digit reference:
+
+      u          reference                err before   err after
+      -9.9e-15   -32.246241637770147      1.42e-14     0
+      -5.0e-15   -32.929338482476588      0            0
+
+  About 1.4 ulp at this magnitude, but in the wrong direction, and it
+  left a step where the function crosses into the `expm1` branch –
+  breaking the “relative error \< 2\*EPSILON” the header promises.
+
+  Downstream the effect is at the noise floor, and is reported as such:
+  56 of 238,140 grid values move, by at most 2.3e-13 relative, and
+  adjudicating the changed densities against a 400-digit reference gives
+  4 closer and 2 farther, all between 1e-15 and 2e-14. The defensible
+  claim is the direct one, on the function itself.
+
+- **`safe_pow()` cast a `double` exponent to `int` without a range
+  check** (`utils.h`): undefined behaviour once `|y| > INT_MAX`, which
+  UBSan flags. `vec_safe_pow()` had a guard for it, but that guard
+  answered the parity question wrongly in the process, reporting “even”
+  for every `|y|` above `INT_MAX` – and an odd integer between `INT_MAX`
+  and `2^53` is exactly representable as a `double`. Both now take the
+  parity from `fmod(|y|, 2) == 1`, which is correct at every magnitude:
+  above `2^53` every `double` is even, and `fmod` says so.
+
+- **`safe_pow()`’s documentation claimed an accuracy it does not have**
+  (`utils.h`): it said the `exp(y * log(x))` form “provides better
+  numerical stability than direct `pow()`”. The reverse is true. That
+  form carries a relative error of roughly `|y log x| * EPSILON`, while
+  `std::pow` on a conforming libm is very nearly correctly rounded.
+  Measured against a 60-digit reference:
+
+      x     y      exp(y*log x)   std::pow
+      10    100    1.11e-14       0
+      10    300    9.00e-14       0
+      2     1000   6.85e-14       0
+
+  The note now says what the form is actually for – intercepting
+  overflow and underflow before they happen – and points callers who do
+  not need that to `std::pow`.
+
 ### Critical Bug Fixes
+
+- **[`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md)
+  reached `R::pbeta` through `exp(lambda * log(x))`, which is not a
+  round trip** (`bpmc.cpp`): for `lambda = 1` the Mc family is the Beta
+  family, and `pmc(x, gamma, delta, 1)` should be
+  `R::pbeta(x, gamma, delta+1)` exactly. It was not: `exp(1 * log(x))`
+  fails to return `x` for 2 of 9 ordinary values under glibc, and for a
+  different pair under the macOS ARM64 libm, which is where CI caught
+  it.
+
+  `std::pow` is used instead. C99 requires `pow(x, 1.0) == x`, so the
+  identity now holds bit-for-bit on every platform, and the form is also
+  the more accurate one for every other `lambda`. Against a 60-digit
+  reference over 1,030 grid points:
+
+      lambda    exp(l*log x)    std::pow     improved   worse
+      1.5       1.19e-14        1.67e-16     403        3
+      0.1       6.57e-16        1.64e-16      56        0
+      2.5       1.57e-14        1.11e-16     527        0
+
+  Only `pmc` moves; 1,093 of 238,140 grid values, all in `p mc`.
+
+- **The upper tail of
+  [`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md)
+  and
+  [`pbkw()`](https://evandeilton.github.io/gkwdist/reference/pbkw.md)
+  collapsed to exactly zero** (`gkw.cpp`, `bkw.cpp`): the CDF batch
+  moved `lower.tail` and `log.p` onto `R::pbeta` instead of applying
+  them afterwards, which fixed the lower tail. A second defect remained,
+  in the *argument* rather than the tail flag.
+
+  [`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md)
+  forms `y = [1 - (1 - x^alpha)^beta]^lambda` and evaluates
+  `I_y(gamma, delta+1)`. As `x` approaches 1 the exponent `lambda*log_w`
+  falls below 1.1e-16, [`exp()`](https://rdrr.io/r/base/Log.html)
+  returns exactly 1, and `R::pbeta(1, ., ., lower = FALSE)` returns
+  exactly 0.
+  [`pbkw()`](https://evandeilton.github.io/gkwdist/reference/pbkw.md)
+  reaches the same place through `-expm1` of an exponent running off to
+  `-Inf`. Against a 300-digit incomplete beta, for
+  `pgkw(x, 2, 3, 1.5, 2, 0.8, lower.tail = FALSE)`:
+
+      1-x     returned        exact           rel err
+      1e-4    5.731692e-34    5.731820e-34    2.2e-05
+      1e-5    5.840671e-43    5.734142e-43    1.9e-02
+      1e-6    0               5.734374e-52    1.00     <- collapse
+      1e-16   0               1.469535e-141   1.00
+
+  The true tail is still representable sixteen decades past the point
+  where the routine gave up, and `lower.tail = FALSE` is ordinary
+  documented API, so survival probabilities, p-values and quantile
+  residuals were silently zero.
+
+  `I_y(a,b) = 1 - I_{1-y}(b,a)` is exact, and `1 - y` is `-expm1` of the
+  same exponent that produces `y`, at full relative accuracy. Reflecting
+  above `y = 1/2` sends the small quantity into `pbeta` and the large
+  one out of it; below that crossover the direct form already holds the
+  small quantity and is left alone. This is the same correction
+  [`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md)
+  received in this release.
+
+  After the fix the maximum relative error over those fifteen decades is
+  6.1e-14 for
+  [`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md)
+  and 5.3e-14 for
+  [`pbkw()`](https://evandeilton.github.io/gkwdist/reference/pbkw.md).
+  Confinement over the 238,140-value grid: only `pgkw` and `pbkw` move,
+  only with `lower.tail = FALSE`, and no `d*` or `q*` value changes at
+  all. The nesting identity against
+  [`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md) –
+  corrected independently, in another translation unit – goes from
+  4.88e-01 to 2.84e-14.
 
 - **`NA`, `NaN` and infinite input did not propagate** (all seven
   families, 21 routines): `NA_REAL` is a `NaN`, so every comparison
@@ -173,6 +294,174 @@
   and
   [`qkkw()`](https://evandeilton.github.io/gkwdist/reference/qkkw.md)
   are untouched and bit-identical.
+
+- **[`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md)’s
+  upper tail was quantised by the argument it handed to `R::pbeta`**
+  (`bpmc.cpp`): `F(x) = I_{x^lambda}(gamma, delta+1)`, and
+  [`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md)
+  formed `x^lambda` in linear arithmetic. Once `x^lambda` passes 1/2 a
+  double holds it no more finely than 1.1e-16, and the upper tail is a
+  function of `1 - x^lambda` alone, so it was quantised to whatever that
+  left – and to exactly 0 once `x^lambda` reached 1:
+
+      pmc(x, 4, 2, 0.25, lower.tail = FALSE)      before             exact
+        x = 1 - 1e-15                       2.1895288505e-46   3.1175127579e-46
+        x = 1 - 1.1e-16                     0                  4.2764235361e-49
+
+  a relative error of 700%, then of 100%. `I_y(a,b) = 1 - I_{1-y}(b,a)`
+  is exact, and `1 - x^lambda` comes from `-expm1` of the same exponent
+  at full relative accuracy, so reflecting sends the small quantity into
+  `pbeta`. The reflection is applied only where the direct form is the
+  one holding the large quantity: the lower tail never changes, and
+  neither does any upper tail with `x^lambda <= 1/2`.
+
+  Over 8942 grid cells whose exact tail is representable at all, 8494
+  are bit-identical, 353 improved and 76 moved the other way. The
+  maximum relative error fell from 7.00 to 1.36e-13, and that residual
+  sits on a cell this change did not touch. The 76 that moved the other
+  way went from at most 2.67e-14 to at most 4.10e-14 relative, which is
+  `R::pbeta`’s own accuracy at tail probabilities of 1e-71: both routes
+  hand it an argument good to one ulp there, and they round differently.
+  [`dmc()`](https://evandeilton.github.io/gkwdist/reference/dmc.md),
+  [`qmc()`](https://evandeilton.github.io/gkwdist/reference/qmc.md),
+  [`rmc()`](https://evandeilton.github.io/gkwdist/reference/rmc.md),
+  [`llmc()`](https://evandeilton.github.io/gkwdist/reference/llmc.md),
+  [`grmc()`](https://evandeilton.github.io/gkwdist/reference/grmc.md)
+  and
+  [`hsmc()`](https://evandeilton.github.io/gkwdist/reference/hsmc.md)
+  are bit-identical, as is every lower tail and every `lambda = 1`
+  result, which stays identical to
+  [`stats::pbeta`](https://rdrr.io/r/stats/Beta.html) to the bit.
+
+- **[`grmc()`](https://evandeilton.github.io/gkwdist/reference/grmc.md)
+  and
+  [`hsmc()`](https://evandeilton.github.io/gkwdist/reference/hsmc.md)
+  swapped `R::digamma` and `R::trigamma` for two-term asymptotic
+  expansions above three separate thresholds** (`bpmc.cpp`):
+  `gamma > 100`, `delta > 100` and `gamma + delta > 100`.
+  `log(z) - 1/(2z)` truncates psi’s expansion before the `1/(12z^2)`
+  term and is wrong by 8.33e-06 at `z = 100` and by 1.30e-03 at `z = 8`,
+  which the `gamma + delta` threshold can reach with `gamma` that small;
+  `1/z + 1/(2z^2)` drops psi’-s `1/(6z^3)` term and is wrong by 1.67e-07
+  at `z = 100`.
+
+  Each threshold put a step of `n` times that error into a different
+  component, at a different place. On the seven observations
+  `c(.1,.25,.4,.5,.6,.75,.9)`:
+
+      grmc(c(gamma, 3, 1), x)[1]   gamma = 99.999    5.9262333798
+                                   gamma = 100.001   5.9262971512
+
+  a jump of 6.38e-05, of which 5.83e-05 is discontinuity rather than
+  slope; the step scales with `n` and reaches 0.018 at `n = 2160`. The
+  largest step between neighbouring `gamma` falls from 6.11e-05 to
+  2.72e-06 in the gradient and from 1.22e-06 to 5.38e-08 in
+  `H[gamma, gamma]`. `R::digamma` and `R::trigamma` are accurate to
+  1e-16 over the whole range, so the substitution bought nothing.
+
+  Over 330 gradient cells the maximum relative error fell from 3.85e-04
+  to 1.07e-12 and no cell got worse; over 660 Hessian cells 105 improved
+  and 20 moved the other way. Ten of those twenty are `H[gamma, delta]`
+  moving by one ulp. The other ten are `H[gamma, gamma]` and
+  `H[delta, delta]` at `gamma` or `delta = 1e12`, where the entry is a
+  difference of two psi’ values that agree to eleven digits: the result,
+  around 1.8e-23, can carry no better than 1e-04 relative in double
+  precision whatever psi’ returns, and the measured relative error moves
+  from 1.9e-05 to 7.2e-04, both inside that floor. The smooth asymptotic
+  form landed inside it by luck at that one point while being 5.1e-04
+  wrong and discontinuous at the far more plausible `gamma = 100`.
+  [`dmc()`](https://evandeilton.github.io/gkwdist/reference/dmc.md),
+  [`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md),
+  [`qmc()`](https://evandeilton.github.io/gkwdist/reference/qmc.md),
+  [`rmc()`](https://evandeilton.github.io/gkwdist/reference/rmc.md) and
+  [`llmc()`](https://evandeilton.github.io/gkwdist/reference/llmc.md)
+  are bit-identical.
+
+- **[`llmc()`](https://evandeilton.github.io/gkwdist/reference/llmc.md)
+  swapped `R::lbeta` for a difference of `lgamma` above `gamma = 100` or
+  `delta = 100`** (`bpmc.cpp`): that difference is the cancellation
+  `R::lbeta` exists to avoid. At `gamma = 1e12`, `delta = 2` the two
+  outer `lgamma` values are 2.66e13, where one ulp is 3.9e-03, so their
+  difference cannot resolve an answer of -82.2 any better than that:
+
+      R::lbeta(1e12, 3)                          -82.1999161672287   (exact)
+      lgamma(1e12) + lgamma(3) - lgamma(1e12+3)  -82.203125          (off by 3.2e-03)
+
+  [`dmc()`](https://evandeilton.github.io/gkwdist/reference/dmc.md) and
+  [`llbeta()`](https://evandeilton.github.io/gkwdist/reference/llbeta.md)
+  always called `R::lbeta`, so
+  [`llmc()`](https://evandeilton.github.io/gkwdist/reference/llmc.md)
+  also disagreed with `-sum(dmc(..., log = TRUE))`, the objective it is
+  supposed to be, and with
+  [`llbeta()`](https://evandeilton.github.io/gkwdist/reference/llbeta.md)
+  at `lambda = 1`, where the two are the same model:
+
+      llmc(c(1e12, 2, 1), 1 - 1e-12)   before -25.9371543959   exact -25.9378518132
+      llmc(c(2, 1e12, 1), 1e-12)       before -26.6306976341   exact -26.6310211159
+
+  `R::lbeta` is now called at every `gamma` and `delta`. Over 110
+  likelihood cells the maximum error fell from 16283 ulps of the working
+  magnitude to 3.00, which is where the branch-free regimes already sat;
+  91 cells are bit-identical, 16 improved and 2 moved by at most 2 ulps.
+  [`dmc()`](https://evandeilton.github.io/gkwdist/reference/dmc.md),
+  [`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md),
+  [`qmc()`](https://evandeilton.github.io/gkwdist/reference/qmc.md),
+  [`rmc()`](https://evandeilton.github.io/gkwdist/reference/rmc.md),
+  [`grmc()`](https://evandeilton.github.io/gkwdist/reference/grmc.md)
+  and
+  [`hsmc()`](https://evandeilton.github.io/gkwdist/reference/hsmc.md)
+  are bit-identical.
+
+- **[`dmc()`](https://evandeilton.github.io/gkwdist/reference/dmc.md)
+  lost the density as `x` approached 1** (`bpmc.cpp`): it formed
+  `x^lambda` in linear arithmetic and then took `log(1 - x^lambda)`.
+  Doubles are spaced 2.2e-16 apart just below 1, so `1 - x^lambda`
+  carries an absolute error of one ulp of 1 however small it truly is,
+  and `x^lambda` rounds to exactly 1 once `1 - x` drops under about
+  1e-16, at which point a guard returned a density of zero.
+
+  `Mc(gamma, delta, lambda)` is `GKw(1, 1, gamma, delta, lambda)`, so
+  [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md)
+  with `alpha = beta = 1` is the same density computed a different way,
+  and it was already right:
+
+      gamma = 1.5, delta = 2, lambda = 0.8
+                           exact (400 digits)   dgkw(x,1,1,..)          dmc
+        x = 1 - 1e-13         -58.65464965      -58.65464965     -58.65409479
+        x = 1 - 1e-15         -67.86721101      -67.86721101     -67.92355276
+        x = 1 - 1e-16         -72.26166017      -72.26166017     -71.81537306
+
+  `log(1 - x^lambda)` now goes through `gkw_log1mexp(lambda * log(x))`,
+  the helper
+  [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md)
+  already uses, and the guard is gone.
+
+  [`llmc()`](https://evandeilton.github.io/gkwdist/reference/llmc.md)
+  and
+  [`grmc()`](https://evandeilton.github.io/gkwdist/reference/grmc.md)
+  carried the mirror image of the same defect at the other end of the
+  support: `log(-expm1(u))` has to represent a number just below 1 and
+  so reported `log(1 - x^lambda)` as a multiple of 1.11e-16 – usually as
+  exactly 0 – for every `x^lambda` under one ulp. At `delta = 1e12` the
+  missing term is worth 2e-05 nats an observation. All four functions
+  now share `gkw_log1mexp()`.
+
+  Adjudicated against a 120-digit `decimal` reference over 9130 density
+  cells (22 parameter settings x 415 quantiles from 5e-324 to 1 -
+  1.1e-16): 8424 cells are bit-identical, 512 improved, 143 moved by at
+  most 4 ulps of the working magnitude, and the maximum error fell from
+  infinite – six cells returned `-Inf` for a finite density – to 10
+  ulps. The nesting identity `dmc(x, g, d, l) == dgkw(x, 1, 1, g, d, l)`
+  closed from 9.8e13 ulps to 10.
+  [`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md),
+  [`qmc()`](https://evandeilton.github.io/gkwdist/reference/qmc.md),
+  [`rmc()`](https://evandeilton.github.io/gkwdist/reference/rmc.md),
+  [`hsmc()`](https://evandeilton.github.io/gkwdist/reference/hsmc.md),
+  [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md),
+  [`llgkw()`](https://evandeilton.github.io/gkwdist/reference/llgkw.md)
+  and
+  [`llbeta()`](https://evandeilton.github.io/gkwdist/reference/llbeta.md)
+  are bit-identical across the whole grid.
 
 - **[`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md),
   [`llgkw()`](https://evandeilton.github.io/gkwdist/reference/llgkw.md)

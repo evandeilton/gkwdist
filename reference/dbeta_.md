@@ -124,7 +124,7 @@ print(paste("Max difference vs dgkw:", max(abs(densities - densities_gkw))))
 # Compare with dmc setting lambda=1
 densities_mc <- dmc(x_vals, gamma = gamma_par, delta = delta_par, lambda = 1.0)
 print(paste("Max difference vs dmc:", max(abs(densities - densities_mc))))
-#> [1] "Max difference vs dmc: 4.44089209850063e-16"
+#> [1] "Max difference vs dmc: 0"
 
 # Calculate log-density
 log_densities <- dbeta_(x_vals, gamma_par, delta_par, log = TRUE)
