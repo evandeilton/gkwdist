@@ -206,6 +206,14 @@ Rcpp::NumericVector dgkw(
   
   // Initialize result vector with appropriate default values
   arma::vec result(n);
+
+  // One warning per call, not one per element. Warning inside the loop cost 51x
+  // on 50,000 values with half the parameters invalid, and under
+  // options(warn = 2) each call longjmps out of the loop through C++ frames
+  // holding live Armadillo objects. R's own convention is a single warning
+  // per call.
+  bool bad_par = false;
+
   result.fill(log_prob ? R_NegInf : 0.0);
   
   // Process each element with parameter recycling
@@ -220,7 +228,7 @@ Rcpp::NumericVector dgkw(
     
     // Validate parameters
     if (!check_pars(a, b, g, d, l)) {
-      Rcpp::warning("dgkw: invalid parameters at index %d (alpha,beta,gamma>0, delta>=0, lambda>0)", i+1);
+      bad_par = true;
       continue;
     }
     
@@ -231,6 +239,14 @@ Rcpp::NumericVector dgkw(
     // carrying a distinguishing payload, so R_IsNA() must be asked first.
     if (ISNAN(xi)) {
       result(i) = R_IsNA(xi) ? NA_REAL : R_NaN;
+      continue;
+    }
+    
+    // The closed boundaries carry the limiting density, as base R does:
+    // dbeta(0, 0.5, 1) is Inf and dbeta(1, 2, 1) is 2, where this package
+    // returned 0 at both ends. Anything strictly outside stays 0.
+    if (xi == 0.0 || xi == 1.0) {
+      result(i) = gkw_boundary_pdf(xi == 0.0, a, b, g, d, l, log_prob);
       continue;
     }
     
@@ -286,6 +302,17 @@ Rcpp::NumericVector dgkw(
     result(i) = log_prob ? logdens : safe_exp(logdens);
   }
   
+  if (bad_par) {
+    // Deliberately does NOT say "NaNs produced". This path leaves the fill
+    // value -- 0, or -Inf when log = TRUE -- and a warning that names a return
+    // value the function does not produce is the very defect this release
+    // fixed for q*(): the R wrappers promised NaN while the C++ saturated, so
+    // defensive code testing is.nan() saw nothing. dgkw() returning 0 where
+    // man/dgkw.Rd promises NaN is a real and separate inconsistency; it is
+    // recorded rather than papered over with a message.
+    Rcpp::warning("dgkw: invalid parameters");
+  }
+
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);
 }
 
@@ -348,6 +375,14 @@ Rcpp::NumericVector pgkw(
                       gamma_vec.n_elem, delta_vec.n_elem, lambda_vec.n_elem});
   
   arma::vec result(n);
+
+  // One warning per call, not one per element. Warning inside the loop cost 51x
+  // on 50,000 values with half the parameters invalid, and under
+  // options(warn = 2) each call longjmps out of the loop through C++ frames
+  // holding live Armadillo objects. R's own convention is a single warning
+  // per call.
+  bool bad_par = false;
+
   
   for (size_t i = 0; i < n; ++i) {
     // Extract recycled parameter values
@@ -361,7 +396,7 @@ Rcpp::NumericVector pgkw(
     // Validate parameters
     if (!check_pars(a, b, g, d, l)) {
       result(i) = NA_REAL;
-      Rcpp::warning("pgkw: invalid parameters at index %d (alpha,beta,gamma>0, delta>=0, lambda>0)", i+1);
+      bad_par = true;
       continue;
     }
     
@@ -416,6 +451,10 @@ Rcpp::NumericVector pgkw(
     }
   }
   
+  if (bad_par) {
+    Rcpp::warning("pgkw: NAs produced");
+  }
+
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);
 }
 
@@ -478,6 +517,14 @@ Rcpp::NumericVector qgkw(
                       gamma_vec.n_elem, delta_vec.n_elem, lambda_vec.n_elem});
   
   arma::vec result(n);
+
+  // One warning per call, not one per element. Warning inside the loop cost 51x
+  // on 50,000 values with half the parameters invalid, and under
+  // options(warn = 2) each call longjmps out of the loop through C++ frames
+  // holding live Armadillo objects. R's own convention is a single warning
+  // per call.
+  bool bad_par = false;
+
   
   for (size_t i = 0; i < n; ++i) {
     // Extract recycled parameter values
@@ -491,7 +538,7 @@ Rcpp::NumericVector qgkw(
     // Validate parameters
     if (!check_pars(a, b, g, d, l)) {
       result(i) = NA_REAL;
-      Rcpp::warning("qgkw: invalid parameters at index %d (alpha,beta,gamma>0, delta>=0, lambda>0)", i+1);
+      bad_par = true;
       continue;
     }
     
@@ -522,6 +569,10 @@ Rcpp::NumericVector qgkw(
     result(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_w) / b) / a);
   }
   
+  if (bad_par) {
+    Rcpp::warning("qgkw: NAs produced");
+  }
+
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);
 }
 
@@ -578,6 +629,14 @@ Rcpp::NumericVector rgkw(
 
   arma::vec result(n);
 
+  // One warning per call, not one per element. Warning inside the loop cost 51x
+  // on 50,000 values with half the parameters invalid, and under
+  // options(warn = 2) each call longjmps out of the loop through C++ frames
+  // holding live Armadillo objects. R's own convention is a single warning
+  // per call.
+  bool bad_par = false;
+
+
   for (int i = 0; i < n; ++i) {
     // Extract recycled parameter values
     double a = alpha_vec[i % alpha_vec.n_elem];
@@ -589,7 +648,7 @@ Rcpp::NumericVector rgkw(
     // Validate parameters
     if (!check_pars(a, b, g, d, l)) {
       result(i) = NA_REAL;
-      Rcpp::warning("rgkw: invalid parameters at index %d (alpha,beta,gamma>0, delta>=0, lambda>0)", i+1);
+      bad_par = true;
       continue;
     }
     
@@ -604,6 +663,10 @@ Rcpp::NumericVector rgkw(
     result(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_w) / b) / a);
   }
   
+  if (bad_par) {
+    Rcpp::warning("rgkw: NAs produced");
+  }
+
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);
 }
 

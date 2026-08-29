@@ -166,6 +166,14 @@ Rcpp::NumericVector dkw(
       continue;
     }
     
+    // The closed boundaries carry the limiting density, as base R does:
+    // dbeta(0, 0.5, 1) is Inf and dbeta(1, 2, 1) is 2, where this package
+    // returned 0 at both ends. Anything strictly outside stays 0.
+    if (xx == 0.0 || xx == 1.0) {
+      out(i) = gkw_boundary_pdf(xx == 0.0, a, b, 1.0, 0.0, 1.0, log_prob);
+      continue;
+    }
+    
     // Check support: x must be in (0, 1)
     if (xx <= 0.0 || xx >= 1.0 || !R_finite(xx)) {
       continue;
@@ -439,8 +447,13 @@ Rcpp::NumericVector rkw(
     const Rcpp::NumericVector& alpha,
     const Rcpp::NumericVector& beta
 ) {
-  if (n <= 0) {
-    Rcpp::stop("rkw: n must be positive");
+  // n = 0 returns numeric(0), matching stats::rbeta(0, 2, 3). Only a
+  // negative n is an error.
+  if (n < 0) {
+    Rcpp::stop("rkw: n must be non-negative");
+  }
+  if (n == 0) {
+    return Rcpp::NumericVector(0);
   }
   
   // Convert R vectors to Armadillo vectors
@@ -456,16 +469,23 @@ Rcpp::NumericVector rkw(
   }
 
   arma::vec out(n);
-  
+
+  // One warning per call, not one per element. Warning inside the loop cost 51x
+  // on 50,000 values with half the parameters invalid, and under
+  // options(warn = 2) each call longjmps out of the loop through C++ frames
+  // holding live Armadillo objects. R's own convention is a single
+  // "NAs produced" per call.
+  bool bad_par = false;
+
   for (int i = 0; i < n; i++) {
     // Extract recycled parameters (direct modulo, no intermediate variable)
     double a = a_vec[i % a_vec.n_elem];
     double b = b_vec[i % b_vec.n_elem];
-    
+
     // Validate parameters
     if (!check_kw_pars(a, b)) {
       out(i) = NA_REAL;
-      Rcpp::warning("rkw: invalid parameters at index %d", i + 1);
+      bad_par = true;
       continue;
     }
     
@@ -480,7 +500,11 @@ Rcpp::NumericVector rkw(
     // before; only the inversion that follows it changes.
     out(i) = std::exp(gkw_log1mexp(std::log1p(-U) / b) / a);
   }
-  
+
+  if (bad_par) {
+    Rcpp::warning("rkw: NAs produced");
+  }
+
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
 }
 

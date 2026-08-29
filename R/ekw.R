@@ -131,14 +131,14 @@ dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
     stop("'log' must be a single logical value")
   }
 
-  .Call("_gkwdist_dekw",
+  .shape_like(.Call("_gkwdist_dekw",
     as.numeric(x),
     as.numeric(alpha),
     as.numeric(beta),
     as.numeric(lambda),
     as.logical(log),
     PACKAGE = "gkwdist"
-  )
+  ), x)
 }
 
 
@@ -277,7 +277,7 @@ pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
     stop("'log.p' must be a single logical value")
   }
 
-  .Call("_gkwdist_pekw",
+  .shape_like(.Call("_gkwdist_pekw",
     as.numeric(q),
     as.numeric(alpha),
     as.numeric(beta),
@@ -285,7 +285,7 @@ pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
     as.logical(lower.tail),
     as.logical(log.p),
     PACKAGE = "gkwdist"
-  )
+  ), q)
 }
 
 
@@ -430,7 +430,7 @@ qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
     warning("'p' values outside [0, 1] will produce NaN")
   }
 
-  .Call("_gkwdist_qekw",
+  .shape_like(.Call("_gkwdist_qekw",
     as.numeric(p),
     as.numeric(alpha),
     as.numeric(beta),
@@ -438,7 +438,7 @@ qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
     as.logical(lower.tail),
     as.logical(log.p),
     PACKAGE = "gkwdist"
-  )
+  ), p)
 }
 
 
@@ -554,8 +554,10 @@ qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #' @export
 rekw <- function(n, alpha = 1, beta = 1, lambda = 1) {
   if (length(n) > 1) n <- length(n)
-  if (!is.numeric(n) || length(n) != 1 || n < 1) {
-    stop("'n' must be a positive integer")
+  # n = 0 is legal and yields numeric(0), as stats::rbeta(0, 2, 3) does.
+  # Negative and missing n stay errors, which is also what base R does.
+  if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 0) {
+    stop("'n' must be a single non-negative integer")
   }
   n <- as.integer(n)
 

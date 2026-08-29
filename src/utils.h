@@ -80,6 +80,46 @@ constexpr double EPSILON      = std::numeric_limits<double>::epsilon();        /
  */
 
 /**
+ * gkw_boundary_pdf: limiting density at the closed boundaries x = 0 and x = 1
+ *
+ * The GKw support is the open interval, but base R's density functions return
+ * the LIMIT at the closed boundary rather than 0 -- dbeta(0, 0.5, 1) is Inf,
+ * dbeta(1, 2, 1) is 2 -- and any code that plots a density across [0,1] depends
+ * on it. This package returned 0 at both ends for every family.
+ *
+ * Substituting the same first-order forms the log chain already uses,
+ *
+ *   x -> 0:  log_v -> 0,  log_w -> log(beta) + alpha*log(x),  log_z -> 0
+ *   x -> 1:  log_x -> 0,  log_w -> 0,  log_z -> log(lambda) + beta*log_v
+ *
+ * the log-density collapses to a constant plus a single power of the vanishing
+ * quantity:
+ *
+ *   at 0:  log_const + (gamma*lambda - 1) log(beta) + (alpha*gamma*lambda - 1) log(x)
+ *   at 1:  log_const + delta log(lambda)            + (beta*(delta + 1) - 1) log(v)
+ *
+ * so the exponent alone decides the answer: positive gives 0, negative gives
+ * +Inf, and zero leaves the constant. Every nested family reaches this through
+ * its own fixed parameters, and the whole rule was checked against stats::dbeta
+ * at each of the ten combinations the Beta parameterisation can express.
+ *
+ * @param at_zero  true for the x = 0 boundary, false for x = 1
+ * @param a,b,g,d,l  the five GKw parameters of the calling family
+ * @param log_prob   return the log-density instead of the density
+ */
+inline double gkw_boundary_pdf(bool at_zero, double a, double b, double g,
+                               double d, double l, bool log_prob) {
+  double exponent = at_zero ? (a * g * l - 1.0) : (b * (d + 1.0) - 1.0);
+  if (exponent > 0.0) return log_prob ? R_NegInf : 0.0;
+  if (exponent < 0.0) return R_PosInf;
+
+  double log_const = std::log(l) + std::log(a) + std::log(b) - R::lbeta(g, d + 1.0);
+  double lp = at_zero ? (log_const + (g * l - 1.0) * std::log(b))
+                      : (log_const + d * std::log(l));
+  return log_prob ? lp : std::exp(lp);
+}
+
+/**
  * log1mexp: Compute log(1 - exp(u)) with enhanced numerical stability
  * 
  * For u <= 0, computes log(1 - exp(u)) using different approximations

@@ -203,15 +203,27 @@ test_that("the logical flags reject anything that is not a single logical", {
   }
 })
 
-test_that("r* rejects a sample size that is not a positive integer", {
+test_that("r* rejects a sample size that is not a non-negative integer", {
+  # n = 0 used to be rejected here too. It is legal now, and tested just below:
+  # stats::rbeta(0, 2, 3) is numeric(0), and a generator that errors instead
+  # breaks any loop or replicate() that happens to reach an empty case.
   for (f in FAMILIES) {
-    for (bad in list(0, -1, NA, "5")) {
+    for (bad in list(-1, NA, "5")) {
       expect_error(
         call_fn("r", f$dpq, c(list(bad), f$pars)),
-        "'n' must be a positive integer",
+        "'n' must be a single non-negative integer",
         info = paste(f$dpq, "n =", format(bad))
       )
     }
+  }
+})
+
+test_that("r*(0) returns numeric(0), as base R does", {
+  expect_length(stats::rbeta(0, 2, 3), 0)
+  for (f in FAMILIES) {
+    v <- call_fn("r", f$dpq, c(list(0), f$pars))
+    expect_length(v, 0)
+    expect_type(v, "double")
   }
 })
 
@@ -443,5 +455,44 @@ test_that("an NA shape parameter raises the package's own error in every family"
         info = paste(f$dpq, par)
       )
     }
+  }
+})
+
+# =============================================================================
+# SECTION 5 -- THE SHAPE OF THE RESULT
+#
+# base R's d/p/q carry the first argument's attributes through to the output,
+# so code that indexes or plots by shape keeps working. This package dropped
+# them. The copy is conditional on the lengths agreeing, which is what base R
+# does once a recycled parameter makes the output longer than the input.
+# =============================================================================
+
+test_that("d, p and q carry dim, dimnames and names, as base R does", {
+  m <- matrix(c(.1, .3, .5, .7), 2, 2,
+              dimnames = list(c("r1", "r2"), c("c1", "c2")))
+  v <- c(a = .2, b = .5)
+
+  expect_identical(dim(stats::dbeta(m, 2, 3)), c(2L, 2L))   # the reference
+  expect_identical(names(stats::dbeta(v, 2, 3)), c("a", "b"))
+
+  for (f in FAMILIES) {
+    for (pref in c("d", "p", "q")) {
+      r <- call_fn(pref, f$dpq, c(list(m), f$pars))
+      expect_identical(dim(r), c(2L, 2L), info = paste(pref, f$dpq))
+      expect_identical(dimnames(r), dimnames(m), info = paste(pref, f$dpq))
+
+      r <- call_fn(pref, f$dpq, c(list(v), f$pars))
+      expect_identical(names(r), c("a", "b"), info = paste(pref, f$dpq))
+    }
+  }
+})
+
+test_that("the shape is dropped when a parameter recycles longer, as base R does", {
+  m <- matrix(c(.1, .3, .5, .7), 2, 2)
+  expect_null(dim(stats::dbeta(m, c(2, 3, 4, 5, 6), 3)))     # the reference
+  for (f in FAMILIES) {
+    long <- f$pars
+    long[[1]] <- rep(long[[1]], length.out = 5)
+    expect_null(dim(call_fn("d", f$dpq, c(list(m), long))), info = f$dpq)
   }
 })

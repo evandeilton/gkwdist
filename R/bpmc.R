@@ -143,14 +143,14 @@ dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
   }
 
   # Call C++ implementation
-  .Call("_gkwdist_dmc",
+  .shape_like(.Call("_gkwdist_dmc",
     as.numeric(x),
     as.numeric(gamma),
     as.numeric(delta),
     as.numeric(lambda),
     as.logical(log),
     PACKAGE = "gkwdist"
-  )
+  ), x)
 }
 
 
@@ -297,7 +297,7 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
   }
 
   # Call C++ implementation
-  .Call("_gkwdist_pmc",
+  .shape_like(.Call("_gkwdist_pmc",
     as.numeric(q),
     as.numeric(gamma),
     as.numeric(delta),
@@ -305,7 +305,7 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
     as.logical(lower.tail),
     as.logical(log.p),
     PACKAGE = "gkwdist"
-  )
+  ), q)
 }
 
 
@@ -460,7 +460,7 @@ qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
   }
 
   # Call C++ implementation
-  .Call("_gkwdist_qmc",
+  .shape_like(.Call("_gkwdist_qmc",
     as.numeric(p),
     as.numeric(gamma),
     as.numeric(delta),
@@ -468,7 +468,7 @@ qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
     as.logical(lower.tail),
     as.logical(log.p),
     PACKAGE = "gkwdist"
-  )
+  ), p)
 }
 
 
@@ -603,8 +603,10 @@ qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
   # Input validation
   if (length(n) > 1) n <- length(n)
-  if (!is.numeric(n) || length(n) != 1 || n < 1) {
-    stop("'n' must be a positive integer")
+  # n = 0 is legal and yields numeric(0), as stats::rbeta(0, 2, 3) does.
+  # Negative and missing n stay errors, which is also what base R does.
+  if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 0) {
+    stop("'n' must be a single non-negative integer")
   }
   n <- as.integer(n)
 
