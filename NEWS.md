@@ -2,6 +2,60 @@
 
 ## Critical Bug Fixes
 
+* **The BKw and KKw likelihoods collapsed to `+Inf` on ordinary data**
+  (`bkw.cpp`, `kkw.cpp`): both families walk the same log-space chain as their
+  GKw parent -- `v = 1 - x^alpha`, `w = 1 - v^beta`, `z = 1 - w^lambda`, with
+  `lambda = 1` for BKw and `gamma = 1` for KKw -- and both stopped at the point
+  where `v` underflows to exactly 1. `log1mexp()` then receives an argument of
+  exactly 0 and can only answer `-Inf`. The threshold is `alpha*log(min(x)) <
+  -745`, which perfectly ordinary data crosses:
+
+  ```
+  x = c(0.01, 0.3, 0.6, 0.9)
+    alpha = 161   llbkw(c(a,2,1.5,1), x) = 1515.5261017902   llkkw(c(a,2,1,1.5), x) = 1516.4186759096
+    alpha = 162   llbkw                  = Inf               llkkw                  = Inf
+    alpha = 200   llbkw                  = Inf               llkkw                  = Inf
+  ```
+
+  Every larger `alpha` stayed at `Inf`, so the likelihood surface carried an
+  infinite plateau that an optimiser cannot leave. The true values, 1525.13 and
+  1526.03 at `alpha = 162`, are now returned.
+
+  The same boundary reached the density, the gradient and the Hessian.
+  `dbkw()` and `dkkw()` dropped such observations and returned the fill value
+  (`-Inf` in log, 0 otherwise). The derivatives built the ratios `v^beta/w` and
+  `w^lambda/z` as separate factors; each overflowed to `+Inf` on its own while
+  the quantity it multiplied had underflowed to 0, and `0 * Inf` is `NaN`:
+
+  ```
+  par = (200, 2, 1.5, 1), x = c(.01, .30, .60, .90)
+    grbkw            NaN  NaN  NaN  NaN
+    grgkw(lambda=1)  9.617994  -3.000000  1278.026571  -2.721489
+  par = (200, 2, 1, 1.5), x = c(.01, .30, .60, .90)
+    grkkw            NaN  NaN  -2  NaN          (partly NaN, and silently so)
+    grgkw(gamma=1)   9.617994  -3.000000  -2.000000  1279.626571
+  ```
+
+  Both files now use the first-order limits that are exact to the last
+  representable bit -- as `x -> 0`, `log_w = log(beta) + alpha*log(x)`; as
+  `x -> 1`, `log_z = log(lambda) + beta*log_v` -- keep every ratio inside a
+  single `exp()` of a sum of logs, and never let a coefficient of exactly zero
+  multiply a logarithm. This is the same repair `gkw.cpp` received, so the
+  nesting identities `BKw(a,b,g,d) == GKw(a,b,g,d,1)` and
+  `KKw(a,b,d,l) == GKw(a,b,1,d,l)` now hold where they previously did not.
+
+  Over a grid of 19,488 values spanning `x` from 1e-300 to `1 - 1e-16` and
+  `alpha` from 0.01 to 5000, 1,966 results changed from `NaN`/`Inf` to a finite
+  value and none went the other way. 1,089 `NaN` Hessian entries -- 71 whole
+  unusable matrices -- became finite. Adjudicated against a 400-digit reference
+  and against the GKw parent: the maximum relative error fell from infinite to
+  1.8e-07 for the log-likelihoods and 1.4e-04 for the gradients, both attained
+  only at `alpha >= 1000` where double precision has no digits left to lose.
+  No value that was already exactly correct changed; values correct to within
+  one ulp rose from 100 to 152 (log-likelihood), 348 to 479 (gradient) and 1,337
+  to 1,716 (Hessian). `pbkw()`, `qbkw()`, `pkkw()` and `qkkw()` are untouched
+  and bit-identical.
+
 * **`dgkw()`, `llgkw()` and `grgkw()` broke down along the same log-space
   chain** (`gkw.cpp`): all three walk `v = 1 - x^alpha`, `w = 1 - v^beta`,
   `z = 1 - w^lambda`, and each lost the chain in its own way.
