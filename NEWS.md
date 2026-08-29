@@ -566,6 +566,13 @@
   `p(q(u))` recovers `u`, that the boundary conventions are unchanged and that
   the nesting identities hold. It fails 28 assertions against 1.1.5.
 
+* New `tests/testthat/test-startvalues-contract.R` pins the three contracts
+  `gkwgetstartvalues()` advertises: that `n_starts` widens the search and never
+  worsens the fit, that the estimate reproduces the first sample moment, that
+  the answer is deterministic and leaves `.Random.seed` alone, and that
+  truncating out-of-support data raises a warning naming how many observations
+  were moved. It fails 25 assertions against 1.1.5 and passes 54 on this branch.
+
 * `test-mle-performance.R` compared each scenario's mean parameter error over
   its own converged subset, which penalises the more robust scenario: the
   analytical gradient fits datasets the numerical baseline gives up on, and
