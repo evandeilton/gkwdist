@@ -35,8 +35,10 @@ when \code{lower.tail = TRUE}).
 \item \code{1} for \code{p = 1} (or \code{p = 0} if \code{log.p = TRUE},
 when \code{lower.tail = TRUE}).
 \item \code{NaN} for \code{p < 0} or \code{p > 1} (or corresponding log scale).
-\item \code{NaN} for invalid parameters (e.g., \code{gamma <= 0},
-\code{delta < 0}, \code{lambda <= 0}).
+\item An out-of-bound or missing parameter is an error, not a
+return value: the wrapper stops with a message naming the parameter.
+An infinite parameter is not currently intercepted there and reaches
+the C++ layer, which treats it as invalid.
 }
 Boundary return values are adjusted accordingly for \code{lower.tail = FALSE}.
 }

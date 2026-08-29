@@ -23,8 +23,10 @@ Can be a scalar or a vector. Default: 1.0.}
 A vector of length \code{n} containing random deviates from the EKw
 distribution. The length of the result is determined by \code{n} and the
 recycling rule applied to the parameters (\code{alpha}, \code{beta},
-\code{lambda}). Returns \code{NaN} if parameters
-are invalid (e.g., \code{alpha <= 0}, \code{beta <= 0}, \code{lambda <= 0}).
+\code{lambda}). An out-of-bound or missing parameter is an
+error, not a return value: the wrapper stops with a message naming the
+parameter. An infinite parameter is not currently intercepted there and
+reaches the C++ layer, which treats it as invalid.
 }
 \description{
 Generates random deviates from the Exponentiated Kumaraswamy (EKw)

@@ -16,9 +16,9 @@
 # dbeta(0.5, -1, 1) is NaN and warns "NaNs produced", rbeta(2, -1, 1) is NA and
 # warns "NAs produced".
 #
-# The invalid-parameter path is reachable from the exported API only through an
-# Inf parameter: every R wrapper stop()s on <= 0, NA and NaN. These tests reach
-# it that way, and through .Call for the per-element case.
+# The invalid-parameter path is no longer reachable from the exported API at all:
+# the wrappers stop() on <= 0, NA, NaN and, since the @return contract fix, on
+# Inf as well. These tests reach it through .Call.
 
 test_that("one warning per call, not one per element", {
   x <- runif(2000, 0.01, 0.99)

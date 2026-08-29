@@ -26,9 +26,10 @@ A vector of density values (\eqn{f(x)}) or log-density values
 (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 rule applied to the arguments (\code{x}, \code{alpha}, \code{beta},
 \code{lambda}). Returns \code{0} (or \code{-Inf} if
-\code{log = TRUE}) for \code{x} outside the interval (0, 1), or
-\code{NaN} if parameters are invalid (e.g., \code{alpha <= 0},
-\code{beta <= 0}, \code{lambda <= 0}).
+\code{log = TRUE}) for \code{x} outside the interval (0, 1). An out-of-bound or missing parameter is an
+error, not a return value: the wrapper stops with a message naming the
+parameter. An infinite parameter is not currently intercepted there and
+reaches the C++ layer, which treats it as invalid.
 }
 \description{
 Computes the probability density function (PDF) for the Exponentiated

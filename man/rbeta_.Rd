@@ -21,8 +21,10 @@ Default: 0.0 (leading to \code{shape2 = 1}, i.e., Uniform).}
 A numeric vector of length \code{n} containing random deviates from the
 Beta(\eqn{\gamma, \delta+1}) distribution, with values in (0, 1). The length
 of the result is determined by \code{n} and the recycling rule applied to
-the parameters (\code{gamma}, \code{delta}). Returns \code{NaN} if parameters
-are invalid (e.g., \code{gamma <= 0}, \code{delta < 0}).
+the parameters (\code{gamma}, \code{delta}). An out-of-bound or missing parameter is an
+error, not a return value: the wrapper stops with a message naming the
+parameter. An infinite parameter is not currently intercepted there and
+reaches the C++ layer, which treats it as invalid.
 }
 \description{
 Generates random deviates from the standard Beta distribution, using a

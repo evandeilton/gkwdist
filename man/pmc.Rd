@@ -30,8 +30,10 @@ depending on \code{lower.tail} and \code{log.p}. The length of the result
 is determined by the recycling rule applied to the arguments (\code{q},
 \code{gamma}, \code{delta}, \code{lambda}). Returns \code{0} (or \code{-Inf}
 if \code{log.p = TRUE}) for \code{q <= 0} and \code{1} (or \code{0} if
-\code{log.p = TRUE}) for \code{q >= 1}. Returns \code{NaN} for invalid
-parameters.
+\code{log.p = TRUE}) for \code{q >= 1}. An out-of-bound or missing parameter is an
+error, not a return value: the wrapper stops with a message naming the
+parameter. An infinite parameter is not currently intercepted there and
+reaches the C++ layer, which treats it as invalid.
 }
 \description{
 Computes the cumulative distribution function (CDF), \eqn{F(q) = P(X \le q)},
