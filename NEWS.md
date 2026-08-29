@@ -2,6 +2,44 @@
 
 ## Critical Bug Fixes
 
+* **`dmc()` lost the density as `x` approached 1** (`bpmc.cpp`): it formed
+  `x^lambda` in linear arithmetic and then took `log(1 - x^lambda)`. Doubles are
+  spaced 2.2e-16 apart just below 1, so `1 - x^lambda` carries an absolute error
+  of one ulp of 1 however small it truly is, and `x^lambda` rounds to exactly 1
+  once `1 - x` drops under about 1e-16, at which point a guard returned a density
+  of zero.
+
+  `Mc(gamma, delta, lambda)` is `GKw(1, 1, gamma, delta, lambda)`, so `dgkw()`
+  with `alpha = beta = 1` is the same density computed a different way, and it
+  was already right:
+
+  ```
+  gamma = 1.5, delta = 2, lambda = 0.8
+                       exact (400 digits)   dgkw(x,1,1,..)          dmc
+    x = 1 - 1e-13         -58.65464965      -58.65464965     -58.65409479
+    x = 1 - 1e-15         -67.86721101      -67.86721101     -67.92355276
+    x = 1 - 1e-16         -72.26166017      -72.26166017     -71.81537306
+  ```
+
+  `log(1 - x^lambda)` now goes through `gkw_log1mexp(lambda * log(x))`, the
+  helper `dgkw()` already uses, and the guard is gone.
+
+  `llmc()` and `grmc()` carried the mirror image of the same defect at the other
+  end of the support: `log(-expm1(u))` has to represent a number just below 1
+  and so reported `log(1 - x^lambda)` as a multiple of 1.11e-16 -- usually as
+  exactly 0 -- for every `x^lambda` under one ulp. At `delta = 1e12` the missing
+  term is worth 2e-05 nats an observation. All four functions now share
+  `gkw_log1mexp()`.
+
+  Adjudicated against a 120-digit `decimal` reference over 9130 density cells
+  (22 parameter settings x 415 quantiles from 5e-324 to 1 - 1.1e-16): 8424 cells
+  are bit-identical, 512 improved, 143 moved by at most 4 ulps of the working
+  magnitude, and the maximum error fell from infinite -- six cells returned
+  `-Inf` for a finite density -- to 10 ulps. The nesting identity
+  `dmc(x, g, d, l) == dgkw(x, 1, 1, g, d, l)` closed from 9.8e13 ulps to 10.
+  `pmc()`, `qmc()`, `rmc()`, `hsmc()`, `dgkw()`, `llgkw()` and `llbeta()` are
+  bit-identical across the whole grid.
+
 * **`dgkw()`, `llgkw()` and `grgkw()` broke down along the same log-space
   chain** (`gkw.cpp`): all three walk `v = 1 - x^alpha`, `w = 1 - v^beta`,
   `z = 1 - w^lambda`, and each lost the chain in its own way.

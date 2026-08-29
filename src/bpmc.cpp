@@ -172,17 +172,24 @@ Rcpp::NumericVector dmc(
     
     // Term 1: (γλ - 1) * log(x)
     double term1 = exponent * lx;
-    
-    // Compute x^λ
-    double x_pow_l = safe_pow(xx, ll);
-    if (x_pow_l >= 1.0) {
-      continue;
+
+    // Term 2: δ * log(1 - x^λ), formed from λ·log(x) so the subtraction never
+    // happens in linear space. Building x^λ first and then log(1 - x^λ) throws
+    // away exactly the digits that matter as x approaches 1: doubles are spaced
+    // 2.2e-16 apart there, so 1 - x^λ carries an absolute error of one ulp of 1
+    // however small it is, and x^λ rounds to 1 outright at 1 - x ~ 1e-16. The
+    // former `if (x_pow_l >= 1.0) continue;` then returned a density of zero
+    // where the true density is finite. At γ=1.5, δ=2, λ=0.8 the log-density
+    // was off by 0.446 nats at x = 1 - 1e-16 and dmc() disagreed with
+    // dgkw(x, 1, 1, γ, δ, λ), which is the same distribution.
+    //
+    // Guarded on δ because δ = 0 with log(1 - x^λ) at the boundary would give
+    // 0 * -Inf = NaN; the same guard llmc(), grmc() and dgkw() already carry.
+    double term2 = 0.0;
+    if (dd != 0.0) {
+      term2 = dd * gkw_log1mexp(ll * lx);
     }
-    
-    // Term 2: δ * log(1 - x^λ)
-    double log_1_minus_xpow = safe_log(1.0 - x_pow_l);
-    double term2 = dd * log_1_minus_xpow;
-    
+
     // Assemble log-density
     double log_pdf = logCst + term1 + term2;
     
@@ -537,12 +544,18 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
     sum_term1 += gl_minus_1 * log_xi;
 
     // Term 2: δ * log(1-x^λ), formed from λ*log(x) so the subtraction never
-    // happens in linear space. grmc() and hsmc() already use -expm1() here;
-    // llmc() used log1p(-x^λ), which cannot recover the digits x^λ has already
-    // lost, so the objective and its gradient disagreed as x approached 1.
+    // happens in linear space. llmc() used log1p(-x^λ), which cannot recover
+    // the digits x^λ has already lost, so the objective and its gradient
+    // disagreed as x approached 1.
+    //
+    // log(-expm1(u)) covers x -> 1 but not x -> 0: there 1 - exp(u) is a value
+    // just below 1, which doubles cannot resolve more finely than 1.1e-16, so
+    // log(1 - x^λ) came back one ulp of 1 wide however small x^λ actually was.
+    // gkw_log1mexp() switches to log1p(-exp(u)) past -log(2) and keeps the full
+    // relative accuracy; at δ = 1e12 that ulp was worth 2.6e-05 nats.
     // Guarded on δ because δ = 0 with an underflowing term would give 0 * -Inf.
     if (delta > 0.0) {
-      sum_term2 += delta * std::log(-std::expm1(lambda * log_xi));
+      sum_term2 += delta * gkw_log1mexp(lambda * log_xi);
     }
   }
   
@@ -639,10 +652,14 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
     // v = 1 - x^λ, always via -expm1 of the same exponent that produces x^λ,
     // so the two never drift apart. The former v = max(v, 1e-10) froze log(v)
     // at -23.03: for x = 1 - 1e-15 the true log(v) is -34.28.
+    // log(v) goes through gkw_log1mexp() rather than log(-expm1(u)): the latter
+    // has to represent a number just below 1, which costs the whole value of
+    // log(v) once x^λ drops under 1.1e-16. This is the same term llmc()
+    // accumulates, and the two now agree bit for bit.
     double log_x_lambda = lambda * log_xi;
     double x_lambda = std::exp(log_x_lambda);
     double v = -std::expm1(log_x_lambda);
-    sum_log_v += std::log(v);
+    sum_log_v += gkw_log1mexp(log_x_lambda);
 
     // Term for the λ gradient: x^λ log(x) / (1 - x^λ). It tends to -1/λ as
     // x -> 1, so it carries its own ceiling; the former ±1e6 clamp truncated
