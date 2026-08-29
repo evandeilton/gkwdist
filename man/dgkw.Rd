@@ -54,7 +54,7 @@ f(x; \alpha, \beta, \gamma, \delta, \lambda) =
 for \eqn{x \in (0,1)}, where \eqn{B(a, b)} is the Beta function
 \code{\link[base]{beta}}.
 
-This distribution was proposed by Cordeiro & de Castro (2011) and includes
+This distribution was proposed by Carrasco, Ferrari & Cordeiro (2010) and includes
 several other distributions as special cases:
 \itemize{
 \item Kumaraswamy (Kw): \code{gamma = 1}, \code{delta = 0}, \code{lambda = 1}
@@ -113,7 +113,7 @@ Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
 }
 \seealso{
-\code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}} (if these exist),
+\code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
 \code{\link[stats]{dbeta}}, \code{\link[stats]{integrate}}
 }
 \author{

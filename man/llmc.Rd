@@ -406,8 +406,8 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \seealso{
 \code{\link{llgkw}} (parent distribution negative log-likelihood),
 \code{\link{dmc}}, \code{\link{pmc}}, \code{\link{qmc}}, \code{\link{rmc}},
-\code{grmc} (gradient, if available),
-\code{hsmc} (Hessian, if available),
+\code{\link{grmc}} (gradient),
+\code{\link{hsmc}} (Hessian),
 \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}
 }
 \author{

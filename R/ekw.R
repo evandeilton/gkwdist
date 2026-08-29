@@ -118,16 +118,16 @@
 #' @export
 dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
   if (!is.numeric(x)) stop("'x' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0, na.rm = TRUE)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive (alpha > 0)")
   }
-  if (!is.numeric(beta) || any(beta <= 0, na.rm = TRUE)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive (beta > 0)")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0, na.rm = TRUE)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive (lambda > 0)")
   }
-  if (!is.logical(log) || length(log) != 1) {
+  if (!is.logical(log) || length(log) != 1 || is.na(log)) {
     stop("'log' must be a single logical value")
   }
 
@@ -261,19 +261,19 @@ dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
 #' @export
 pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
   if (!is.numeric(q)) stop("'q' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0, na.rm = TRUE)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive (alpha > 0)")
   }
-  if (!is.numeric(beta) || any(beta <= 0, na.rm = TRUE)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive (beta > 0)")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0, na.rm = TRUE)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive (lambda > 0)")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -411,19 +411,19 @@ pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #' @export
 qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
   if (!is.numeric(p)) stop("'p' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0, na.rm = TRUE)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive (alpha > 0)")
   }
-  if (!is.numeric(beta) || any(beta <= 0, na.rm = TRUE)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive (beta > 0)")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0, na.rm = TRUE)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive (lambda > 0)")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
   if (!log.p && any(p < 0 | p > 1, na.rm = TRUE)) {
@@ -559,13 +559,13 @@ rekw <- function(n, alpha = 1, beta = 1, lambda = 1) {
   }
   n <- as.integer(n)
 
-  if (!is.numeric(alpha) || any(alpha <= 0, na.rm = TRUE)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive (alpha > 0)")
   }
-  if (!is.numeric(beta) || any(beta <= 0, na.rm = TRUE)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive (beta > 0)")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0, na.rm = TRUE)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive (lambda > 0)")
   }
 
@@ -640,8 +640,8 @@ rekw <- function(n, alpha = 1, beta = 1, lambda = 1) {
 #' @seealso
 #' \code{\link{llgkw}} (parent distribution negative log-likelihood),
 #' \code{\link{dekw}}, \code{\link{pekw}}, \code{\link{qekw}}, \code{\link{rekw}},
-#' \code{grekw} (gradient, if available),
-#' \code{hsekw} (Hessian, if available),
+#' \code{\link{grekw}} (gradient),
+#' \code{\link{hsekw}} (Hessian),
 #' \code{\link[stats]{optim}}
 #'
 #' @examples
@@ -1138,7 +1138,7 @@ llekw <- function(par, data) {
 #' @seealso
 #' \code{\link{grgkw}} (parent distribution gradient),
 #' \code{\link{llekw}} (negative log-likelihood for EKw),
-#' \code{hsekw} (Hessian for EKw, if available),
+#' \code{\link{hsekw}} (Hessian for EKw),
 #' \code{\link{dekw}} (density for EKw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison).
@@ -1289,7 +1289,11 @@ llekw <- function(par, data) {
 #' theta <- seq(0, 2 * pi, length.out = 100)
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
-#' eig_decomp <- eigen(vcov_2d)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #' ellipse <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1334,7 +1338,11 @@ llekw <- function(par, data) {
 #' vcov_2d_al <- vcov_full[c(1, 3), c(1, 3)]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_al <- eigen(vcov_2d_al)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_al <- eigen(vcov_2d_al, symmetric = TRUE)
+#' eig_decomp_al$values <- pmax(eig_decomp_al$values, 0)
 #' ellipse_al <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1379,7 +1387,11 @@ llekw <- function(par, data) {
 #' vcov_2d_bl <- vcov_full[2:3, 2:3]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_bl <- eigen(vcov_2d_bl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_bl <- eigen(vcov_2d_bl, symmetric = TRUE)
+#' eig_decomp_bl$values <- pmax(eig_decomp_bl$values, 0)
 #' ellipse_bl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1507,7 +1519,7 @@ grekw <- function(par, data) {
 #' @seealso
 #' \code{\link{hsgkw}} (parent distribution Hessian),
 #' \code{\link{llekw}} (negative log-likelihood for EKw),
-#' \code{grekw} (gradient for EKw, if available),
+#' \code{\link{grekw}} (gradient for EKw),
 #' \code{\link{dekw}} (density for EKw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).
@@ -1702,7 +1714,11 @@ grekw <- function(par, data) {
 #' theta <- seq(0, 2 * pi, length.out = 100)
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
-#' eig_decomp <- eigen(vcov_2d)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #' ellipse <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1747,7 +1763,11 @@ grekw <- function(par, data) {
 #' vcov_2d_al <- vcov_matrix[c(1, 3), c(1, 3)]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_al <- eigen(vcov_2d_al)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_al <- eigen(vcov_2d_al, symmetric = TRUE)
+#' eig_decomp_al$values <- pmax(eig_decomp_al$values, 0)
 #' ellipse_al <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1792,7 +1812,11 @@ grekw <- function(par, data) {
 #' vcov_2d_bl <- vcov_matrix[2:3, 2:3]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_bl <- eigen(vcov_2d_bl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_bl <- eigen(vcov_2d_bl, symmetric = TRUE)
+#' eig_decomp_bl$values <- pmax(eig_decomp_bl$values, 0)
 #' ellipse_bl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))

@@ -64,7 +64,7 @@
 #' for \eqn{x \in (0,1)}, where \eqn{B(a, b)} is the Beta function
 #' \code{\link[base]{beta}}.
 #'
-#' This distribution was proposed by Cordeiro & de Castro (2011) and includes
+#' This distribution was proposed by Carrasco, Ferrari & Cordeiro (2010) and includes
 #' several other distributions as special cases:
 #' \itemize{
 #'   \item Kumaraswamy (Kw): \code{gamma = 1}, \code{delta = 0}, \code{lambda = 1}
@@ -85,7 +85,7 @@
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
 #'
 #' @seealso
-#' \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}} (if these exist),
+#' \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
 #' \code{\link[stats]{dbeta}}, \code{\link[stats]{integrate}}
 #'
 #' @examples
@@ -129,22 +129,22 @@
 dgkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
   # Input validation
   if (!is.numeric(x)) stop("'x' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
-  if (!is.logical(log) || length(log) != 1) {
+  if (!is.logical(log) || length(log) != 1 || is.na(log)) {
     stop("'log' must be a single logical value")
   }
 
@@ -288,25 +288,25 @@ pgkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
                  lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(q)) stop("'q' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -445,25 +445,25 @@ qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
                  lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(p)) stop("'p' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -596,19 +596,19 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
   }
   n <- as.integer(n)
 
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
 
@@ -691,7 +691,7 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'
 #' @seealso
 #' \code{\link{dgkw}}, \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
-#' \code{\link{grgkw}}, \code{\link{hsgkw}} (gradient and Hessian functions, if available),
+#' \code{\link{grgkw}}, \code{\link{hsgkw}} (gradient and Hessian),
 #' \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}, \code{\link[base]{log1p}}
 #'
 #' @examples
@@ -1443,7 +1443,11 @@ llgkw <- function(par, data) {
 #' theta <- seq(0, 2 * pi, length.out = round(n / 4))
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
-#' eig_decomp <- eigen(vcov_2d)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #' ellipse <- matrix(NA, nrow = round(n / 4), ncol = 2)
 #' for (i in 1:round(n / 4)) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1487,7 +1491,11 @@ llgkw <- function(par, data) {
 #' vcov_2d_gd <- vcov_full[3:4, 3:4]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_gd <- eigen(vcov_2d_gd)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_gd <- eigen(vcov_2d_gd, symmetric = TRUE)
+#' eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
 #' ellipse_gd <- matrix(NA, nrow = round(n / 4), ncol = 2)
 #' for (i in 1:round(n / 4)) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1823,7 +1831,11 @@ grgkw <- function(par, data) {
 #' theta <- seq(0, 2 * pi, length.out = round(n / 4))
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
-#' eig_decomp <- eigen(vcov_2d)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #' ellipse <- matrix(NA, nrow = round(n / 4), ncol = 2)
 #' for (i in 1:round(n / 4)) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1867,7 +1879,11 @@ grgkw <- function(par, data) {
 #' vcov_2d_gd <- vcov_matrix[3:4, 3:4]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_gd <- eigen(vcov_2d_gd)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_gd <- eigen(vcov_2d_gd, symmetric = TRUE)
+#' eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
 #' ellipse_gd <- matrix(NA, nrow = round(n / 4), ncol = 2)
 #' for (i in 1:round(n / 4)) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1911,7 +1927,11 @@ grgkw <- function(par, data) {
 #' vcov_2d_dl <- vcov_matrix[4:5, 4:5]
 #'
 #' # Create confidence ellipse
-#' eig_decomp_dl <- eigen(vcov_2d_dl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_dl <- eigen(vcov_2d_dl, symmetric = TRUE)
+#' eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
 #' ellipse_dl <- matrix(NA, nrow = round(n / 4), ncol = 2)
 #' for (i in 1:round(n / 4)) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))

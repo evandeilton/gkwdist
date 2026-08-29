@@ -126,19 +126,19 @@
 dbkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, log = FALSE) {
   # Input validation
   if (!is.numeric(x)) stop("'x' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.logical(log) || length(log) != 1) {
+  if (!is.logical(log) || length(log) != 1 || is.na(log)) {
     stop("'log' must be a single logical value")
   }
 
@@ -269,22 +269,22 @@ dbkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, log = FALSE) {
 pbkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(q)) stop("'q' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -432,22 +432,22 @@ pbkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
 qbkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(p)) stop("'p' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -600,16 +600,16 @@ rbkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0) {
   }
   n <- as.integer(n)
 
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
 
@@ -690,8 +690,8 @@ rbkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0) {
 #' @seealso
 #' \code{\link{llgkw}} (parent distribution negative log-likelihood),
 #' \code{\link{dbkw}}, \code{\link{pbkw}}, \code{\link{qbkw}}, \code{\link{rbkw}},
-#' \code{grbkw} (gradient, if available),
-#' \code{hsbkw} (Hessian, if available),
+#' \code{\link{grbkw}} (gradient),
+#' \code{\link{hsbkw}} (Hessian),
 #' \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}
 #'
 #' @examples
@@ -1173,7 +1173,7 @@ llbkw <- function(par, data) {
 #' @seealso
 #' \code{\link{grgkw}} (parent distribution gradient),
 #' \code{\link{llbkw}} (negative log-likelihood for BKw),
-#' \code{\link{hsbkw}} (Hessian for BKw, if available),
+#' \code{\link{hsbkw}} (Hessian for BKw),
 #' \code{\link{dbkw}} (density for BKw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
@@ -1327,7 +1327,11 @@ llbkw <- function(par, data) {
 #'
 #' # Alpha vs Beta ellipse
 #' vcov_ab <- vcov_full[1:2, 1:2]
-#' eig_decomp_ab <- eigen(vcov_ab)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_ab <- eigen(vcov_ab, symmetric = TRUE)
+#' eig_decomp_ab$values <- pmax(eig_decomp_ab$values, 0)
 #' ellipse_ab <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1337,7 +1341,11 @@ llbkw <- function(par, data) {
 #'
 #' # Alpha vs Gamma ellipse
 #' vcov_ag <- vcov_full[c(1, 3), c(1, 3)]
-#' eig_decomp_ag <- eigen(vcov_ag)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_ag <- eigen(vcov_ag, symmetric = TRUE)
+#' eig_decomp_ag$values <- pmax(eig_decomp_ag$values, 0)
 #' ellipse_ag <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1347,7 +1355,11 @@ llbkw <- function(par, data) {
 #'
 #' # Beta vs Delta ellipse
 #' vcov_bd <- vcov_full[c(2, 4), c(2, 4)]
-#' eig_decomp_bd <- eigen(vcov_bd)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_bd <- eigen(vcov_bd, symmetric = TRUE)
+#' eig_decomp_bd$values <- pmax(eig_decomp_bd$values, 0)
 #' ellipse_bd <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1511,7 +1523,7 @@ grbkw <- function(par, data) {
 #' @seealso
 #' \code{\link{hsgkw}} (parent distribution Hessian),
 #' \code{\link{llbkw}} (negative log-likelihood for BKw),
-#' \code{\link{grbkw}} (gradient for BKw, if available),
+#' \code{\link{grbkw}} (gradient for BKw),
 #' \code{\link{dbkw}} (density for BKw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).
@@ -1780,7 +1792,11 @@ grbkw <- function(par, data) {
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
 #' # Alpha vs Beta ellipse
-#' eig_decomp_ab <- eigen(vcov_ab)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_ab <- eigen(vcov_ab, symmetric = TRUE)
+#' eig_decomp_ab$values <- pmax(eig_decomp_ab$values, 0)
 #' ellipse_ab <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1789,7 +1805,11 @@ grbkw <- function(par, data) {
 #' }
 #'
 #' # Alpha vs Gamma ellipse
-#' eig_decomp_ag <- eigen(vcov_ag)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_ag <- eigen(vcov_ag, symmetric = TRUE)
+#' eig_decomp_ag$values <- pmax(eig_decomp_ag$values, 0)
 #' ellipse_ag <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1798,7 +1818,11 @@ grbkw <- function(par, data) {
 #' }
 #'
 #' # Beta vs Delta ellipse
-#' eig_decomp_bd <- eigen(vcov_bd)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_bd <- eigen(vcov_bd, symmetric = TRUE)
+#' eig_decomp_bd$values <- pmax(eig_decomp_bd$values, 0)
 #' ellipse_bd <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))

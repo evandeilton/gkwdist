@@ -138,6 +138,13 @@ Rcpp::NumericVector dbeta_(
   arma::vec d_vec(delta.begin(), delta.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (x.n_elem == 0 || g_vec.n_elem == 0 || d_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({x.n_elem, g_vec.n_elem, d_vec.n_elem});
   
   // Initialize result with appropriate default
@@ -231,6 +238,13 @@ Rcpp::NumericVector pbeta_(
   arma::vec d_vec(delta.begin(), delta.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (q.n_elem == 0 || g_vec.n_elem == 0 || d_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({q.n_elem, g_vec.n_elem, d_vec.n_elem});
   
   arma::vec out(N);
@@ -263,14 +277,11 @@ Rcpp::NumericVector pbeta_(
     
     // ---- Compute CDF via R's pbeta with adjusted parameters ----
     // Beta_GKw(γ, δ) = Beta_standard(γ, δ+1)
-    double val = R::pbeta(qq, g, d + 1.0, lower_tail, false);
-    
-    // Apply log transformation if requested
-    if (log_p) {
-      val = safe_log(val);
-    }
-    
-    out(i) = val;
+    // log_p goes to R::pbeta rather than being applied afterwards: taking
+    // log() of an already underflowed probability returned -Inf where the log
+    // scale still has room (pbeta_(1e-200, 2, 3, log.p = TRUE) gave -Inf
+    // against a true -918.73).
+    out(i) = R::pbeta(qq, g, d + 1.0, lower_tail, log_p);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -316,6 +327,13 @@ Rcpp::NumericVector qbeta_(
   arma::vec d_vec(delta.begin(), delta.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (p.n_elem == 0 || g_vec.n_elem == 0 || d_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({p.n_elem, g_vec.n_elem, d_vec.n_elem});
   
   arma::vec out(N);
@@ -332,35 +350,21 @@ Rcpp::NumericVector qbeta_(
       continue;
     }
     
-    // ---- Convert probability to linear scale ----
-    if (log_p) {
-      if (pp > 0.0) {
-        out(i) = NA_REAL;
-        continue;
-      }
-      pp = safe_exp(pp);
-    }
-    
-    // Handle upper tail (pp is now always linear scale)
-    if (!lower_tail) {
-      pp = 1.0 - pp;
-    }
-    
-    // Handle boundary cases
-    if (pp <= 0.0) {
-      out(i) = 0.0;
+    // ---- Normalise the probability, without leaving log space ----
+    // The former code did exp(log p) and then 1 - p in linear space. The first
+    // flushed the deep tail to zero (qbeta_(-1000, 2, 3, log.p = TRUE) gave 0
+    // against a true 2.25e-218); the second cost the upper tail. Out-of-range p
+    // keeps the saturating result it has always returned -- whether that should
+    // be NaN instead is a separate, still-open question.
+    if (log_p && pp > 0.0) { out(i) = NA_REAL; continue; }
+    if (!log_p && (pp < 0.0 || pp > 1.0)) {
+      out(i) = (lower_tail == (pp > 1.0)) ? 1.0 : 0.0;
       continue;
     }
-    if (pp >= 1.0) {
-      out(i) = 1.0;
-      continue;
-    }
-    
-    // ---- Compute quantile via R's qbeta with adjusted parameters ----
-    // Beta_GKw(γ, δ) = Beta_standard(γ, δ+1)
-    double val = R::qbeta(pp, g, d + 1.0, true, false);
-    
-    out(i) = val;
+
+    // The Beta quantile is R::qbeta itself; lower_tail and log_p belong to it
+    // rather than being undone beforehand.
+    out(i) = R::qbeta(pp, g, d + 1.0, lower_tail, log_p);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -403,6 +407,14 @@ Rcpp::NumericVector rbeta_(
   arma::vec g_vec(gamma.begin(), gamma.size());
   arma::vec d_vec(delta.begin(), delta.size());
   
+  // A zero-length parameter cannot be recycled. Match R's convention
+  // (rbeta(3, numeric(0), 1) is NA NA NA with a warning) instead of
+  // reaching the `i % vec.n_elem` recycling with a zero divisor.
+  if (g_vec.n_elem == 0 || d_vec.n_elem == 0) {
+    Rcpp::warning("rbeta_: NAs produced");
+    return Rcpp::NumericVector(n, NA_REAL);
+  }
+
   arma::vec out(n);
   
   for (int i = 0; i < n; i++) {

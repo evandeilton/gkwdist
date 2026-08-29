@@ -17,4 +17,17 @@ The result of calling \code{rhs(lhs)}.
 \description{
 See \code{magrittr::\link[magrittr:pipe]{\%>\%}} for details.
 }
+\section{Deprecation notice}{
+
+This re-export is deprecated and is scheduled for removal in a future
+release. gkwdist does not use the pipe anywhere in its own code; it
+re-exports \code{magrittr}'s operator only, which makes \code{magrittr} a hard
+dependency of a package that has no need of it. Nothing changes in this
+release: \verb{\%>\%} remains exported and behaves exactly as before.
+
+If your code relies on gkwdist supplying \verb{\%>\%}, take it from its own source
+instead -- \code{library(magrittr)}, or any of the tidyverse packages that
+re-export it -- or use R's native pipe, \verb{|>}, available since R 4.1.0.
+}
+
 \keyword{internal}

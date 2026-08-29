@@ -254,7 +254,11 @@ theta <- seq(0, 2 * pi, length.out = 100)
 chi2_val <- qchisq(0.95, df = 2)
 
 # Eigendecomposition
-eig_decomp <- eigen(asymp_cov)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp <- eigen(asymp_cov, symmetric = TRUE)
+eig_decomp$values <- pmax(eig_decomp$values, 0)
 
 # Ellipse points
 ellipse <- matrix(NA, nrow = 100, ncol = 2)
@@ -295,7 +299,7 @@ with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 
 \seealso{
 \code{\link{hsgkw}} (parent distribution Hessian),
 \code{\link{llkw}} (negative log-likelihood for Kw),
-\code{grkw} (gradient for Kw, if available),
+\code{\link{grkw}} (gradient for Kw),
 \code{\link{dkw}} (density for Kw),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).

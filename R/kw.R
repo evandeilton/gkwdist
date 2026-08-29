@@ -119,13 +119,13 @@
 dkw <- function(x, alpha = 1, beta = 1, log = FALSE) {
   # Input validation
   if (!is.numeric(x)) stop("'x' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.logical(log) || length(log) != 1) {
+  if (!is.logical(log) || length(log) != 1 || is.na(log)) {
     stop("'log' must be a single logical value")
   }
 
@@ -253,16 +253,16 @@ dkw <- function(x, alpha = 1, beta = 1, log = FALSE) {
 pkw <- function(q, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(q)) stop("'q' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -389,16 +389,16 @@ pkw <- function(q, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
 qkw <- function(p, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(p)) stop("'p' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -528,10 +528,10 @@ rkw <- function(n, alpha = 1, beta = 1) {
   }
   n <- as.integer(n)
 
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
 
@@ -604,8 +604,8 @@ rkw <- function(n, alpha = 1, beta = 1) {
 #' @seealso
 #' \code{\link{llgkw}} (parent distribution negative log-likelihood),
 #' \code{\link{dkw}}, \code{\link{pkw}}, \code{\link{qkw}}, \code{\link{rkw}},
-#' \code{grkw} (gradient, if available),
-#' \code{hskw} (Hessian, if available),
+#' \code{\link{grkw}} (gradient),
+#' \code{\link{hskw}} (Hessian),
 #' \code{\link[stats]{optim}}
 #'
 #' @examples
@@ -1070,7 +1070,7 @@ llkw <- function(par, data) {
 #' @seealso
 #' \code{\link{grgkw}} (parent distribution gradient),
 #' \code{\link{llkw}} (negative log-likelihood for Kw),
-#' \code{hskw} (Hessian for Kw, if available),
+#' \code{\link{hskw}} (Hessian for Kw),
 #' \code{\link{dkw}} (density for Kw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison).
@@ -1364,7 +1364,7 @@ grkw <- function(par, data) {
 #' @seealso
 #' \code{\link{hsgkw}} (parent distribution Hessian),
 #' \code{\link{llkw}} (negative log-likelihood for Kw),
-#' \code{grkw} (gradient for Kw, if available),
+#' \code{\link{grkw}} (gradient for Kw),
 #' \code{\link{dkw}} (density for Kw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).
@@ -1564,7 +1564,11 @@ grkw <- function(par, data) {
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
 #' # Eigendecomposition
-#' eig_decomp <- eigen(asymp_cov)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(asymp_cov, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #'
 #' # Ellipse points
 #' ellipse <- matrix(NA, nrow = 100, ncol = 2)

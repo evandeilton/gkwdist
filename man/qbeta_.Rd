@@ -126,7 +126,7 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \code{\link[stats]{qbeta}} (standard R implementation),
 \code{\link{qgkw}} (parent distribution quantile function),
 \code{\link{qmc}} (McDonald/Beta Power quantile function),
-\code{dbeta_}, \code{pbeta_}, \code{rbeta_} (other functions for this parameterization, if they exist).
+\code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{rbeta_}}.
 }
 \author{
 Lopes, J. E.

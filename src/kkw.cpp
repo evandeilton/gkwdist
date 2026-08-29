@@ -75,6 +75,89 @@
 #include <RcppArmadillo.h>
 #include "utils.h"
 
+// ----------------------------------------------------------------------------
+// Shared log-space chain for the KKw likelihood family
+// ----------------------------------------------------------------------------
+//
+// KKw is GKw at gamma = 1, so all three transformations survive,
+//
+//     v = 1 - x^alpha        w = 1 - v^beta        z = 1 - w^lambda
+//
+// and dkkw(), llkkw(), grkkw() and hskkw() all need their logarithms. Two of
+// the three have a regime where the linear quantity underflows to a boundary
+// that gkw_log1mexp() cannot recover from, because its argument arrives as
+// exactly 0 and log(1 - exp(0)) is -Inf:
+//
+//   x -> 0 :  v -> 1, so log_v = log1p(-x^alpha) ~ -x^alpha, which underflows
+//             to 0 once x^alpha < 5e-324. Then log1mexp(beta*log_v) is -Inf.
+//             But w = 1 - v^beta -> beta * x^alpha, so
+//             log_w = log(beta) + alpha*log(x).
+//
+//   x -> 1 :  w -> 1 by the same route one level down, and
+//             z = 1 - w^lambda -> lambda * v^beta, so
+//             log_z = log(lambda) + beta*log_v.
+//
+// Each substitution is the first-order limit and agrees with log1mexp() to the
+// last bits wherever both are representable. The branches fire only where the
+// old code produced -Inf, so ordinary data is bit-identical. This is the same
+// chain gkw_log_chain() walks in gkw.cpp -- gamma never enters it -- which
+// keeps KKw(a,b,d,l) == GKw(a,b,1,d,l) exact.
+//
+// A -Inf log_w is what put an artificial plateau on the KKw likelihood surface:
+// alpha*log(min(x)) crosses -745 on entirely ordinary data, and llkkw() then
+// returned +Inf where the likelihood is finite. With
+// x = c(0.01, 0.3, 0.6, 0.9) and par = c(alpha, 2, 1, 1.5),
+//
+//   alpha = 161  llkkw = 1516.4186759096   (correct)
+//   alpha = 162  llkkw = Inf               (true value 1526.0259318659)
+//
+// and every larger alpha stayed at Inf, which an optimiser will happily sit on.
+static inline void kkw_log_chain(double log_x, double alpha, double beta,
+                                 double lambda,
+                                 double& log_x_alpha, double& log_v,
+                                 double& log_v_beta, double& log_w,
+                                 double& log_w_lambda, double& log_z) {
+  log_x_alpha  = alpha * log_x;
+  log_v        = gkw_log1mexp(log_x_alpha);
+  log_v_beta   = beta * log_v;
+  log_w        = (log_v == 0.0) ? (std::log(beta) + log_x_alpha)
+                                : gkw_log1mexp(log_v_beta);
+  log_w_lambda = lambda * log_w;
+  log_z        = (log_w == 0.0) ? (std::log(lambda) + log_v_beta)
+                                : gkw_log1mexp(log_w_lambda);
+}
+
+// log_v and log_w each underflow to 0 in the regime where their true values are
+// -x^alpha and -v^beta. The quotient they multiply has overflowed by exactly
+// the reciprocal amount, so the product is finite while the two factors are 0
+// and +Inf -- and 0 * Inf is NaN. That is how grkkw() returned a partly-NaN
+// gradient where llkkw() was finite; see the note above grkkw().
+//
+// Substituting the magnitude back inside the exponential keeps the product
+// exact and finite:  log_v * exp(E)  ->  -exp(log_x_alpha + E). The two
+// familiar limits fall out of it: with E = log_v_beta - log_w the result is
+// -1/beta, and the lambda term's -1/lambda likewise.
+//
+// This mirrors gkw_mul_small_log() in gkw.cpp exactly.
+static inline double kkw_mul_small_log(double log_small, double log_magnitude,
+                                       double E) {
+  // log_small is a logarithm of something in (0, 1], so it is <= 0 and the
+  // product is <= 0 too.
+  //
+  // Exactly 0 means the linear quantity underflowed completely and the
+  // magnitude has to come from one level up. Short of that, log_small can still
+  // be subnormal while exp(E) has already overflowed to +Inf -- and a subnormal
+  // times +Inf is -Inf, not the finite product it stands for. Both cases are
+  // handled by moving the magnitude inside the exponential, which needs only
+  // the sum of the logs to be representable.
+  //
+  // The direct multiply is kept wherever exp(E) cannot overflow, so ordinary
+  // data is bit-identical and pays nothing for the extra log().
+  if (log_small == 0.0) return -std::exp(log_magnitude + E);
+  if (E < 700.0)        return log_small * std::exp(E);
+  return -std::exp(std::log(-log_small) + E);
+}
+
 
 // ============================================================================
 // PROBABILITY DENSITY FUNCTION
@@ -122,6 +205,13 @@ Rcpp::NumericVector dkkw(
   arma::vec l_vec(lambda.begin(), lambda.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (x.n_elem == 0 || a_vec.n_elem == 0 || b_vec.n_elem == 0 || d_vec.n_elem == 0 || l_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({x.n_elem, a_vec.n_elem, b_vec.n_elem, 
                       d_vec.n_elem, l_vec.n_elem});
   
@@ -152,46 +242,37 @@ Rcpp::NumericVector dkkw(
     // Normalization constant: log(λαβ(δ+1))
     double logCst = safe_log(ll) + safe_log(a) + safe_log(b) + safe_log(dd + 1.0);
     
-    // Compute log(x) and log(x^α)
+    // Compute log(x) once. Forming x^alpha in linear space and taking its
+    // logarithm loses the digits that matter as x approaches 1; the chain below
+    // works from alpha*log(x) directly and bridges the two points where the
+    // linear quantity underflows to a boundary that log1mexp() cannot recover
+    // from. The guards that used to sit between the steps -- one `continue` per
+    // intermediate -- dropped the observation entirely and left the fill value,
+    // 0 or -Inf in log. That is what made
+    // dkkw(1e-300, 2, 1.5, 0.5, 1.2, log = TRUE) return -Inf where
+    // dgkw(1e-300, 2, 1.5, 1, 0.5, 1.2, log = TRUE) gives -965.3182.
     double lx = safe_log(xx);
-    double log_xalpha = a * lx;
-    
-    // Compute log(1 - x^α) using stable log1mexp
-    double log_1_minus_xalpha = gkw_log1mexp(log_xalpha);
-    if (!R_finite(log_1_minus_xalpha)) {
+    double log_xalpha, log_v, log_v_beta, log_w, log_w_lambda, log_z;
+    kkw_log_chain(lx, a, b, ll,
+                  log_xalpha, log_v, log_v_beta, log_w, log_w_lambda, log_z);
+
+    // Assemble log-density:
+    // log(f) = logCst + (α-1)*log(x) + (β-1)*log(v) + (λ-1)*log(w) + δ*log(z)
+    //
+    // A coefficient that is exactly zero contributes nothing even where its
+    // log is -Inf at the boundary of the support; writing 0 * -Inf gives NaN.
+    double log_pdf = logCst;
+    if (a != 1.0)  log_pdf += (a - 1.0) * lx;
+    if (b != 1.0)  log_pdf += (b - 1.0) * log_v;
+    if (ll != 1.0) log_pdf += (ll - 1.0) * log_w;
+    if (dd != 0.0) log_pdf += dd * log_z;
+
+    // A density that is still not finite here is a genuine boundary value:
+    // -Inf in log, 0 on the natural scale, which is what the fill already holds.
+    if (!R_finite(log_pdf)) {
       continue;
     }
-    
-    // Term: (β-1) * log(1 - x^α)
-    double term1 = (b - 1.0) * log_1_minus_xalpha;
-    
-    // Compute A = (1 - x^α)^β → log(A) = β * log(1 - x^α)
-    double logA = b * log_1_minus_xalpha;
-    
-    // Compute log(1 - A) = log(1 - (1-x^α)^β) using log1mexp
-    double log_1_minusA = gkw_log1mexp(logA);
-    if (!R_finite(log_1_minusA)) {
-      continue;
-    }
-    
-    // Term: (λ-1) * log(1 - A)
-    double term2 = (ll - 1.0) * log_1_minusA;
-    
-    // Compute B = [1 - (1-x^α)^β]^λ → log(B) = λ * log(1 - A)
-    double logB = ll * log_1_minusA;
-    
-    // Compute log(1 - B) using log1mexp
-    double log_1_minus_B = gkw_log1mexp(logB);
-    if (!R_finite(log_1_minus_B)) {
-      continue;
-    }
-    
-    // Term: δ * log(1 - B)
-    double term3 = dd * log_1_minus_B;
-    
-    // Assemble log-density
-    double log_pdf = logCst + (a - 1.0) * lx + term1 + term2 + term3;
-    
+
     // Return appropriate scale
     out(i) = log_prob ? log_pdf : safe_exp(log_pdf);
   }
@@ -243,6 +324,13 @@ Rcpp::NumericVector pkkw(
   arma::vec l_vec(lambda.begin(), lambda.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (q.n_elem == 0 || a_vec.n_elem == 0 || b_vec.n_elem == 0 || d_vec.n_elem == 0 || l_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({q.n_elem, a_vec.n_elem, b_vec.n_elem, 
                       d_vec.n_elem, l_vec.n_elem});
   
@@ -276,64 +364,24 @@ Rcpp::NumericVector pkkw(
       continue;
     }
     
-    // ---- Compute CDF ----
-    
-    // Step 1: x^α
-    double log_xalpha = a * safe_log(xx);
-    double xalpha = safe_exp(log_xalpha);
-    
-    // Step 2: 1 - x^α
-    double one_minus_xalpha = 1.0 - xalpha;
-    if (one_minus_xalpha <= 0.0) {
-      double val1 = lower_tail ? 1.0 : 0.0;
-      out(i) = log_p ? safe_log(val1) : val1;
-      continue;
-    }
-    
-    // Step 3: (1 - x^α)^β
-    double vbeta = safe_pow(one_minus_xalpha, b);
-    
-    // Step 4: y = 1 - (1 - x^α)^β
-    double y = 1.0 - vbeta;
-    if (y <= 0.0) {
-      double val0 = lower_tail ? 0.0 : 1.0;
-      out(i) = log_p ? safe_log(val0) : val0;
-      continue;
-    }
-    if (y >= 1.0) {
-      double val1 = lower_tail ? 1.0 : 0.0;
-      out(i) = log_p ? safe_log(val1) : val1;
-      continue;
-    }
-    
-    // Step 5: y^λ = [1-(1-x^α)^β]^λ
-    double ylambda = safe_pow(y, ll);
-    if (ylambda <= 0.0) {
-      double val0 = lower_tail ? 0.0 : 1.0;
-      out(i) = log_p ? safe_log(val0) : val0;
-      continue;
-    }
-    if (ylambda >= 1.0) {
-      double val1 = lower_tail ? 1.0 : 0.0;
-      out(i) = log_p ? safe_log(val1) : val1;
-      continue;
-    }
-    
-    // Step 6: F(x) = 1 - (1 - y^λ)^(δ+1)
-    double outer = 1.0 - ylambda;
-    double cdfval = 1.0 - safe_pow(outer, dd + 1.0);
-    
-    // Apply tail adjustment
-    if (!lower_tail) {
-      cdfval = 1.0 - cdfval;
-    }
-    
-    // Apply log transformation
-    if (log_p) {
-      cdfval = safe_log(cdfval);
-    }
-    
-    out(i) = cdfval;
+    // ---- Cumulative probability, computed entirely in log space ----
+    // Every step below is a log(1 - exp(u)), never a 1 - u in linear space.
+    // The former chain formed 1 - x^alpha and 1 - (1 - x^alpha)^beta directly:
+    // once x^alpha fell below 1.1e-16 the first rounded to exactly 1, the
+    // second to exactly 0, and the CDF collapsed to 0 or 1. That is not a
+    // last-digit loss -- pekw(5.6e-09, 2, 5, 0.02) returned 0 where the true
+    // value is 0.483.
+    double log_x_alpha = a * std::log(xx);
+
+    // F = 1 - (1 - y^lambda)^(delta+1), y = 1 - (1 - x^alpha)^beta
+    double log_y    = gkw_log1mexp(b * gkw_log1mexp(log_x_alpha));
+    double log_surv = (dd + 1.0) * gkw_log1mexp(ll * log_y);
+    double log_cdf  = gkw_log1mexp(log_surv);
+
+    // Emit the requested tail on the requested scale without ever forming
+    // 1 - p or log(p) from a value that has already lost its digits.
+    double lg = lower_tail ? log_cdf : log_surv;
+    out(i) = log_p ? lg : std::exp(lg);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -383,6 +431,13 @@ Rcpp::NumericVector qkkw(
   arma::vec l_vec(lambda.begin(), lambda.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (p.n_elem == 0 || a_vec.n_elem == 0 || b_vec.n_elem == 0 || d_vec.n_elem == 0 || l_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({p.n_elem, a_vec.n_elem, b_vec.n_elem, 
                       d_vec.n_elem, l_vec.n_elem});
   
@@ -402,57 +457,34 @@ Rcpp::NumericVector qkkw(
       continue;
     }
     
-    // ---- Convert probability to linear scale ----
+    // ---- Normalise the probability, without leaving log space ----
+    // The former code did exp(log p) and then 1 - p in linear space. The first
+    // flushed the deep tail to zero (qbeta_(-1000, 2, 3, log.p = TRUE) gave 0
+    // against a true 2.25e-218); the second cost the upper tail. Out-of-range p
+    // keeps the saturating result it has always returned -- whether that should
+    // be NaN instead is a separate, still-open question.
+    if (log_p && pp > 0.0) { out(i) = NA_REAL; continue; }
+    if (!log_p && (pp < 0.0 || pp > 1.0)) {
+      out(i) = (lower_tail == (pp > 1.0)) ? 1.0 : 0.0;
+      continue;
+    }
+
+    // log(u) and log(1-u) for the lower-tail probability u, whichever scale and
+    // tail the caller used, so neither has to be recovered by subtraction.
+    double log_u, log_1mu;
     if (log_p) {
-      if (pp > 0.0) {
-        out(i) = NA_REAL;
-        continue;
-      }
-      pp = safe_exp(pp);
+      if (lower_tail) { log_u = pp;               log_1mu = gkw_log1mexp(pp); }
+      else            { log_u = gkw_log1mexp(pp); log_1mu = pp; }
+    } else {
+      if (lower_tail) { log_u = std::log(pp);     log_1mu = std::log1p(-pp); }
+      else            { log_u = std::log1p(-pp);  log_1mu = std::log(pp); }
     }
-    
-    // Handle upper tail (pp is now always linear scale)
-    if (!lower_tail) {
-      pp = 1.0 - pp;
-    }
-    
-    // Handle boundary cases
-    if (pp <= 0.0) {
-      out(i) = 0.0;
-      continue;
-    }
-    if (pp >= 1.0) {
-      out(i) = 1.0;
-      continue;
-    }
-    
-    // ---- Compute quantile via inverse transformations ----
-    
-    // Step 1: tmp1 = 1 - (1-p)^(1/(δ+1))
-    double tmp1 = 1.0 - safe_pow(1.0 - pp, 1.0 / (dd + 1.0));
-    tmp1 = std::max(0.0, std::min(1.0, tmp1));
-    
-    // Step 2: T = tmp1^(1/λ)
-    double T = (ll == 1.0) ? tmp1 : safe_pow(tmp1, 1.0 / ll);
-    
-    // Step 3: M = 1 - T  →  (1 - x^α)^β = M
-    double M = 1.0 - T;
-    M = std::max(0.0, std::min(1.0, M));
-    
-    // Step 4: Mpow = M^(1/β)  →  1 - x^α = Mpow
-    double Mpow = safe_pow(M, 1.0 / b);
-    
-    // Step 5: xalpha = 1 - Mpow  →  x^α = xalpha
-    double xalpha = 1.0 - Mpow;
-    xalpha = std::max(0.0, std::min(1.0, xalpha));
-    
-    // Step 6: x = xalpha^(1/α)
-    double xx = (a == 1.0) ? xalpha : safe_pow(xalpha, 1.0 / a);
-    
-    // Clamp to valid support
-    xx = std::max(0.0, std::min(1.0, xx));
-    
-    out(i) = xx;
+    if (log_u   == R_NegInf) { out(i) = 0.0; continue; }
+    if (log_1mu == R_NegInf) { out(i) = 1.0; continue; }
+
+    // 1 - y^lambda = (1-u)^(1/(delta+1)), then y = 1 - (1 - x^alpha)^beta
+    double log_y = gkw_log1mexp(log_1mu / (dd + 1.0)) / ll;
+    out(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_y) / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -503,6 +535,14 @@ Rcpp::NumericVector rkkw(
   arma::vec d_vec(delta.begin(), delta.size());
   arma::vec l_vec(lambda.begin(), lambda.size());
   
+  // A zero-length parameter cannot be recycled. Match R's convention
+  // (rbeta(3, numeric(0), 1) is NA NA NA with a warning) instead of
+  // reaching the `i % vec.n_elem` recycling with a zero divisor.
+  if (a_vec.n_elem == 0 || b_vec.n_elem == 0 || d_vec.n_elem == 0 || l_vec.n_elem == 0) {
+    Rcpp::warning("rkkw: NAs produced");
+    return Rcpp::NumericVector(n, NA_REAL);
+  }
+
   arma::vec out(n);
   
   for (int i = 0; i < n; i++) {
@@ -521,36 +561,13 @@ Rcpp::NumericVector rkkw(
     
     // Generate V ~ Uniform(0,1)
     double V = R::runif(0.0, 1.0);
-    
-    // Step 1: U = 1 - (1-V)^(1/(δ+1))
-    double U = 1.0 - safe_pow(1.0 - V, 1.0 / (dd + 1.0));
-    U = std::max(0.0, std::min(1.0, U));
-    
-    // Step 2: u_pow = U^(1/λ)
-    double u_pow = (ll == 1.0) ? U : safe_pow(U, 1.0 / ll);
-    
-    // Step 3: bracket = 1 - u_pow
-    double bracket = 1.0 - u_pow;
-    bracket = std::max(0.0, std::min(1.0, bracket));
-    
-    // Step 4: bracket2 = bracket^(1/β)
-    double bracket2 = safe_pow(bracket, 1.0 / b);
-    
-    // Step 5: xalpha = 1 - bracket2
-    double xalpha = 1.0 - bracket2;
-    xalpha = std::max(0.0, std::min(1.0, xalpha));
-    
-    // Step 6: x = xalpha^(1/α)
-    double xx;
-    if (a == 1.0) {
-      xx = xalpha;
-    } else {
-      xx = safe_pow(xalpha, 1.0 / a);
-      if (!R_finite(xx) || xx < 0.0) xx = 0.0;
-      if (xx > 1.0) xx = 1.0;
-    }
-    
-    out(i) = xx;
+
+    // 1 - y^lambda = (1-V)^(1/(delta+1)), then y = 1 - (1 - x^alpha)^beta.
+    // Four linear subtractions used to stand between the draw and the variate.
+    // The draw itself is untouched, so the RNG stream is identical to
+    // before; only the inversion that follows it changes.
+    double log_y = gkw_log1mexp(std::log1p(-V) / (dd + 1.0)) / ll;
+    out(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_y) / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -621,18 +638,28 @@ double llkkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   // Kept entirely in log space: v = 1-x^alpha, w = 1-v^beta and z = 1-w^lambda
   // all collapse to 0 or 1 in double precision for perfectly ordinary data,
   // and gkw_log1mexp() is the only way to retain their logarithms accurately.
+  //
+  // kkw_log_chain() supplies log(w) and log(z) in the two regimes where
+  // log1mexp() can only answer -Inf. Without it the whole likelihood collapsed
+  // to +Inf as soon as alpha*log(min(x)) crossed -745; see the note on the
+  // helper. Each coefficient is tested against zero before it multiplies its
+  // log, because a log legitimately reaches -Inf at the boundary of the support
+  // and 0 * -Inf is NaN.
+  const double c1 = alpha - 1.0;
+  const double c2 = beta - 1.0;
+  const double c3 = lambda - 1.0;
+  const double c4 = delta;
+
   for (int i = 0; i < n; i++) {
     double log_xi = std::log(x(i));
-    sum_term1 += (alpha - 1.0) * log_xi;
+    double log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z;
+    kkw_log_chain(log_xi, alpha, beta, lambda,
+                  log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z);
 
-    double log_v = gkw_log1mexp(alpha * log_xi);
-    sum_term2 += (beta - 1.0) * log_v;
-
-    double log_w = gkw_log1mexp(beta * log_v);
-    sum_term3 += (lambda - 1.0) * log_w;
-
-    double log_z = gkw_log1mexp(lambda * log_w);
-    sum_term4 += delta * log_z;
+    if (c1 != 0.0) sum_term1 += c1 * log_xi;
+    if (c2 != 0.0) sum_term2 += c2 * log_v;
+    if (c3 != 0.0) sum_term3 += c3 * log_w;
+    if (c4 != 0.0) sum_term4 += c4 * log_z;
   }
 
   double loglike = const_term + sum_term1 + sum_term2 + sum_term3 + sum_term4;
@@ -670,27 +697,38 @@ double llkkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 // [[Rcpp::export(.grkkw_cpp)]]
 Rcpp::NumericVector grkkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   // Validate parameter vector length
+  //
+  // Every rejection below says why, as grbkw() has always done. Returning a
+  // silent NaN vector left the caller unable to tell a refused input from a
+  // genuine boundary.
   if (par.size() < 4) {
+    Rcpp::warning("Parameter vector must have at least 4 elements for KKw");
     return Rcpp::NumericVector(4, R_NaN);
   }
-  
+
   // Extract parameters
   double alpha = par[0];
   double beta = par[1];
   double delta = par[2];
   double lambda = par[3];
-  
+
   // Validate parameters using consistent checker
   if (!check_kkw_pars(alpha, beta, delta, lambda)) {
+    Rcpp::warning("Invalid parameters in grkkw");
     return Rcpp::NumericVector(4, R_NaN);
   }
-  
+
   // Convert and validate data
+  //
+  // has_nan() is part of the test: a NaN compares false against both bounds, so
+  // without it NaN data passed straight through and the gradient came back NaN
+  // with nothing said.
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (x.n_elem < 1 || arma::any(x <= 0) || arma::any(x >= 1)) {
+  if (x.n_elem < 1 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
+    Rcpp::warning("Data must be strictly in (0,1) and non-empty for grkkw");
     return Rcpp::NumericVector(4, R_NaN);
   }
-  
+
   int n = x.n_elem;
   Rcpp::NumericVector grad(4, 0.0);
 
@@ -700,38 +738,64 @@ Rcpp::NumericVector grkkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   double d_lambda = n / lambda;
 
   // Log-space building blocks, per observation:
-  //   P = dlog(v)/dalpha   S = v^beta/w        Q = dlog(w)/dalpha = -beta*P*S
-  //   R = dlog(w)/dbeta    T = w^lambda/z
-  //   U = dlog(z)/dalpha = -lambda*T*Q
-  //   V = dlog(z)/dbeta  = -lambda*T*R
-  //   W = dlog(z)/dlambda = -T*log(w)
+  //   P = dlog(v)/dalpha    Q = dlog(w)/dalpha    R = dlog(w)/dbeta
+  //   U = dlog(z)/dalpha    V = dlog(z)/dbeta     W = dlog(z)/dlambda
+  //
+  // These used to be assembled from the two ratios S = v^beta/w and
+  // T = w^lambda/z as -beta*P*S, -log(v)*S, -lambda*T*Q, -lambda*T*R and
+  // -T*log(w). Once x^alpha underflows, log(v) is exactly 0 and log(w) is
+  // supplied by kkw_log_chain() as log(beta) + alpha*log(x); S has then
+  // overflowed to +Inf while P and log(v) are 0, and 0 * Inf is NaN even though
+  // both products are perfectly ordinary -- Q -> log(x) and R -> 1/beta. The
+  // same happens one level down through T as x approaches 1. That is how the
+  // gradient came back partly NaN where the likelihood is finite:
+  //
+  //   par = (200, 2, 1, 1.5), x = c(.01,.30,.60,.90)
+  //     grkkw            NaN  NaN  -2  NaN
+  //     grgkw(gamma=1)   9.617994  -3.000000  -2.000000  1279.626571
+  //
+  // Keeping each quotient inside a single exp() removes the overflow entirely,
+  // since only the sum of the logs has to be representable. The direct forms
+  // are algebraically identical, so ordinary data is bit-identical.
   for (int i = 0; i < n; i++) {
     double log_xi = std::log(x(i));
     d_alpha += log_xi;
 
-    double log_x_alpha = alpha * log_xi;
-    double log_v = gkw_log1mexp(log_x_alpha);
+    double log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z;
+    kkw_log_chain(log_xi, alpha, beta, lambda,
+                  log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z);
     d_beta += log_v;
-
-    double log_v_beta = beta * log_v;
-    double log_w = gkw_log1mexp(log_v_beta);
-
-    double log_w_lambda = lambda * log_w;
-    double log_z = gkw_log1mexp(log_w_lambda);
     d_delta += log_z;
 
+    double log_v_beta_m1   = (beta - 1.0) * log_v;
+    double log_w_lambda_m1 = (lambda - 1.0) * log_w;
+
     double P = -log_xi * std::exp(log_x_alpha - log_v);
-    double S = std::exp(log_v_beta - log_w);
-    double Q = -beta * P * S;
-    double R = -log_v * S;
-    double T = std::exp(log_w_lambda - log_z);
-    double U = -lambda * T * Q;
-    double V = -lambda * T * R;
-    double W = -T * log_w;
+    double Q = beta * log_xi * std::exp(log_x_alpha + log_v_beta_m1 - log_w);
+    double R = -kkw_mul_small_log(log_v, log_x_alpha, log_v_beta - log_w);
+    double U = -lambda * beta * log_xi *
+      std::exp(log_x_alpha + log_v_beta_m1 + log_w_lambda_m1 - log_z);
+    double V = lambda * kkw_mul_small_log(log_v, log_x_alpha,
+                                          log_v_beta + log_w_lambda_m1 - log_z);
+    double W = -kkw_mul_small_log(log_w, log_v_beta, log_w_lambda - log_z);
 
     d_alpha  += (beta - 1.0) * P + (lambda - 1.0) * Q + delta * U;
     d_beta   += (lambda - 1.0) * R + delta * V;
     d_lambda += log_w + delta * W;
+  }
+
+  // Final validity check
+  //
+  // A component that is still not finite here is a genuine boundary, and the
+  // whole vector goes with it. Returning the surviving components alongside a
+  // NaN or an Inf is worse than returning nothing: the caller gets a gradient
+  // that looks partly usable and is not. grbkw() has always failed uniformly,
+  // and grkkw() did not -- with alpha = beta = 1e-8 and lambda = 1e300 it
+  // returned c(1.378417e+307, -Inf, -2, 31.43853) and said nothing.
+  if (!std::isfinite(d_alpha) || !std::isfinite(d_beta) ||
+      !std::isfinite(d_delta) || !std::isfinite(d_lambda)) {
+    Rcpp::warning("Gradient calculation produced non-finite values in grkkw");
+    return Rcpp::NumericVector(4, R_NaN);
   }
 
   // Return NEGATIVE gradient (for minimization)
@@ -739,7 +803,7 @@ Rcpp::NumericVector grkkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   grad[1] = -d_beta;
   grad[2] = -d_delta;
   grad[3] = -d_lambda;
-  
+
   return grad;
 }
 
@@ -770,34 +834,43 @@ Rcpp::NumericVector grkkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
  */
 // [[Rcpp::export(.hskkw_cpp)]]
 Rcpp::NumericMatrix hskkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
+  // Initialize NaN matrix for error cases
+  Rcpp::NumericMatrix nanH(4, 4);
+  nanH.fill(R_NaN);
+
   // Validate parameter vector length
+  //
+  // Every rejection below says why, as hsbkw() has always done. Returning a
+  // silent NaN matrix left the caller unable to tell a refused input from a
+  // genuine boundary.
   if (par.size() < 4) {
-    Rcpp::NumericMatrix nanH(4, 4);
-    nanH.fill(R_NaN);
+    Rcpp::warning("Parameter vector must have at least 4 elements for KKw");
     return nanH;
   }
-  
+
   // Extract parameters
   double alpha = par[0];
   double beta = par[1];
   double delta = par[2];
   double lambda = par[3];
-  
+
   // Validate parameters using consistent checker
   if (!check_kkw_pars(alpha, beta, delta, lambda)) {
-    Rcpp::NumericMatrix nanH(4, 4);
-    nanH.fill(R_NaN);
+    Rcpp::warning("Invalid parameters in hskkw");
     return nanH;
   }
-  
+
   // Convert and validate data
+  //
+  // has_nan() is part of the test: a NaN compares false against both bounds, so
+  // without it NaN data passed straight through and hskkw() returned a matrix
+  // with 15 NaN entries and one finite one -- which looks partly usable.
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (x.n_elem < 1 || arma::any(x <= 0) || arma::any(x >= 1)) {
-    Rcpp::NumericMatrix nanH(4, 4);
-    nanH.fill(R_NaN);
+  if (x.n_elem < 1 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
+    Rcpp::warning("Data must be strictly in (0,1) and non-empty for hskkw");
     return nanH;
   }
-  
+
   int n = x.n_elem;
 
   // Initialize Hessian matrix
@@ -821,32 +894,48 @@ Rcpp::NumericMatrix hskkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   for (int i = 0; i < n; i++) {
     double log_xi = std::log(x(i));
 
-    double log_x_alpha = alpha * log_xi;
-    double log_v = gkw_log1mexp(log_x_alpha);
-    double log_v_beta = beta * log_v;
-    double log_w = gkw_log1mexp(log_v_beta);
-    double log_w_lambda = lambda * log_w;
-    double log_z = gkw_log1mexp(log_w_lambda);
+    double log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z;
+    kkw_log_chain(log_xi, alpha, beta, lambda,
+                  log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z);
 
-    double P = -log_xi * std::exp(log_x_alpha - log_v);
-    double S = std::exp(log_v_beta - log_w);
-    double Q = -beta * P * S;
-    double R = -log_v * S;
-    double T = std::exp(log_w_lambda - log_z);
-    double U = -lambda * T * Q;
-    double V = -lambda * T * R;
-    double W = -T * log_w;
+    double log_v_beta_m1   = (beta - 1.0) * log_v;
+    double log_w_lambda_m1 = (lambda - 1.0) * log_w;
+
+    // Same rewrite as the gradient. The two ratios S = v^beta/w and
+    // T = w^lambda/z overflow to +Inf on their own long before any product they
+    // belong to is large, and the factors they meet there are 0, so every block
+    // built from them became NaN. Each is folded into the exp() of the sum of
+    // logs it appears in, which is what the products actually require:
+    //
+    //   PS  = -P*S     TPS = -P*S*T     TQ = T*Q = beta*TPS
+    //   TR  =  T*R
+    //
+    // and the second derivatives below are rewritten in those terms. They are
+    // algebraically identical, so ordinary data is bit-identical.
+    double P   = -log_xi * std::exp(log_x_alpha - log_v);
+    double PS  =  log_xi * std::exp(log_x_alpha + log_v_beta_m1 - log_w);
+    double Q   =  beta * PS;
+    double R   = -kkw_mul_small_log(log_v, log_x_alpha, log_v_beta - log_w);
+    double TPS =  log_xi * std::exp(log_x_alpha + log_v_beta_m1 +
+                                    log_w_lambda_m1 - log_z);
+    double TQ  =  beta * TPS;
+    double TR  = -kkw_mul_small_log(log_v, log_x_alpha,
+                                    log_v_beta + log_w_lambda_m1 - log_z);
+    double U   = -lambda * TQ;
+    double V   = -lambda * TR;
+    double W   = -kkw_mul_small_log(log_w, log_v_beta, log_w_lambda - log_z);
 
     double dP_dalpha = P * (log_xi - P);
     double dQ_dalpha = Q * (log_xi - P + beta * P - Q);
-    double dQ_dbeta  = -P * S * (1.0 + beta * (log_v - R));
+    double dQ_dbeta  = PS * (1.0 + beta * (log_v - R));
     double dR_dbeta  = R * (log_v - R);
 
-    double dU_dalpha = -lambda * T * (Q * (lambda * Q - U) + dQ_dalpha);
-    double dU_dbeta  = -lambda * T * (Q * (lambda * R - V) + dQ_dbeta);
-    double dU_dlambda = -T * Q * (1.0 + lambda * (log_w - W));
-    double dV_dbeta  = -lambda * T * (R * (lambda * R - V) + dR_dbeta);
-    double dV_dlambda = -T * R * (1.0 + lambda * (log_w - W));
+    double dU_dalpha = -lambda * TQ * (lambda * Q - U + log_xi - P + beta * P - Q);
+    double dU_dbeta  = -lambda * (TQ * (lambda * R - V) +
+                                  TPS * (1.0 + beta * (log_v - R)));
+    double dU_dlambda = -TQ * (1.0 + lambda * (log_w - W));
+    double dV_dbeta  = -lambda * TR * (lambda * R - V + log_v - R);
+    double dV_dlambda = -TR * (1.0 + lambda * (log_w - W));
     double dW_dlambda = W * (log_w - W);
 
     // alpha row
@@ -868,6 +957,18 @@ Rcpp::NumericMatrix hskkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   // Only the upper triangle is accumulated above; mirror it
   H = arma::symmatu(H);
 
+  // Final validity check
+  //
+  // An entry that is still not finite here is a genuine boundary, and the whole
+  // matrix goes with it. A Hessian holding two NaN entries among fourteen finite
+  // ones is not a smaller, weaker answer -- it is one that will be inverted for
+  // a standard error and silently produce nonsense. hsbkw() has always failed
+  // uniformly, and hskkw() did not: with alpha = beta = 1e-8 and lambda = 1e300
+  // it returned exactly that, and said nothing.
+  if (!H.is_finite()) {
+    Rcpp::warning("Hessian calculation produced non-finite values in hskkw");
+    return nanH;
+  }
 
   // Return NEGATIVE Hessian (for minimization)
   return Rcpp::wrap(-H);

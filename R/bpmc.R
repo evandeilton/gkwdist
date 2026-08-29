@@ -129,16 +129,16 @@
 dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
   # Input validation
   if (!is.numeric(x)) stop("'x' must be numeric")
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
-  if (!is.logical(log) || length(log) != 1) {
+  if (!is.logical(log) || length(log) != 1 || is.na(log)) {
     stop("'log' must be a single logical value")
   }
 
@@ -280,19 +280,19 @@ dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
 pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(q)) stop("'q' must be numeric")
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -438,19 +438,19 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(p)) stop("'p' must be numeric")
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -608,13 +608,13 @@ rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
   }
   n <- as.integer(n)
 
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
 
@@ -694,8 +694,8 @@ rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
 #' @seealso
 #' \code{\link{llgkw}} (parent distribution negative log-likelihood),
 #' \code{\link{dmc}}, \code{\link{pmc}}, \code{\link{qmc}}, \code{\link{rmc}},
-#' \code{grmc} (gradient, if available),
-#' \code{hsmc} (Hessian, if available),
+#' \code{\link{grmc}} (gradient),
+#' \code{\link{hsmc}} (Hessian),
 #' \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}
 #'
 #' @examples
@@ -1101,11 +1101,11 @@ llmc <- function(par, data) {
 #' model are:
 #'
 #' \deqn{
-#' -\frac{\partial \ell}{\partial \gamma} = n[\psi(\gamma+\delta+1) - \psi(\gamma)] -
+#' -\frac{\partial \ell}{\partial \gamma} = n[\psi(\gamma) - \psi(\gamma+\delta+1)] -
 #' \lambda\sum_{i=1}^{n}\ln(x_i)
 #' }
 #' \deqn{
-#' -\frac{\partial \ell}{\partial \delta} = n[\psi(\gamma+\delta+1) - \psi(\delta+1)] -
+#' -\frac{\partial \ell}{\partial \delta} = n[\psi(\delta+1) - \psi(\gamma+\delta+1)] -
 #' \sum_{i=1}^{n}\ln(1-x_i^{\lambda})
 #' }
 #' \deqn{
@@ -1130,7 +1130,7 @@ llmc <- function(par, data) {
 #' @seealso
 #' \code{\link{grgkw}} (parent distribution gradient),
 #' \code{\link{llmc}} (negative log-likelihood for Mc),
-#' \code{hsmc} (Hessian for Mc, if available),
+#' \code{\link{hsmc}} (Hessian for Mc),
 #' \code{\link{dmc}} (density for Mc),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
@@ -1397,7 +1397,11 @@ llmc <- function(par, data) {
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
 #' # Gamma vs Delta ellipse
-#' eig_decomp_gd <- eigen(vcov_gd)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_gd <- eigen(vcov_gd, symmetric = TRUE)
+#' eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
 #' ellipse_gd <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1406,7 +1410,11 @@ llmc <- function(par, data) {
 #' }
 #'
 #' # Gamma vs Lambda ellipse
-#' eig_decomp_gl <- eigen(vcov_gl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_gl <- eigen(vcov_gl, symmetric = TRUE)
+#' eig_decomp_gl$values <- pmax(eig_decomp_gl$values, 0)
 #' ellipse_gl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1415,7 +1423,11 @@ llmc <- function(par, data) {
 #' }
 #'
 #' # Delta vs Lambda ellipse
-#' eig_decomp_dl <- eigen(vcov_dl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_dl <- eigen(vcov_dl, symmetric = TRUE)
+#' eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
 #' ellipse_dl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1547,13 +1559,12 @@ grmc <- function(par, data) {
 #'
 #' **Note:** The formulas below represent the second derivatives of the positive
 #' log-likelihood (\eqn{\ell}). The function returns the **negative** of these values.
-#' Users should verify these formulas independently if using for critical applications.
 #'
 #' \deqn{
 #' \frac{\partial^2 \ell}{\partial \gamma^2} = -n[\psi'(\gamma) - \psi'(\gamma+\delta+1)]
 #' }
 #' \deqn{
-#' \frac{\partial^2 \ell}{\partial \gamma \partial \delta} = -n\psi'(\gamma+\delta+1)
+#' \frac{\partial^2 \ell}{\partial \gamma \partial \delta} = n\psi'(\gamma+\delta+1)
 #' }
 #' \deqn{
 #' \frac{\partial^2 \ell}{\partial \gamma \partial \lambda} = \sum_{i=1}^{n}\ln(x_i)
@@ -1590,7 +1601,7 @@ grmc <- function(par, data) {
 #' @seealso
 #' \code{\link{hsgkw}} (parent distribution Hessian),
 #' \code{\link{llmc}} (negative log-likelihood for Mc),
-#' \code{\link{grmc}} (gradient for Mc, if available),
+#' \code{\link{grmc}} (gradient for Mc),
 #' \code{\link{dmc}} (density for Mc),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),
@@ -1856,7 +1867,11 @@ grmc <- function(par, data) {
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
 #' # Gamma vs Delta ellipse
-#' eig_decomp_gd <- eigen(vcov_gd)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_gd <- eigen(vcov_gd, symmetric = TRUE)
+#' eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
 #' ellipse_gd <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1865,7 +1880,11 @@ grmc <- function(par, data) {
 #' }
 #'
 #' # Gamma vs Lambda ellipse
-#' eig_decomp_gl <- eigen(vcov_gl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_gl <- eigen(vcov_gl, symmetric = TRUE)
+#' eig_decomp_gl$values <- pmax(eig_decomp_gl$values, 0)
 #' ellipse_gl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1874,7 +1893,11 @@ grmc <- function(par, data) {
 #' }
 #'
 #' # Delta vs Lambda ellipse
-#' eig_decomp_dl <- eigen(vcov_dl)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp_dl <- eigen(vcov_dl, symmetric = TRUE)
+#' eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
 #' ellipse_dl <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))

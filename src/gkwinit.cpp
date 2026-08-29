@@ -506,6 +506,16 @@ std::vector<arma::vec> generate_initial_points(const arma::vec &sample_moments,
   alpha_init = std::min(20.0, std::max(0.1, alpha_init));
   beta_init = std::min(20.0, std::max(0.1, beta_init));
 
+  // Deliberately a fixed, self-contained seed rather than R's RNG.  The grid
+  // below is a search design, not a statistical sample: the function is a
+  // method-of-moments estimator whose output seeds optimisers elsewhere, so two
+  // calls on the same data must return the same starting values.  Drawing
+  // through R's stream would make every fit depend on the ambient seed and
+  // would consume draws the caller did not ask to spend.  set.seed() therefore
+  // has no effect here, and R's RNG state is neither read nor advanced -- both
+  // documented in the roxygen block below.  Do not "fix" this to R::unif_rand()
+  // without changing that contract.  Users who want a wider search raise
+  // n_starts, which is monotone: more starts can only lower the objective.
   std::mt19937 gen(42);
 
   if (family == "gkw") {
@@ -693,7 +703,13 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //' numerical integration.
 //'
 //' @param x Numeric vector of observations. All values must be in the open interval (0,1).
-//'   Values outside this range will be automatically truncated to avoid numerical issues.
+//'   Values outside it -- including exact 0 and exact 1 -- are truncated to the interval
+//'   so that a single boundary observation does not abort a fit, and a warning naming the
+//'   number of truncated observations and their observed range is issued. Truncation
+//'   shifts every sample moment and therefore every estimate returned, so treat the
+//'   warning as a signal to check the scale of the data rather than as noise: values such
+//'   as 5 or -3 usually mean a percentage or 0-100 scale that has to be rescaled first.
+//'   \code{NA} and non-finite values are dropped without a warning.
 //' @param family Character string specifying the distribution family. Valid options are:
 //'   \code{"gkw"} (Generalized Kumaraswamy - 5 parameters),
 //'   \code{"bkw"} (Beta-Kumaraswamy - 4 parameters),
@@ -704,8 +720,10 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //'   \code{"beta"} (Beta - 2 parameters).
 //'   The string is case-insensitive. Default is \code{"gkw"}.
 //' @param n_starts Integer specifying the number of different initial parameter values
-//'   to try during optimization. More starting points increase the probability of finding
-//'   the global optimum at the cost of longer computation time. Default is 5.
+//'   to try during optimization. Every starting point is optimized and the candidate with
+//'   the smallest objective is returned, so more starting points can only improve the fit,
+//'   at a cost that grows linearly in \code{n_starts}. Default is 5. Four fixed,
+//'   family-specific starting points are always used, so values below 4 behave as 4.
 //'
 //' @return Named numeric vector containing the estimated parameters for the specified
 //'   distribution family. Parameter names correspond to the distribution specification.
@@ -719,9 +737,26 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //'
 //' Key implementation features: logarithmic calculations for numerical stability,
 //' adaptive numerical integration using Simpson's rule with fallback to trapezoidal rule,
-//' multiple random starting points to avoid local minima, decreasing weights for
+//' multiple starting points to avoid local minima, decreasing weights for
 //' higher-order moments (1.0, 0.8, 0.6, 0.4, 0.2), and automatic parameter constraint
 //' enforcement.
+//'
+//' Multiple starts: the grid of starting points is built from four fixed, family-specific
+//' points -- one of them derived from the sample moments -- plus \code{n_starts - 4}
+//' further points drawn over the family's parameter box. Nelder-Mead is run from every
+//' point in the grid, each result is clipped to the parameter box, and the clipped
+//' candidate with the smallest objective is returned. Because the candidate set grows
+//' with \code{n_starts}, the returned objective is non-increasing in \code{n_starts}.
+//'
+//' Determinism: the extra starting points are drawn from a generator with a fixed
+//' internal seed, deliberately not from R's random number stream. The function is
+//' therefore deterministic -- two calls with the same \code{x}, \code{family} and
+//' \code{n_starts} return the same vector, so a fit seeded by these values is
+//' reproducible without any further precaution. Two consequences are worth stating
+//' explicitly: \code{\link[base]{set.seed}} has no effect on \code{gkwgetstartvalues},
+//' and the function neither reads nor advances \code{.Random.seed}, so it cannot
+//' perturb simulations running alongside it. To widen the search, raise
+//' \code{n_starts} rather than looking for a seed argument.
 //'
 //' Parameter Constraints:
 //' All parameters are constrained to positive values. Additionally, family-specific
@@ -729,12 +764,15 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //' GKw-related families or (0.1, 50.0) for Beta, delta in (0.01, 10.0), and lambda in
 //' (0.1, 20.0).
 //'
-//' The function will issue warnings for empty input vectors, sample sizes less than 10
-//' (unreliable estimation), or failure to find valid parameter estimates (returns defaults).
+//' The function will issue warnings for empty input vectors, observations outside the
+//' open interval (0,1) (truncated to it), sample sizes less than 10 (unreliable
+//' estimation), or failure to find valid parameter estimates (returns defaults).
 //'
 //' @examples
 //' \donttest{
-//' # Generate sample data from Beta distribution
+//' # Generate sample data from a Beta distribution. set.seed() here makes the
+//' # SAMPLE reproducible; gkwgetstartvalues() itself is deterministic and is
+//' # unaffected by the seed (see the Determinism note in Details).
 //' set.seed(123)
 //' x <- rbeta(100, shape1 = 2, shape2 = 3)
 //'
@@ -749,6 +787,17 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 //' # Estimate GKw parameters with more starting points
 //' params_gkw <- gkwgetstartvalues(x, family = "gkw", n_starts = 10)
 //' print(params_gkw)
+//'
+//' # Deterministic: the seed in force does not change the answer, and the
+//' # function does not consume draws from R's stream.
+//' set.seed(1)
+//' identical(gkwgetstartvalues(x, family = "kw"), params_kw)
+//' set.seed(9999)
+//' identical(gkwgetstartvalues(x, family = "kw"), params_kw)
+//'
+//' before <- .Random.seed
+//' invisible(gkwgetstartvalues(x, family = "kw"))
+//' identical(before, .Random.seed)
 //' }
 //'
 //' @references
@@ -777,12 +826,36 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
 
  try {
    // Filter NAs and clamp to (0,1) — std::max(1e-10, NaN) is platform-dependent
+   //
+   // The clamp is retained so that a boundary observation does not abort a fit,
+   // but it is no longer silent.  Moving an observation to the edge of the
+   // support changes every sample moment and therefore every estimate, and the
+   // commonest cause is data on the wrong scale (0-100 rather than 0-1), which
+   // the caller has to be told about.  Count the offenders and report the
+   // observed range so the scale is visible in the message.
    std::vector<double> clean;
    clean.reserve(x.size());
+   int n_outside = 0;
+   double lo = std::numeric_limits<double>::infinity();
+   double hi = -std::numeric_limits<double>::infinity();
    for (int i = 0; i < x.size(); i++) {
      if (!Rcpp::NumericVector::is_na(x[i]) && std::isfinite(x[i])) {
-       clean.push_back(std::max(1e-10, std::min(1.0 - 1e-10, (double)x[i])));
+       const double xi = x[i];
+       if (xi <= 0.0 || xi >= 1.0) {
+         n_outside++;
+         if (xi < lo) lo = xi;
+         if (xi > hi) hi = xi;
+       }
+       clean.push_back(std::max(1e-10, std::min(1.0 - 1e-10, xi)));
      }
+   }
+   if (n_outside > 0) {
+     Rcpp::warning(
+       "gkwgetstartvalues: %d of %d observations lie outside the open interval "
+       "(0,1) (observed range [%g, %g]) and were clamped to it; the estimates "
+       "below are those of the clamped sample. Data on a percentage or 0-100 "
+       "scale must be rescaled before use.",
+       n_outside, (int)clean.size(), lo, hi);
    }
    if (clean.empty()) {
      Rcpp::warning("No valid (non-NA, finite, in (0,1)) observations found.");
@@ -811,20 +884,37 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
    double best_obj = std::numeric_limits<double>::max();
    bool found_valid_solution = false;
 
+   // Every candidate is optimized and only the OPTIMIZED objectives are
+   // compared.  Gating the Nelder-Mead call on the raw objective at the
+   // starting point, against a best_obj that already holds an optimized
+   // value, discarded every start that did not happen to begin below the
+   // incumbent -- in practice only the first point was ever optimized and
+   // n_starts had no effect at all.
+   const double kSentinel = std::numeric_limits<double>::max();
+
    for (size_t i = 0; i < initial_points.size(); i++) {
      try {
-       double obj_val = objective_function(initial_points[i], sample_moments, family);
+       // Skip only points the objective cannot score at all; a merely poor
+       // start is exactly the case multi-start exists to rescue.
+       const double start_obj = objective_function(initial_points[i], sample_moments, family);
+       if (!std::isfinite(start_obj) || start_obj >= kSentinel) {
+         continue;
+       }
+
+       // Score the candidate AFTER the box constraints, because that is the
+       // vector the function returns.  Nelder-Mead is unconstrained and can
+       // leave the family box; comparing the pre-clamp objective and then
+       // clamping the winner could hand back a worse fit than a rival that
+       // stayed inside, and made the reported error non-monotone in n_starts.
+       arma::vec optimized = constrain_parameters(
+         optimize_nelder_mead(initial_points[i], sample_moments, family), family);
+
+       const double obj_val = objective_function(optimized, sample_moments, family);
 
        if (std::isfinite(obj_val) && obj_val < best_obj) {
-         arma::vec optimized = optimize_nelder_mead(initial_points[i], sample_moments, family);
-
-         obj_val = objective_function(optimized, sample_moments, family);
-
-         if (std::isfinite(obj_val) && obj_val < best_obj) {
-           best_theta = optimized;
-           best_obj = obj_val;
-           found_valid_solution = true;
-         }
+         best_theta = optimized;
+         best_obj = obj_val;
+         found_valid_solution = true;
        }
      } catch (...) {
        continue;

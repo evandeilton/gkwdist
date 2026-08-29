@@ -39,13 +39,12 @@ The components are based on the second derivatives of the log-likelihood \eqn{\e
 
 \strong{Note:} The formulas below represent the second derivatives of the positive
 log-likelihood (\eqn{\ell}). The function returns the \strong{negative} of these values.
-Users should verify these formulas independently if using for critical applications.
 
 \deqn{
 \frac{\partial^2 \ell}{\partial \gamma^2} = -n[\psi'(\gamma) - \psi'(\gamma+\delta+1)]
 }
 \deqn{
-\frac{\partial^2 \ell}{\partial \gamma \partial \delta} = -n\psi'(\gamma+\delta+1)
+\frac{\partial^2 \ell}{\partial \gamma \partial \delta} = n\psi'(\gamma+\delta+1)
 }
 \deqn{
 \frac{\partial^2 \ell}{\partial \gamma \partial \lambda} = \sum_{i=1}^{n}\ln(x_i)
@@ -330,7 +329,11 @@ theta <- seq(0, 2 * pi, length.out = 100)
 chi2_val <- qchisq(0.95, df = 2)
 
 # Gamma vs Delta ellipse
-eig_decomp_gd <- eigen(vcov_gd)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_gd <- eigen(vcov_gd, symmetric = TRUE)
+eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
 ellipse_gd <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -339,7 +342,11 @@ for (i in 1:100) {
 }
 
 # Gamma vs Lambda ellipse
-eig_decomp_gl <- eigen(vcov_gl)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_gl <- eigen(vcov_gl, symmetric = TRUE)
+eig_decomp_gl$values <- pmax(eig_decomp_gl$values, 0)
 ellipse_gl <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -348,7 +355,11 @@ for (i in 1:100) {
 }
 
 # Delta vs Lambda ellipse
-eig_decomp_dl <- eigen(vcov_dl)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_dl <- eigen(vcov_dl, symmetric = TRUE)
+eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
 ellipse_dl <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -433,7 +444,7 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \seealso{
 \code{\link{hsgkw}} (parent distribution Hessian),
 \code{\link{llmc}} (negative log-likelihood for Mc),
-\code{\link{grmc}} (gradient for Mc, if available),
+\code{\link{grmc}} (gradient for Mc),
 \code{\link{dmc}} (density for Mc),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),

@@ -100,7 +100,7 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 }
 \seealso{
 \code{\link{dgkw}} (parent distribution density),
-\code{\link{pkkw}}, \code{\link{qkkw}}, \code{\link{rkkw}} (if they exist),
+\code{\link{pkkw}}, \code{\link{qkkw}}, \code{\link{rkkw}},
 \code{\link[stats]{dbeta}}
 }
 \author{

@@ -1,13 +1,22 @@
-utils::globalVariables(c(
-  "packageVersion", "dev.interactive", "calculateMean", "index", "theoretical", "observed", "lower",
-  "upper", "log", "log_scale", "::", ":::", "x", "Theoretical", "Empirical", "value", "loglik", "cook_dist",
-  "fitted", "abs_resid", "leverage", "y_obs", "linpred", "resid", "model_label", "metric", "y", "Type", "Deviation",
-  "object", "p_empirical", "p_theoretical", "statistic", "type", "Residual", "Family", "Value", "Criterion", "Parameter"
-))
+# There is deliberately no utils::globalVariables() call here. This package has
+# no non-standard evaluation, so codetools finds no undefined globals:
+# `R CMD check` reports "checking R code for possible problems ... OK" with no
+# registration at all. Do not add one without a check finding that names it.
 
 #' Pipe operator
 #'
 #' See \code{magrittr::\link[magrittr:pipe]{\%>\%}} for details.
+#'
+#' @section Deprecation notice:
+#' This re-export is deprecated and is scheduled for removal in a future
+#' release. gkwdist does not use the pipe anywhere in its own code; it
+#' re-exports `magrittr`'s operator only, which makes `magrittr` a hard
+#' dependency of a package that has no need of it. Nothing changes in this
+#' release: `%>%` remains exported and behaves exactly as before.
+#'
+#' If your code relies on gkwdist supplying `%>%`, take it from its own source
+#' instead -- `library(magrittr)`, or any of the tidyverse packages that
+#' re-export it -- or use R's native pipe, `|>`, available since R 4.1.0.
 #'
 #' @name %>%
 #' @rdname pipe
@@ -23,8 +32,6 @@ NULL
 
 ## usethis namespace: start
 #' @importFrom Rcpp sourceCpp evalCpp
-#' @importFrom numDeriv grad hessian
-#' @import RcppArmadillo
 #' @import graphics
 ## usethis namespace: end
 NULL

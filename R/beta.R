@@ -91,7 +91,7 @@
 #' \code{\link[stats]{dbeta}} (standard R implementation),
 #' \code{\link{dgkw}} (parent distribution density),
 #' \code{\link{dmc}} (McDonald/Beta Power density),
-#' \code{pbeta_}, \code{qbeta_}, \code{rbeta_} (other functions for this parameterization, if they exist).
+#' \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}}.
 #'
 #' @examples
 #' \donttest{
@@ -146,13 +146,13 @@ dbeta_ <- function(x, gamma = 1, delta = 0, log = FALSE) {
   if (!is.numeric(x)) {
     stop("'x' must be numeric")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0, na.rm = TRUE)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive (gamma > 0)")
   }
-  if (!is.numeric(delta) || any(delta < 0, na.rm = TRUE)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative (delta >= 0)")
   }
-  if (!is.logical(log) || length(log) != 1) {
+  if (!is.logical(log) || length(log) != 1 || is.na(log)) {
     stop("'log' must be a single logical value")
   }
 
@@ -239,7 +239,7 @@ dbeta_ <- function(x, gamma = 1, delta = 0, log = FALSE) {
 #' \code{\link[stats]{pbeta}} (standard R implementation),
 #' \code{\link{pgkw}} (parent distribution CDF),
 #' \code{\link{pmc}} (McDonald/Beta Power CDF),
-#' \code{dbeta_}, \code{qbeta_}, \code{rbeta_} (other functions for this parameterization, if they exist).
+#' \code{\link{dbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}}.
 #'
 #' @examples
 #' \donttest{
@@ -299,16 +299,16 @@ pbeta_ <- function(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
   if (!is.numeric(q)) {
     stop("'q' must be numeric")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0, na.rm = TRUE)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive (gamma > 0)")
   }
-  if (!is.numeric(delta) || any(delta < 0, na.rm = TRUE)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative (delta >= 0)")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -395,7 +395,7 @@ pbeta_ <- function(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #' \code{\link[stats]{qbeta}} (standard R implementation),
 #' \code{\link{qgkw}} (parent distribution quantile function),
 #' \code{\link{qmc}} (McDonald/Beta Power quantile function),
-#' \code{dbeta_}, \code{pbeta_}, \code{rbeta_} (other functions for this parameterization, if they exist).
+#' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{rbeta_}}.
 #'
 #' @examples
 #' \donttest{
@@ -454,16 +454,16 @@ qbeta_ <- function(p, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
   if (!is.numeric(p)) {
     stop("'p' must be numeric")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0, na.rm = TRUE)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive (gamma > 0)")
   }
-  if (!is.numeric(delta) || any(delta < 0, na.rm = TRUE)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative (delta >= 0)")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -544,7 +544,7 @@ qbeta_ <- function(p, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #' \code{\link[stats]{rbeta}} (standard R implementation),
 #' \code{\link{rgkw}} (parent distribution random generation),
 #' \code{\link{rmc}} (McDonald/Beta Power random generation),
-#' \code{dbeta_}, \code{pbeta_}, \code{qbeta_} (other functions for this parameterization, if they exist).
+#' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}.
 #'
 #' @examples
 #' \donttest{
@@ -593,10 +593,10 @@ rbeta_ <- function(n, gamma = 1, delta = 0) {
   }
   n <- as.integer(n)
 
-  if (!is.numeric(gamma) || any(gamma <= 0, na.rm = TRUE)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive (gamma > 0)")
   }
-  if (!is.numeric(delta) || any(delta < 0, na.rm = TRUE)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative (delta >= 0)")
   }
 
@@ -672,9 +672,9 @@ rbeta_ <- function(n, gamma = 1, delta = 0) {
 #'
 #' @seealso
 #' \code{\link{llgkw}}, \code{\link{llmc}} (related negative log-likelihoods),
-#' \code{dbeta_}, \code{pbeta_}, \code{qbeta_}, \code{rbeta_},
-#' \code{grbeta} (gradient, if available),
-#' \code{hsbeta} (Hessian, if available),
+#' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}},
+#' \code{\link{grbeta}} (gradient),
+#' \code{\link{hsbeta}} (Hessian),
 #' \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}.
 #'
 #' @examples
@@ -1036,8 +1036,8 @@ llbeta <- function(par, data) {
 #' @seealso
 #' \code{\link{grgkw}}, \code{\link{grmc}} (related gradients),
 #' \code{\link{llbeta}} (negative log-likelihood function),
-#' \code{hsbeta} (Hessian, if available),
-#' \code{dbeta_}, \code{pbeta_}, \code{qbeta_}, \code{rbeta_},
+#' \code{\link{hsbeta}} (Hessian),
+#' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}},
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
 #' \code{\link[base]{digamma}}.
@@ -1186,7 +1186,11 @@ llbeta <- function(par, data) {
 #' theta <- seq(0, 2 * pi, length.out = 100)
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
-#' eig_decomp <- eigen(vcov_full)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(vcov_full, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #' ellipse <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))
@@ -1314,8 +1318,8 @@ grbeta <- function(par, data) {
 #' @seealso
 #' \code{\link{hsgkw}}, \code{\link{hsmc}} (related Hessians),
 #' \code{\link{llbeta}} (negative log-likelihood function),
-#' \code{grbeta} (gradient, if available),
-#' \code{dbeta_}, \code{pbeta_}, \code{qbeta_}, \code{rbeta_},
+#' \code{\link{grbeta}} (gradient),
+#' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}},
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),
 #' \code{\link[base]{trigamma}}.
@@ -1517,7 +1521,11 @@ grbeta <- function(par, data) {
 #' theta <- seq(0, 2 * pi, length.out = 100)
 #' chi2_val <- qchisq(0.95, df = 2)
 #'
-#' eig_decomp <- eigen(vcov_2d)
+#' # The observed information is not guaranteed positive definite at a
+#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+#' # below stays finite and the region remains drawable.
+#' eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+#' eig_decomp$values <- pmax(eig_decomp$values, 0)
 #' ellipse <- matrix(NA, nrow = 100, ncol = 2)
 #' for (i in 1:100) {
 #'   v <- c(cos(theta[i]), sin(theta[i]))

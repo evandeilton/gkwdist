@@ -132,6 +132,13 @@ Rcpp::NumericVector dkw(
   arma::vec b_vec(beta.begin(), beta.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (x.n_elem == 0 || a_vec.n_elem == 0 || b_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({x.n_elem, a_vec.n_elem, b_vec.n_elem});
   
   // Initialize result with appropriate default
@@ -224,6 +231,13 @@ Rcpp::NumericVector pkw(
   arma::vec b_vec(beta.begin(), beta.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (q.n_elem == 0 || a_vec.n_elem == 0 || b_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({q.n_elem, a_vec.n_elem, b_vec.n_elem});
   
   arma::vec out(N);
@@ -254,42 +268,23 @@ Rcpp::NumericVector pkw(
       continue;
     }
     
-    // ---- Compute CDF ----
-    
-    // Step 1: x^α
-    double xalpha = safe_pow(xx, a);
-    
-    // Step 2: (1 - x^α)^β
-    double one_minus_xalpha_beta = safe_pow(1.0 - xalpha, b);
-    
-    // Step 3: F(x) = 1 - (1 - x^α)^β
-    double tmp = 1.0 - one_minus_xalpha_beta;
-    
-    // Boundary checks after computation
-    if (tmp <= 0.0) {
-      double val0 = lower_tail ? 0.0 : 1.0;
-      out(i) = log_p ? safe_log(val0) : val0;
-      continue;
-    }
-    if (tmp >= 1.0) {
-      double val1 = lower_tail ? 1.0 : 0.0;
-      out(i) = log_p ? safe_log(val1) : val1;
-      continue;
-    }
-    
-    double val = tmp;
-    
-    // Apply tail adjustment
-    if (!lower_tail) {
-      val = 1.0 - val;
-    }
-    
-    // Apply log transformation
-    if (log_p) {
-      val = safe_log(val);
-    }
-    
-    out(i) = val;
+    // ---- Cumulative probability, computed entirely in log space ----
+    // Every step below is a log(1 - exp(u)), never a 1 - u in linear space.
+    // The former chain formed 1 - x^alpha and 1 - (1 - x^alpha)^beta directly:
+    // once x^alpha fell below 1.1e-16 the first rounded to exactly 1, the
+    // second to exactly 0, and the CDF collapsed to 0 or 1. That is not a
+    // last-digit loss -- pkw(1e-06, 3, 100) returned 0 where the true
+    // value is 1e-16.
+    double log_x_alpha = a * std::log(xx);
+
+    // F = 1 - (1 - x^alpha)^beta
+    double log_surv = b * gkw_log1mexp(log_x_alpha);
+    double log_cdf  = gkw_log1mexp(log_surv);
+
+    // Emit the requested tail on the requested scale without ever forming
+    // 1 - p or log(p) from a value that has already lost its digits.
+    double lg = lower_tail ? log_cdf : log_surv;
+    out(i) = log_p ? lg : std::exp(lg);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -333,6 +328,13 @@ Rcpp::NumericVector qkw(
   arma::vec b_vec(beta.begin(), beta.size());
   
   // Determine output length for recycling
+  // Zero-length input: follow R's recycling convention and return an empty
+  // vector, as dbeta(numeric(0), 1, 1) does. This also guards the
+  // `i % vec.n_elem` recycling below against integer division by zero.
+  if (p.n_elem == 0 || a_vec.n_elem == 0 || b_vec.n_elem == 0) {
+    return Rcpp::NumericVector(0);
+  }
+
   size_t N = std::max({p.n_elem, a_vec.n_elem, b_vec.n_elem});
   
   arma::vec out(N);
@@ -349,55 +351,33 @@ Rcpp::NumericVector qkw(
       continue;
     }
     
-    // ---- Convert probability to linear scale ----
+    // ---- Normalise the probability, without leaving log space ----
+    // The former code did exp(log p) and then 1 - p in linear space. The first
+    // flushed the deep tail to zero (qbeta_(-1000, 2, 3, log.p = TRUE) gave 0
+    // against a true 2.25e-218); the second cost the upper tail. Out-of-range p
+    // keeps the saturating result it has always returned -- whether that should
+    // be NaN instead is a separate, still-open question.
+    if (log_p && pp > 0.0) { out(i) = NA_REAL; continue; }
+    if (!log_p && (pp < 0.0 || pp > 1.0)) {
+      out(i) = (lower_tail == (pp > 1.0)) ? 1.0 : 0.0;
+      continue;
+    }
+
+    // log(u) and log(1-u) for the lower-tail probability u, whichever scale and
+    // tail the caller used, so neither has to be recovered by subtraction.
+    double log_u, log_1mu;
     if (log_p) {
-      if (pp > 0.0) {
-        out(i) = NA_REAL;
-        continue;
-      }
-      pp = safe_exp(pp);
-    }
-    
-    // Handle upper tail (pp is now always linear scale)
-    if (!lower_tail) {
-      pp = 1.0 - pp;
-    }
-    
-    // Handle boundary cases
-    if (pp <= 0.0) {
-      out(i) = 0.0;
-      continue;
-    }
-    if (pp >= 1.0) {
-      out(i) = 1.0;
-      continue;
-    }
-    
-    // ---- Compute quantile via closed-form formula ----
-    
-    // Step 1: 1 - p
-    double step1 = 1.0 - pp;
-    step1 = std::max(0.0, step1);
-    
-    // Step 2: (1 - p)^(1/β)
-    double step2 = safe_pow(step1, 1.0 / b);
-    
-    // Step 3: 1 - (1 - p)^(1/β)
-    double step3 = 1.0 - step2;
-    step3 = std::max(0.0, step3);
-    
-    // Step 4: {1 - (1 - p)^(1/β)}^(1/α)
-    double xval;
-    if (a == 1.0) {
-      xval = step3;
+      if (lower_tail) { log_u = pp;               log_1mu = gkw_log1mexp(pp); }
+      else            { log_u = gkw_log1mexp(pp); log_1mu = pp; }
     } else {
-      xval = safe_pow(step3, 1.0 / a);
+      if (lower_tail) { log_u = std::log(pp);     log_1mu = std::log1p(-pp); }
+      else            { log_u = std::log1p(-pp);  log_1mu = std::log(pp); }
     }
-    
-    // Clamp to valid support
-    xval = std::max(0.0, std::min(1.0, xval));
-    
-    out(i) = xval;
+    if (log_u   == R_NegInf) { out(i) = 0.0; continue; }
+    if (log_1mu == R_NegInf) { out(i) = 1.0; continue; }
+
+    // Q(u) = [1 - (1-u)^(1/beta)]^(1/alpha)
+    out(i) = std::exp(gkw_log1mexp(log_1mu / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -444,6 +424,14 @@ Rcpp::NumericVector rkw(
   arma::vec a_vec(alpha.begin(), alpha.size());
   arma::vec b_vec(beta.begin(), beta.size());
   
+  // A zero-length parameter cannot be recycled. Match R's convention
+  // (rbeta(3, numeric(0), 1) is NA NA NA with a warning) instead of
+  // reaching the `i % vec.n_elem` recycling with a zero divisor.
+  if (a_vec.n_elem == 0 || b_vec.n_elem == 0) {
+    Rcpp::warning("rkw: NAs produced");
+    return Rcpp::NumericVector(n, NA_REAL);
+  }
+
   arma::vec out(n);
   
   for (int i = 0; i < n; i++) {
@@ -460,30 +448,14 @@ Rcpp::NumericVector rkw(
     
     // Generate U ~ Uniform(0,1)
     double U = R::runif(0.0, 1.0);
-    
-    // Step 1: 1 - U
-    double step1 = 1.0 - U;
-    step1 = std::max(0.0, step1);
-    
-    // Step 2: (1 - U)^(1/β)
-    double step2 = safe_pow(step1, 1.0 / b);
-    
-    // Step 3: 1 - (1 - U)^(1/β)
-    double step3 = 1.0 - step2;
-    step3 = std::max(0.0, step3);
-    
-    // Step 4: {1 - (1 - U)^(1/β)}^(1/α)
-    double x;
-    if (a == 1.0) {
-      x = step3;
-    } else {
-      x = safe_pow(step3, 1.0 / a);
-    }
-    
-    // Clamp to valid support
-    x = std::max(0.0, std::min(1.0, x));
-    
-    out(i) = x;
+
+    // x = [1 - (1-U)^(1/beta)]^(1/alpha), inverted in log space. Forming
+    // 1 - U and then 1 - (1-U)^(1/beta) in linear arithmetic is what drove the
+    // draw out of the open support: once either subtraction rounded to 0 the
+    // generator returned exactly 0 or 1.
+    // The draw itself is untouched, so the RNG stream is identical to
+    // before; only the inversion that follows it changes.
+    out(i) = std::exp(gkw_log1mexp(std::log1p(-U) / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -610,30 +582,36 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   int n = x.n_elem;
   Rcpp::NumericVector grad(2, 0.0);
   
-  // Numerical stability constant
-  const double eps = std::numeric_limits<double>::epsilon() * 100;
-  
-  // ---- Compute intermediate quantities ----
-  
-  arma::vec log_x = vec_safe_log(x);
-  arma::vec x_alpha = vec_safe_pow(x, alpha);
-  arma::vec x_alpha_log_x = x_alpha % log_x;
-  
-  // v = 1 - x^α (with clamping for numerical stability)
-  arma::vec v = 1.0 - x_alpha;
-  v = arma::clamp(v, eps, 1.0 - eps);
-  
-  arma::vec log_v = vec_safe_log(v);
-  
   // ---- Calculate gradient components ----
+  //
+  // This is grekw() with lambda fixed at 1, evaluated from logarithms. The
+  // former code formed v = 1 - x^alpha in linear arithmetic and then applied
+  // arma::clamp(v, eps, 1 - eps) with eps = 2.22e-14, which froze log(v) at
+  // -31.4384832 for every observation near 1 regardless of the data. kw.cpp was
+  // the last family file still doing this; gkw.cpp, bkw.cpp, kkw.cpp and ekw.cpp
+  // already work in log space. At (alpha, beta) = (0.5, 2) on x = 1 - 1e-14 the
+  // clamp cost 38.75% of the alpha component, and ordinary data was enough to
+  // show it: c(1-1e-9, 1-1e-11, 0.5) already diverged by 3.4e-05.
+  //
+  //   P = dlog(v)/dalpha = -log(x) * exp(log(x^alpha) - log(v))
+  //
+  // Writing the ratio as a single exp() of a difference of logs avoids the
+  // tiny/tiny division that x^alpha / v degenerates into.
+  double d_alpha = n / alpha;
+  double d_beta = n / beta;
   
-  // ∂ℓ/∂α = n/α + Σlog(x) - (β-1)Σ[x^α log(x)/(1-x^α)]
-  double d_alpha = n / alpha + arma::sum(log_x);
-  arma::vec alpha_term = (beta - 1.0) * x_alpha_log_x / v;
-  d_alpha -= arma::sum(alpha_term);
-  
-  // ∂ℓ/∂β = n/β + Σlog(1-x^α)
-  double d_beta = n / beta + arma::sum(log_v);
+  for (int i = 0; i < n; i++) {
+    double log_xi = std::log(x(i));
+    d_alpha += log_xi;
+    
+    double log_x_alpha = alpha * log_xi;
+    double log_v = gkw_log1mexp(log_x_alpha);
+    d_beta += log_v;
+    
+    // dl/dalpha += (beta-1) * P
+    double P = -log_xi * std::exp(log_x_alpha - log_v);
+    d_alpha += (beta - 1.0) * P;
+  }
   
   // Return NEGATIVE gradient (for minimization of negative log-likelihood)
   grad[0] = -d_alpha;
@@ -701,33 +679,30 @@ Rcpp::NumericMatrix hskw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   int n = x.n_elem;
   Rcpp::NumericMatrix hess(2, 2);
   
-  // Numerical stability constant
-  const double eps = std::numeric_limits<double>::epsilon() * 100;
-  
-  // ---- Compute intermediate quantities ----
-  
-  arma::vec log_x = vec_safe_log(x);
-  arma::vec log_x_squared = arma::square(log_x);
-  arma::vec x_alpha = vec_safe_pow(x, alpha);
-  arma::vec x_alpha_log_x = x_alpha % log_x;
-  
-  // v = 1 - x^α (with clamping for numerical stability)
-  arma::vec v = 1.0 - x_alpha;
-  v = arma::clamp(v, eps, 1.0 - eps);
-  
-  // Additional terms for second derivatives
-  arma::vec term_ratio = x_alpha / v;              // x^α / (1-x^α)
-  arma::vec term_combined = 1.0 + term_ratio;      // 1 + x^α/(1-x^α) = 1/(1-x^α)
-  
   // ---- Calculate Hessian components (of log-likelihood ℓ) ----
-  
-  // H[α,α] = ∂²ℓ/∂α² = -n/α² - (β-1)Σ[x^α(log x)²(1+x^α/(1-x^α))/(1-x^α)]
+  //
+  // Evaluated from logarithms, for the same reason as grkw() above: the former
+  // code clamped v = 1 - x^alpha to [2.22e-14, 1 - 2.22e-14], which cost 47% in
+  // H[alpha,alpha] and 78% in H[alpha,beta] at x = 1 - 1e-14.
+  //
+  // Since v + x^alpha = 1, the factor (1 + x^alpha/v)/v in the documented form
+  // is exactly 1/v^2, so the alpha-alpha term is x^alpha (log x)^2 / v^2 and
+  // both ratios below are a single exp() of a difference of logs.
   double h_alpha_alpha = -n / (alpha * alpha);
-  arma::vec d2a_terms = (beta - 1.0) * x_alpha % log_x_squared % term_combined / v;
-  h_alpha_alpha -= arma::sum(d2a_terms);
+  double h_alpha_beta = 0.0;
   
-  // H[α,β] = H[β,α] = ∂²ℓ/∂α∂β = -Σ[x^α log(x)/(1-x^α)]
-  double h_alpha_beta = -arma::sum(x_alpha_log_x / v);
+  for (int i = 0; i < n; i++) {
+    double log_xi = std::log(x(i));
+    double log_x_alpha = alpha * log_xi;
+    double log_v = gkw_log1mexp(log_x_alpha);
+    
+    // -(beta-1) * x^alpha (log x)^2 / v^2
+    h_alpha_alpha -= (beta - 1.0) * log_xi * log_xi *
+                     std::exp(log_x_alpha - 2.0 * log_v);
+    
+    // -x^alpha log(x) / v
+    h_alpha_beta -= log_xi * std::exp(log_x_alpha - log_v);
+  }
   
   // H[β,β] = ∂²ℓ/∂β² = -n/β²
   double h_beta_beta = -n / (beta * beta);

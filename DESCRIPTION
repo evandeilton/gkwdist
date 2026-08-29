@@ -1,6 +1,6 @@
 Package: gkwdist
 Title: Generalized Kumaraswamy Distribution Family
-Version: 1.1.5
+Version: 1.1.6
 Authors@R: c(person(given = "José Evandeilton",
                     family = "Lopes",
                     role = c("aut", "cre"),
@@ -26,14 +26,13 @@ Language: en-US
 Roxygen: list(markdown = TRUE)
 Imports: 
     Rcpp,
-    RcppArmadillo,
-    magrittr,
-    numDeriv
+    magrittr
 LinkingTo: 
     Rcpp,
     RcppArmadillo
 Suggests: 
     knitr,
+    numDeriv,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

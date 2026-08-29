@@ -254,7 +254,7 @@ with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 
 \seealso{
 \code{\link{grgkw}} (parent distribution gradient),
 \code{\link{llkw}} (negative log-likelihood for Kw),
-\code{hskw} (Hessian for Kw, if available),
+\code{\link{hskw}} (Hessian for Kw),
 \code{\link{dkw}} (density for Kw),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{grad}} (for numerical gradient comparison).

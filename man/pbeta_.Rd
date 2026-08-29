@@ -119,7 +119,7 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \code{\link[stats]{pbeta}} (standard R implementation),
 \code{\link{pgkw}} (parent distribution CDF),
 \code{\link{pmc}} (McDonald/Beta Power CDF),
-\code{dbeta_}, \code{qbeta_}, \code{rbeta_} (other functions for this parameterization, if they exist).
+\code{\link{dbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}}.
 }
 \author{
 Lopes, J. E.
