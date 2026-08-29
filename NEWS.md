@@ -55,6 +55,34 @@
 
 ## Base R Contract
 
+* **`d*()` returned 0 at `x = 0` and `x = 1`, where base R returns the limit**
+  (all seven families): the GKw support is the open interval, but base R's
+  density functions carry the limiting value at the closed boundary --
+  `dbeta(0, 0.5, 1)` is `Inf` and `dbeta(1, 2, 1)` is 2 -- and any code that
+  plots a density across `[0, 1]` depends on it. Curves fell to zero exactly
+  where they should have diverged.
+
+  Substituting the first-order forms the log chain already uses, the
+  log-density at each boundary collapses to a constant plus one power of the
+  vanishing quantity, so a single exponent decides the answer:
+
+  ```
+  at x = 0:  alpha*gamma*lambda - 1        at x = 1:  beta*(delta + 1) - 1
+      > 0  ->  0        = 0  ->  the constant        < 0  ->  Inf
+  ```
+
+  Each nested family reaches this through its own fixed parameters. The rule was
+  checked against `stats::dbeta` at all ten combinations the Beta
+  parameterisation can express, and against the nesting identities at both
+  boundaries for the other six.
+
+  ```
+  dkw(0, 0.5, 1)     0  ->  Inf        dbeta_(1, 2, 0)     0  ->  2
+  ```
+
+  Anything strictly outside `[0, 1]` is still 0, as in base R, and the interior
+  is bit-identical over the 238,140-value regression grid.
+
 * **`d*()`, `p*()` and `q*()` dropped `dim`, `dimnames` and `names`** (all seven
   families): base R carries the first argument's attributes through to the
   output, so code that indexes or plots the result by shape keeps working.

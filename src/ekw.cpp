@@ -159,6 +159,14 @@ Rcpp::NumericVector dekw(
       continue;
     }
     
+    // The closed boundaries carry the limiting density, as base R does:
+    // dbeta(0, 0.5, 1) is Inf and dbeta(1, 2, 1) is 2, where this package
+    // returned 0 at both ends. Anything strictly outside stays 0.
+    if (xx == 0.0 || xx == 1.0) {
+      out(i) = gkw_boundary_pdf(xx == 0.0, a, b, 1.0, 0.0, l, log_prob);
+      continue;
+    }
+    
     // Check support: x must be in (0, 1)
     if (xx <= 0.0 || xx >= 1.0 || !R_finite(xx)) {
       continue;
