@@ -83,8 +83,10 @@ implementation),
 [`pgkw`](https://evandeilton.github.io/gkwdist/reference/pgkw.md)
 (parent distribution CDF),
 [`pmc`](https://evandeilton.github.io/gkwdist/reference/pmc.md)
-(McDonald/Beta Power CDF), `dbeta_`, `qbeta_`, `rbeta_` (other functions
-for this parameterization, if they exist).
+(McDonald/Beta Power CDF),
+[`dbeta_`](https://evandeilton.github.io/gkwdist/reference/dbeta_.md),
+[`qbeta_`](https://evandeilton.github.io/gkwdist/reference/qbeta_.md),
+[`rbeta_`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md).
 
 ## Author
 
@@ -117,7 +119,7 @@ probs_gkw <- pgkw(q_vals,
   delta = delta_par, lambda = 1.0
 )
 print(paste("Max difference vs pgkw:", max(abs(probs - probs_gkw))))
-#> [1] "Max difference vs pgkw: 1.11022302462516e-16"
+#> [1] "Max difference vs pgkw: 0"
 
 # Compare with pmc setting lambda=1
 probs_mc <- pmc(q_vals, gamma = gamma_par, delta = delta_par, lambda = 1.0)

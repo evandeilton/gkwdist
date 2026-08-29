@@ -95,8 +95,10 @@ implementation),
 [`qgkw`](https://evandeilton.github.io/gkwdist/reference/qgkw.md)
 (parent distribution quantile function),
 [`qmc`](https://evandeilton.github.io/gkwdist/reference/qmc.md)
-(McDonald/Beta Power quantile function), `dbeta_`, `pbeta_`, `rbeta_`
-(other functions for this parameterization, if they exist).
+(McDonald/Beta Power quantile function),
+[`dbeta_`](https://evandeilton.github.io/gkwdist/reference/dbeta_.md),
+[`pbeta_`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
+[`rbeta_`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md).
 
 ## Author
 
@@ -129,7 +131,7 @@ quantiles_gkw <- qgkw(p_vals,
   delta = delta_par, lambda = 1.0
 )
 print(paste("Max difference vs qgkw:", max(abs(quantiles - quantiles_gkw))))
-#> [1] "Max difference vs qgkw: 5.55111512312578e-17"
+#> [1] "Max difference vs qgkw: 1.38777878078145e-17"
 
 # Compare with qmc setting lambda=1
 quantiles_mc <- qmc(p_vals, gamma = gamma_par, delta = delta_par, lambda = 1.0)

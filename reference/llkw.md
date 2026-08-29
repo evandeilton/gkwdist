@@ -66,9 +66,11 @@ Methodology*, *6*(1), 70-81.
 [`dkw`](https://evandeilton.github.io/gkwdist/reference/dkw.md),
 [`pkw`](https://evandeilton.github.io/gkwdist/reference/pkw.md),
 [`qkw`](https://evandeilton.github.io/gkwdist/reference/qkw.md),
-[`rkw`](https://evandeilton.github.io/gkwdist/reference/rkw.md), `grkw`
-(gradient, if available), `hskw` (Hessian, if available),
-[`optim`](https://rdrr.io/r/stats/optim.html)
+[`rkw`](https://evandeilton.github.io/gkwdist/reference/rkw.md),
+[`grkw`](https://evandeilton.github.io/gkwdist/reference/grkw.md)
+(gradient),
+[`hskw`](https://evandeilton.github.io/gkwdist/reference/hskw.md)
+(Hessian), [`optim`](https://rdrr.io/r/stats/optim.html)
 
 ## Author
 
@@ -122,9 +124,9 @@ print(results, digits = 4)
 # At MLE, gradient should be approximately zero
 gradient_at_mle <- grkw(par = mle, data = data)
 print(gradient_at_mle)
-#> [1]  2.071782e-05 -1.146518e-05
+#> [1]  2.071783e-05 -1.146518e-05
 cat("Max absolute score:", max(abs(gradient_at_mle)), "\n")
-#> Max absolute score: 2.071782e-05 
+#> Max absolute score: 2.071783e-05 
 
 ## Example 3: Checking Hessian Properties
 
@@ -425,8 +427,8 @@ comparison_grad <- data.frame(
 )
 print(comparison_grad, digits = 8)
 #>   Parameter     Analytical      Numerical    Difference
-#> 1     alpha  2.0717825e-05  2.3305802e-05 2.5879771e-06
-#> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493044e-07
+#> 1     alpha  2.0717825e-05  2.3305802e-05 2.5879765e-06
+#> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493081e-07
 
 ## Example 10: Bootstrap Confidence Intervals
 

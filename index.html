@@ -26,7 +26,7 @@ family and its seven nested sub-models for bounded continuous data.
 
     <a class="navbar-brand me-2" href="index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -546,8 +546,9 @@ family and its seven nested sub-models for bounded continuous data.
 <span><span class="va">neg_score</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/grekw.html">grekw</a></span><span class="op">(</span><span class="va">params</span>, <span class="va">data</span><span class="op">)</span></span>
 <span><span class="va">neg_hess</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hsekw.html">hsekw</a></span><span class="op">(</span><span class="va">params</span>, <span class="va">data</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Fisher information matrix (negative of negative Hessian = Hessian)</span></span>
-<span><span class="va">fisher</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="va">neg_hess</span></span>
+<span><span class="co"># hsekw() already returns the Hessian of the negative log-likelihood,</span></span>
+<span><span class="co"># which is the observed information matrix</span></span>
+<span><span class="va">fisher</span> <span class="op">&lt;-</span> <span class="va">neg_hess</span></span>
 <span></span>
 <span><span class="co"># Asymptotic standard errors</span></span>
 <span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">fisher</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>

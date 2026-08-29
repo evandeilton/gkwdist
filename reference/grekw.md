@@ -85,8 +85,9 @@ additional references).
 [`grgkw`](https://evandeilton.github.io/gkwdist/reference/grgkw.md)
 (parent distribution gradient),
 [`llekw`](https://evandeilton.github.io/gkwdist/reference/llekw.md)
-(negative log-likelihood for EKw), `hsekw` (Hessian for EKw, if
-available),
+(negative log-likelihood for EKw),
+[`hsekw`](https://evandeilton.github.io/gkwdist/reference/hsekw.md)
+(Hessian for EKw),
 [`dekw`](https://evandeilton.github.io/gkwdist/reference/dekw.md)
 (density for EKw), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`grad`](https://rdrr.io/pkg/numDeriv/man/grad.html) (for numerical
@@ -193,7 +194,7 @@ cat("\nGradient at MLE:\n")
 #> 
 #> Gradient at MLE:
 print(gradient_at_mle)
-#> [1] 2.067845e-05 8.446125e-06 1.901242e-05
+#> [1] 2.067845e-05 8.446126e-06 1.901242e-05
 cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
 #> Max absolute component: 2.067845e-05 
 cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
@@ -227,10 +228,10 @@ comparison_grad <- data.frame(
     (abs(grad_analytical) + 1e-10)
 )
 print(comparison_grad, digits = 8)
-#>   Parameter    Analytical     Numerical      Abs_Diff   Rel_Error
-#> 1     alpha 2.0678455e-05 3.9221959e-05 1.8543504e-05 0.896750477
-#> 2      beta 8.4461253e-06 4.5474735e-06 3.8986518e-06 0.461585106
-#> 3    lambda 1.9012424e-05 2.0179414e-05 1.1669895e-06 0.061380038
+#>   Parameter    Analytical     Numerical      Abs_Diff  Rel_Error
+#> 1     alpha 2.0678455e-05 3.3821834e-05 1.3143379e-05 0.63560435
+#> 2      beta 8.4461257e-06 4.2632564e-06 4.1828693e-06 0.49523532
+#> 3    lambda 1.9012425e-05 2.3590019e-05 4.5775942e-06 0.24076730
 
 
 ## Example 5: Score Test Statistic
@@ -268,7 +269,11 @@ vcov_2d <- vcov_full[1:2, 1:2]
 theta <- seq(0, 2 * pi, length.out = 100)
 chi2_val <- qchisq(0.95, df = 2)
 
-eig_decomp <- eigen(vcov_2d)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+eig_decomp$values <- pmax(eig_decomp$values, 0)
 ellipse <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -314,7 +319,11 @@ grid(col = "gray90")
 vcov_2d_al <- vcov_full[c(1, 3), c(1, 3)]
 
 # Create confidence ellipse
-eig_decomp_al <- eigen(vcov_2d_al)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_al <- eigen(vcov_2d_al, symmetric = TRUE)
+eig_decomp_al$values <- pmax(eig_decomp_al$values, 0)
 ellipse_al <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -360,7 +369,11 @@ grid(col = "gray90")
 vcov_2d_bl <- vcov_full[2:3, 2:3]
 
 # Create confidence ellipse
-eig_decomp_bl <- eigen(vcov_2d_bl)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_bl <- eigen(vcov_2d_bl, symmetric = TRUE)
+eig_decomp_bl$values <- pmax(eig_decomp_bl$values, 0)
 ellipse_bl <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))

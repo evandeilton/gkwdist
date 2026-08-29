@@ -81,8 +81,7 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`rgkw`](https://evandeilton.github.io/gkwdist/reference/rgkw.md),
 [`grgkw`](https://evandeilton.github.io/gkwdist/reference/grgkw.md),
 [`hsgkw`](https://evandeilton.github.io/gkwdist/reference/hsgkw.md)
-(gradient and Hessian functions, if available),
-[`optim`](https://rdrr.io/r/stats/optim.html),
+(gradient and Hessian), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`lbeta`](https://rdrr.io/r/base/Special.html),
 [`log1p`](https://rdrr.io/r/base/Log.html)
 
@@ -161,19 +160,19 @@ results <- data.frame(
 )
 print(results, digits = 4)
 #>        Parameter True     MLE      SE CI_Lower CI_Upper
-#> alpha      alpha  2.0  1.2054  1.8369  -2.3949    4.806
-#> beta        beta  3.0  3.2880  3.6955  -3.9552   10.531
-#> gamma      gamma  1.5  0.3823  0.3952  -0.3924    1.157
-#> delta      delta  2.0  1.4619  2.5862  -3.6070    6.531
-#> lambda    lambda  1.8 13.8780 23.0766 -31.3522   59.108
+#> alpha      alpha  2.0  1.1195  1.5527  -1.9238    4.163
+#> beta        beta  3.0  3.1335  2.9345  -2.6181    8.885
+#> gamma      gamma  1.5  0.3877  0.3678  -0.3332    1.109
+#> delta      delta  2.0  1.5749  2.2983  -2.9298    6.080
+#> lambda    lambda  1.8 15.0213 24.7056 -33.4016   63.444
 
 cat("\nNegative log-likelihood at MLE:", fit$value, "\n")
 #> 
-#> Negative log-likelihood at MLE: -704.336 
+#> Negative log-likelihood at MLE: -704.3453 
 cat("AIC:", 2 * fit$value + 2 * length(mle), "\n")
-#> AIC: -1398.672 
+#> AIC: -1398.691 
 cat("BIC:", 2 * fit$value + length(mle) * log(n), "\n")
-#> BIC: -1374.133 
+#> BIC: -1374.152 
 
 
 ## Example 3: Comparing Optimization Methods
@@ -239,7 +238,7 @@ for (method in methods) {
 
 print(comparison, digits = 4, row.names = FALSE)
 #>       Method Alpha  Beta  Gamma Delta Lambda NegLogLik Convergence
-#>         BFGS 1.205 3.288 0.3823 1.462 13.878    -704.3           0
+#>         BFGS 1.119 3.134 0.3877 1.575 15.021    -704.3           0
 #>  Nelder-Mead 1.868 3.136 1.0095 1.870  2.826    -704.0           0
 
 
@@ -272,9 +271,9 @@ lr_stat <- 2 * (loglik_full - loglik_restricted)
 p_value <- pchisq(lr_stat, df = 1, lower.tail = FALSE)
 
 cat("LR Statistic:", round(lr_stat, 4), "\n")
-#> LR Statistic: 0.7677 
+#> LR Statistic: 0.7917 
 cat("P-value:", format.pval(p_value, digits = 4), "\n")
-#> P-value: 0.3809 
+#> P-value: 0.3736 
 
 
 ## Example 5: Univariate Profile Likelihoods

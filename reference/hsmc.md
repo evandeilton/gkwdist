@@ -46,12 +46,11 @@ components are based on the second derivatives of the log-likelihood
 
 **Note:** The formulas below represent the second derivatives of the
 positive log-likelihood (\\\ell\\). The function returns the
-**negative** of these values. Users should verify these formulas
-independently if using for critical applications.
+**negative** of these values.
 
 \$\$ \frac{\partial^2 \ell}{\partial \gamma^2} = -n\[\psi'(\gamma) -
 \psi'(\gamma+\delta+1)\] \$\$ \$\$ \frac{\partial^2 \ell}{\partial
-\gamma \partial \delta} = -n\psi'(\gamma+\delta+1) \$\$ \$\$
+\gamma \partial \delta} = n\psi'(\gamma+\delta+1) \$\$ \$\$
 \frac{\partial^2 \ell}{\partial \gamma \partial \lambda} =
 \sum\_{i=1}^{n}\ln(x_i) \$\$ \$\$ \frac{\partial^2 \ell}{\partial
 \delta^2} = -n\[\psi'(\delta+1) - \psi'(\gamma+\delta+1)\] \$\$ \$\$
@@ -89,7 +88,7 @@ additional references).
 [`llmc`](https://evandeilton.github.io/gkwdist/reference/llmc.md)
 (negative log-likelihood for Mc),
 [`grmc`](https://evandeilton.github.io/gkwdist/reference/grmc.md)
-(gradient for Mc, if available),
+(gradient for Mc),
 [`dmc`](https://evandeilton.github.io/gkwdist/reference/dmc.md) (density
 for Mc), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`hessian`](https://rdrr.io/pkg/numDeriv/man/hessian.html) (for
@@ -168,7 +167,7 @@ cat(
   "Max absolute difference:",
   max(abs(hessian_at_mle - fit$hessian)), "\n"
 )
-#> Max absolute difference: 0.0002574138 
+#> Max absolute difference: 0.0002574132 
 
 # Eigenvalue analysis
 eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
@@ -413,7 +412,11 @@ theta <- seq(0, 2 * pi, length.out = 100)
 chi2_val <- qchisq(0.95, df = 2)
 
 # Gamma vs Delta ellipse
-eig_decomp_gd <- eigen(vcov_gd)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_gd <- eigen(vcov_gd, symmetric = TRUE)
+eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
 ellipse_gd <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -422,7 +425,11 @@ for (i in 1:100) {
 }
 
 # Gamma vs Lambda ellipse
-eig_decomp_gl <- eigen(vcov_gl)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_gl <- eigen(vcov_gl, symmetric = TRUE)
+eig_decomp_gl$values <- pmax(eig_decomp_gl$values, 0)
 ellipse_gl <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -431,7 +438,11 @@ for (i in 1:100) {
 }
 
 # Delta vs Lambda ellipse
-eig_decomp_dl <- eigen(vcov_dl)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_dl <- eigen(vcov_dl, symmetric = TRUE)
+eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
 ellipse_dl <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))

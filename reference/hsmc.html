@@ -19,7 +19,7 @@ standard errors and in optimization algorithms."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,13 +96,12 @@ negative log-likelihood function (\(-\ell(\theta|\mathbf{x})\)).
 The components are based on the second derivatives of the log-likelihood \(\ell\)
 (derived from the PDF in <code><a href="dmc.html">dmc</a></code>).</p>
 <p><strong>Note:</strong> The formulas below represent the second derivatives of the positive
-log-likelihood (\(\ell\)). The function returns the <strong>negative</strong> of these values.
-Users should verify these formulas independently if using for critical applications.</p>
+log-likelihood (\(\ell\)). The function returns the <strong>negative</strong> of these values.</p>
 <p>$$
 \frac{\partial^2 \ell}{\partial \gamma^2} = -n[\psi'(\gamma) - \psi'(\gamma+\delta+1)]
 $$
 $$
-\frac{\partial^2 \ell}{\partial \gamma \partial \delta} = -n\psi'(\gamma+\delta+1)
+\frac{\partial^2 \ell}{\partial \gamma \partial \delta} = n\psi'(\gamma+\delta+1)
 $$
 $$
 \frac{\partial^2 \ell}{\partial \gamma \partial \lambda} = \sum_{i=1}^{n}\ln(x_i)
@@ -137,7 +136,7 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="hsgkw.html">hsgkw</a></code> (parent distribution Hessian),
 <code><a href="llmc.html">llmc</a></code> (negative log-likelihood for Mc),
-<code><a href="grmc.html">grmc</a></code> (gradient for Mc, if available),
+<code><a href="grmc.html">grmc</a></code> (gradient for Mc),
 <code><a href="dmc.html">dmc</a></code> (density for Mc),
 <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></code>,
 <code><a href="https://rdrr.io/pkg/numDeriv/man/hessian.html" class="external-link">hessian</a></code> (for numerical Hessian comparison),
@@ -215,7 +214,7 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-in"><span>  <span class="st">"Max absolute difference:"</span>,</span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">hessian_at_mle</span> <span class="op">-</span> <span class="va">fit</span><span class="op">$</span><span class="va">hessian</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute difference: 0.0002574138 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute difference: 0.0002574132 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Eigenvalue analysis</span></span></span>
 <span class="r-in"><span><span class="va">eigenvals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">hessian_at_mle</span>, only.values <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">values</span></span></span>
@@ -460,7 +459,11 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-in"><span><span class="va">chi2_val</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">qchisq</a></span><span class="op">(</span><span class="fl">0.95</span>, df <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Gamma vs Delta ellipse</span></span></span>
-<span class="r-in"><span><span class="va">eig_decomp_gd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_gd</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># The observed information is not guaranteed positive definite at a</span></span></span>
+<span class="r-in"><span><span class="co"># numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()</span></span></span>
+<span class="r-in"><span><span class="co"># below stays finite and the region remains drawable.</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_gd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_gd</span>, symmetric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_gd</span><span class="op">$</span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">eig_decomp_gd</span><span class="op">$</span><span class="va">values</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ellipse_gd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fl">100</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -469,7 +472,11 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Gamma vs Lambda ellipse</span></span></span>
-<span class="r-in"><span><span class="va">eig_decomp_gl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_gl</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># The observed information is not guaranteed positive definite at a</span></span></span>
+<span class="r-in"><span><span class="co"># numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()</span></span></span>
+<span class="r-in"><span><span class="co"># below stays finite and the region remains drawable.</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_gl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_gl</span>, symmetric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_gl</span><span class="op">$</span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">eig_decomp_gl</span><span class="op">$</span><span class="va">values</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ellipse_gl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fl">100</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -478,7 +485,11 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Delta vs Lambda ellipse</span></span></span>
-<span class="r-in"><span><span class="va">eig_decomp_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_dl</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># The observed information is not guaranteed positive definite at a</span></span></span>
+<span class="r-in"><span><span class="co"># numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()</span></span></span>
+<span class="r-in"><span><span class="co"># below stays finite and the region remains drawable.</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_dl</span>, symmetric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_dl</span><span class="op">$</span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">eig_decomp_dl</span><span class="op">$</span><span class="va">values</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ellipse_dl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fl">100</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>

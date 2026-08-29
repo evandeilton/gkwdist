@@ -84,8 +84,9 @@ additional references).
 [`hsgkw`](https://evandeilton.github.io/gkwdist/reference/hsgkw.md)
 (parent distribution Hessian),
 [`llkw`](https://evandeilton.github.io/gkwdist/reference/llkw.md)
-(negative log-likelihood for Kw), `grkw` (gradient for Kw, if
-available),
+(negative log-likelihood for Kw),
+[`grkw`](https://evandeilton.github.io/gkwdist/reference/grkw.md)
+(gradient for Kw),
 [`dkw`](https://evandeilton.github.io/gkwdist/reference/dkw.md) (density
 for Kw), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`hessian`](https://rdrr.io/pkg/numDeriv/man/hessian.html) (for
@@ -157,7 +158,7 @@ cat(
   "Max absolute difference:",
   max(abs(hessian_at_mle - fit$hessian)), "\n"
 )
-#> Max absolute difference: 8.859183e-05 
+#> Max absolute difference: 8.859188e-05 
 
 # Eigenvalue analysis
 eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
@@ -342,7 +343,11 @@ theta <- seq(0, 2 * pi, length.out = 100)
 chi2_val <- qchisq(0.95, df = 2)
 
 # Eigendecomposition
-eig_decomp <- eigen(asymp_cov)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp <- eigen(asymp_cov, symmetric = TRUE)
+eig_decomp$values <- pmax(eig_decomp$values, 0)
 
 # Ellipse points
 ellipse <- matrix(NA, nrow = 100, ncol = 2)

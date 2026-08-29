@@ -185,8 +185,8 @@ comparison <- data.frame(
 )
 print(comparison, digits = 4, row.names = FALSE)
 #>            Method Alpha  Beta  Gamma Delta Lambda NegLogLik Iterations
-#>     With Gradient 1.205 3.288 0.3823 1.462  13.88    -704.3        386
-#>  Without Gradient 1.256 3.386 0.3747 1.403  13.43    -704.3        367
+#>     With Gradient 1.119 3.134 0.3877 1.575  15.02    -704.3        396
+#>  Without Gradient 1.274 3.394 0.3851 1.395  12.79    -704.3        347
 
 
 ## Example 3: Verifying Gradient at MLE
@@ -200,11 +200,11 @@ cat("\nGradient at MLE:\n")
 #> 
 #> Gradient at MLE:
 print(gradient_at_mle)
-#> [1] -0.040704813  0.024508274  0.007276465  0.017706753 -0.010821899
+#> [1]  0.0550132386 -0.0484390887 -0.0887069625  0.0005045136 -0.0087954869
 cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
-#> Max absolute component: 0.04070481 
+#> Max absolute component: 0.08870696 
 cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
-#> Gradient norm: 0.05235577 
+#> Gradient norm: 0.1154095 
 
 
 ## Example 4: Numerical vs Analytical Gradient
@@ -234,12 +234,12 @@ comparison_grad <- data.frame(
     (abs(grad_analytical) + 1e-10)
 )
 print(comparison_grad, digits = 8)
-#>   Parameter    Analytical     Numerical      Abs_Diff     Rel_Error
-#> 1     alpha -0.0407048130 -0.0407061407 1.3276474e-06 3.2616473e-05
-#> 2      beta  0.0245082736  0.0245046294 3.6441642e-06 1.4869118e-04
-#> 3     gamma  0.0072764653  0.0072782314 1.7660659e-06 2.4270931e-04
-#> 4     delta  0.0177067532  0.0177067250 2.8273547e-08 1.5967663e-06
-#> 5    lambda -0.0108218991 -0.0108224185 5.1944308e-07 4.7999253e-05
+#>   Parameter     Analytical      Numerical      Abs_Diff     Rel_Error
+#> 1     alpha  0.05501323860  0.05501703981 3.8012090e-06 6.9096259e-05
+#> 2      beta -0.04843908874 -0.04843798251 1.1062275e-06 2.2837496e-05
+#> 3     gamma -0.08870696248 -0.08871438695 7.4244685e-06 8.3696571e-05
+#> 4     delta  0.00050451358  0.00050590643 1.3928451e-06 2.7607678e-03
+#> 5    lambda -0.00879548691 -0.00879595063 4.6372314e-07 5.2722850e-05
 
 
 ## Example 5: Score Test Statistic
@@ -277,7 +277,11 @@ vcov_2d <- vcov_full[1:2, 1:2]
 theta <- seq(0, 2 * pi, length.out = round(n / 4))
 chi2_val <- qchisq(0.95, df = 2)
 
-eig_decomp <- eigen(vcov_2d)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+eig_decomp$values <- pmax(eig_decomp$values, 0)
 ellipse <- matrix(NA, nrow = round(n / 4), ncol = 2)
 for (i in 1:round(n / 4)) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -322,7 +326,11 @@ grid(col = "gray90")
 vcov_2d_gd <- vcov_full[3:4, 3:4]
 
 # Create confidence ellipse
-eig_decomp_gd <- eigen(vcov_2d_gd)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_gd <- eigen(vcov_2d_gd, symmetric = TRUE)
+eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
 ellipse_gd <- matrix(NA, nrow = round(n / 4), ncol = 2)
 for (i in 1:round(n / 4)) {
   v <- c(cos(theta[i]), sin(theta[i]))

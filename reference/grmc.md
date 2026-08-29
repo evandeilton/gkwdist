@@ -43,10 +43,10 @@ The components of the gradient vector of the negative log-likelihood
 (\\-\nabla \ell(\theta \| \mathbf{x})\\) for the Mc (\\\alpha=1,
 \beta=1\\) model are:
 
-\$\$ -\frac{\partial \ell}{\partial \gamma} = n\[\psi(\gamma+\delta+1) -
-\psi(\gamma)\] - \lambda\sum\_{i=1}^{n}\ln(x_i) \$\$ \$\$
--\frac{\partial \ell}{\partial \delta} = n\[\psi(\gamma+\delta+1) -
-\psi(\delta+1)\] - \sum\_{i=1}^{n}\ln(1-x_i^{\lambda}) \$\$ \$\$
+\$\$ -\frac{\partial \ell}{\partial \gamma} = n\[\psi(\gamma) -
+\psi(\gamma+\delta+1)\] - \lambda\sum\_{i=1}^{n}\ln(x_i) \$\$ \$\$
+-\frac{\partial \ell}{\partial \delta} = n\[\psi(\delta+1) -
+\psi(\gamma+\delta+1)\] - \sum\_{i=1}^{n}\ln(1-x_i^{\lambda}) \$\$ \$\$
 -\frac{\partial \ell}{\partial \lambda} = -\frac{n}{\lambda} -
 \gamma\sum\_{i=1}^{n}\ln(x_i) +
 \delta\sum\_{i=1}^{n}\frac{x_i^{\lambda}\ln(x_i)}{1-x_i^{\lambda}} \$\$
@@ -75,7 +75,9 @@ additional references).
 [`grgkw`](https://evandeilton.github.io/gkwdist/reference/grgkw.md)
 (parent distribution gradient),
 [`llmc`](https://evandeilton.github.io/gkwdist/reference/llmc.md)
-(negative log-likelihood for Mc), `hsmc` (Hessian for Mc, if available),
+(negative log-likelihood for Mc),
+[`hsmc`](https://evandeilton.github.io/gkwdist/reference/hsmc.md)
+(Hessian for Mc),
 [`dmc`](https://evandeilton.github.io/gkwdist/reference/dmc.md) (density
 for Mc), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`grad`](https://rdrr.io/pkg/numDeriv/man/grad.html) (for numerical
@@ -153,7 +155,7 @@ cat(
   "Max absolute difference:",
   max(abs(hessian_at_mle - fit$hessian)), "\n"
 )
-#> Max absolute difference: 0.0002574138 
+#> Max absolute difference: 0.0002574132 
 
 # Eigenvalue analysis
 eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
@@ -399,7 +401,11 @@ theta <- seq(0, 2 * pi, length.out = 100)
 chi2_val <- qchisq(0.95, df = 2)
 
 # Gamma vs Delta ellipse
-eig_decomp_gd <- eigen(vcov_gd)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_gd <- eigen(vcov_gd, symmetric = TRUE)
+eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
 ellipse_gd <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -408,7 +414,11 @@ for (i in 1:100) {
 }
 
 # Gamma vs Lambda ellipse
-eig_decomp_gl <- eigen(vcov_gl)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_gl <- eigen(vcov_gl, symmetric = TRUE)
+eig_decomp_gl$values <- pmax(eig_decomp_gl$values, 0)
 ellipse_gl <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -417,7 +427,11 @@ for (i in 1:100) {
 }
 
 # Delta vs Lambda ellipse
-eig_decomp_dl <- eigen(vcov_dl)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_dl <- eigen(vcov_dl, symmetric = TRUE)
+eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
 ellipse_dl <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))

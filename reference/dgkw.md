@@ -66,8 +66,8 @@ is given by: \$\$ f(x; \alpha, \beta, \gamma, \delta, \lambda) =
 (0,1)\\, where \\B(a, b)\\ is the Beta function
 [`beta`](https://rdrr.io/r/base/Special.html).
 
-This distribution was proposed by Cordeiro & de Castro (2011) and
-includes several other distributions as special cases:
+This distribution was proposed by Carrasco, Ferrari & Cordeiro (2010)
+and includes several other distributions as special cases:
 
 - Kumaraswamy (Kw): `gamma = 1`, `delta = 0`, `lambda = 1`
 
@@ -97,8 +97,8 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 
 [`pgkw`](https://evandeilton.github.io/gkwdist/reference/pgkw.md),
 [`qgkw`](https://evandeilton.github.io/gkwdist/reference/qgkw.md),
-[`rgkw`](https://evandeilton.github.io/gkwdist/reference/rgkw.md) (if
-these exist), [`dbeta`](https://rdrr.io/r/stats/Beta.html),
+[`rgkw`](https://evandeilton.github.io/gkwdist/reference/rgkw.md),
+[`dbeta`](https://rdrr.io/r/stats/Beta.html),
 [`integrate`](https://rdrr.io/r/stats/integrate.html)
 
 ## Author

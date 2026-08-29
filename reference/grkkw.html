@@ -19,7 +19,7 @@ optimization algorithms for maximum likelihood estimation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -226,7 +226,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span>, digits <span class="op">=</span> <span class="fl">4</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            Method Alpha  Beta  Delta Lambda NegLogLik Iterations</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     With Gradient 2.304 3.610 1.2222  1.705    -586.5        113</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Without Gradient 2.495 4.544 0.8006  1.570    -586.5        213</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Without Gradient 2.495 4.541 0.8015  1.570    -586.5        213</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 3: Verifying Gradient at MLE</span></span></span>
@@ -240,11 +240,11 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gradient at MLE:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.05694299 -0.03217945 -0.03422843  0.04666593</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.05693441 -0.03218057 -0.03423100  0.04665646</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max absolute component:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute component: 0.05694299 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute component: 0.05693441 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Gradient norm:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gradient norm: 0.08733451 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gradient norm: 0.08732527 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 4: Numerical vs Analytical Gradient</span></span></span>
@@ -275,10 +275,10 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison_grad</span>, digits <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter   Analytical    Numerical      Abs_Diff     Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha  0.056942995  0.056946874 3.8793581e-06 6.8127048e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -0.032179455 -0.032177354 2.1004228e-06 6.5272169e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     delta -0.034228431 -0.034227128 1.3032425e-06 3.8074852e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4    lambda  0.046665928  0.046665605 3.2338735e-07 6.9298387e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha  0.056934412  0.056932663 1.7486380e-06 3.0713201e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -0.032180568 -0.032185881 5.3123175e-06 1.6507842e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     delta -0.034230998 -0.034237928 6.9303137e-06 2.0245725e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    lambda  0.046656456  0.046658784 2.3278267e-06 4.9892917e-05</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 5: Score Test Statistic</span></span></span>
@@ -317,7 +317,11 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="va">theta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">chi2_val</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">qchisq</a></span><span class="op">(</span><span class="fl">0.95</span>, df <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">eig_decomp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_2d</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># The observed information is not guaranteed positive definite at a</span></span></span>
+<span class="r-in"><span><span class="co"># numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()</span></span></span>
+<span class="r-in"><span><span class="co"># below stays finite and the region remains drawable.</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_2d</span>, symmetric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp</span><span class="op">$</span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">eig_decomp</span><span class="op">$</span><span class="va">values</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ellipse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fl">100</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>

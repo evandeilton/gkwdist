@@ -83,8 +83,10 @@ implementation),
 [`dgkw`](https://evandeilton.github.io/gkwdist/reference/dgkw.md)
 (parent distribution density),
 [`dmc`](https://evandeilton.github.io/gkwdist/reference/dmc.md)
-(McDonald/Beta Power density), `pbeta_`, `qbeta_`, `rbeta_` (other
-functions for this parameterization, if they exist).
+(McDonald/Beta Power density),
+[`pbeta_`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
+[`qbeta_`](https://evandeilton.github.io/gkwdist/reference/qbeta_.md),
+[`rbeta_`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md).
 
 ## Author
 

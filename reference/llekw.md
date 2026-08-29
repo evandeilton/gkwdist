@@ -79,8 +79,10 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`pekw`](https://evandeilton.github.io/gkwdist/reference/pekw.md),
 [`qekw`](https://evandeilton.github.io/gkwdist/reference/qekw.md),
 [`rekw`](https://evandeilton.github.io/gkwdist/reference/rekw.md),
-`grekw` (gradient, if available), `hsekw` (Hessian, if available),
-[`optim`](https://rdrr.io/r/stats/optim.html)
+[`grekw`](https://evandeilton.github.io/gkwdist/reference/grekw.md)
+(gradient),
+[`hsekw`](https://evandeilton.github.io/gkwdist/reference/hsekw.md)
+(Hessian), [`optim`](https://rdrr.io/r/stats/optim.html)
 
 ## Author
 

@@ -72,9 +72,15 @@ distributions. *Journal of Statistical Computation and Simulation*,
 
 [`llgkw`](https://evandeilton.github.io/gkwdist/reference/llgkw.md),
 [`llmc`](https://evandeilton.github.io/gkwdist/reference/llmc.md)
-(related negative log-likelihoods), `dbeta_`, `pbeta_`, `qbeta_`,
-`rbeta_`, `grbeta` (gradient, if available), `hsbeta` (Hessian, if
-available), [`optim`](https://rdrr.io/r/stats/optim.html),
+(related negative log-likelihoods),
+[`dbeta_`](https://evandeilton.github.io/gkwdist/reference/dbeta_.md),
+[`pbeta_`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
+[`qbeta_`](https://evandeilton.github.io/gkwdist/reference/qbeta_.md),
+[`rbeta_`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md),
+[`grbeta`](https://evandeilton.github.io/gkwdist/reference/grbeta.md)
+(gradient),
+[`hsbeta`](https://evandeilton.github.io/gkwdist/reference/hsbeta.md)
+(Hessian), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`lbeta`](https://rdrr.io/r/base/Special.html).
 
 ## Author

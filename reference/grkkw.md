@@ -187,7 +187,7 @@ comparison <- data.frame(
 print(comparison, digits = 4, row.names = FALSE)
 #>            Method Alpha  Beta  Delta Lambda NegLogLik Iterations
 #>     With Gradient 2.304 3.610 1.2222  1.705    -586.5        113
-#>  Without Gradient 2.495 4.544 0.8006  1.570    -586.5        213
+#>  Without Gradient 2.495 4.541 0.8015  1.570    -586.5        213
 
 
 ## Example 3: Verifying Gradient at MLE
@@ -201,11 +201,11 @@ cat("\nGradient at MLE:\n")
 #> 
 #> Gradient at MLE:
 print(gradient_at_mle)
-#> [1]  0.05694299 -0.03217945 -0.03422843  0.04666593
+#> [1]  0.05693441 -0.03218057 -0.03423100  0.04665646
 cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
-#> Max absolute component: 0.05694299 
+#> Max absolute component: 0.05693441 
 cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
-#> Gradient norm: 0.08733451 
+#> Gradient norm: 0.08732527 
 
 
 ## Example 4: Numerical vs Analytical Gradient
@@ -236,10 +236,10 @@ comparison_grad <- data.frame(
 )
 print(comparison_grad, digits = 8)
 #>   Parameter   Analytical    Numerical      Abs_Diff     Rel_Error
-#> 1     alpha  0.056942995  0.056946874 3.8793581e-06 6.8127048e-05
-#> 2      beta -0.032179455 -0.032177354 2.1004228e-06 6.5272169e-05
-#> 3     delta -0.034228431 -0.034227128 1.3032425e-06 3.8074852e-05
-#> 4    lambda  0.046665928  0.046665605 3.2338735e-07 6.9298387e-06
+#> 1     alpha  0.056934412  0.056932663 1.7486380e-06 3.0713201e-05
+#> 2      beta -0.032180568 -0.032185881 5.3123175e-06 1.6507842e-04
+#> 3     delta -0.034230998 -0.034237928 6.9303137e-06 2.0245725e-04
+#> 4    lambda  0.046656456  0.046658784 2.3278267e-06 4.9892917e-05
 
 
 ## Example 5: Score Test Statistic
@@ -278,7 +278,11 @@ vcov_2d <- vcov_full[1:2, 1:2]
 theta <- seq(0, 2 * pi, length.out = 100)
 chi2_val <- qchisq(0.95, df = 2)
 
-eig_decomp <- eigen(vcov_2d)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+eig_decomp$values <- pmax(eig_decomp$values, 0)
 ellipse <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))

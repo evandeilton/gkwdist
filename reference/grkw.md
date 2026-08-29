@@ -69,7 +69,9 @@ additional references).
 [`grgkw`](https://evandeilton.github.io/gkwdist/reference/grgkw.md)
 (parent distribution gradient),
 [`llkw`](https://evandeilton.github.io/gkwdist/reference/llkw.md)
-(negative log-likelihood for Kw), `hskw` (Hessian for Kw, if available),
+(negative log-likelihood for Kw),
+[`hskw`](https://evandeilton.github.io/gkwdist/reference/hskw.md)
+(Hessian for Kw),
 [`dkw`](https://evandeilton.github.io/gkwdist/reference/dkw.md) (density
 for Kw), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`grad`](https://rdrr.io/pkg/numDeriv/man/grad.html) (for numerical
@@ -173,9 +175,9 @@ cat("\nGradient at MLE:\n")
 #> 
 #> Gradient at MLE:
 print(gradient_at_mle)
-#> [1]  2.071782e-05 -1.146518e-05
+#> [1]  2.071783e-05 -1.146518e-05
 cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
-#> Max absolute component: 2.071782e-05 
+#> Max absolute component: 2.071783e-05 
 cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
 #> Gradient norm: 2.367865e-05 
 
@@ -227,23 +229,23 @@ for (i in 1:nrow(test_points)) {
 #> 
 #> Point 1 : alpha = 1.5 , beta = 2.5 
 #>   Parameter Analytical  Numerical      Abs_Diff     Rel_Error
-#> 1     alpha -431.55771 -431.55771 1.2864846e-06 2.9810256e-09
-#> 2      beta  122.18002  122.18002 7.1891532e-07 5.8840662e-09
+#> 1     alpha -431.55771 -431.55771 1.2864840e-06 2.9810243e-09
+#> 2      beta  122.18002  122.18002 7.1891493e-07 5.8840630e-09
 #> 
 #> Point 2 : alpha = 2 , beta = 3 
 #>   Parameter  Analytical   Numerical      Abs_Diff     Rel_Error
-#> 1     alpha -170.184879 -170.184879 7.6758630e-07 4.5103085e-09
+#> 1     alpha -170.184879 -170.184879 1.9915149e-07 1.1702067e-09
 #> 2      beta   42.661367   42.661367 3.0471102e-07 7.1425518e-09
 #> 
 #> Point 3 : alpha = 2.511171 , beta = 3.570812 
 #>   Parameter     Analytical      Numerical      Abs_Diff   Rel_Error
-#> 1     alpha  2.0717825e-05  2.3305802e-05 2.5879771e-06 0.124914880
-#> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493044e-07 0.057995133
+#> 1     alpha  2.0717825e-05  2.3305802e-05 2.5879765e-06 0.124914849
+#> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493081e-07 0.057995164
 #> 
 #> Point 4 : alpha = 3 , beta = 4 
-#>   Parameter Analytical  Numerical      Abs_Diff     Rel_Error
-#> 1     alpha 133.673727 133.673730 2.8540616e-06 2.1350954e-08
-#> 2      beta -32.697532 -32.697532 5.1952384e-08 1.5888778e-09
+#>   Parameter Analytical  Numerical     Abs_Diff     Rel_Error
+#> 1     alpha 133.673727 133.673729 2.285627e-06 1.7098551e-08
+#> 2      beta -32.697532 -32.697532 5.195232e-08 1.5888759e-09
 
 
 ## Example 5: Gradient Path Visualization

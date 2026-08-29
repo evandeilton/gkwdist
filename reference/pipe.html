@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,19 @@
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The result of calling <code>rhs(lhs)</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="deprecation-notice">Deprecation notice<a class="anchor" aria-label="anchor" href="#deprecation-notice"></a></h2>
+
+
+<p>This re-export is deprecated and is scheduled for removal in a future
+release. gkwdist does not use the pipe anywhere in its own code; it
+re-exports <code>magrittr</code>'s operator only, which makes <code>magrittr</code> a hard
+dependency of a package that has no need of it. Nothing changes in this
+release: <code>%&gt;%</code> remains exported and behaves exactly as before.</p>
+<p>If your code relies on gkwdist supplying <code>%&gt;%</code>, take it from its own source
+instead – <code><a href="https://magrittr.tidyverse.org" class="external-link">library(magrittr)</a></code>, or any of the tidyverse packages that
+re-export it – or use R's native pipe, <code>|&gt;</code>, available since R 4.1.0.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

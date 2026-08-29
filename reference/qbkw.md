@@ -162,7 +162,7 @@ quantiles_gkw <- qgkw(p_vals, alpha_par, beta_par,
   delta = delta_par, lambda = 1.0
 )
 print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-#> [1] "Max difference: 0"
+#> [1] "Max difference: 2.77555756156289e-17"
 
 # Verify inverse relationship with pbkw
 p_check <- 0.75

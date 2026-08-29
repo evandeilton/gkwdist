@@ -77,8 +77,10 @@ implementation),
 [`rgkw`](https://evandeilton.github.io/gkwdist/reference/rgkw.md)
 (parent distribution random generation),
 [`rmc`](https://evandeilton.github.io/gkwdist/reference/rmc.md)
-(McDonald/Beta Power random generation), `dbeta_`, `pbeta_`, `qbeta_`
-(other functions for this parameterization, if they exist).
+(McDonald/Beta Power random generation),
+[`dbeta_`](https://evandeilton.github.io/gkwdist/reference/dbeta_.md),
+[`pbeta_`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
+[`qbeta_`](https://evandeilton.github.io/gkwdist/reference/qbeta_.md).
 
 ## Author
 

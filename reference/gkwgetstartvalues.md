@@ -17,8 +17,15 @@ gkwgetstartvalues(x, family = "gkw", n_starts = 5L)
 - x:
 
   Numeric vector of observations. All values must be in the open
-  interval (0,1). Values outside this range will be automatically
-  truncated to avoid numerical issues.
+  interval (0,1). Values outside it – including exact 0 and exact 1 –
+  are truncated to the interval so that a single boundary observation
+  does not abort a fit, and a warning naming the number of truncated
+  observations and their observed range is issued. Truncation shifts
+  every sample moment and therefore every estimate returned, so treat
+  the warning as a signal to check the scale of the data rather than as
+  noise: values such as 5 or -3 usually mean a percentage or 0-100 scale
+  that has to be rescaled first. `NA` and non-finite values are dropped
+  without a warning.
 
 - family:
 
@@ -33,9 +40,11 @@ gkwgetstartvalues(x, family = "gkw", n_starts = 5L)
 - n_starts:
 
   Integer specifying the number of different initial parameter values to
-  try during optimization. More starting points increase the probability
-  of finding the global optimum at the cost of longer computation time.
-  Default is 5.
+  try during optimization. Every starting point is optimized and the
+  candidate with the smallest objective is returned, so more starting
+  points can only improve the fit, at a cost that grows linearly in
+  `n_starts`. Default is 5. Four fixed, family-specific starting points
+  are always used, so values below 4 behave as 4.
 
 ## Value
 
@@ -54,9 +63,29 @@ derivative-free and particularly robust for this problem.
 
 Key implementation features: logarithmic calculations for numerical
 stability, adaptive numerical integration using Simpson's rule with
-fallback to trapezoidal rule, multiple random starting points to avoid
-local minima, decreasing weights for higher-order moments (1.0, 0.8,
-0.6, 0.4, 0.2), and automatic parameter constraint enforcement.
+fallback to trapezoidal rule, multiple starting points to avoid local
+minima, decreasing weights for higher-order moments (1.0, 0.8, 0.6, 0.4,
+0.2), and automatic parameter constraint enforcement.
+
+Multiple starts: the grid of starting points is built from four fixed,
+family-specific points – one of them derived from the sample moments –
+plus `n_starts - 4` further points drawn over the family's parameter
+box. Nelder-Mead is run from every point in the grid, each result is
+clipped to the parameter box, and the clipped candidate with the
+smallest objective is returned. Because the candidate set grows with
+`n_starts`, the returned objective is non-increasing in `n_starts`.
+
+Determinism: the extra starting points are drawn from a generator with a
+fixed internal seed, deliberately not from R's random number stream. The
+function is therefore deterministic – two calls with the same `x`,
+`family` and `n_starts` return the same vector, so a fit seeded by these
+values is reproducible without any further precaution. Two consequences
+are worth stating explicitly:
+[`set.seed`](https://rdrr.io/r/base/Random.html) has no effect on
+`gkwgetstartvalues`, and the function neither reads nor advances
+`.Random.seed`, so it cannot perturb simulations running alongside it.
+To widen the search, raise `n_starts` rather than looking for a seed
+argument.
 
 Parameter Constraints: All parameters are constrained to positive
 values. Additionally, family-specific constraints are enforced: alpha
@@ -64,8 +93,9 @@ and beta in (0.1, 50.0), gamma in (0.1, 10.0) for GKw-related families
 or (0.1, 50.0) for Beta, delta in (0.01, 10.0), and lambda in (0.1,
 20.0).
 
-The function will issue warnings for empty input vectors, sample sizes
-less than 10 (unreliable estimation), or failure to find valid parameter
+The function will issue warnings for empty input vectors, observations
+outside the open interval (0,1) (truncated to it), sample sizes less
+than 10 (unreliable estimation), or failure to find valid parameter
 estimates (returns defaults).
 
 ## References
@@ -78,7 +108,9 @@ distribution with some tractability advantages. Statistical Methodology,
 
 ``` r
 # \donttest{
-# Generate sample data from Beta distribution
+# Generate sample data from a Beta distribution. set.seed() here makes the
+# SAMPLE reproducible; gkwgetstartvalues() itself is deterministic and is
+# unaffected by the seed (see the Determinism note in Details).
 set.seed(123)
 x <- rbeta(100, shape1 = 2, shape2 = 3)
 
@@ -98,6 +130,20 @@ print(params_kw)
 params_gkw <- gkwgetstartvalues(x, family = "gkw", n_starts = 10)
 print(params_gkw)
 #>     alpha      beta     gamma     delta    lambda 
-#> 1.2590661 3.1762475 1.9558583 0.0100000 0.9977211 
+#> 0.5562367 1.4240218 1.9332680 1.2036964 2.4553624 
+
+# Deterministic: the seed in force does not change the answer, and the
+# function does not consume draws from R's stream.
+set.seed(1)
+identical(gkwgetstartvalues(x, family = "kw"), params_kw)
+#> [1] TRUE
+set.seed(9999)
+identical(gkwgetstartvalues(x, family = "kw"), params_kw)
+#> [1] TRUE
+
+before <- .Random.seed
+invisible(gkwgetstartvalues(x, family = "kw"))
+identical(before, .Random.seed)
+#> [1] TRUE
 # }
 ```

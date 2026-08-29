@@ -593,8 +593,9 @@ nll <- llekw(params, data)
 neg_score <- grekw(params, data)
 neg_hess <- hsekw(params, data)
 
-# Fisher information matrix (negative of negative Hessian = Hessian)
-fisher <- -neg_hess
+# hsekw() already returns the Hessian of the negative log-likelihood,
+# which is the observed information matrix
+fisher <- neg_hess
 
 # Asymptotic standard errors
 se <- sqrt(diag(solve(fisher)))

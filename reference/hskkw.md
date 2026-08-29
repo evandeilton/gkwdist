@@ -171,7 +171,7 @@ cat(
   "Max absolute difference:",
   max(abs(hessian_at_mle - fit$hessian)), "\n"
 )
-#> Max absolute difference: 0.0003078666 
+#> Max absolute difference: 0.0003078665 
 
 # Eigenvalue analysis
 eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
@@ -179,13 +179,13 @@ cat("\nEigenvalues:\n")
 #> 
 #> Eigenvalues:
 print(eigenvals)
-#> [1] 2.109731e+03 9.911840e+01 1.552329e+00 9.866167e-03
+#> [1] 2.109731e+03 9.911841e+01 1.552334e+00 9.866885e-03
 
 cat("\nPositive definite:", all(eigenvals > 0), "\n")
 #> 
 #> Positive definite: TRUE 
 cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
-#> Condition number: 213834.9 
+#> Condition number: 213819.3 
 
 
 ## Example 3: Standard Errors and Confidence Intervals
@@ -200,10 +200,10 @@ cat("\nVariance-Covariance Matrix:\n")
 #> Variance-Covariance Matrix:
 print(vcov_matrix, digits = 6)
 #>          [,1]     [,2]      [,3]      [,4]
-#> [1,]  4.72539  17.8385  -9.98000  -3.65573
-#> [2,] 17.83853  71.2228 -40.54756 -13.54993
-#> [3,] -9.98000 -40.5476  23.21520   7.54021
-#> [4,] -3.65573 -13.5499   7.54021   2.84782
+#> [1,]  4.72506  17.8372  -9.97925  -3.65547
+#> [2,] 17.83721  71.2176 -40.54462 -13.54893
+#> [3,] -9.97925 -40.5446  23.21354   7.53964
+#> [4,] -3.65547 -13.5489   7.53964   2.84762
 
 # Standard errors
 se <- sqrt(diag(vcov_matrix))
@@ -216,9 +216,9 @@ cat("\nCorrelation Matrix:\n")
 #> Correlation Matrix:
 print(corr_matrix, digits = 4)
 #>         [,1]    [,2]    [,3]    [,4]
-#> [1,]  1.0000  0.9724 -0.9529 -0.9965
+#> [1,]  1.0000  0.9724 -0.9528 -0.9965
 #> [2,]  0.9724  1.0000 -0.9972 -0.9514
-#> [3,] -0.9529 -0.9972  1.0000  0.9273
+#> [3,] -0.9528 -0.9972  1.0000  0.9273
 #> [4,] -0.9965 -0.9514  0.9273  1.0000
 
 # Confidence intervals
@@ -233,10 +233,10 @@ results <- data.frame(
 )
 print(results, digits = 4)
 #>        Parameter True   MLE    SE CI_Lower CI_Upper
-#> alpha      alpha  2.0 2.304 2.174   -1.956    6.565
+#> alpha      alpha  2.0 2.304 2.174   -1.956    6.564
 #> beta        beta  3.0 3.610 8.439  -12.931   20.150
-#> delta      delta  1.5 1.222 4.818   -8.221   10.666
-#> lambda    lambda  2.0 1.705 1.688   -1.603    5.012
+#> delta      delta  1.5 1.222 4.818   -8.221   10.665
+#> lambda    lambda  2.0 1.705 1.687   -1.603    5.012
 
 
 ## Example 4: Determinant and Trace Analysis
@@ -286,12 +286,12 @@ print(hess_properties, digits = 4, row.names = FALSE)
 #>  Alpha Beta Delta Lambda Determinant Trace Min_Eigenval Max_Eigenval
 #>  1.500 2.50 1.000  1.500  -5.769e+09  3399   -1.056e+02         3061
 #>  2.000 3.00 1.500  2.000  -1.317e+06  2506   -2.387e+00         2413
-#>  2.304 3.61 1.222  1.705   3.203e+03  2210    9.866e-03         2110
+#>  2.304 3.61 1.222  1.705   3.203e+03  2210    9.867e-03         2110
 #>  2.500 3.50 2.000  2.500  -2.204e+09  1873   -2.309e+02         1954
 #>  Cond_Number
 #>      -28.985
 #>    -1011.104
-#>   213834.878
+#>   213819.321
 #>       -8.462
 
 
@@ -352,7 +352,11 @@ vcov_2d <- vcov_matrix[1:2, 1:2]
 theta <- seq(0, 2 * pi, length.out = round(n / 2))
 chi2_val <- qchisq(0.95, df = 2)
 
-eig_decomp <- eigen(vcov_2d)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
+eig_decomp$values <- pmax(eig_decomp$values, 0)
 ellipse <- matrix(NA, nrow = round(n / 2), ncol = 2)
 for (i in 1:round(n / 2)) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -397,7 +401,11 @@ grid(col = "gray90")
 vcov_2d_dl <- vcov_matrix[3:4, 3:4]
 
 # Create confidence ellipse
-eig_decomp_dl <- eigen(vcov_2d_dl)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_dl <- eigen(vcov_2d_dl, symmetric = TRUE)
+eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
 ellipse_dl <- matrix(NA, nrow = round(n / 2), ncol = 2)
 for (i in 1:round(n / 2)) {
   v <- c(cos(theta[i]), sin(theta[i]))

@@ -81,9 +81,9 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`qkkw`](https://evandeilton.github.io/gkwdist/reference/qkkw.md),
 [`rkkw`](https://evandeilton.github.io/gkwdist/reference/rkkw.md),
 [`grkkw`](https://evandeilton.github.io/gkwdist/reference/grkkw.md)
-(gradient, if available),
+(gradient),
 [`hskkw`](https://evandeilton.github.io/gkwdist/reference/hskkw.md)
-(Hessian, if available), [`optim`](https://rdrr.io/r/stats/optim.html)
+(Hessian), [`optim`](https://rdrr.io/r/stats/optim.html)
 
 ## Author
 
@@ -157,9 +157,9 @@ results <- data.frame(
 )
 print(results, digits = 4)
 #>        Parameter True   MLE    SE CI_Lower CI_Upper
-#> alpha      alpha  2.0 2.304 2.170   -1.950    6.558
+#> alpha      alpha  2.0 2.304 2.170   -1.949    6.557
 #> beta        beta  3.0 3.610 8.425  -12.904   20.123
-#> delta      delta  1.5 1.222 4.810   -8.206   10.651
+#> delta      delta  1.5 1.222 4.810   -8.206   10.650
 #> lambda    lambda  2.0 1.705 1.685   -1.598    5.007
 
 cat("\nNegative log-likelihood at MLE:", fit$value, "\n")

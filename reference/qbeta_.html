@@ -17,7 +17,7 @@ parameters shape1 = gamma and shape2 = delta + 1."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -133,7 +133,7 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
     <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">qbeta</a></code> (standard R implementation),
 <code><a href="qgkw.html">qgkw</a></code> (parent distribution quantile function),
 <code><a href="qmc.html">qmc</a></code> (McDonald/Beta Power quantile function),
-<code>dbeta_</code>, <code>pbeta_</code>, <code>rbeta_</code> (other functions for this parameterization, if they exist).</p></div>
+<code><a href="dbeta_.html">dbeta_</a></code>, <code><a href="pbeta_.html">pbeta_</a></code>, <code><a href="rbeta_.html">rbeta_</a></code>.</p></div>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
@@ -166,7 +166,7 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <span class="r-in"><span>  delta <span class="op">=</span> <span class="va">delta_par</span>, lambda <span class="op">=</span> <span class="fl">1.0</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Max difference vs qgkw:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">quantiles</span> <span class="op">-</span> <span class="va">quantiles_gkw</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Max difference vs qgkw: 5.55111512312578e-17"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Max difference vs qgkw: 1.38777878078145e-17"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare with qmc setting lambda=1</span></span></span>
 <span class="r-in"><span><span class="va">quantiles_mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="qmc.html">qmc</a></span><span class="op">(</span><span class="va">p_vals</span>, gamma <span class="op">=</span> <span class="va">gamma_par</span>, delta <span class="op">=</span> <span class="va">delta_par</span>, lambda <span class="op">=</span> <span class="fl">1.0</span><span class="op">)</span></span></span>

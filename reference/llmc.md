@@ -74,9 +74,11 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`dmc`](https://evandeilton.github.io/gkwdist/reference/dmc.md),
 [`pmc`](https://evandeilton.github.io/gkwdist/reference/pmc.md),
 [`qmc`](https://evandeilton.github.io/gkwdist/reference/qmc.md),
-[`rmc`](https://evandeilton.github.io/gkwdist/reference/rmc.md), `grmc`
-(gradient, if available), `hsmc` (Hessian, if available),
-[`optim`](https://rdrr.io/r/stats/optim.html),
+[`rmc`](https://evandeilton.github.io/gkwdist/reference/rmc.md),
+[`grmc`](https://evandeilton.github.io/gkwdist/reference/grmc.md)
+(gradient),
+[`hsmc`](https://evandeilton.github.io/gkwdist/reference/hsmc.md)
+(Hessian), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`lbeta`](https://rdrr.io/r/base/Special.html)
 
 ## Author

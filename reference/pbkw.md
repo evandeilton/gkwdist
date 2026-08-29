@@ -146,7 +146,7 @@ probs_gkw <- pgkw(q_vals, alpha_par, beta_par,
   delta = delta_par, lambda = 1.0
 )
 print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-#> [1] "Max difference: 1.66533453693773e-16"
+#> [1] "Max difference: 0"
 
 # Plot the CDF
 curve_q <- seq(0.01, 0.99, length.out = 200)

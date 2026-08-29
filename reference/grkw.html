@@ -15,7 +15,7 @@ optimization via maximum likelihood estimation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -110,7 +110,7 @@ with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="grgkw.html">grgkw</a></code> (parent distribution gradient),
 <code><a href="llkw.html">llkw</a></code> (negative log-likelihood for Kw),
-<code>hskw</code> (Hessian for Kw, if available),
+<code><a href="hskw.html">hskw</a></code> (Hessian for Kw),
 <code><a href="dkw.html">dkw</a></code> (density for Kw),
 <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></code>,
 <code><a href="https://rdrr.io/pkg/numDeriv/man/grad.html" class="external-link">grad</a></code> (for numerical gradient comparison).</p></div>
@@ -213,9 +213,9 @@ with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gradient at MLE:</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  2.071782e-05 -1.146518e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  2.071783e-05 -1.146518e-05</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max absolute component:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute component: 2.071782e-05 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute component: 2.071783e-05 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Gradient norm:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gradient_at_mle</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gradient norm: 2.367865e-05 </span>
 <span class="r-in"><span></span></span>
@@ -267,23 +267,23 @@ with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Point 1 : alpha = 1.5 , beta = 2.5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter Analytical  Numerical      Abs_Diff     Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha -431.55771 -431.55771 1.2864846e-06 2.9810256e-09</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta  122.18002  122.18002 7.1891532e-07 5.8840662e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha -431.55771 -431.55771 1.2864840e-06 2.9810243e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta  122.18002  122.18002 7.1891493e-07 5.8840630e-09</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Point 2 : alpha = 2 , beta = 3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter  Analytical   Numerical      Abs_Diff     Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha -170.184879 -170.184879 7.6758630e-07 4.5103085e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha -170.184879 -170.184879 1.9915149e-07 1.1702067e-09</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta   42.661367   42.661367 3.0471102e-07 7.1425518e-09</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Point 3 : alpha = 2.511171 , beta = 3.570812 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter     Analytical      Numerical      Abs_Diff   Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha  2.0717825e-05  2.3305802e-05 2.5879771e-06 0.124914880</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493044e-07 0.057995133</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha  2.0717825e-05  2.3305802e-05 2.5879765e-06 0.124914849</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -1.1465180e-05 -1.0800250e-05 6.6493081e-07 0.057995164</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Point 4 : alpha = 3 , beta = 4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter Analytical  Numerical      Abs_Diff     Rel_Error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha 133.673727 133.673730 2.8540616e-06 2.1350954e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -32.697532 -32.697532 5.1952384e-08 1.5888778e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameter Analytical  Numerical     Abs_Diff     Rel_Error</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     alpha 133.673727 133.673729 2.285627e-06 1.7098551e-08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      beta -32.697532 -32.697532 5.195232e-08 1.5888759e-09</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example 5: Gradient Path Visualization</span></span></span>

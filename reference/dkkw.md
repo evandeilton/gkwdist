@@ -84,8 +84,8 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 (parent distribution density),
 [`pkkw`](https://evandeilton.github.io/gkwdist/reference/pkkw.md),
 [`qkkw`](https://evandeilton.github.io/gkwdist/reference/qkkw.md),
-[`rkkw`](https://evandeilton.github.io/gkwdist/reference/rkkw.md) (if
-they exist), [`dbeta`](https://rdrr.io/r/stats/Beta.html)
+[`rkkw`](https://evandeilton.github.io/gkwdist/reference/rkkw.md),
+[`dbeta`](https://rdrr.io/r/stats/Beta.html)
 
 ## Author
 

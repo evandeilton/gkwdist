@@ -79,8 +79,10 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`pbkw`](https://evandeilton.github.io/gkwdist/reference/pbkw.md),
 [`qbkw`](https://evandeilton.github.io/gkwdist/reference/qbkw.md),
 [`rbkw`](https://evandeilton.github.io/gkwdist/reference/rbkw.md),
-`grbkw` (gradient, if available), `hsbkw` (Hessian, if available),
-[`optim`](https://rdrr.io/r/stats/optim.html),
+[`grbkw`](https://evandeilton.github.io/gkwdist/reference/grbkw.md)
+(gradient),
+[`hsbkw`](https://evandeilton.github.io/gkwdist/reference/hsbkw.md)
+(Hessian), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`lbeta`](https://rdrr.io/r/base/Special.html)
 
 ## Author
@@ -155,10 +157,10 @@ results <- data.frame(
 )
 print(results, digits = 4)
 #>       Parameter True     MLE     SE CI_Lower CI_Upper
-#> alpha     alpha  2.0 2.51815 0.7563   1.0358    4.001
-#> beta       beta  1.5 2.36835 4.3962  -6.2483   10.985
-#> gamma     gamma  1.5 1.15019 0.4192   0.3285    1.972
-#> delta     delta  0.5 0.04282 1.9495  -3.7783    3.864
+#> alpha     alpha  2.0 2.51814 0.7628   1.0231    4.013
+#> beta       beta  1.5 2.36931 4.6650  -6.7740   11.513
+#> gamma     gamma  1.5 1.15022 0.4217   0.3236    1.977
+#> delta     delta  0.5 0.04241 2.0668  -4.0085    4.093
 
 cat("\nNegative log-likelihood at MLE:", fit$value, "\n")
 #> 
@@ -230,7 +232,7 @@ print(comparison, digits = 4, row.names = FALSE)
 #>         BFGS 2.528 2.470 1.145 0.0001526    -270.2           0
 #>     L-BFGS-B 2.526 2.446 1.146 0.0100000    -270.2           0
 #>  Nelder-Mead 2.570 2.332 1.122 0.0670160    -270.2           1
-#>           CG 2.414 1.566 1.205 0.5780028    -270.2           1
+#>           CG 2.429 1.571 1.196 0.5750573    -270.2           1
 
 
 ## Example 4: Likelihood Ratio Test

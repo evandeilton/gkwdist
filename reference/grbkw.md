@@ -91,7 +91,7 @@ additional references).
 [`llbkw`](https://evandeilton.github.io/gkwdist/reference/llbkw.md)
 (negative log-likelihood for BKw),
 [`hsbkw`](https://evandeilton.github.io/gkwdist/reference/hsbkw.md)
-(Hessian for BKw, if available),
+(Hessian for BKw),
 [`dbkw`](https://evandeilton.github.io/gkwdist/reference/dbkw.md)
 (density for BKw), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`grad`](https://rdrr.io/pkg/numDeriv/man/grad.html) (for numerical
@@ -234,10 +234,10 @@ comparison_grad <- data.frame(
 )
 print(comparison_grad, digits = 8)
 #>   Parameter  Analytical   Numerical      Abs_Diff     Rel_Error
-#> 1     alpha  0.50006808  0.50006179 6.2915325e-06 1.2581352e-05
-#> 2      beta -0.14962570 -0.14962069 5.0058813e-06 3.3456027e-05
-#> 3     gamma  0.66679761  0.66679604 1.5727016e-06 2.3585892e-06
-#> 4     delta -0.26559804 -0.26560201 3.9708742e-06 1.4950691e-05
+#> 1     alpha  0.50006808  0.50006236 5.7230983e-06 1.1444638e-05
+#> 2      beta -0.14962570 -0.14962040 5.2900983e-06 3.5355547e-05
+#> 3     gamma  0.66679761  0.66679604 1.5727018e-06 2.3585894e-06
+#> 4     delta -0.26559804 -0.26560087 2.8340062e-06 1.0670283e-05
 
 
 ## Example 5: Score Test Statistic
@@ -276,7 +276,11 @@ chi2_val <- qchisq(0.95, df = 2)
 
 # Alpha vs Beta ellipse
 vcov_ab <- vcov_full[1:2, 1:2]
-eig_decomp_ab <- eigen(vcov_ab)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_ab <- eigen(vcov_ab, symmetric = TRUE)
+eig_decomp_ab$values <- pmax(eig_decomp_ab$values, 0)
 ellipse_ab <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -286,7 +290,11 @@ for (i in 1:100) {
 
 # Alpha vs Gamma ellipse
 vcov_ag <- vcov_full[c(1, 3), c(1, 3)]
-eig_decomp_ag <- eigen(vcov_ag)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_ag <- eigen(vcov_ag, symmetric = TRUE)
+eig_decomp_ag$values <- pmax(eig_decomp_ag$values, 0)
 ellipse_ag <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))
@@ -296,7 +304,11 @@ for (i in 1:100) {
 
 # Beta vs Delta ellipse
 vcov_bd <- vcov_full[c(2, 4), c(2, 4)]
-eig_decomp_bd <- eigen(vcov_bd)
+# The observed information is not guaranteed positive definite at a
+# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
+# below stays finite and the region remains drawable.
+eig_decomp_bd <- eigen(vcov_bd, symmetric = TRUE)
+eig_decomp_bd$values <- pmax(eig_decomp_bd$values, 0)
 ellipse_bd <- matrix(NA, nrow = 100, ncol = 2)
 for (i in 1:100) {
   v <- c(cos(theta[i]), sin(theta[i]))

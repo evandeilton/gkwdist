@@ -19,7 +19,7 @@ standard errors and in optimization algorithms."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -123,7 +123,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="hsgkw.html">hsgkw</a></code> (parent distribution Hessian),
 <code><a href="llbkw.html">llbkw</a></code> (negative log-likelihood for BKw),
-<code><a href="grbkw.html">grbkw</a></code> (gradient for BKw, if available),
+<code><a href="grbkw.html">grbkw</a></code> (gradient for BKw),
 <code><a href="dbkw.html">dbkw</a></code> (density for BKw),
 <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></code>,
 <code><a href="https://rdrr.io/pkg/numDeriv/man/hessian.html" class="external-link">hessian</a></code> (for numerical Hessian comparison).</p></div>
@@ -459,7 +459,11 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="va">chi2_val</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">qchisq</a></span><span class="op">(</span><span class="fl">0.95</span>, df <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alpha vs Beta ellipse</span></span></span>
-<span class="r-in"><span><span class="va">eig_decomp_ab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_ab</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># The observed information is not guaranteed positive definite at a</span></span></span>
+<span class="r-in"><span><span class="co"># numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()</span></span></span>
+<span class="r-in"><span><span class="co"># below stays finite and the region remains drawable.</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_ab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_ab</span>, symmetric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_ab</span><span class="op">$</span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">eig_decomp_ab</span><span class="op">$</span><span class="va">values</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ellipse_ab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fl">100</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -468,7 +472,11 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Alpha vs Gamma ellipse</span></span></span>
-<span class="r-in"><span><span class="va">eig_decomp_ag</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_ag</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># The observed information is not guaranteed positive definite at a</span></span></span>
+<span class="r-in"><span><span class="co"># numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()</span></span></span>
+<span class="r-in"><span><span class="co"># below stays finite and the region remains drawable.</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_ag</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_ag</span>, symmetric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_ag</span><span class="op">$</span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">eig_decomp_ag</span><span class="op">$</span><span class="va">values</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ellipse_ag</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fl">100</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -477,7 +485,11 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Beta vs Delta ellipse</span></span></span>
-<span class="r-in"><span><span class="va">eig_decomp_bd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_bd</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># The observed information is not guaranteed positive definite at a</span></span></span>
+<span class="r-in"><span><span class="co"># numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()</span></span></span>
+<span class="r-in"><span><span class="co"># below stays finite and the region remains drawable.</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_bd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">vcov_bd</span>, symmetric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">eig_decomp_bd</span><span class="op">$</span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">eig_decomp_bd</span><span class="op">$</span><span class="va">values</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ellipse_bd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="fl">100</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
