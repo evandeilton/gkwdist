@@ -2,6 +2,36 @@
 
 ## Critical Bug Fixes
 
+* **`pmc()`'s upper tail was quantised by the argument it handed to
+  `R::pbeta`** (`bpmc.cpp`): `F(x) = I_{x^lambda}(gamma, delta+1)`, and `pmc()`
+  formed `x^lambda` in linear arithmetic. Once `x^lambda` passes 1/2 a double
+  holds it no more finely than 1.1e-16, and the upper tail is a function of
+  `1 - x^lambda` alone, so it was quantised to whatever that left -- and to
+  exactly 0 once `x^lambda` reached 1:
+
+  ```
+  pmc(x, 4, 2, 0.25, lower.tail = FALSE)      before             exact
+    x = 1 - 1e-15                       2.1895288505e-46   3.1175127579e-46
+    x = 1 - 1.1e-16                     0                  4.2764235361e-49
+  ```
+
+  a relative error of 700%, then of 100%. `I_y(a,b) = 1 - I_{1-y}(b,a)` is
+  exact, and `1 - x^lambda` comes from `-expm1` of the same exponent at full
+  relative accuracy, so reflecting sends the small quantity into `pbeta`. The
+  reflection is applied only where the direct form is the one holding the large
+  quantity: the lower tail never changes, and neither does any upper tail with
+  `x^lambda <= 1/2`.
+
+  Over 8942 grid cells whose exact tail is representable at all, 8494 are
+  bit-identical, 353 improved and 76 moved the other way. The maximum relative
+  error fell from 7.00 to 1.36e-13, and that residual sits on a cell this change
+  did not touch. The 76 that moved the other way went from at most 2.67e-14 to
+  at most 4.10e-14 relative, which is `R::pbeta`'s own accuracy at tail
+  probabilities of 1e-71: both routes hand it an argument good to one ulp there,
+  and they round differently. `dmc()`, `qmc()`, `rmc()`, `llmc()`, `grmc()` and
+  `hsmc()` are bit-identical, as is every lower tail and every `lambda = 1`
+  result, which stays identical to `stats::pbeta` to the bit.
+
 * **`grmc()` and `hsmc()` swapped `R::digamma` and `R::trigamma` for two-term
   asymptotic expansions above three separate thresholds** (`bpmc.cpp`):
   `gamma > 100`, `delta > 100` and `gamma + delta > 100`. `log(z) - 1/(2z)`

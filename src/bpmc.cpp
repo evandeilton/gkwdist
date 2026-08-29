@@ -290,8 +290,26 @@ Rcpp::NumericVector pmc(
     // R::pbeta: computing p first and then forming 1 - p or log(p) lost the
     // whole upper tail (pmc(1 - 1e-06, 2, 3, 2.5, lower.tail = FALSE) returned
     // exactly 0 against a true 1.95e-22).
-    double xpow = std::exp(ll * std::log(xx));
-    out(i) = R::pbeta(xpow, gg, dd + 1.0, lower_tail, log_p);
+    //
+    // The remaining loss is in the argument rather than the tail flag. Once
+    // x^lambda passes 1/2 a double can hold it no more finely than 1.1e-16, so
+    // the upper tail -- which is a function of 1 - x^lambda alone -- is
+    // quantised to whatever that leaves. Against a 120-digit incomplete beta,
+    // pmc(x, 1.5, 2, 0.8, lower.tail = FALSE) was 95% relative in error by
+    // x = 1 - 1.1e-16, and 8.3e-04 out by 1 - 1e-13.
+    //
+    // I_y(a,b) = 1 - I_{1-y}(b,a) is exact, and 1 - x^lambda comes from -expm1
+    // of the same exponent that produces x^lambda, at full relative accuracy.
+    // Reflecting sends the small quantity into pbeta and the large one out of
+    // it. Below the crossover the direct form is already the one holding the
+    // small quantity, so it is left exactly as it was: the lower tail never
+    // changes, and neither does any upper tail with x^lambda <= 1/2.
+    double log_xpow = ll * std::log(xx);
+    if (!lower_tail && log_xpow > -M_LN2) {
+      out(i) = R::pbeta(-std::expm1(log_xpow), dd + 1.0, gg, /*lower*/ 1, log_p);
+    } else {
+      out(i) = R::pbeta(std::exp(log_xpow), gg, dd + 1.0, lower_tail, log_p);
+    }
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

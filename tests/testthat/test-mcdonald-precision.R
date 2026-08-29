@@ -339,3 +339,124 @@ test_that("grmc is the gradient of llmc above the former thresholds", {
                  info = sprintf("gamma=%g delta=%g lambda=%g", p[1], p[2], p[3]))
   }
 })
+
+
+# ---------------------------------------------------------------------------
+# 4. pmc()'s upper tail was quantised by the argument it handed to R::pbeta.
+#
+# F(x) = I_{x^lambda}(gamma, delta+1), and pmc() formed x^lambda in linear
+# arithmetic. Once x^lambda passes 1/2 a double holds it no more finely than
+# 1.1e-16, and the upper tail is a function of 1 - x^lambda alone, so it was
+# quantised to whatever that left -- and to exactly 0 once x^lambda reached 1.
+# Against a 150-digit incomplete beta:
+#
+#   pmc(x, 4, 2, 0.25, lower.tail = FALSE)   before        exact
+#     x = 1 - 1e-15                   2.1895288505e-46   3.1175127579e-46
+#     x = 1 - 1.1e-16                 0                  4.2764235361e-49
+#
+# a relative error of 700% and then of 100%. I_y(a,b) = 1 - I_{1-y}(b,a) is
+# exact, and 1 - x^lambda comes from -expm1 of the same exponent at full
+# relative accuracy, so reflecting sends the small quantity into pbeta. It is
+# applied only where the direct form is the one holding the large quantity:
+# the lower tail never changes, and neither does any upper tail with
+# x^lambda <= 1/2.
+
+up_cases <- list(
+  list(par = c(4, 2, 0.25),
+       up = c(3.1279160176645228e-40, 3.1175127578515545e-43,
+              3.1175127578515389e-46, 4.276423536147513e-49),
+       lup = c(-90.963036746011909, -97.874123507846178,
+               -104.78187878682833, -111.37355251883699)),
+  list(par = c(1.5, 2, 0.8),
+       up = c(1.121045100730902e-39, 1.117316572413991e-42,
+              1.117316572413991e-45, 1.5326701953552688e-48),
+       lup = c(-89.686557250899284, -96.597644012733511,
+               -103.50539929171565, -110.09707302372431)),
+  list(par = c(0.3, 0.2, 0.4),
+       up = c(2.2499671788302198e-17, 1.4177427826382917e-18,
+              8.9453522128941221e-20, 6.4048126976138964e-21),
+       lup = c(-38.33303095197541, -41.097465656709147,
+               -43.860567768302005, -46.497237261105468)),
+  list(par = c(2, 3, 2.5),
+       up = c(1.9555553925591543e-50, 1.9468881243727164e-54,
+              1.9468881243728042e-58, 2.9673649205499354e-62),
+       lup = c(-114.45858040834483, -123.67336275745667,
+               -132.8837031294328, -141.67260143877769)),
+  list(par = c(1, 1, 0.5),
+       up = c(2.5015549676537291e-27, 2.49600520792587e-29,
+              2.496005207925859e-31, 3.0814879110195774e-33),
+       lup = c(-61.252884985257367, -65.860276159813552,
+               -70.465446345801652, -74.859895500474096))
+)
+up_x <- 1 - c(1e-13, 1e-14, 1e-15, .Machine$double.eps / 2)
+
+test_that("pmc resolves the upper tail as x approaches 1", {
+  for (cc in up_cases) {
+    p <- cc$par
+    got <- pmc(up_x, p[1], p[2], p[3], lower.tail = FALSE)
+    expect_true(all(got > 0),
+                info = sprintf("gamma=%g delta=%g lambda=%g", p[1], p[2], p[3]))
+    expect_equal(got / cc$up, rep(1, length(up_x)), tolerance = 1e-12,
+                 info = sprintf("gamma=%g delta=%g lambda=%g", p[1], p[2], p[3]))
+  }
+})
+
+test_that("pmc's log upper tail follows the same route", {
+  for (cc in up_cases) {
+    p <- cc$par
+    got <- pmc(up_x, p[1], p[2], p[3], lower.tail = FALSE, log.p = TRUE)
+    expect_true(all(is.finite(got)),
+                info = sprintf("gamma=%g delta=%g lambda=%g", p[1], p[2], p[3]))
+    expect_equal(got, cc$lup, tolerance = 1e-13,
+                 info = sprintf("gamma=%g delta=%g lambda=%g", p[1], p[2], p[3]))
+  }
+})
+
+test_that("pmc's upper tail is positive and strictly decreasing in the band", {
+  # Quantisation flattened it and then dropped it to zero. Every one of these
+  # tails is well above the smallest double -- the deepest is 4.3e-49 -- so
+  # every one must be positive, and the sequence must fall monotonically.
+  fine <- 1 - 10^seq(-8, -16, by = -0.25)
+  for (cc in up_cases) {
+    p <- cc$par
+    lab <- sprintf("gamma=%g delta=%g lambda=%g", p[1], p[2], p[3])
+    v <- pmc(fine, p[1], p[2], p[3], lower.tail = FALSE)
+    expect_true(all(is.finite(v)), info = lab)
+    expect_true(all(v > 0), info = lab)
+    expect_true(all(diff(v) < 0), info = lab)
+  }
+})
+
+test_that("pmc's lower tail and pmc(lambda = 1) are untouched", {
+  # The reflection is applied only to the upper tail above the crossover, so
+  # everything else must be bit-identical to R::pbeta on the same argument.
+  x <- c(1e-12, 0.01, 0.3, 0.5, 0.7, 0.99, 1 - 1e-8, 1 - 1e-14, 1 - 1e-16)
+  for (gd in list(c(2, 3), c(0.5, 0.5), c(50, 40), c(1.5, 2))) {
+    expect_identical(pmc(x, gd[1], gd[2], 1),
+                     stats::pbeta(x, gd[1], gd[2] + 1))
+    expect_identical(pmc(x, gd[1], gd[2], 1, lower.tail = FALSE),
+                     stats::pbeta(x, gd[1], gd[2] + 1, lower.tail = FALSE))
+    expect_identical(pmc(x, gd[1], gd[2], 1, log.p = TRUE),
+                     stats::pbeta(x, gd[1], gd[2] + 1, log.p = TRUE))
+  }
+})
+
+test_that("pmc's log upper tail is exp-consistent with the natural scale", {
+  # Both routes go through the same reflected pbeta call, so where the natural
+  # scale is representable the two must agree to the last few bits. They used
+  # to disagree completely: the natural scale returned 0 and the log scale -Inf
+  # while the true tail was 4.3e-49.
+  x <- c(0.6, 0.9, 0.99, 1 - 1e-6, 1 - 1e-10, 1 - 1e-14, 1 - .Machine$double.eps / 2)
+  for (cc in up_cases) {
+    p <- cc$par
+    lab <- sprintf("gamma=%g delta=%g lambda=%g", p[1], p[2], p[3])
+    hi <- pmc(x, p[1], p[2], p[3], lower.tail = FALSE)
+    lhi <- pmc(x, p[1], p[2], p[3], lower.tail = FALSE, log.p = TRUE)
+    ok <- hi > 0 & is.finite(lhi)
+    expect_true(all(ok), info = lab)
+    expect_equal(log(hi[ok]), lhi[ok], tolerance = 1e-13, info = lab)
+    # and the two tails still sum to one where both are representable
+    lo <- pmc(x, p[1], p[2], p[3])
+    expect_equal(lo + hi, rep(1, length(x)), tolerance = 1e-14, info = lab)
+  }
+})
