@@ -580,7 +580,14 @@ Rcpp::NumericVector rkkw(
   }
 
   arma::vec out(n);
-  
+
+  // One warning per call, not one per element. Warning inside the loop cost 51x
+  // on 50,000 values with half the parameters invalid, and under
+  // options(warn = 2) each call longjmps out of the loop through C++ frames
+  // holding live Armadillo objects. R's own convention is a single
+  // "NAs produced" per call.
+  bool bad_par = false;
+
   for (int i = 0; i < n; i++) {
     // Extract recycled parameters (direct modulo, no intermediate variable)
     double a = a_vec[i % a_vec.n_elem];
@@ -591,7 +598,7 @@ Rcpp::NumericVector rkkw(
     // Validate parameters
     if (!check_kkw_pars(a, b, dd, ll)) {
       out(i) = NA_REAL;
-      Rcpp::warning("rkkw: invalid parameters at index %d", i + 1);
+      bad_par = true;
       continue;
     }
     
@@ -605,7 +612,11 @@ Rcpp::NumericVector rkkw(
     double log_y = gkw_log1mexp(std::log1p(-V) / (dd + 1.0)) / ll;
     out(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_y) / b) / a);
   }
-  
+
+  if (bad_par) {
+    Rcpp::warning("rkkw: NAs produced");
+  }
+
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
 }
 

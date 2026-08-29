@@ -452,7 +452,14 @@ Rcpp::NumericVector rbeta_(
   }
 
   arma::vec out(n);
-  
+
+  // One warning per call, not one per element. Warning inside the loop cost 51x
+  // on 50,000 values with half the parameters invalid, and under
+  // options(warn = 2) each call longjmps out of the loop through C++ frames
+  // holding live Armadillo objects. R's own convention is a single
+  // "NAs produced" per call.
+  bool bad_par = false;
+
   for (int i = 0; i < n; i++) {
     // Extract recycled parameters (direct modulo, no intermediate variable)
     double g = g_vec[i % g_vec.n_elem];
@@ -461,7 +468,7 @@ Rcpp::NumericVector rbeta_(
     // Validate parameters
     if (!check_beta_pars(g, d)) {
       out(i) = NA_REAL;
-      Rcpp::warning("rbeta_: invalid parameters at index %d", i + 1);
+      bad_par = true;
       continue;
     }
     
@@ -469,7 +476,11 @@ Rcpp::NumericVector rbeta_(
     double val = R::rbeta(g, d + 1.0);
     out(i) = val;
   }
-  
+
+  if (bad_par) {
+    Rcpp::warning("rbeta_: NAs produced");
+  }
+
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
 }
 

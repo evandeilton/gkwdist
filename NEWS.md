@@ -55,6 +55,35 @@
 
 ## Base R Contract
 
+* **`Rcpp::warning()` fired once per element inside the vectorised loops**
+  (`dgkw`, `pgkw`, `qgkw`, `rgkw`, and the six nested `r*`): on 50,000 values
+  with half the parameters invalid that cost 51x, and under
+  `options(warn = 2)` each call longjmps out of the loop through C++ frames
+  holding live Armadillo objects. R's own convention is a single warning per
+  call. Each routine now sets a flag and warns once after the loop.
+
+  ```
+  50,000 values, half invalid      before      after
+  elapsed                          0.514 s     0.005 s
+  warnings raised                  25,000      1
+  ```
+
+  The message now also names what the routine actually returns, which base R
+  pairs up: `dbeta(0.5, -1, 1)` is `NaN` and warns *"NaNs produced"*, while
+  `rbeta(2, -1, 1)` is `NA` and warns *"NAs produced"*. `p*`, `q*` and `r*` fill
+  `NA_REAL` and say so. `dgkw()` leaves its fill value, 0, so it says
+  *"invalid parameters"* and claims no return value at all -- promising a `NaN`
+  that is not there is the defect this release fixed for `q*()`.
+
+  Values are bit-identical over the 238,140-value regression grid. The path is
+  reachable from the exported API only through an `Inf` parameter, since every
+  wrapper `stop()`s on `<= 0`, `NA` and `NaN`.
+
+  **Known inconsistency, recorded rather than papered over:** `man/dgkw.Rd` says
+  the function returns `NaN` for invalid parameters. It returns 0. The other
+  six families document and return the same 0. Aligning the two is a behaviour
+  decision and is deliberately not made here.
+
 * **`d*()` returned 0 at `x = 0` and `x = 1`, where base R returns the limit**
   (all seven families): the GKw support is the open interval, but base R's
   density functions carry the limiting value at the closed boundary --
