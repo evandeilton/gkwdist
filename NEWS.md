@@ -631,6 +631,78 @@
   Kumaraswamy distribution implemented here. `DESCRIPTION`, the README and the
   vignettes already cited the latter.
 
+## Packaging
+
+* **`RcppArmadillo` moved out of `Imports`.** It was listed there only because
+  `R/zzz.R` carried `@import RcppArmadillo`, which put `import(RcppArmadillo)`
+  in `NAMESPACE`. Armadillo is header-only for a client package: everything
+  gkwdist uses from it is compiled into `gkwdist.so` at install time through
+  `LinkingTo`, where `RcppArmadillo` already appeared. Loading its R namespace
+  at run time bought nothing, and `R CMD check --as-cran` reported
+  `Package in Depends/Imports which should probably only be in LinkingTo:
+  'RcppArmadillo'`. The tag, the `NAMESPACE` entry and the `Imports` line are
+  gone; `LinkingTo` is untouched, so the build is unchanged.
+
+* **`numDeriv` moved from `Imports` to `Suggests`.** No function in `R/` calls
+  `grad()` or `hessian()`; the package's own derivatives are analytic and live
+  in `src/`. `numDeriv` is used only by the test suite, as the independent
+  reference the analytic `gr*()` and `hs*()` routines are checked against, and
+  by `\seealso` cross-references in the help pages, which `Suggests` keeps
+  valid. Every test that calls it is guarded by `skip_if_not_installed()`, so
+  the suite runs to completion without it. Installing gkwdist no longer pulls
+  `numDeriv` in.
+
+* **The `utils::globalVariables()` registration in `R/zzz.R` is gone.** It
+  listed 39 names, all 39 of which also appear in the sibling package
+  `gkwreg`'s own registration -- regression-diagnostic artefacts such as
+  `cook_dist`, `leverage`, `linpred` and `model_label` that no distributions
+  package produces, plus `"::"`, `":::"` and `"log"`, which are functions, not
+  variables. The list had been copied across and never pruned. With the whole
+  call removed, `R CMD check` still reports
+  `checking R code for possible problems ... OK`, so not one of the 39 was
+  suppressing a real finding. Removing it restores the check's ability to
+  notice a genuine undefined global in future.
+
+* **New `.github/workflows/sanitizers.yaml` runs the compiled code under
+  runtime sanitizers.** CI had none: no ASan, UBSan, valgrind or rhub job
+  anywhere. That gap is what let the worst defect of this release through. The
+  `SIGFPE` from `i % 0` on zero-length input, which killed the R process
+  outright, produced no diagnostic under `-Wall -Wextra -Wformat=2`, passed
+  `R CMD check` cleanly, and kept the whole five-platform `R-CMD-check` matrix
+  green. UBSan names it on the first call, with a stack trace:
+
+  ```
+  gkw.cpp:134:21: runtime error: division by zero
+      #0 ... in dgkw(...) src/gkw.cpp:134
+      #1 ... in _gkwdist_dgkw   src/RcppExports.cpp:415
+  ```
+
+  The workflow has two jobs: UBSan on stock R with GCC, which links `libubsan`
+  into `gkwdist.so` and needs no instrumented R, and R-hub's `clang-asan`
+  container, which adds AddressSanitizer. Both are `continue-on-error: true`
+  for now, so a finding reports without blocking a pull request.
+
+## Deprecated
+
+* **The re-exported pipe, `%>%`, is deprecated and will be removed in a future
+  release. Nothing changes in this one:** it is still exported and still
+  behaves exactly as before.
+
+  gkwdist does not use the pipe anywhere -- not in `R/`, not in the tests, not
+  in the vignettes. It re-exports `magrittr`'s operator and nothing else, which
+  is the sole reason `magrittr` is a hard dependency, so every installation of
+  a distributions package pulls in a package it never calls. R has had a native
+  pipe, `|>`, since 4.1.0, and users who want `%>%` can attach it from its own
+  source.
+
+  This is announced a release ahead rather than done now because
+  `export("%>%")` is public API: code that reads `library(gkwdist)` and then
+  uses `%>%` without attaching magrittr or a tidyverse package would stop
+  working the moment the export went away, with `could not find function
+  "%>%"`. If your code depends on gkwdist supplying it, switch now to
+  `library(magrittr)` (or any tidyverse package that re-exports it), or to
+  `|>`. The change is invisible if you already attach magrittr yourself.
+
 ## Testing
 
 * New `tests/testthat/test-zero-length-input.R` covers all 28 routines with
@@ -688,6 +760,36 @@
   replayed draw, that `set.seed()` still reproduces, that the sample passes a
   Kolmogorov-Smirnov test against its own CDF, and that simulate-then-fit runs
   end to end. It fails 8 assertions against 1.1.5.
+
+* New `tests/testthat/test-argument-contract.R` covers the two surfaces the
+  suite had never touched: the roughly 218 documented `stop()` conditions in
+  the R wrappers, and non-finite input. It asserts every bound on every shape
+  parameter of every `d*`/`p*`/`q*`/`r*`, the `n` guard, the `log`,
+  `lower.tail` and `log.p` guards, and the `par`-length and `data` guards of
+  every `ll*`/`gr*`/`hs*`; then that `NA_real_`, `NaN`, `+Inf` and `-Inf` are
+  accepted without error, return one double per input element and leave their
+  finite neighbours untouched. 526 assertions, and it fails 11 of them against
+  1.1.5: `qkw(NA)` returned 1 there, and `q*(NaN)` collapsed to `NA` in six of
+  the seven families. The log-space quantile inversion in this release fixed
+  both, and this file pins them.
+
+  Six of its tests are marked `skip()`. They assert the behaviour the
+  functions *should* have for non-finite input -- `d*(NA)` giving `NA` rather
+  than `0`, `p*(+Inf)` giving `1` rather than `0`, `q*` outside `[0, 1]`
+  giving the `NaN` its own warning promises, and the `log = NA` and NA-shape
+  -parameter holes -- and will fail 86 assertions until that defect is fixed.
+  They are the specification, written down and executable; the fix removes
+  the `skip()` line and nothing else.
+
+* `tests/testthat/test-derivatives-validation.R` had 69 tests where its own
+  header promises 70: BKw was missing Hessian config 3. Restored.
+
+* `tests/testthat/test-loglikelihood-functions.R` asserted
+  `expect_true(result < 0)` on all seven families, commented "Log-likelihood
+  should be negative". The `ll*()` functions return the *negative* log
+  likelihood, whose sign is not a property of anything -- `llkw(c(1,1), .)` is
+  0 on a uniform sample and `llkw(c(2,2), .)` is +2.1. Each test now asserts
+  the defining identity, `ll*(par, data) == -sum(d*(data, ..., log = TRUE))`.
 
 # gkwdist 1.1.5
 
