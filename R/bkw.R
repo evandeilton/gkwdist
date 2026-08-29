@@ -126,19 +126,19 @@
 dbkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, log = FALSE) {
   # Input validation
   if (!is.numeric(x)) stop("'x' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.logical(log) || length(log) != 1) {
+  if (!is.logical(log) || length(log) != 1 || is.na(log)) {
     stop("'log' must be a single logical value")
   }
 
@@ -269,22 +269,22 @@ dbkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, log = FALSE) {
 pbkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(q)) stop("'q' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -432,22 +432,22 @@ pbkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
 qbkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(p)) stop("'p' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -600,16 +600,16 @@ rbkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0) {
   }
   n <- as.integer(n)
 
-  if (!is.numeric(alpha) || any(alpha <= 0)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive")
   }
-  if (!is.numeric(beta) || any(beta <= 0)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive")
   }
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
 

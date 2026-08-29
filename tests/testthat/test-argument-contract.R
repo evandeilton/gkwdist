@@ -415,7 +415,6 @@ test_that("q* returns NaN for probabilities outside [0, 1], as it warns it will"
 })
 
 test_that("the logical flags reject NA", {
-  skip(OPEN_DEFECT)
   # is.logical(NA) is TRUE and length(NA) is 1, so NA passes the "single
   # logical value" guard, reaches C++ as NA_LOGICAL and is read as TRUE:
   # dgkw(0.5, 2, 3, 1.5, 0.5, 2, log = NA) returns 0.8517722, the LOG density,
@@ -437,7 +436,6 @@ test_that("the logical flags reject NA", {
 })
 
 test_that("an NA shape parameter raises the package's own error in every family", {
-  skip(OPEN_DEFECT)
   # Two different guard styles today. gkw, bkw, kkw, mc and kw write
   # `any(alpha <= 0)`, so `if` sees NA and R raises "missing value where
   # TRUE/FALSE needed" instead of the documented message. ekw and beta_ write

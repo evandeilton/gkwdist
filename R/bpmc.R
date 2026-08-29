@@ -129,16 +129,16 @@
 dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
   # Input validation
   if (!is.numeric(x)) stop("'x' must be numeric")
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
-  if (!is.logical(log) || length(log) != 1) {
+  if (!is.logical(log) || length(log) != 1 || is.na(log)) {
     stop("'log' must be a single logical value")
   }
 
@@ -280,19 +280,19 @@ dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
 pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(q)) stop("'q' must be numeric")
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -438,19 +438,19 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
   # Input validation
   if (!is.numeric(p)) stop("'p' must be numeric")
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -608,13 +608,13 @@ rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
   }
   n <- as.integer(n)
 
-  if (!is.numeric(gamma) || any(gamma <= 0)) {
+  if (!is.numeric(gamma) || anyNA(gamma) || any(gamma <= 0)) {
     stop("'gamma' must be positive")
   }
-  if (!is.numeric(delta) || any(delta < 0)) {
+  if (!is.numeric(delta) || anyNA(delta) || any(delta < 0)) {
     stop("'delta' must be non-negative")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive")
   }
 

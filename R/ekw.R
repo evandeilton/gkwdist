@@ -118,16 +118,16 @@
 #' @export
 dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
   if (!is.numeric(x)) stop("'x' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0, na.rm = TRUE)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive (alpha > 0)")
   }
-  if (!is.numeric(beta) || any(beta <= 0, na.rm = TRUE)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive (beta > 0)")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0, na.rm = TRUE)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive (lambda > 0)")
   }
-  if (!is.logical(log) || length(log) != 1) {
+  if (!is.logical(log) || length(log) != 1 || is.na(log)) {
     stop("'log' must be a single logical value")
   }
 
@@ -261,19 +261,19 @@ dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
 #' @export
 pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
   if (!is.numeric(q)) stop("'q' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0, na.rm = TRUE)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive (alpha > 0)")
   }
-  if (!is.numeric(beta) || any(beta <= 0, na.rm = TRUE)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive (beta > 0)")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0, na.rm = TRUE)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive (lambda > 0)")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
 
@@ -411,19 +411,19 @@ pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #' @export
 qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
   if (!is.numeric(p)) stop("'p' must be numeric")
-  if (!is.numeric(alpha) || any(alpha <= 0, na.rm = TRUE)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive (alpha > 0)")
   }
-  if (!is.numeric(beta) || any(beta <= 0, na.rm = TRUE)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive (beta > 0)")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0, na.rm = TRUE)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive (lambda > 0)")
   }
-  if (!is.logical(lower.tail) || length(lower.tail) != 1) {
+  if (!is.logical(lower.tail) || length(lower.tail) != 1 || is.na(lower.tail)) {
     stop("'lower.tail' must be a single logical value")
   }
-  if (!is.logical(log.p) || length(log.p) != 1) {
+  if (!is.logical(log.p) || length(log.p) != 1 || is.na(log.p)) {
     stop("'log.p' must be a single logical value")
   }
   if (!log.p && any(p < 0 | p > 1, na.rm = TRUE)) {
@@ -559,13 +559,13 @@ rekw <- function(n, alpha = 1, beta = 1, lambda = 1) {
   }
   n <- as.integer(n)
 
-  if (!is.numeric(alpha) || any(alpha <= 0, na.rm = TRUE)) {
+  if (!is.numeric(alpha) || anyNA(alpha) || any(alpha <= 0)) {
     stop("'alpha' must be positive (alpha > 0)")
   }
-  if (!is.numeric(beta) || any(beta <= 0, na.rm = TRUE)) {
+  if (!is.numeric(beta) || anyNA(beta) || any(beta <= 0)) {
     stop("'beta' must be positive (beta > 0)")
   }
-  if (!is.numeric(lambda) || any(lambda <= 0, na.rm = TRUE)) {
+  if (!is.numeric(lambda) || anyNA(lambda) || any(lambda <= 0)) {
     stop("'lambda' must be positive (lambda > 0)")
   }
 

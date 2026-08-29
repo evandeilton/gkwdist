@@ -2,6 +2,37 @@
 
 ## Critical Bug Fixes
 
+* **`log`, `lower.tail` and `log.p` silently accepted `NA` and read it as
+  `TRUE`** (all seven families, 35 guards): the check was
+  `!is.logical(flag) || length(flag) != 1`, and `NA` passes both halves --
+  `is.logical(NA)` is `TRUE` and `length(NA)` is 1. The value reached C++ as
+  `NA_LOGICAL`, which is a non-zero integer, so it was read as `TRUE`:
+
+  ```
+  dgkw(0.5, 2, 3, 1.5, 0.5, 2, log = NA)   0.8517722   <- the LOG density
+  dgkw(0.5, 2, 3, 1.5, 0.5, 2)             2.343797    <- the density
+  ```
+
+  The documented error is now raised, with the message the help pages already
+  promised.
+
+* **An `NA` shape parameter behaved three different ways** (all seven families,
+  92 guards): `gkw`, `bkw`, `kkw`, `mc` and `kw` wrote `any(alpha <= 0)`, so `if`
+  received `NA` and R raised its own opaque *"missing value where TRUE/FALSE
+  needed"* instead of the documented message; `ekw` and `beta_` wrote
+  `any(alpha <= 0, na.rm = TRUE)`, which dropped the `NA` and returned 0 as
+  though the call had been valid. All seven now raise the package's own error:
+
+  ```
+  dkw(0.5, NA, 3)        before  Error: missing value where TRUE/FALSE needed
+                         after   Error: 'alpha' must be positive
+  dekw(0.5, NA, 3, 1)    before  0
+                         after   Error: 'alpha' must be positive (alpha > 0)
+  ```
+
+  Valid calls are unaffected: `dgkw(0.5, 2, 3, 1.5, 0.5, 2)` is still 2.343797,
+  and `delta = 0` is still accepted.
+
 * **`grkkw()` and `hskkw()` failed silently and only partly** (`kkw.cpp`):
   alone among the seven families, they carried none of the guards their BKw
   counterparts have. A refused input -- a short parameter vector, an invalid
