@@ -55,6 +55,43 @@
 
 ## Critical Bug Fixes
 
+* **The upper tail of `pgkw()` and `pbkw()` collapsed to exactly zero**
+  (`gkw.cpp`, `bkw.cpp`): the CDF batch moved `lower.tail` and `log.p` onto
+  `R::pbeta` instead of applying them afterwards, which fixed the lower tail. A
+  second defect remained, in the *argument* rather than the tail flag.
+
+  `pgkw()` forms `y = [1 - (1 - x^alpha)^beta]^lambda` and evaluates
+  `I_y(gamma, delta+1)`. As `x` approaches 1 the exponent `lambda*log_w` falls
+  below 1.1e-16, `exp()` returns exactly 1, and
+  `R::pbeta(1, ., ., lower = FALSE)` returns exactly 0. `pbkw()` reaches the
+  same place through `-expm1` of an exponent running off to `-Inf`. Against a
+  300-digit incomplete beta, for `pgkw(x, 2, 3, 1.5, 2, 0.8, lower.tail = FALSE)`:
+
+  ```
+  1-x     returned        exact           rel err
+  1e-4    5.731692e-34    5.731820e-34    2.2e-05
+  1e-5    5.840671e-43    5.734142e-43    1.9e-02
+  1e-6    0               5.734374e-52    1.00     <- collapse
+  1e-16   0               1.469535e-141   1.00
+  ```
+
+  The true tail is still representable sixteen decades past the point where the
+  routine gave up, and `lower.tail = FALSE` is ordinary documented API, so
+  survival probabilities, p-values and quantile residuals were silently zero.
+
+  `I_y(a,b) = 1 - I_{1-y}(b,a)` is exact, and `1 - y` is `-expm1` of the same
+  exponent that produces `y`, at full relative accuracy. Reflecting above
+  `y = 1/2` sends the small quantity into `pbeta` and the large one out of it;
+  below that crossover the direct form already holds the small quantity and is
+  left alone. This is the same correction `pmc()` received in this release.
+
+  After the fix the maximum relative error over those fifteen decades is
+  6.1e-14 for `pgkw()` and 5.3e-14 for `pbkw()`. Confinement over the
+  238,140-value grid: only `pgkw` and `pbkw` move, only with
+  `lower.tail = FALSE`, and no `d*` or `q*` value changes at all. The nesting
+  identity against `pmc()` -- corrected independently, in another translation
+  unit -- goes from 4.88e-01 to 2.84e-14.
+
 * **`NA`, `NaN` and infinite input did not propagate** (all seven families, 21
   routines): `NA_REAL` is a `NaN`, so every comparison against it is false and
   `!R_finite()` is true. Missing input therefore fell into the "outside the

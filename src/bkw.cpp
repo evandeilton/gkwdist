@@ -388,8 +388,24 @@ Rcpp::NumericVector pbkw(
     // F = I_z(gamma, delta+1) with z = 1 - (1 - x^alpha)^beta. z is formed
     // with -expm1 so it keeps its digits, and lower_tail/log_p go straight to
     // R::pbeta, which implements both without forming 1 - p or log(p).
-    double z = -std::expm1(b * gkw_log1mexp(log_x_alpha));
-    res(i) = R::pbeta(z, g, d + 1.0, lower_tail, log_p);
+    //
+    // The remaining loss was in the argument rather than the tail flag. As
+    // x -> 1 the quantity b*log(v) runs off to -Inf, -expm1 of it returns
+    // exactly 1, and R::pbeta(1, ., ., lower = FALSE) returns exactly 0 --
+    // pbkw(1 - 1e-06, 2, 3, 1.5, 2, lower.tail = FALSE) gave 0 for a tail that
+    // is still representable sixteen decades further down.
+    //
+    // 1 - z is exp(b*log(v)), the same exponent, at full relative accuracy, and
+    // I_z(a,b) = 1 - I_{1-z}(b,a) is exact. Reflecting above the crossover sends
+    // the small quantity into pbeta. Below it the direct form already holds the
+    // small quantity, so the lower tail and any upper tail with z <= 1/2 are
+    // untouched. LOG1MEXP_CROSSOVER is -log(2).
+    double log_v_beta = b * gkw_log1mexp(log_x_alpha);   // log(1 - z)
+    if (!lower_tail && log_v_beta < LOG1MEXP_CROSSOVER) {
+      res(i) = R::pbeta(std::exp(log_v_beta), d + 1.0, g, /*lower*/ 1, log_p);
+    } else {
+      res(i) = R::pbeta(-std::expm1(log_v_beta), g, d + 1.0, lower_tail, log_p);
+    }
   }
   
   return Rcpp::NumericVector(res.memptr(), res.memptr() + res.n_elem);
