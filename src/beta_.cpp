@@ -422,8 +422,13 @@ Rcpp::NumericVector rbeta_(
     const Rcpp::NumericVector& gamma,
     const Rcpp::NumericVector& delta
 ) {
-  if (n <= 0) {
-    Rcpp::stop("rbeta_: n must be positive");
+  // n = 0 returns numeric(0), matching stats::rbeta(0, 2, 3). Only a
+  // negative n is an error.
+  if (n < 0) {
+    Rcpp::stop("rbeta_: n must be non-negative");
+  }
+  if (n == 0) {
+    return Rcpp::NumericVector(0);
   }
   
   // Convert R vectors to Armadillo vectors

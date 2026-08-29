@@ -143,7 +143,7 @@ dbkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, log = FALSE) {
   }
 
   # Call C++ implementation
-  .Call("_gkwdist_dbkw",
+  .shape_like(.Call("_gkwdist_dbkw",
     as.numeric(x),
     as.numeric(alpha),
     as.numeric(beta),
@@ -151,7 +151,7 @@ dbkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, log = FALSE) {
     as.numeric(delta),
     as.logical(log),
     PACKAGE = "gkwdist"
-  )
+  ), x)
 }
 
 
@@ -289,7 +289,7 @@ pbkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
   }
 
   # Call C++ implementation
-  .Call("_gkwdist_pbkw",
+  .shape_like(.Call("_gkwdist_pbkw",
     as.numeric(q),
     as.numeric(alpha),
     as.numeric(beta),
@@ -298,7 +298,7 @@ pbkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
     as.logical(lower.tail),
     as.logical(log.p),
     PACKAGE = "gkwdist"
-  )
+  ), q)
 }
 
 
@@ -457,7 +457,7 @@ qbkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
   }
 
   # Call C++ implementation
-  .Call("_gkwdist_qbkw",
+  .shape_like(.Call("_gkwdist_qbkw",
     as.numeric(p),
     as.numeric(alpha),
     as.numeric(beta),
@@ -466,7 +466,7 @@ qbkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
     as.logical(lower.tail),
     as.logical(log.p),
     PACKAGE = "gkwdist"
-  )
+  ), p)
 }
 
 
@@ -595,8 +595,10 @@ qbkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
 rbkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0) {
   # Input validation
   if (length(n) > 1) n <- length(n)
-  if (!is.numeric(n) || length(n) != 1 || n < 1) {
-    stop("'n' must be a positive integer")
+  # n = 0 is legal and yields numeric(0), as stats::rbeta(0, 2, 3) does.
+  # Negative and missing n stay errors, which is also what base R does.
+  if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 0) {
+    stop("'n' must be a single non-negative integer")
   }
   n <- as.integer(n)
 

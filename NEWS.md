@@ -53,6 +53,29 @@
   underflow before they happen -- and points callers who do not need that to
   `std::pow`.
 
+## Base R Contract
+
+* **`d*()`, `p*()` and `q*()` dropped `dim`, `dimnames` and `names`** (all seven
+  families): base R carries the first argument's attributes through to the
+  output, so code that indexes or plots the result by shape keeps working.
+
+  ```
+                                    before   after   stats::dbeta
+  dim(d(matrix(x, 2, 2), 2, 3))      NULL     2 2     2 2
+  names(d(c(a = .2, b = .5), 2, 3))  NULL     a b     a b
+  ```
+
+  The copy is conditional on the lengths agreeing, which is also what base R
+  does: once a recycled parameter makes the output longer than the first
+  argument, `dim()` is `NULL` in both. Values are bit-identical over the
+  238,140-value regression grid.
+
+* **`r*(0)` raised an error instead of returning `numeric(0)`** (all seven
+  families): `stats::rbeta(0, 2, 3)` is `numeric(0)`, and a generator that
+  errors instead breaks any loop or `replicate()` that reaches an empty case.
+  All seven now return `numeric(0)`. A negative or missing `n` is still an
+  error, as in base R.
+
 ## Critical Bug Fixes
 
 * **`pmc()` reached `R::pbeta` through `exp(lambda * log(x))`, which is not a
