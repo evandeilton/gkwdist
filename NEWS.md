@@ -2,6 +2,32 @@
 
 ## Critical Bug Fixes
 
+* **`llmc()` swapped `R::lbeta` for a difference of `lgamma` above
+  `gamma = 100` or `delta = 100`** (`bpmc.cpp`): that difference is the
+  cancellation `R::lbeta` exists to avoid. At `gamma = 1e12`, `delta = 2` the
+  two outer `lgamma` values are 2.66e13, where one ulp is 3.9e-03, so their
+  difference cannot resolve an answer of -82.2 any better than that:
+
+  ```
+  R::lbeta(1e12, 3)                          -82.1999161672287   (exact)
+  lgamma(1e12) + lgamma(3) - lgamma(1e12+3)  -82.203125          (off by 3.2e-03)
+  ```
+
+  `dmc()` and `llbeta()` always called `R::lbeta`, so `llmc()` also disagreed
+  with `-sum(dmc(..., log = TRUE))`, the objective it is supposed to be, and
+  with `llbeta()` at `lambda = 1`, where the two are the same model:
+
+  ```
+  llmc(c(1e12, 2, 1), 1 - 1e-12)   before -25.9371543959   exact -25.9378518132
+  llmc(c(2, 1e12, 1), 1e-12)       before -26.6306976341   exact -26.6310211159
+  ```
+
+  `R::lbeta` is now called at every `gamma` and `delta`. Over 110
+  likelihood cells the maximum error fell from 16283 ulps of the working
+  magnitude to 3.00, which is where the branch-free regimes already sat; 91
+  cells are bit-identical, 16 improved and 2 moved by at most 2 ulps.
+  `dmc()`, `pmc()`, `qmc()`, `rmc()`, `grmc()` and `hsmc()` are bit-identical.
+
 * **`dmc()` lost the density as `x` approached 1** (`bpmc.cpp`): it formed
   `x^lambda` in linear arithmetic and then took `log(1 - x^lambda)`. Doubles are
   spaced 2.2e-16 apart just below 1, so `1 - x^lambda` carries an absolute error

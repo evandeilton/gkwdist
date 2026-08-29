@@ -513,14 +513,20 @@ double llmc(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   
   int n = x.n_elem;
 
-  // Compute log(B(γ, δ+1)) stably
-  double log_B;
-  if (gamma > 100.0 || delta > 100.0) {
-    log_B = lgamma(gamma) + lgamma(delta + 1.0) - lgamma(gamma + delta + 1.0);
-  } else {
-    log_B = R::lbeta(gamma, delta + 1.0);
-  }
-  
+  // log B(γ, δ+1) via R::lbeta, at every γ and δ. The former code switched to
+  // lgamma(γ) + lgamma(δ+1) - lgamma(γ+δ+1) above 100, which is the very
+  // cancellation R::lbeta exists to avoid. At γ = 1e12, δ = 2 the two outer
+  // lgamma values are 2.66e13, where one ulp is 3.9e-03, so their difference
+  // cannot resolve an answer of -82.2 any better than that:
+  //
+  //   R::lbeta(1e12, 3)                       -82.1999161672287  (exact)
+  //   lgamma(1e12) + lgamma(3) - lgamma(1e12+3)  -82.203125      (off by 3.2e-03)
+  //
+  // dmc() and llbeta() always called R::lbeta, so llmc() also disagreed with
+  // -sum(dmc(..., log = TRUE)) and with llbeta() at λ = 1, where the two are
+  // the same model.
+  double log_B = R::lbeta(gamma, delta + 1.0);
+
   // Constant term: n * [log(λ) - log(B(γ, δ+1))]
   double log_lambda = safe_log(lambda);
   double const_term = n * (log_lambda - log_B);
