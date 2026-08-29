@@ -508,6 +508,36 @@
   Kolmogorov-Smirnov test against its own CDF, and that simulate-then-fit runs
   end to end. It fails 8 assertions against 1.1.5.
 
+* New `tests/testthat/test-argument-contract.R` covers the two surfaces the
+  suite had never touched: the roughly 218 documented `stop()` conditions in
+  the R wrappers, and non-finite input. It asserts every bound on every shape
+  parameter of every `d*`/`p*`/`q*`/`r*`, the `n` guard, the `log`,
+  `lower.tail` and `log.p` guards, and the `par`-length and `data` guards of
+  every `ll*`/`gr*`/`hs*`; then that `NA_real_`, `NaN`, `+Inf` and `-Inf` are
+  accepted without error, return one double per input element and leave their
+  finite neighbours untouched. 526 assertions, and it fails 11 of them against
+  1.1.5: `qkw(NA)` returned 1 there, and `q*(NaN)` collapsed to `NA` in six of
+  the seven families. The log-space quantile inversion in this release fixed
+  both, and this file pins them.
+
+  Six of its tests are marked `skip()`. They assert the behaviour the
+  functions *should* have for non-finite input -- `d*(NA)` giving `NA` rather
+  than `0`, `p*(+Inf)` giving `1` rather than `0`, `q*` outside `[0, 1]`
+  giving the `NaN` its own warning promises, and the `log = NA` and NA-shape
+  -parameter holes -- and will fail 86 assertions until that defect is fixed.
+  They are the specification, written down and executable; the fix removes
+  the `skip()` line and nothing else.
+
+* `tests/testthat/test-derivatives-validation.R` had 69 tests where its own
+  header promises 70: BKw was missing Hessian config 3. Restored.
+
+* `tests/testthat/test-loglikelihood-functions.R` asserted
+  `expect_true(result < 0)` on all seven families, commented "Log-likelihood
+  should be negative". The `ll*()` functions return the *negative* log
+  likelihood, whose sign is not a property of anything -- `llkw(c(1,1), .)` is
+  0 on a uniform sample and `llkw(c(2,2), .)` is +2.1. Each test now asserts
+  the defining identity, `ll*(par, data) == -sum(d*(data, ..., log = TRUE))`.
+
 # gkwdist 1.1.5
 
 ## Critical Bug Fixes
