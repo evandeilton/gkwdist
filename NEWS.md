@@ -335,6 +335,122 @@
   magnitude below the true double maximum. That headroom is the documented intent
   of the `DBL_MAX_SAFE` constant and is left in place.
 
+* **`gkwgetstartvalues()` never ran the multi-start it documents; `n_starts` was
+  inert** (`gkwinit.cpp`): the selection loop decided whether to optimize a
+  starting point by comparing the *raw* objective at that point against
+  `best_obj`, which after the first iteration already held an *optimized* value.
+  A start that was merely poor -- exactly the case multi-start exists to rescue --
+  was therefore discarded before Nelder-Mead ever saw it, and in practice only
+  the first of the candidates was optimized at all. Every value of `n_starts`
+  returned the same answer, bit for bit:
+
+  ```
+  set.seed(202); x <- rgkw(500, 5, 1.2, 3, 0.5, 2)
+  gkwgetstartvalues(x, "gkw", n_starts = k)   moment objective
+    k =   1                                     6.262579e-04
+    k =  10                                     6.262579e-04   (identical)
+    k = 200                                     6.262579e-04   (identical)
+  after
+    k =   1                                     1.008584e-07
+    k =  10                                     1.369536e-08
+    k = 200                                     1.037278e-10
+  ```
+
+  Every candidate is now optimized and only the optimized objectives are
+  compared. A second defect surfaced once the multi-start was live: Nelder-Mead
+  is unconstrained and can leave the family's parameter box, so a winner chosen
+  on its pre-clamp objective could be handed back worse than a rival that stayed
+  inside, making the returned error non-monotone in `n_starts`. Candidates are
+  now clipped to the box *before* being scored, so the objective that is compared
+  is the objective of the vector that is returned.
+
+  The practical failure was worse than a suboptimal start. The single optimized
+  path ran into a degenerate corner in which the numerical integral of the
+  density underflows, `moment_theoretical()` falls back to its closed-form
+  Kumaraswamy moment, and the optimizer is rewarded for parameters whose real
+  moments are nothing like the sample's. In 15 of 168 sweep cases the returned
+  vector scored the maximum possible objective of exactly 3.0 -- all five
+  relative moment errors equal to 1:
+
+  ```
+  set.seed(3050); x <- rgkw(50, 2, 3, 1.5, 2, 0.8)      sample mean 0.296299
+  before  alpha = 0.100000 (pinned at the lower bound), beta = 9.874503,
+          gamma = 0.574504, delta = 0.131984, lambda = 1.276909
+          theoretical mean 1.401418e-06,  objective 3.000000
+  after   alpha = 0.773802, beta = 3.322900, gamma = 3.662037,
+          delta = 0.670337, lambda = 1.437505,  objective 4.830e-07
+  ```
+
+  Downstream the damage reached the fits themselves. Starting `optim()` from that
+  corner, 8 of 10 GKw samples of size 500 converged to a *positive* negative
+  log-likelihood -- around +4100 to +4900 where the correct region is near -300:
+
+  ```
+                          nll from old start   nll from new start
+    gkw seed 1                    4117.357            -295.479
+    gkw seed 4                    4829.810            -297.731
+    gkw seed 10                   4855.630            -284.388
+  ```
+
+  Verified over 168 cases (seven families x n in {50, 200, 1000} x 8 seeds) at
+  the default `n_starts = 5`: 77 improved, 91 unchanged, none worse, worst ratio
+  exactly 1.000000. The 15 cases at the maximum objective of 3.0 fell to none,
+  and the largest objective over the sweep fell from 3.0 to 5.876e-04. Over 70
+  MLE fits driven from the two sets of starting values, the largest improvement
+  in the attained negative log-likelihood was 5230.4 nats and the largest
+  regression 0.09 nats, on a `kkw` sample that settled in a neighbouring local
+  optimum; mean relative parameter error fell from 0.507 to 0.409. The full test
+  suite is unchanged at 0 failures.
+
+  Cost: `n_starts` now buys what it claims, so it also costs what it claims. At
+  the default `n_starts = 5` a GKw call goes from 0.058s to 0.27s (n = 300); at
+  `n_starts = 1000`, from 0.09s to 50s. The default is unchanged. Four fixed,
+  family-specific starting points are always used, so `n_starts` below 4 still
+  behaves as 4; this is now documented rather than silently true.
+
+* **`gkwgetstartvalues()` truncated out-of-support data without saying so**
+  (`gkwinit.cpp`): every observation was clamped into `[1e-10, 1 - 1e-10]` in
+  silence. Truncation moves every sample moment and therefore every estimate the
+  function returns, and its commonest cause -- data on a percentage or 0-100
+  scale -- is exactly the case a caller needs to be told about. On that input the
+  function did not fail; it answered, and the answer was both wrong and
+  unremarkable-looking:
+
+  ```
+  set.seed(1); y <- rkw(300, 2, 3)
+  gkwgetstartvalues(y, "kw")                alpha 2.137549   beta 3.506511
+  gkwgetstartvalues(c(y, 5, -3), "kw")      alpha 2.047567   beta 3.251306
+  gkwgetstartvalues(y * 100, "kw")          alpha 50.000000  beta 50.000000
+  ```
+
+  The last line is the whole problem in one row: a sample handed over on a 0-100
+  scale came back with both parameters pinned at the upper edge of the parameter
+  box, with nothing to distinguish it from a fit. `tryCatch(..., warning = )`
+  caught no condition in any of the three calls.
+
+  Observations outside the open interval `(0,1)` -- exact 0 and exact 1 included,
+  matching the support `ll*()` enforces since the fix earlier in this release --
+  now raise a warning naming how many were truncated and the range they spanned:
+
+  ```
+  gkwgetstartvalues: 300 of 300 observations lie outside the open interval (0,1)
+  (observed range [6.6169, 89.7703]) and were clamped to it; the estimates below
+  are those of the clamped sample. Data on a percentage or 0-100 scale must be
+  rescaled before use.
+  ```
+
+  The clamp itself is kept, so a single boundary observation still does not abort
+  a fit and no existing call changes its return value; only the silence is
+  removed. `NA` and non-finite values continue to be dropped without a warning,
+  which the `@param x` entry now states.
+
+  Verified: the warning fires on `c(y, 5, -3)`, on a lone exact 0, on a lone
+  exact 1 and on `y * 100`, reporting 2, 1, 1 and 300 offenders respectively with
+  the correct observed range in each; it does not fire on the clean sample, nor
+  on samples carrying `NA` or `Inf`. Every returned vector is unchanged. The full
+  test suite, whose data are all strictly inside the support, still reports 0
+  warnings.
+
 ## Documentation Fixes
 
 * **Editorial hedging in the rendered help pages** (all seven family files):
@@ -352,6 +468,38 @@
 
   Documentation only; no executable code changes and no numerical result is
   affected.
+
+* **`gkwgetstartvalues()` is deterministic, and now says so** (`gkwinit.cpp`):
+  the help page described "multiple random starting points" without stating that
+  the randomness is internal and fixed. The extra starting points come from a
+  generator seeded with a constant, so `set.seed()` has no effect on the returned
+  value and `.Random.seed` is neither read nor advanced:
+
+  ```
+  set.seed(1);    a <- gkwgetstartvalues(x, "gkw", 20)
+  set.seed(9999); b <- gkwgetstartvalues(x, "gkw", 20)
+  identical(a, b)                                        TRUE
+  .Random.seed unchanged across the call                 TRUE
+  the caller's next runif(1) unchanged                   TRUE
+  ```
+
+  This is deliberate and is being documented, not changed. The function is a
+  method-of-moments estimator whose output seeds optimisers elsewhere in a fit;
+  two calls on the same data must agree, or every downstream fit would inherit a
+  dependence on the ambient seed and would silently consume draws the caller did
+  not ask to spend. The lever for a wider search is `n_starts`, which since the
+  fix above is both effective and monotone -- more starts can only lower the
+  objective -- so a seed argument would add a lottery where a monotone control
+  already exists. A `Determinism` paragraph in `Details` now states all three
+  facts, the `@examples` block demonstrates them, and a comment at the generator
+  in `gkwinit.cpp` records the intent so the constant seed is not mistaken for an
+  oversight.
+
+  The `set.seed(123)` opening the example is correct and is kept: it makes the
+  `rbeta()` sample on the next line reproducible. Its comment now says which of
+  the two calls it governs.
+
+  Documentation only; no numerical result changes.
 
 * **Confidence-region examples were undrawable where the observed information
   was not positive definite** (29 `@examples` blocks across the seven families):
@@ -433,6 +581,13 @@
   against closed-form inversions, checks that they stay inside `(0,1)`, that
   `p(q(u))` recovers `u`, that the boundary conventions are unchanged and that
   the nesting identities hold. It fails 28 assertions against 1.1.5.
+
+* New `tests/testthat/test-startvalues-contract.R` pins the three contracts
+  `gkwgetstartvalues()` advertises: that `n_starts` widens the search and never
+  worsens the fit, that the estimate reproduces the first sample moment, that
+  the answer is deterministic and leaves `.Random.seed` alone, and that
+  truncating out-of-support data raises a warning naming how many observations
+  were moved. It fails 25 assertions against 1.1.5 and passes 54 on this branch.
 
 * `test-mle-performance.R` compared each scenario's mean parameter error over
   its own converged subset, which penalises the more robust scenario: the

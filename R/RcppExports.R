@@ -150,7 +150,13 @@
 #' numerical integration.
 #'
 #' @param x Numeric vector of observations. All values must be in the open interval (0,1).
-#'   Values outside this range will be automatically truncated to avoid numerical issues.
+#'   Values outside it -- including exact 0 and exact 1 -- are truncated to the interval
+#'   so that a single boundary observation does not abort a fit, and a warning naming the
+#'   number of truncated observations and their observed range is issued. Truncation
+#'   shifts every sample moment and therefore every estimate returned, so treat the
+#'   warning as a signal to check the scale of the data rather than as noise: values such
+#'   as 5 or -3 usually mean a percentage or 0-100 scale that has to be rescaled first.
+#'   \code{NA} and non-finite values are dropped without a warning.
 #' @param family Character string specifying the distribution family. Valid options are:
 #'   \code{"gkw"} (Generalized Kumaraswamy - 5 parameters),
 #'   \code{"bkw"} (Beta-Kumaraswamy - 4 parameters),
@@ -161,8 +167,10 @@
 #'   \code{"beta"} (Beta - 2 parameters).
 #'   The string is case-insensitive. Default is \code{"gkw"}.
 #' @param n_starts Integer specifying the number of different initial parameter values
-#'   to try during optimization. More starting points increase the probability of finding
-#'   the global optimum at the cost of longer computation time. Default is 5.
+#'   to try during optimization. Every starting point is optimized and the candidate with
+#'   the smallest objective is returned, so more starting points can only improve the fit,
+#'   at a cost that grows linearly in \code{n_starts}. Default is 5. Four fixed,
+#'   family-specific starting points are always used, so values below 4 behave as 4.
 #'
 #' @return Named numeric vector containing the estimated parameters for the specified
 #'   distribution family. Parameter names correspond to the distribution specification.
@@ -176,9 +184,26 @@
 #'
 #' Key implementation features: logarithmic calculations for numerical stability,
 #' adaptive numerical integration using Simpson's rule with fallback to trapezoidal rule,
-#' multiple random starting points to avoid local minima, decreasing weights for
+#' multiple starting points to avoid local minima, decreasing weights for
 #' higher-order moments (1.0, 0.8, 0.6, 0.4, 0.2), and automatic parameter constraint
 #' enforcement.
+#'
+#' Multiple starts: the grid of starting points is built from four fixed, family-specific
+#' points -- one of them derived from the sample moments -- plus \code{n_starts - 4}
+#' further points drawn over the family's parameter box. Nelder-Mead is run from every
+#' point in the grid, each result is clipped to the parameter box, and the clipped
+#' candidate with the smallest objective is returned. Because the candidate set grows
+#' with \code{n_starts}, the returned objective is non-increasing in \code{n_starts}.
+#'
+#' Determinism: the extra starting points are drawn from a generator with a fixed
+#' internal seed, deliberately not from R's random number stream. The function is
+#' therefore deterministic -- two calls with the same \code{x}, \code{family} and
+#' \code{n_starts} return the same vector, so a fit seeded by these values is
+#' reproducible without any further precaution. Two consequences are worth stating
+#' explicitly: \code{\link[base]{set.seed}} has no effect on \code{gkwgetstartvalues},
+#' and the function neither reads nor advances \code{.Random.seed}, so it cannot
+#' perturb simulations running alongside it. To widen the search, raise
+#' \code{n_starts} rather than looking for a seed argument.
 #'
 #' Parameter Constraints:
 #' All parameters are constrained to positive values. Additionally, family-specific
@@ -186,12 +211,15 @@
 #' GKw-related families or (0.1, 50.0) for Beta, delta in (0.01, 10.0), and lambda in
 #' (0.1, 20.0).
 #'
-#' The function will issue warnings for empty input vectors, sample sizes less than 10
-#' (unreliable estimation), or failure to find valid parameter estimates (returns defaults).
+#' The function will issue warnings for empty input vectors, observations outside the
+#' open interval (0,1) (truncated to it), sample sizes less than 10 (unreliable
+#' estimation), or failure to find valid parameter estimates (returns defaults).
 #'
 #' @examples
 #' \donttest{
-#' # Generate sample data from Beta distribution
+#' # Generate sample data from a Beta distribution. set.seed() here makes the
+#' # SAMPLE reproducible; gkwgetstartvalues() itself is deterministic and is
+#' # unaffected by the seed (see the Determinism note in Details).
 #' set.seed(123)
 #' x <- rbeta(100, shape1 = 2, shape2 = 3)
 #'
@@ -206,6 +234,17 @@
 #' # Estimate GKw parameters with more starting points
 #' params_gkw <- gkwgetstartvalues(x, family = "gkw", n_starts = 10)
 #' print(params_gkw)
+#'
+#' # Deterministic: the seed in force does not change the answer, and the
+#' # function does not consume draws from R's stream.
+#' set.seed(1)
+#' identical(gkwgetstartvalues(x, family = "kw"), params_kw)
+#' set.seed(9999)
+#' identical(gkwgetstartvalues(x, family = "kw"), params_kw)
+#'
+#' before <- .Random.seed
+#' invisible(gkwgetstartvalues(x, family = "kw"))
+#' identical(before, .Random.seed)
 #' }
 #'
 #' @references
