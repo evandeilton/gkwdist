@@ -304,8 +304,10 @@ Rcpp::NumericVector pmc(
     // it. Below the crossover the direct form is already the one holding the
     // small quantity, so it is left exactly as it was: the lower tail never
     // changes, and neither does any upper tail with x^lambda <= 1/2.
+    // LOG1MEXP_CROSSOVER is -log(2), the same crossover gkw_log1mexp() uses to
+    // decide which of x^lambda and 1 - x^lambda a double can hold.
     double log_xpow = ll * std::log(xx);
-    if (!lower_tail && log_xpow > -M_LN2) {
+    if (!lower_tail && log_xpow > LOG1MEXP_CROSSOVER) {
       out(i) = R::pbeta(-std::expm1(log_xpow), dd + 1.0, gg, /*lower*/ 1, log_p);
     } else {
       out(i) = R::pbeta(std::exp(log_xpow), gg, dd + 1.0, lower_tail, log_p);
