@@ -115,9 +115,6 @@ FAMILIES <- list(
   )
 )
 
-# The two message variants: gkw/bkw/kkw/mc/kw say "'alpha' must be positive",
-# ekw and beta_ say "'alpha' must be positive (alpha > 0)". Matching the common
-# prefix keeps one expectation for both.
 bound_msg <- function(par, kind) {
   sprintf("'%s' must be %s", par, if (kind == "pos") "positive" else "non-negative")
 }

@@ -57,8 +57,10 @@
 #'   (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 #'   rule applied to the arguments (\code{x}, \code{gamma}, \code{delta}).
 #'   Returns \code{0} (or \code{-Inf} if \code{log = TRUE}) for \code{x}
-#'   outside the interval (0, 1), or \code{NaN} if parameters are invalid
-#'   (e.g., \code{gamma <= 0}, \code{delta < 0}).
+#'   outside the interval (0, 1). An out-of-bound or missing parameter is an
+#'   error, not a return value: the wrapper stops with a message naming the
+#'   parameter. An infinite parameter is not currently intercepted there and
+#'   reaches the C++ layer, which treats it as invalid.
 #'
 #' @details
 #' The probability density function (PDF) calculated by this function corresponds
@@ -208,8 +210,10 @@ dbeta_ <- function(x, gamma = 1, delta = 0, log = FALSE) {
 #'   is determined by the recycling rule applied to the arguments (\code{q},
 #'   \code{gamma}, \code{delta}). Returns \code{0} (or \code{-Inf} if
 #'   \code{log.p = TRUE}) for \code{q <= 0} and \code{1} (or \code{0} if
-#'   \code{log.p = TRUE}) for \code{q >= 1}. Returns \code{NaN} for invalid
-#'   parameters.
+#'   \code{log.p = TRUE}) for \code{q >= 1}. An out-of-bound or missing parameter is an
+#'   error, not a return value: the wrapper stops with a message naming the
+#'   parameter. An infinite parameter is not currently intercepted there and
+#'   reaches the C++ layer, which treats it as invalid.
 #'
 #' @details
 #' This function computes the CDF of a Beta distribution with parameters
@@ -361,8 +365,10 @@ pbeta_ <- function(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #'     \item \code{1} for \code{p = 1} (or \code{p = 0} if \code{log.p = TRUE},
 #'           when \code{lower.tail = TRUE}).
 #'     \item \code{NaN} for \code{p < 0} or \code{p > 1} (or corresponding log scale).
-#'     \item \code{NaN} for invalid parameters (e.g., \code{gamma <= 0},
-#'           \code{delta < 0}).
+#'     \item An out-of-bound or missing parameter is an error, not a
+#'       return value: the wrapper stops with a message naming the parameter.
+#'       An infinite parameter is not currently intercepted there and reaches
+#'       the C++ layer, which treats it as invalid.
 #'   }
 #'   Boundary return values are adjusted accordingly for \code{lower.tail = FALSE}.
 #'
@@ -512,8 +518,10 @@ qbeta_ <- function(p, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #' @return A numeric vector of length \code{n} containing random deviates from the
 #'   Beta(\eqn{\gamma, \delta+1}) distribution, with values in (0, 1). The length
 #'   of the result is determined by \code{n} and the recycling rule applied to
-#'   the parameters (\code{gamma}, \code{delta}). Returns \code{NaN} if parameters
-#'   are invalid (e.g., \code{gamma <= 0}, \code{delta < 0}).
+#'   the parameters (\code{gamma}, \code{delta}). An out-of-bound or missing parameter is an
+#'   error, not a return value: the wrapper stops with a message naming the
+#'   parameter. An infinite parameter is not currently intercepted there and
+#'   reaches the C++ layer, which treats it as invalid.
 #'
 #' @details
 #' This function generates samples from a Beta distribution with parameters
@@ -963,6 +971,8 @@ llbeta <- function(par, data) {
   if (length(data) < 1) {
     stop("'data' must have at least one observation")
   }
+  # ll*() returns +Inf for data outside the open support -- an infinite objective
+  # with no gradient direction, which an optimiser can only sit on.
   if (any(data <= 0 | data >= 1, na.rm = TRUE)) {
     warning("'data' contains values outside (0, 1)")
   }

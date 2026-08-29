@@ -40,9 +40,10 @@
 #'   (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 #'   rule applied to the arguments (\code{x}, \code{alpha}, \code{beta},
 #'   \code{lambda}). Returns \code{0} (or \code{-Inf} if
-#'   \code{log = TRUE}) for \code{x} outside the interval (0, 1), or
-#'   \code{NaN} if parameters are invalid (e.g., \code{alpha <= 0},
-#'   \code{beta <= 0}, \code{lambda <= 0}).
+#'   \code{log = TRUE}) for \code{x} outside the interval (0, 1). An out-of-bound or missing parameter is an
+#'   error, not a return value: the wrapper stops with a message naming the
+#'   parameter. An infinite parameter is not currently intercepted there and
+#'   reaches the C++ layer, which treats it as invalid.
 #'
 #' @details
 #' The probability density function (PDF) of the Exponentiated Kumaraswamy (EKw)
@@ -171,8 +172,10 @@ dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
 #'   is determined by the recycling rule applied to the arguments (\code{q},
 #'   \code{alpha}, \code{beta}, \code{lambda}). Returns \code{0} (or \code{-Inf}
 #'   if \code{log.p = TRUE}) for \code{q <= 0} and \code{1} (or \code{0} if
-#'   \code{log.p = TRUE}) for \code{q >= 1}. Returns \code{NaN} for invalid
-#'   parameters.
+#'   \code{log.p = TRUE}) for \code{q >= 1}. An out-of-bound or missing parameter is an
+#'   error, not a return value: the wrapper stops with a message naming the
+#'   parameter. An infinite parameter is not currently intercepted there and
+#'   reaches the C++ layer, which treats it as invalid.
 #'
 #' @details
 #' The Exponentiated Kumaraswamy (EKw) distribution is a special case of the
@@ -325,8 +328,10 @@ pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #'     \item \code{1} for \code{p = 1} (or \code{p = 0} if \code{log.p = TRUE},
 #'           when \code{lower.tail = TRUE}).
 #'     \item \code{NaN} for \code{p < 0} or \code{p > 1} (or corresponding log scale).
-#'     \item \code{NaN} for invalid parameters (e.g., \code{alpha <= 0},
-#'           \code{beta <= 0}, \code{lambda <= 0}).
+#'     \item An out-of-bound or missing parameter is an error, not a
+#'       return value: the wrapper stops with a message naming the parameter.
+#'       An infinite parameter is not currently intercepted there and reaches
+#'       the C++ layer, which treats it as invalid.
 #'   }
 #'   Boundary return values are adjusted accordingly for \code{lower.tail = FALSE}.
 #'
@@ -465,8 +470,10 @@ qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #' @return A vector of length \code{n} containing random deviates from the EKw
 #'   distribution. The length of the result is determined by \code{n} and the
 #'   recycling rule applied to the parameters (\code{alpha}, \code{beta},
-#'   \code{lambda}). Returns \code{NaN} if parameters
-#'   are invalid (e.g., \code{alpha <= 0}, \code{beta <= 0}, \code{lambda <= 0}).
+#'   \code{lambda}). An out-of-bound or missing parameter is an
+#'   error, not a return value: the wrapper stops with a message naming the
+#'   parameter. An infinite parameter is not currently intercepted there and
+#'   reaches the C++ layer, which treats it as invalid.
 #'
 #' @details
 #' The generation method uses the inverse transform (quantile) method.
@@ -1059,6 +1066,8 @@ llekw <- function(par, data) {
   if (length(data) < 1) {
     stop("'data' must have at least one observation")
   }
+  # ll*() returns +Inf for data outside the open support -- an infinite objective
+  # with no gradient direction, which an optimiser can only sit on.
   if (any(data <= 0 | data >= 1, na.rm = TRUE)) {
     warning("'data' contains values outside (0, 1)")
   }
