@@ -326,7 +326,13 @@ Rcpp::NumericVector pmc(
     if (!lower_tail && log_xpow > LOG1MEXP_CROSSOVER) {
       out(i) = R::pbeta(-std::expm1(log_xpow), dd + 1.0, gg, /*lower*/ 1, log_p);
     } else {
-      out(i) = R::pbeta(std::exp(log_xpow), gg, dd + 1.0, lower_tail, log_p);
+      // std::pow rather than exp(log_xpow): C99 requires pow(x, 1.0) == x
+      // exactly, so pmc(x, g, d, 1) is bit-for-bit R::pbeta(x, g, d+1) on every
+      // platform. The round trip through exp(1 * log(x)) is not: it already
+      // misses on 2 of 9 ordinary x under glibc, and misses on a different
+      // pair under the macOS ARM64 libm. std::pow is also the more accurate
+      // form -- see the note on safe_pow() in utils.h.
+      out(i) = R::pbeta(std::pow(xx, ll), gg, dd + 1.0, lower_tail, log_p);
     }
   }
   

@@ -55,6 +55,27 @@
 
 ## Critical Bug Fixes
 
+* **`pmc()` reached `R::pbeta` through `exp(lambda * log(x))`, which is not a
+  round trip** (`bpmc.cpp`): for `lambda = 1` the Mc family is the Beta family,
+  and `pmc(x, gamma, delta, 1)` should be `R::pbeta(x, gamma, delta+1)` exactly.
+  It was not: `exp(1 * log(x))` fails to return `x` for 2 of 9 ordinary values
+  under glibc, and for a different pair under the macOS ARM64 libm, which is
+  where CI caught it.
+
+  `std::pow` is used instead. C99 requires `pow(x, 1.0) == x`, so the identity
+  now holds bit-for-bit on every platform, and the form is also the more
+  accurate one for every other `lambda`. Against a 60-digit reference over 1,030
+  grid points:
+
+  ```
+  lambda    exp(l*log x)    std::pow     improved   worse
+  1.5       1.19e-14        1.67e-16     403        3
+  0.1       6.57e-16        1.64e-16      56        0
+  2.5       1.57e-14        1.11e-16     527        0
+  ```
+
+  Only `pmc` moves; 1,093 of 238,140 grid values, all in `p mc`.
+
 * **The upper tail of `pgkw()` and `pbkw()` collapsed to exactly zero**
   (`gkw.cpp`, `bkw.cpp`): the CDF batch moved `lower.tail` and `log.p` onto
   `R::pbeta` instead of applying them afterwards, which fixed the lower tail. A
