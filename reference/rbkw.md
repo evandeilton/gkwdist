@@ -74,10 +74,13 @@ as needed.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 Devroye, L. (1986). *Non-Uniform Random Variate Generation*.
 Springer-Verlag. (General methods for random variate generation).
@@ -91,6 +94,14 @@ Springer-Verlag. (General methods for random variate generation).
 [`qbkw`](https://evandeilton.github.io/gkwdist/reference/qbkw.md) (other
 BKw functions), [`rbeta`](https://rdrr.io/r/stats/Beta.html)
 
+Other random generation functions:
+[`rbeta_()`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md),
+[`rekw()`](https://evandeilton.github.io/gkwdist/reference/rekw.md),
+[`rgkw()`](https://evandeilton.github.io/gkwdist/reference/rgkw.md),
+[`rkkw()`](https://evandeilton.github.io/gkwdist/reference/rkkw.md),
+[`rkw()`](https://evandeilton.github.io/gkwdist/reference/rkw.md),
+[`rmc()`](https://evandeilton.github.io/gkwdist/reference/rmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -98,7 +109,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 set.seed(2026) # for reproducibility
 
 # Generate 1000 random values from a specific BKw distribution
@@ -162,5 +172,4 @@ print("Summary stats for rgkw(lambda=1) sample:")
 print(summary(x_sample_gkw)) # Should be similar
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #> 0.04279 0.36298 0.52400 0.51632 0.67744 0.98445 
-# }
 ```

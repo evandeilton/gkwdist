@@ -71,10 +71,12 @@ evaluated at \\\gamma=1, \delta=0, \lambda=1\\.
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type
 distribution with some tractability advantages. *Statistical
 Methodology*, *6*(1), 70-81.
+[doi:10.1016/j.stamet.2008.04.001](https://doi.org/10.1016/j.stamet.2008.04.001)
 
 (Note: Specific Hessian formulas might be derived or sourced from
 additional references).
@@ -91,6 +93,14 @@ additional references).
 for Kw), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`hessian`](https://rdrr.io/pkg/numDeriv/man/hessian.html) (for
 numerical Hessian comparison).
+
+Other Hessian functions:
+[`hsbeta()`](https://evandeilton.github.io/gkwdist/reference/hsbeta.md),
+[`hsbkw()`](https://evandeilton.github.io/gkwdist/reference/hsbkw.md),
+[`hsekw()`](https://evandeilton.github.io/gkwdist/reference/hsekw.md),
+[`hsgkw()`](https://evandeilton.github.io/gkwdist/reference/hsgkw.md),
+[`hskkw()`](https://evandeilton.github.io/gkwdist/reference/hskkw.md),
+[`hsmc()`](https://evandeilton.github.io/gkwdist/reference/hsmc.md)
 
 ## Author
 

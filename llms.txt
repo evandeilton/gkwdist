@@ -862,6 +862,14 @@ details.
 
 # Package index
 
+## Package Overview
+
+Scope, the nested family hierarchy, and worked estimation workflows
+
+- [`gkwdist`](https://evandeilton.github.io/gkwdist/reference/gkwdist-package.md)
+  [`gkwdist-package`](https://evandeilton.github.io/gkwdist/reference/gkwdist-package.md)
+  : Generalized Kumaraswamy Distribution Family
+
 ## Utility Functions
 
 Helper functions for parameter initialization
@@ -876,11 +884,12 @@ Density, CDF, quantile, and random generation (α, β, γ, δ, λ)
 - [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md) :
   Density of the Generalized Kumaraswamy Distribution
 - [`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md) :
-  Generalized Kumaraswamy Distribution CDF
+  Cumulative Distribution Function (CDF) of the Generalized Kumaraswamy
+  Distribution
 - [`qgkw()`](https://evandeilton.github.io/gkwdist/reference/qgkw.md) :
-  Generalized Kumaraswamy Distribution Quantile Function
+  Quantile Function of the Generalized Kumaraswamy Distribution
 - [`rgkw()`](https://evandeilton.github.io/gkwdist/reference/rgkw.md) :
-  Generalized Kumaraswamy Distribution Random Generation
+  Random Number Generation for the Generalized Kumaraswamy Distribution
 
 ## Generalized Kumaraswamy (GKw) - Inference
 
@@ -896,7 +905,8 @@ Log-likelihood, gradient, and Hessian
 
 ## Beta-Kumaraswamy (BKw) - Distribution
 
-Density, CDF, quantile, and random generation (α, β, γ, δ)
+Density, CDF, quantile, and random generation (α, β, γ, δ) — GKw with λ
+= 1
 
 - [`dbkw()`](https://evandeilton.github.io/gkwdist/reference/dbkw.md) :
   Density of the Beta-Kumaraswamy (BKw) Distribution
@@ -913,7 +923,7 @@ Density, CDF, quantile, and random generation (α, β, γ, δ)
 Log-likelihood, gradient, and Hessian
 
 - [`llbkw()`](https://evandeilton.github.io/gkwdist/reference/llbkw.md)
-  : Negative Log-Likelihood for Beta-Kumaraswamy (BKw) Distribution
+  : Negative Log-Likelihood for the Beta-Kumaraswamy (BKw) Distribution
 - [`grbkw()`](https://evandeilton.github.io/gkwdist/reference/grbkw.md)
   : Gradient of the Negative Log-Likelihood for the BKw Distribution
 - [`hsbkw()`](https://evandeilton.github.io/gkwdist/reference/hsbkw.md)
@@ -922,32 +932,34 @@ Log-likelihood, gradient, and Hessian
 
 ## Kumaraswamy-Kumaraswamy (KKw) - Distribution
 
-Density, CDF, quantile, and random generation (α, β, δ, λ)
+Density, CDF, quantile, and random generation (α, β, δ, λ) — GKw with γ
+= 1
 
 - [`dkkw()`](https://evandeilton.github.io/gkwdist/reference/dkkw.md) :
-  Density of the Kumaraswamy-Kumaraswamy (kkw) Distribution
+  Density of the Kumaraswamy-Kumaraswamy (KKw) Distribution
 - [`pkkw()`](https://evandeilton.github.io/gkwdist/reference/pkkw.md) :
-  Cumulative Distribution Function (CDF) of the kkw Distribution
+  Cumulative Distribution Function (CDF) of the KKw Distribution
 - [`qkkw()`](https://evandeilton.github.io/gkwdist/reference/qkkw.md) :
-  Quantile Function of the Kumaraswamy-Kumaraswamy (kkw) Distribution
+  Quantile Function of the Kumaraswamy-Kumaraswamy (KKw) Distribution
 - [`rkkw()`](https://evandeilton.github.io/gkwdist/reference/rkkw.md) :
-  Random Number Generation for the kkw Distribution
+  Random Number Generation for the KKw Distribution
 
 ## Kumaraswamy-Kumaraswamy (KKw) - Inference
 
 Log-likelihood, gradient, and Hessian
 
 - [`llkkw()`](https://evandeilton.github.io/gkwdist/reference/llkkw.md)
-  : Negative Log-Likelihood for the kkw Distribution
+  : Negative Log-Likelihood for the KKw Distribution
 - [`grkkw()`](https://evandeilton.github.io/gkwdist/reference/grkkw.md)
-  : Gradient of the Negative Log-Likelihood for the kkw Distribution
+  : Gradient of the Negative Log-Likelihood for the KKw Distribution
 - [`hskkw()`](https://evandeilton.github.io/gkwdist/reference/hskkw.md)
-  : Hessian Matrix of the Negative Log-Likelihood for the kkw
+  : Hessian Matrix of the Negative Log-Likelihood for the KKw
   Distribution
 
 ## Exponentiated Kumaraswamy (EKw) - Distribution
 
-Density, CDF, quantile, and random generation (α, β, λ)
+Density, CDF, quantile, and random generation (α, β, λ) — GKw with γ =
+1, δ = 0
 
 - [`dekw()`](https://evandeilton.github.io/gkwdist/reference/dekw.md) :
   Density of the Exponentiated Kumaraswamy (EKw) Distribution
@@ -974,12 +986,14 @@ Log-likelihood, gradient, and Hessian
 
 ## McDonald (MC) - Distribution
 
-Density, CDF, quantile, and random generation (γ, δ, λ)
+Density, CDF, quantile, and random generation (γ, δ, λ) — GKw with α = β
+= 1
 
 - [`dmc()`](https://evandeilton.github.io/gkwdist/reference/dmc.md) :
-  Density of the McDonald (Mc)/Beta Power Distribution Distribution
+  Density of the McDonald (Mc)/Beta Power Distribution
 - [`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md) :
-  CDF of the McDonald (Mc)/Beta Power Distribution
+  Cumulative Distribution Function (CDF) of the McDonald (Mc)/Beta Power
+  Distribution
 - [`qmc()`](https://evandeilton.github.io/gkwdist/reference/qmc.md) :
   Quantile Function of the McDonald (Mc)/Beta Power Distribution
 - [`rmc()`](https://evandeilton.github.io/gkwdist/reference/rmc.md) :
@@ -1000,7 +1014,8 @@ Log-likelihood, gradient, and Hessian
 
 ## Kumaraswamy (Kw) - Distribution
 
-Density, CDF, quantile, and random generation (α, β)
+Density, CDF, quantile, and random generation (α, β) — GKw with γ = 1, δ
+= 0, λ = 1
 
 - [`dkw()`](https://evandeilton.github.io/gkwdist/reference/dkw.md) :
   Density of the Kumaraswamy (Kw) Distribution
@@ -1017,7 +1032,7 @@ Density, CDF, quantile, and random generation (α, β)
 Log-likelihood, gradient, and Hessian
 
 - [`llkw()`](https://evandeilton.github.io/gkwdist/reference/llkw.md) :
-  Negative Log-Likelihood of the Kumaraswamy (Kw) Distribution
+  Negative Log-Likelihood for the Kumaraswamy (Kw) Distribution
 - [`grkw()`](https://evandeilton.github.io/gkwdist/reference/grkw.md) :
   Gradient of the Negative Log-Likelihood for the Kumaraswamy (Kw)
   Distribution
@@ -1026,17 +1041,19 @@ Log-likelihood, gradient, and Hessian
 
 ## Beta - Distribution
 
-Density, CDF, quantile, and random generation (γ, δ)
+Density, CDF, quantile, and random generation (γ, δ) — GKw with α = β =
+λ = 1; Beta(γ, δ+1)
 
 - [`dbeta_()`](https://evandeilton.github.io/gkwdist/reference/dbeta_.md)
   : Density of the Beta Distribution (gamma, delta+1 Parameterization)
 - [`pbeta_()`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md)
-  : CDF of the Beta Distribution (gamma, delta+1 Parameterization)
+  : Cumulative Distribution Function (CDF) of the Beta Distribution
+  (gamma, delta+1 Parameterization)
 - [`qbeta_()`](https://evandeilton.github.io/gkwdist/reference/qbeta_.md)
   : Quantile Function of the Beta Distribution (gamma, delta+1
   Parameterization)
 - [`rbeta_()`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md)
-  : Random Generation for the Beta Distribution (gamma, delta+1
+  : Random Number Generation for the Beta Distribution (gamma, delta+1
   Parameterization)
 
 ## Beta - Inference
@@ -1058,7 +1075,7 @@ Log-likelihood, gradient, and Hessian
 ### All vignettes
 
 - [Introduction to gkwdist: Generalized Kumaraswamy Distribution
-  Family](https://evandeilton.github.io/gkwdist/articles/into-gkwdist.md):
+  Family](https://evandeilton.github.io/gkwdist/articles/gkwdist.md):
 - [On the Statistical Properties and Computational Inference of the
   Generalized Kumaraswamy Distribution
   Family](https://evandeilton.github.io/gkwdist/articles/theory-gkwdist.md):

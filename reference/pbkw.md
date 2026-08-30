@@ -88,11 +88,14 @@ q^\alpha)^\beta}(\gamma, \delta+1) \$\$ This is evaluated using the
 ## References
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. *Journal of Statistical Computation and Simulation*
+distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
@@ -103,6 +106,14 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`rbkw`](https://evandeilton.github.io/gkwdist/reference/rbkw.md) (other
 BKw functions), [`pbeta`](https://rdrr.io/r/stats/Beta.html)
 
+Other cumulative distribution functions:
+[`pbeta_()`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
+[`pekw()`](https://evandeilton.github.io/gkwdist/reference/pekw.md),
+[`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md),
+[`pkkw()`](https://evandeilton.github.io/gkwdist/reference/pkkw.md),
+[`pkw()`](https://evandeilton.github.io/gkwdist/reference/pkw.md),
+[`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -110,7 +121,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -159,5 +169,4 @@ plot(curve_q, curve_p,
   xlab = "q", ylab = "F(q)", col = "blue", ylim = c(0, 1)
 )
 
-# }
 ```

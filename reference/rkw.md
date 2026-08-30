@@ -56,10 +56,12 @@ evaluated at \\\gamma=1, \delta=0, \lambda=1\\.
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type
 distribution with some tractability advantages. *Statistical
 Methodology*, *6*(1), 70-81.
+[doi:10.1016/j.stamet.2008.04.001](https://doi.org/10.1016/j.stamet.2008.04.001)
 
 Devroye, L. (1986). *Non-Uniform Random Variate Generation*.
 Springer-Verlag. (General methods for random variate generation).
@@ -73,6 +75,14 @@ Springer-Verlag. (General methods for random variate generation).
 [`qkw`](https://evandeilton.github.io/gkwdist/reference/qkw.md) (other
 Kw functions), [`runif`](https://rdrr.io/r/stats/Uniform.html)
 
+Other random generation functions:
+[`rbeta_()`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md),
+[`rbkw()`](https://evandeilton.github.io/gkwdist/reference/rbkw.md),
+[`rekw()`](https://evandeilton.github.io/gkwdist/reference/rekw.md),
+[`rgkw()`](https://evandeilton.github.io/gkwdist/reference/rgkw.md),
+[`rkkw()`](https://evandeilton.github.io/gkwdist/reference/rkkw.md),
+[`rmc()`](https://evandeilton.github.io/gkwdist/reference/rmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -80,7 +90,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 set.seed(2029) # for reproducibility
 
 # Generate 1000 random values from a specific Kw distribution
@@ -132,5 +141,4 @@ print("Summary stats for rgkw(gamma=1, delta=0, lambda=1) sample:")
 print(summary(x_sample_gkw)) # Should be similar
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #> 0.00568 0.30017 0.45069 0.45469 0.59646 0.95381 
-# }
 ```

@@ -366,7 +366,7 @@ beta distribution functions
 
 ## Author
 
-J. E. Lopes <evandeilton@gmail.com> [ORCID:
+Lopes, J. E. <evandeilton@gmail.com> [ORCID:
 0009-0007-5887-4084](https://orcid.org/0009-0007-5887-4084)
 
 LEG - Laboratory of Statistics and Geoinformation

@@ -1,4 +1,4 @@
-# Generalized Kumaraswamy Distribution Random Generation
+# Random Number Generation for the Generalized Kumaraswamy Distribution
 
 Generates random deviates from the five-parameter Generalized
 Kumaraswamy (GKw) distribution defined on the interval (0, 1).
@@ -76,12 +76,19 @@ handling potential edge cases during the transformations.
 
 ## References
 
+Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+generalized Kumaraswamy distribution. *arXiv preprint arXiv:1004.0911*.
+[doi:10.48550/arXiv.1004.0911](https://doi.org/10.48550/arXiv.1004.0911)
+
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. *Journal of Statistical Computation and Simulation*
+distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
@@ -91,6 +98,14 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`rbeta`](https://rdrr.io/r/stats/Beta.html),
 [`set.seed`](https://rdrr.io/r/base/Random.html)
 
+Other random generation functions:
+[`rbeta_()`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md),
+[`rbkw()`](https://evandeilton.github.io/gkwdist/reference/rbkw.md),
+[`rekw()`](https://evandeilton.github.io/gkwdist/reference/rekw.md),
+[`rkkw()`](https://evandeilton.github.io/gkwdist/reference/rkkw.md),
+[`rkw()`](https://evandeilton.github.io/gkwdist/reference/rkw.md),
+[`rmc()`](https://evandeilton.github.io/gkwdist/reference/rmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -98,7 +113,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 set.seed(1234) # for reproducibility
 
 # Generate 1000 random values from a specific GKw distribution (Kw case)
@@ -138,5 +152,4 @@ samples_vec <- rgkw(n_param, alpha = alphas_vec, beta = 2, gamma = 1, delta = 0,
 print(samples_vec) # One sample for each alpha value
 #> [1] 0.4386491 0.2135709 0.8667377
 # Result length matches n=3, parameters alpha recycled accordingly
-# }
 ```

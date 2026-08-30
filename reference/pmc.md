@@ -1,4 +1,4 @@
-# CDF of the McDonald (Mc)/Beta Power Distribution
+# Cumulative Distribution Function (CDF) of the McDonald (Mc)/Beta Power Distribution
 
 Computes the cumulative distribution function (CDF), \\F(q) = P(X \le
 q)\\, for the McDonald (Mc) distribution (also known as Beta Power) with
@@ -76,14 +76,18 @@ The CDF of the GKw distribution is \\F\_{GKw}(q) = I\_{y(q)}(\gamma,
 ## References
 
 McDonald, J. B. (1984). Some generalized functions for the size
-distribution of income. *Econometrica*, 52(3), 647-663.
+distribution of income. *Econometrica*, *52*(3), 647-663.
+[doi:10.2307/1913469](https://doi.org/10.2307/1913469)
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
@@ -94,6 +98,14 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`rmc`](https://evandeilton.github.io/gkwdist/reference/rmc.md) (other
 Mc functions), [`pbeta`](https://rdrr.io/r/stats/Beta.html)
 
+Other cumulative distribution functions:
+[`pbeta_()`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
+[`pbkw()`](https://evandeilton.github.io/gkwdist/reference/pbkw.md),
+[`pekw()`](https://evandeilton.github.io/gkwdist/reference/pekw.md),
+[`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md),
+[`pkkw()`](https://evandeilton.github.io/gkwdist/reference/pkkw.md),
+[`pkw()`](https://evandeilton.github.io/gkwdist/reference/pkw.md)
+
 ## Author
 
 Lopes, J. E.
@@ -101,7 +113,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 gamma_par <- 2.0
@@ -159,5 +170,4 @@ legend("bottomright",
   col = c("blue", "red", "green"), lty = 1, bty = "n"
 )
 
-# }
 ```

@@ -73,10 +73,13 @@ The returned matrix is symmetric, with rows/columns corresponding to
 ## References
 
 McDonald, J. B. (1984). Some generalized functions for the size
-distribution of income. *Econometrica*, 52(3), 647-663.
+distribution of income. *Econometrica*, *52*(3), 647-663.
+[doi:10.2307/1913469](https://doi.org/10.2307/1913469)
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 (Note: Specific Hessian formulas might be derived or sourced from
 additional references).
@@ -94,6 +97,14 @@ for Mc), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`hessian`](https://rdrr.io/pkg/numDeriv/man/hessian.html) (for
 numerical Hessian comparison),
 [`trigamma`](https://rdrr.io/r/base/Special.html).
+
+Other Hessian functions:
+[`hsbeta()`](https://evandeilton.github.io/gkwdist/reference/hsbeta.md),
+[`hsbkw()`](https://evandeilton.github.io/gkwdist/reference/hsbkw.md),
+[`hsekw()`](https://evandeilton.github.io/gkwdist/reference/hsekw.md),
+[`hsgkw()`](https://evandeilton.github.io/gkwdist/reference/hsgkw.md),
+[`hskkw()`](https://evandeilton.github.io/gkwdist/reference/hskkw.md),
+[`hskw()`](https://evandeilton.github.io/gkwdist/reference/hskw.md)
 
 ## Author
 

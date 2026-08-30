@@ -1,8 +1,8 @@
-# Gradient of the Negative Log-Likelihood for the kkw Distribution
+# Gradient of the Negative Log-Likelihood for the KKw Distribution
 
 Computes the gradient vector (vector of first partial derivatives) of
 the negative log-likelihood function for the Kumaraswamy-Kumaraswamy
-(kkw) distribution with parameters `alpha` (\\\alpha\\), `beta`
+(KKw) distribution with parameters `alpha` (\\\alpha\\), `beta`
 (\\\beta\\), `delta` (\\\delta\\), and `lambda` (\\\lambda\\). This
 distribution is the special case of the Generalized Kumaraswamy (GKw)
 distribution where \\\gamma = 1\\. The gradient is typically used in
@@ -40,7 +40,7 @@ values are invalid according to their constraints, or if any value in
 ## Details
 
 The components of the gradient vector of the negative log-likelihood
-(\\-\nabla \ell(\theta \| \mathbf{x})\\) for the kkw (\\\gamma=1\\)
+(\\-\nabla \ell(\theta \| \mathbf{x})\\) for the KKw (\\\gamma=1\\)
 model are:
 
 \$\$ -\frac{\partial \ell}{\partial \alpha} = -\frac{n}{\alpha} -
@@ -80,23 +80,34 @@ Numerical stability is maintained through careful implementation.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
 [`grgkw`](https://evandeilton.github.io/gkwdist/reference/grgkw.md)
 (parent distribution gradient),
 [`llkkw`](https://evandeilton.github.io/gkwdist/reference/llkkw.md)
-(negative log-likelihood for kkw),
+(negative log-likelihood for KKw),
 [`hskkw`](https://evandeilton.github.io/gkwdist/reference/hskkw.md)
-(Hessian for kkw),
+(Hessian for KKw),
 [`dkkw`](https://evandeilton.github.io/gkwdist/reference/dkkw.md)
-(density for kkw), [`optim`](https://rdrr.io/r/stats/optim.html),
+(density for KKw), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`grad`](https://rdrr.io/pkg/numDeriv/man/grad.html) (for numerical
 gradient comparison).
+
+Other gradient functions:
+[`grbeta()`](https://evandeilton.github.io/gkwdist/reference/grbeta.md),
+[`grbkw()`](https://evandeilton.github.io/gkwdist/reference/grbkw.md),
+[`grekw()`](https://evandeilton.github.io/gkwdist/reference/grekw.md),
+[`grgkw()`](https://evandeilton.github.io/gkwdist/reference/grgkw.md),
+[`grkw()`](https://evandeilton.github.io/gkwdist/reference/grkw.md),
+[`grmc()`](https://evandeilton.github.io/gkwdist/reference/grmc.md)
 
 ## Author
 

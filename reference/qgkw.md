@@ -1,4 +1,4 @@
-# Generalized Kumaraswamy Distribution Quantile Function
+# Quantile Function of the Generalized Kumaraswamy Distribution
 
 Computes the quantile function (inverse CDF) for the five-parameter
 Generalized Kumaraswamy (GKw) distribution. Finds the value `x` such
@@ -105,12 +105,19 @@ arguments to powers are non-negative).
 
 ## References
 
+Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+generalized Kumaraswamy distribution. *arXiv preprint arXiv:1004.0911*.
+[doi:10.48550/arXiv.1004.0911](https://doi.org/10.48550/arXiv.1004.0911)
+
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. *Journal of Statistical Computation and Simulation*
+distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
@@ -119,6 +126,14 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`rgkw`](https://evandeilton.github.io/gkwdist/reference/rgkw.md),
 [`qbeta`](https://rdrr.io/r/stats/Beta.html)
 
+Other quantile functions:
+[`qbeta_()`](https://evandeilton.github.io/gkwdist/reference/qbeta_.md),
+[`qbkw()`](https://evandeilton.github.io/gkwdist/reference/qbkw.md),
+[`qekw()`](https://evandeilton.github.io/gkwdist/reference/qekw.md),
+[`qkkw()`](https://evandeilton.github.io/gkwdist/reference/qkkw.md),
+[`qkw()`](https://evandeilton.github.io/gkwdist/reference/qkw.md),
+[`qmc()`](https://evandeilton.github.io/gkwdist/reference/qmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -126,7 +141,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Basic quantile calculation (median)
 median_val <- qgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 print(median_val)
@@ -171,5 +185,4 @@ x_val <- qgkw(p_val, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 p_check <- pgkw(x_val, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 print(paste("Calculated p:", p_check, " (Expected:", p_val, ")"))
 #> [1] "Calculated p: 0.75  (Expected: 0.75 )"
-# }
 ```

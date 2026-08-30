@@ -1,4 +1,4 @@
-# Random Generation for the Beta Distribution (gamma, delta+1 Parameterization)
+# Random Number Generation for the Beta Distribution (gamma, delta+1 Parameterization)
 
 Generates random deviates from the standard Beta distribution, using a
 parameterization common in generalized distribution families. The
@@ -68,6 +68,8 @@ Univariate Distributions, Volume 2* (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Devroye, L. (1986). *Non-Uniform Random Variate Generation*.
 Springer-Verlag.
@@ -84,6 +86,14 @@ implementation),
 [`pbeta_`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
 [`qbeta_`](https://evandeilton.github.io/gkwdist/reference/qbeta_.md).
 
+Other random generation functions:
+[`rbkw()`](https://evandeilton.github.io/gkwdist/reference/rbkw.md),
+[`rekw()`](https://evandeilton.github.io/gkwdist/reference/rekw.md),
+[`rgkw()`](https://evandeilton.github.io/gkwdist/reference/rgkw.md),
+[`rkkw()`](https://evandeilton.github.io/gkwdist/reference/rkkw.md),
+[`rkw()`](https://evandeilton.github.io/gkwdist/reference/rkw.md),
+[`rmc()`](https://evandeilton.github.io/gkwdist/reference/rmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -91,7 +101,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 set.seed(2030) # for reproducibility
 
 # Generate 1000 samples using rbeta_
@@ -140,5 +149,4 @@ print("Summary stats for rmc(l=1) sample:")
 print(summary(x_sample_mc))
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #> 0.00105 0.19221 0.31254 0.33300 0.45504 0.91894 
-# }
 ```

@@ -25,11 +25,11 @@ special case of the Generalized Kumaraswamy (GKw) distribution where
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/gkwdist.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/into-gkwdist.html">Introduction to gkwdist: Generalized Kumaraswamy Distribution Family</a></li>
-    <li><a class="dropdown-item" href="../articles/theory-gkwdist.html">On the Statistical Properties and Computational Inference of the Generalized Kumaraswamy Distribution Family</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/theory-gkwdist.html">On the Statistical Properties and Computational Inference of the Generalized Kumaraswamy Distribution Family</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -114,9 +114,12 @@ of the general GKw gradient (<code><a href="grgkw.html">grgkw</a></code>) evalua
     <p>Nadarajah, S., Cordeiro, G. M., &amp; Ortega, E. M. (2012). The exponentiated
 Kumaraswamy distribution. <em>Journal of the Franklin Institute</em>, <em>349</em>(3),</p>
 <p>Cordeiro, G. M., &amp; de Castro, M. (2011). A new family of generalized
-distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
+distributions. <em>Journal of Statistical Computation and Simulation</em>,
+<em>81</em>(7), 883-898.
+<a href="https://doi.org/10.1080/00949650903530745" class="external-link">doi:10.1080/00949650903530745</a></p>
 <p>Kumaraswamy, P. (1980). A generalized probability density function for
-double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2), 79-88.</p>
+double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2), 79-88.
+<a href="https://doi.org/10.1016/0022-1694%2880%2990036-0" class="external-link">doi:10.1016/0022-1694(80)90036-0</a></p>
 <p>(Note: Specific gradient formulas might be derived or sourced from additional references).</p>
     </div>
     <div class="section level2">
@@ -126,7 +129,14 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <code><a href="hsekw.html">hsekw</a></code> (Hessian for EKw),
 <code><a href="dekw.html">dekw</a></code> (density for EKw),
 <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></code>,
-<code><a href="https://rdrr.io/pkg/numDeriv/man/grad.html" class="external-link">grad</a></code> (for numerical gradient comparison).</p></div>
+<code><a href="https://rdrr.io/pkg/numDeriv/man/grad.html" class="external-link">grad</a></code> (for numerical gradient comparison).</p>
+<p>Other gradient functions:
+<code><a href="grbeta.html">grbeta()</a></code>,
+<code><a href="grbkw.html">grbkw()</a></code>,
+<code><a href="grgkw.html">grgkw()</a></code>,
+<code><a href="grkkw.html">grkkw()</a></code>,
+<code><a href="grkw.html">grkw()</a></code>,
+<code><a href="grmc.html">grmc()</a></code></p></div>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

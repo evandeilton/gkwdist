@@ -1,8 +1,8 @@
-# Hessian Matrix of the Negative Log-Likelihood for the kkw Distribution
+# Hessian Matrix of the Negative Log-Likelihood for the KKw Distribution
 
 Computes the analytic 4x4 Hessian matrix (matrix of second partial
 derivatives) of the negative log-likelihood function for the
-Kumaraswamy-Kumaraswamy (kkw) distribution with parameters `alpha`
+Kumaraswamy-Kumaraswamy (KKw) distribution with parameters `alpha`
 (\\\alpha\\), `beta` (\\\beta\\), `delta` (\\\delta\\), and `lambda`
 (\\\lambda\\). This distribution is the special case of the Generalized
 Kumaraswamy (GKw) distribution where \\\gamma = 1\\. The Hessian is
@@ -39,7 +39,7 @@ values are invalid according to their constraints, or if any value in
 ## Details
 
 This function calculates the analytic second partial derivatives of the
-negative log-likelihood function based on the kkw log-likelihood
+negative log-likelihood function based on the KKw log-likelihood
 (\\\gamma=1\\ case of GKw, see
 [`llkkw`](https://evandeilton.github.io/gkwdist/reference/llkkw.md)):
 \$\$ \ell(\theta \| \mathbf{x}) = n\[\ln(\delta+1) + \ln(\lambda) +
@@ -78,24 +78,35 @@ directly.
 ## References
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. *Journal of Statistical Computation and Simulation*
+distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
 [`hsgkw`](https://evandeilton.github.io/gkwdist/reference/hsgkw.md)
 (parent distribution Hessian),
 [`llkkw`](https://evandeilton.github.io/gkwdist/reference/llkkw.md)
-(negative log-likelihood for kkw),
+(negative log-likelihood for KKw),
 [`grkkw`](https://evandeilton.github.io/gkwdist/reference/grkkw.md)
-(gradient for kkw),
+(gradient for KKw),
 [`dkkw`](https://evandeilton.github.io/gkwdist/reference/dkkw.md)
-(density for kkw), [`optim`](https://rdrr.io/r/stats/optim.html),
+(density for KKw), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`hessian`](https://rdrr.io/pkg/numDeriv/man/hessian.html) (for
 numerical Hessian comparison).
+
+Other Hessian functions:
+[`hsbeta()`](https://evandeilton.github.io/gkwdist/reference/hsbeta.md),
+[`hsbkw()`](https://evandeilton.github.io/gkwdist/reference/hsbkw.md),
+[`hsekw()`](https://evandeilton.github.io/gkwdist/reference/hsekw.md),
+[`hsgkw()`](https://evandeilton.github.io/gkwdist/reference/hsgkw.md),
+[`hskw()`](https://evandeilton.github.io/gkwdist/reference/hskw.md),
+[`hsmc()`](https://evandeilton.github.io/gkwdist/reference/hsmc.md)
 
 ## Author
 

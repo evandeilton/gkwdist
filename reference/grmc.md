@@ -62,10 +62,13 @@ evaluated at \\\alpha=1, \beta=1\\.
 ## References
 
 McDonald, J. B. (1984). Some generalized functions for the size
-distribution of income. *Econometrica*, 52(3), 647-663.
+distribution of income. *Econometrica*, *52*(3), 647-663.
+[doi:10.2307/1913469](https://doi.org/10.2307/1913469)
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 (Note: Specific gradient formulas might be derived or sourced from
 additional references).
@@ -82,6 +85,14 @@ additional references).
 for Mc), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`grad`](https://rdrr.io/pkg/numDeriv/man/grad.html) (for numerical
 gradient comparison), [`digamma`](https://rdrr.io/r/base/Special.html).
+
+Other gradient functions:
+[`grbeta()`](https://evandeilton.github.io/gkwdist/reference/grbeta.md),
+[`grbkw()`](https://evandeilton.github.io/gkwdist/reference/grbkw.md),
+[`grekw()`](https://evandeilton.github.io/gkwdist/reference/grekw.md),
+[`grgkw()`](https://evandeilton.github.io/gkwdist/reference/grgkw.md),
+[`grkkw()`](https://evandeilton.github.io/gkwdist/reference/grkkw.md),
+[`grkw()`](https://evandeilton.github.io/gkwdist/reference/grkw.md)
 
 ## Author
 

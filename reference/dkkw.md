@@ -1,7 +1,7 @@
-# Density of the Kumaraswamy-Kumaraswamy (kkw) Distribution
+# Density of the Kumaraswamy-Kumaraswamy (KKw) Distribution
 
 Computes the probability density function (PDF) for the
-Kumaraswamy-Kumaraswamy (kkw) distribution with parameters `alpha`
+Kumaraswamy-Kumaraswamy (KKw) distribution with parameters `alpha`
 (\\\alpha\\), `beta` (\\\beta\\), `delta` (\\\delta\\), and `lambda`
 (\\\lambda\\). This distribution is defined on the interval (0, 1).
 
@@ -47,15 +47,20 @@ dkkw(x, alpha = 1, beta = 1, delta = 0, lambda = 1, log = FALSE)
 A vector of density values (\\f(x)\\) or log-density values
 (\\\log(f(x))\\). The length of the result is determined by the
 recycling rule applied to the arguments (`x`, `alpha`, `beta`, `delta`,
-`lambda`). Returns `0` (or `-Inf` if `log = TRUE`) for `x` outside the
-interval (0, 1). An out-of-bound or missing parameter is an error, not a
-return value: the wrapper stops with a message naming the parameter. An
-infinite parameter is not currently intercepted there and reaches the
-C++ layer, which treats it as invalid.
+`lambda`). Returns `0` (or `-Inf` if `log = TRUE`) for `x` strictly
+outside the interval \[0, 1\]. At the closed boundaries `x = 0` and
+`x = 1` the limiting density is returned rather than `0`, following the
+convention of base R's density functions (compare
+[`dbeta`](https://rdrr.io/r/stats/Beta.html)); depending on the
+parameters that limit is `0`, a finite positive value, or `Inf`. An
+out-of-bound or missing parameter is an error, not a return value: the
+wrapper stops with a message naming the parameter. An infinite parameter
+is not currently intercepted there and reaches the C++ layer, which
+treats it as invalid.
 
 ## Details
 
-The Kumaraswamy-Kumaraswamy (kkw) distribution is a special case of the
+The Kumaraswamy-Kumaraswamy (KKw) distribution is a special case of the
 five-parameter Generalized Kumaraswamy distribution
 ([`dgkw`](https://evandeilton.github.io/gkwdist/reference/dgkw.md))
 obtained by setting the parameter \\\gamma = 1\\.
@@ -74,11 +79,14 @@ Numerical evaluation follows similar stability considerations as
 ## References
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. *Journal of Statistical Computation and Simulation*
+distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
@@ -89,6 +97,14 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`rkkw`](https://evandeilton.github.io/gkwdist/reference/rkkw.md),
 [`dbeta`](https://rdrr.io/r/stats/Beta.html)
 
+Other density functions:
+[`dbeta_()`](https://evandeilton.github.io/gkwdist/reference/dbeta_.md),
+[`dbkw()`](https://evandeilton.github.io/gkwdist/reference/dbkw.md),
+[`dekw()`](https://evandeilton.github.io/gkwdist/reference/dekw.md),
+[`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md),
+[`dkw()`](https://evandeilton.github.io/gkwdist/reference/dkw.md),
+[`dmc()`](https://evandeilton.github.io/gkwdist/reference/dmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -96,7 +112,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Example values
 x_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -131,9 +146,8 @@ print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be
 curve_x <- seq(0.01, 0.99, length.out = 200)
 curve_y <- dkkw(curve_x, alpha_par, beta_par, delta_par, lambda_par)
 plot(curve_x, curve_y,
-  type = "l", main = "kkw Density Example",
+  type = "l", main = "KKw Density Example",
   xlab = "x", ylab = "f(x)", col = "blue"
 )
 
-# }
 ```

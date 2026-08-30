@@ -101,8 +101,21 @@ estimates (returns defaults).
 ## References
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type
-distribution with some tractability advantages. Statistical Methodology,
-6(1), 70-81.
+distribution with some tractability advantages. *Statistical
+Methodology*, *6*(1), 70-81.
+[doi:10.1016/j.stamet.2008.04.001](https://doi.org/10.1016/j.stamet.2008.04.001)
+
+## See also
+
+[`llgkw`](https://evandeilton.github.io/gkwdist/reference/llgkw.md),
+[`llbkw`](https://evandeilton.github.io/gkwdist/reference/llbkw.md),
+[`llkkw`](https://evandeilton.github.io/gkwdist/reference/llkkw.md),
+[`llekw`](https://evandeilton.github.io/gkwdist/reference/llekw.md),
+[`llmc`](https://evandeilton.github.io/gkwdist/reference/llmc.md),
+[`llkw`](https://evandeilton.github.io/gkwdist/reference/llkw.md),
+[`llbeta`](https://evandeilton.github.io/gkwdist/reference/llbeta.md)
+(the objectives these values are meant to seed),
+[`optim`](https://rdrr.io/r/stats/optim.html)
 
 ## Examples
 

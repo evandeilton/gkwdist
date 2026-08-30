@@ -1149,6 +1149,228 @@
 
 ### Documentation Fixes
 
+- **The `@return` of all seven densities denied the boundary contract**
+  (`R/gkw.R`, `R/bkw.R`, `R/kkw.R`, `R/ekw.R`, `R/bpmc.R`, `R/kw.R`,
+  `R/beta.R`): once the closed boundaries began carrying the limiting
+  density, the seven blocks still promised `0` – or `-Inf` on the log
+  scale – for `x` “outside the interval (0, 1)”. No rendered page
+  mentioned the limit at all, and 0 and 1 lie outside that open
+  interval, so the sentence denied precisely the two points the change
+  had added:
+
+      call                              documented   returned
+      dgkw(c(0, 1), 0.5, 0.5, 1, 0, 1)       0 0      Inf Inf
+      dkw(c(0, 1), 2, 1)                     0 0          0 2
+      dbeta_(c(0, 1), 0.5, 0)                0 0      Inf 0.5
+      dgkw(c(-0.1, 1.1), 2, 3, 1, 0, 1)      0 0          0 0
+
+  The last row is the case that really does return `0`, and the wording
+  is narrowed to it: “strictly outside the interval \[0, 1\]”. Each
+  block now states that `x = 0` and `x = 1` carry the limiting density,
+  names [`stats::dbeta`](https://rdrr.io/r/stats/Beta.html) as the base
+  R convention being followed – with the `shape2 = delta + 1` shift
+  spelled out in
+  [`dbeta_()`](https://evandeilton.github.io/gkwdist/reference/dbeta_.md),
+  whose parameterization differs – and records that the limit is `0`, a
+  finite positive value, or `Inf` according to the parameters.
+
+  Documentation only; no executable code changes and no numerical result
+  is affected.
+
+- **The out-of-support warning was undocumented in all seven `ll*()`**
+  (`R/gkw.R`, `R/bkw.R`, `R/kkw.R`, `R/ekw.R`, `R/bpmc.R`, `R/kw.R`,
+  `R/beta.R`): the guard that warns
+  `'data' contains values outside (0, 1)` appeared in no help page, so
+  the one signal separating a mis-scaled sample from a genuine fit
+  failure was invisible to a reader of the documentation. All seven
+  `@return` blocks now record it, with the reason: an infinite objective
+  offers an optimiser no gradient direction to follow.
+
+  In the same pass
+  [`llgkw()`](https://evandeilton.github.io/gkwdist/reference/llgkw.md)
+  loses “returns a large positive value (e.g., `Inf`)”, the only one of
+  the seven that did not name `Inf` exactly. Measured, all seven return
+  `Inf` exactly, for an invalid `par` and for out-of-support `data`
+  alike.
+
+  Documentation only; no executable code changes and no numerical result
+  is affected.
+
+- **The Cordeiro & de Castro (2011) citation was truncated in 41 of its
+  42 appearances** (the six family files that cite it – `R/kw.R` does
+  not): the entry existed in two broken shapes – 14 ended at the journal
+  name with no volume, pages or full stop, and 27 ended at a dangling
+  comma. Only
+  [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md)
+  carried it complete. All 42 now read
+  `*Journal of Statistical Computation and Simulation*, *81*(7), 883-898.`
+
+  In the same pass, Carrasco, Ferrari & Cordeiro (2010) – the primary
+  source for the five-parameter distribution this package implements –
+  is added to the `@references` of the seven GKw topics. Their
+  `@details` credited it in prose while `@references` listed only the
+  two secondary sources; the earlier attribution fix reached the prose
+  and not the list. The six sub-families are left alone: each defines
+  itself as a special case of GKw and links to
+  [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md),
+  so the attribution reaches them through that link.
+
+- **References were not linkable outside the package overview** (all
+  seven family files, `src/gkwinit.cpp`): `\doi{}` appeared on 7
+  citations in `R/gkwdist-package.R` and nowhere else, so 103 citations
+  across the 50 function topics rendered as plain text. Every citation
+  whose DOI was already recorded in the package – Carrasco (2010),
+  Cordeiro & de Castro (2011), Jones (2009), Kumaraswamy (1980) and
+  McDonald (1984) – now carries it, taken verbatim from
+  `R/gkwdist-package.R` and `DESCRIPTION`. Every topic that has a
+  `\references` section now has at least one DOI.
+
+  Nadarajah, Johnson/Kotz/Balakrishnan and Devroye are deliberately left
+  without one: no DOI for those works is recorded anywhere in this
+  package, and a DOI is not something to reconstruct from memory.
+  [`gkwgetstartvalues()`](https://evandeilton.github.io/gkwdist/reference/gkwgetstartvalues.md)’s
+  Jones citation, the only one still in plain text with no `\emph`, is
+  brought into the same form as the other seven, and McDonald’s volume
+  number is italicised to match every other volume number in the
+  package.
+
+- **The package overview page was generated but unreachable**
+  (`R/gkwdist-package.R`): `_PACKAGE` carried `@keywords internal`,
+  which removes a topic from the help index and from the pkgdown
+  reference. `docs/reference/gkwdist-package.html` was being built and
+  nothing linked to it, so the whole overview – family hierarchy,
+  performance notes, model-selection workflow, four worked estimation
+  examples – could be reached only by typing the URL. The keyword is
+  dropped and the topic is added to `_pkgdown.yml` under a
+  `Package Overview` heading, which is also what keeps
+  [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
+  clean once the topic is no longer internal.
+
+- **Ten of the thirteen `\keyword` entries were outside R’s controlled
+  vocabulary** (all seven family files): `density`, `cumulative`,
+  `quantile`, `random`, `likelihood`, `gradient`, `hessian`, `beta`,
+  `kumaraswamy` and `mcdonald` are absent from `R/doc/KEYWORDS`, so they
+  indexed nothing. The seven that name a role become `@family` groupings
+  – density, cumulative distribution, quantile, random generation,
+  log-likelihood, gradient and Hessian functions, seven members each –
+  which roxygen2 renders as bidirectional “Other …:” links and pkgdown
+  exposes as concepts. The three that name a distribution become
+  `@concept`. `distribution` and `optimize`, which are standard, are
+  kept.
+
+  This is the axis the hand-written `\seealso` blocks did not cover:
+  they link each function to the siblings of its own distribution, never
+  across distributions, so nothing led from
+  [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md) to
+  the other six densities. The curated blocks are untouched and the
+  generated lists are appended below them.
+
+  Only `beta`, `kumaraswamy` and `mcdonald` existed as distribution
+  keywords. The four families that had none – `generalized kumaraswamy`,
+  `beta-kumaraswamy`, `kumaraswamy-kumaraswamy` and
+  `exponentiated kumaraswamy` – are given the matching concept, so all
+  49 topics now carry one family and one distribution concept.
+
+- **Every example in the package sat inside `\donttest{}`** (all seven
+  family files): 51 of 52 topics wrapped their entire `@examples` block,
+  so `R CMD check` without `--run-donttest` – the form run locally and
+  in most CI configurations – executed no example at all, while
+  `--as-cran` ran all 9,217 lines regardless. The wrapper bought nothing
+  and hid everything.
+
+  Measured on one machine, the 28 `d`/`p`/`q`/`r` blocks take 0.05 s in
+  total and the 21 `ll`/`gr`/`hs` blocks take 41 s. The wrapper is
+  removed from the first group and kept on the second, where the cost is
+  real and where the weakly-identified fits behind the confidence-region
+  entry below make the examples platform-sensitive. The default check
+  now exercises 1,515 lines of examples instead of none.
+
+- **[`gkwgetstartvalues()`](https://evandeilton.github.io/gkwdist/reference/gkwgetstartvalues.md)
+  had no `@seealso`** (`src/gkwinit.cpp`): the one topic whose output is
+  meant to be fed straight into other functions of this package linked
+  to none of them. It now points at the seven `ll*()` objectives it
+  seeds and at [`stats::optim()`](https://rdrr.io/r/stats/optim.html).
+
+- **Help page titles followed five competing patterns** (all seven
+  family files):
+  [`dmc()`](https://evandeilton.github.io/gkwdist/reference/dmc.md) read
+  “Beta Power Distribution Distribution”; the GKw CDF, quantile and RNG
+  topics put the role after the distribution (“Generalized Kumaraswamy
+  Distribution CDF”) where the other six put it first; “CDF of the” and
+  “Cumulative Distribution Function (CDF) of the” both appeared, as did
+  “Random Generation for” and “Random Number Generation for”, and
+  “Negative Log-Likelihood” took “for the”, “for” and “of the” in
+  different topics. The KKw family was written `kkw` in all seven of its
+  titles while the README, `_pkgdown.yml` and the package overview write
+  `KKw`.
+
+  Sixteen titles are repaired – the duplicated word, nine against the
+  majority form, and the seven KKw case fixes below – leaving all 49 on
+  exactly seven patterns, one per role. Titles that abbreviate the
+  distribution in the gradient and Hessian topics are left abbreviated:
+  those are the longest titles in the package and spelling the family
+  out would push them past 120 characters.
+
+  The lower-case `kkw` is corrected in the prose of `R/kkw.R` as well,
+  27 occurrences across descriptions, details, `@return` blocks,
+  `@seealso` labels and example plot titles. Three kinds of `kkw` are
+  deliberately left alone, because they are identifiers rather than the
+  name of the distribution: the file references `src/kkw.cpp`, the
+  exported function names (`dkkw`, `pkkw`, `qkkw`, `rkkw`, `llkkw`,
+  `grkkw`, `hskkw`), and the `family = "kkw"` argument value that users
+  pass to
+  [`gkwgetstartvalues()`](https://evandeilton.github.io/gkwdist/reference/gkwgetstartvalues.md).
+
+- **Eight verifications inside `@examples` were commented out** (all
+  seven family files): six `q*()` topics computed a round trip
+  `p -> q*() -> p*()`, printed both numbers, and left the assertion
+  `abs(p_check - p_recalc) < 1e-9` commented.
+  [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md)
+  and
+  [`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md)
+  were worse: each built `pdf_beta_check` / `cdf_beta_check` against
+  [`stats::dbeta()`](https://rdrr.io/r/stats/Beta.html) /
+  [`stats::pbeta()`](https://rdrr.io/r/stats/Beta.html) and then
+  commented out the only line that used it, leaving a variable computed
+  for nothing. All eight now run and print. Checked before enabling: the
+  two `stats` comparisons agree to 4.4e-16 and 3.3e-16, and every round
+  trip is exact to at worst 1.1e-16.
+
+- **The `intro` navbar entry pointed at nothing** (`_pkgdown.yml`,
+  `vignettes/`): pkgdown fills “Get started” from
+  `vignettes/<package>.Rmd`, and the introductory vignette was
+  `into-gkwdist.Rmd` – “into” for “intro” – so the entry was silently
+  dropped and the published site had no “Get started” link. The file is
+  renamed `gkwdist.Rmd`, which fixes the spelling and activates the
+  entry in one move. Its title and `VignetteIndexEntry` are unchanged.
+  **Links to `articles/into-gkwdist.html` and calls to
+  `vignette("into-gkwdist")` will no longer resolve.**
+
+- **Half of `_pkgdown.yml` was a superseded copy of itself**
+  (`_pkgdown.yml`): 131 of its 284 lines were a commented-out earlier
+  reference layout. It was not a duplicate – it carried the nesting
+  relation for each sub-family, which the active version had dropped –
+  and two of those relations were wrong, giving EKw as “GKw with γ = δ =
+  1” and Kw as “GKw with γ = δ = λ = 1” where δ = 0 is the neutral value
+  in this parameterization and is what every `@details` block and every
+  function default states. The nesting is carried over to the active
+  `desc` lines with δ = 0, and the dead block is removed.
+
+- **No `inst/WORDLIST`** (new file): `spelling::spell_check_package()`
+  reported 191 words and was therefore unusable as a check. A curated
+  list of 45 – the family abbreviations, the cited authors, the
+  institutions, terms such as `digamma`, `trigamma`, `unimodality` and
+  `bimodality`, and the three fragments the `<doi:...>` markup and the
+  quoted package name leave in `DESCRIPTION` – now leaves the `.Rd`
+  files and `DESCRIPTION` reporting nothing, so a real typo will show
+  up. Nothing consumes the list automatically: there is no
+  `tests/spelling.R` and `spelling` is not in `Suggests`, so it serves
+  whoever runs the check by hand.
+
+- **The author name was rendered two ways** (`R/gkwdist-package.R`): 49
+  topics say “Lopes, J. E.” and the package overview said “J. E. Lopes”.
+  The overview now matches the rest.
+
 - **Editorial hedging in the rendered help pages** (all seven family
   files): 29 `\seealso` entries qualified functions that exist and are
   exported – “(if these exist)”, “(gradient, if available)”, “(other

@@ -37,7 +37,12 @@ dkw(x, alpha = 1, beta = 1, log = FALSE)
 A vector of density values (\\f(x)\\) or log-density values
 (\\\log(f(x))\\). The length of the result is determined by the
 recycling rule applied to the arguments (`x`, `alpha`, `beta`). Returns
-`0` (or `-Inf` if `log = TRUE`) for `x` outside the interval (0, 1). An
+`0` (or `-Inf` if `log = TRUE`) for `x` strictly outside the interval
+\[0, 1\]. At the closed boundaries `x = 0` and `x = 1` the limiting
+density is returned rather than `0`, following the convention of base
+R's density functions (compare
+[`dbeta`](https://rdrr.io/r/stats/Beta.html)); depending on the
+parameters that limit is `0`, a finite positive value, or `Inf`. An
 out-of-bound or missing parameter is an error, not a return value: the
 wrapper stops with a message naming the parameter. An infinite parameter
 is not currently intercepted there and reaches the C++ layer, which
@@ -65,10 +70,12 @@ also a special case of the Exponentiated Kumaraswamy
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type
 distribution with some tractability advantages. *Statistical
 Methodology*, *6*(1), 70-81.
+[doi:10.1016/j.stamet.2008.04.001](https://doi.org/10.1016/j.stamet.2008.04.001)
 
 ## See also
 
@@ -81,6 +88,14 @@ Methodology*, *6*(1), 70-81.
 [`rkw`](https://evandeilton.github.io/gkwdist/reference/rkw.md) (other
 Kw functions), [`dbeta`](https://rdrr.io/r/stats/Beta.html)
 
+Other density functions:
+[`dbeta_()`](https://evandeilton.github.io/gkwdist/reference/dbeta_.md),
+[`dbkw()`](https://evandeilton.github.io/gkwdist/reference/dbkw.md),
+[`dekw()`](https://evandeilton.github.io/gkwdist/reference/dekw.md),
+[`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md),
+[`dkkw()`](https://evandeilton.github.io/gkwdist/reference/dkkw.md),
+[`dmc()`](https://evandeilton.github.io/gkwdist/reference/dmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -88,7 +103,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Example values
 x_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -130,6 +144,4 @@ legend("top",
   legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
   col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
 )
-
-# }
 ```

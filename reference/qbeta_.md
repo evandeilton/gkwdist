@@ -90,6 +90,8 @@ Univariate Distributions, Volume 2* (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 ## See also
 
@@ -103,6 +105,14 @@ implementation),
 [`pbeta_`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
 [`rbeta_`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md).
 
+Other quantile functions:
+[`qbkw()`](https://evandeilton.github.io/gkwdist/reference/qbkw.md),
+[`qekw()`](https://evandeilton.github.io/gkwdist/reference/qekw.md),
+[`qgkw()`](https://evandeilton.github.io/gkwdist/reference/qgkw.md),
+[`qkkw()`](https://evandeilton.github.io/gkwdist/reference/qkkw.md),
+[`qkw()`](https://evandeilton.github.io/gkwdist/reference/qkw.md),
+[`qmc()`](https://evandeilton.github.io/gkwdist/reference/qmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -110,7 +120,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Example values
 p_vals <- c(0.1, 0.5, 0.9)
 gamma_par <- 2.0 # Corresponds to shape1
@@ -162,12 +171,12 @@ q_calc <- qbeta_(p_check, gamma_par, delta_par)
 p_recalc <- pbeta_(q_calc, gamma_par, delta_par)
 print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 #> [1] "Original p: 0.75  Recalculated p: 0.75"
-# abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
+#> [1] TRUE
 
 # Boundary conditions
 print(qbeta_(c(0, 1), gamma_par, delta_par)) # Should be 0, 1
 #> [1] 0 1
 print(qbeta_(c(-Inf, 0), gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
-# }
 ```

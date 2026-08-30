@@ -23,11 +23,11 @@ optimization algorithms."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/gkwdist.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/into-gkwdist.html">Introduction to gkwdist: Generalized Kumaraswamy Distribution Family</a></li>
-    <li><a class="dropdown-item" href="../articles/theory-gkwdist.html">On the Statistical Properties and Computational Inference of the Generalized Kumaraswamy Distribution Family</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/theory-gkwdist.html">On the Statistical Properties and Computational Inference of the Generalized Kumaraswamy Distribution Family</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -112,9 +112,11 @@ evaluated at \(\gamma=1, \delta=0, \lambda=1\).</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Kumaraswamy, P. (1980). A generalized probability density function for
-double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2), 79-88.</p>
+double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2), 79-88.
+<a href="https://doi.org/10.1016/0022-1694%2880%2990036-0" class="external-link">doi:10.1016/0022-1694(80)90036-0</a></p>
 <p>Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
-with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(1), 70-81.</p>
+with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(1), 70-81.
+<a href="https://doi.org/10.1016/j.stamet.2008.04.001" class="external-link">doi:10.1016/j.stamet.2008.04.001</a></p>
 <p>(Note: Specific Hessian formulas might be derived or sourced from additional references).</p>
     </div>
     <div class="section level2">
@@ -124,7 +126,14 @@ with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(
 <code><a href="grkw.html">grkw</a></code> (gradient for Kw),
 <code><a href="dkw.html">dkw</a></code> (density for Kw),
 <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></code>,
-<code><a href="https://rdrr.io/pkg/numDeriv/man/hessian.html" class="external-link">hessian</a></code> (for numerical Hessian comparison).</p></div>
+<code><a href="https://rdrr.io/pkg/numDeriv/man/hessian.html" class="external-link">hessian</a></code> (for numerical Hessian comparison).</p>
+<p>Other Hessian functions:
+<code><a href="hsbeta.html">hsbeta()</a></code>,
+<code><a href="hsbkw.html">hsbkw()</a></code>,
+<code><a href="hsekw.html">hsekw()</a></code>,
+<code><a href="hsgkw.html">hsgkw()</a></code>,
+<code><a href="hskkw.html">hskkw()</a></code>,
+<code><a href="hsmc.html">hsmc()</a></code></p></div>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

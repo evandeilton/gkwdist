@@ -1,4 +1,4 @@
-# CDF of the Beta Distribution (gamma, delta+1 Parameterization)
+# Cumulative Distribution Function (CDF) of the Beta Distribution (gamma, delta+1 Parameterization)
 
 Computes the cumulative distribution function (CDF), \\F(q) = P(X \le
 q)\\, for the standard Beta distribution, using a parameterization
@@ -77,6 +77,8 @@ Univariate Distributions, Volume 2* (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 ## See also
 
@@ -90,6 +92,14 @@ implementation),
 [`qbeta_`](https://evandeilton.github.io/gkwdist/reference/qbeta_.md),
 [`rbeta_`](https://evandeilton.github.io/gkwdist/reference/rbeta_.md).
 
+Other cumulative distribution functions:
+[`pbkw()`](https://evandeilton.github.io/gkwdist/reference/pbkw.md),
+[`pekw()`](https://evandeilton.github.io/gkwdist/reference/pekw.md),
+[`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md),
+[`pkkw()`](https://evandeilton.github.io/gkwdist/reference/pkkw.md),
+[`pkw()`](https://evandeilton.github.io/gkwdist/reference/pkw.md),
+[`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -97,7 +107,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 gamma_par <- 2.0 # Corresponds to shape1
@@ -155,5 +164,4 @@ legend("bottomright",
   col = c("blue", "red"), lty = c(1, 2), bty = "n"
 )
 
-# }
 ```

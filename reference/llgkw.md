@@ -28,9 +28,12 @@ llgkw(par, data)
 ## Value
 
 Returns a single `double` value representing the negative log-likelihood
-(\\-\ell(\theta\|\mathbf{x})\\). Returns a large positive value (e.g.,
-`Inf`) if any parameter values in `par` are invalid according to their
-constraints, or if any value in `data` is not in the interval (0, 1).
+(\\-\ell(\theta\|\mathbf{x})\\). Returns `Inf` if any parameter values
+in `par` are invalid according to their constraints, or if any value in
+`data` is not in the interval (0, 1); in the latter case a warning
+naming `data` is also signaled, because an infinite objective offers an
+optimizer no gradient direction to follow and more often means a sample
+on the wrong scale than a genuine fit failure.
 
 ## Details
 
@@ -66,12 +69,19 @@ Numerical stability is prioritized using:
 
 ## References
 
+Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+generalized Kumaraswamy distribution. *arXiv preprint arXiv:1004.0911*.
+[doi:10.48550/arXiv.1004.0911](https://doi.org/10.48550/arXiv.1004.0911)
+
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. *Journal of Statistical Computation and Simulation*
+distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
@@ -84,6 +94,14 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 (gradient and Hessian), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`lbeta`](https://rdrr.io/r/base/Special.html),
 [`log1p`](https://rdrr.io/r/base/Log.html)
+
+Other log-likelihood functions:
+[`llbeta()`](https://evandeilton.github.io/gkwdist/reference/llbeta.md),
+[`llbkw()`](https://evandeilton.github.io/gkwdist/reference/llbkw.md),
+[`llekw()`](https://evandeilton.github.io/gkwdist/reference/llekw.md),
+[`llkkw()`](https://evandeilton.github.io/gkwdist/reference/llkkw.md),
+[`llkw()`](https://evandeilton.github.io/gkwdist/reference/llkw.md),
+[`llmc()`](https://evandeilton.github.io/gkwdist/reference/llmc.md)
 
 ## Author
 

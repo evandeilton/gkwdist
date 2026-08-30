@@ -1,7 +1,7 @@
-# Quantile Function of the Kumaraswamy-Kumaraswamy (kkw) Distribution
+# Quantile Function of the Kumaraswamy-Kumaraswamy (KKw) Distribution
 
 Computes the quantile function (inverse CDF) for the
-Kumaraswamy-Kumaraswamy (kkw) distribution with parameters `alpha`
+Kumaraswamy-Kumaraswamy (KKw) distribution with parameters `alpha`
 (\\\alpha\\), `beta` (\\\beta\\), `delta` (\\\delta\\), and `lambda`
 (\\\lambda\\). It finds the value `q` such that \\P(X \le q) = p\\. This
 distribution is a special case of the Generalized Kumaraswamy (GKw)
@@ -82,7 +82,7 @@ Boundary return values are adjusted accordingly for
 ## Details
 
 The quantile function \\Q(p)\\ is the inverse of the CDF \\F(q)\\. The
-CDF for the kkw (\\\gamma=1\\) distribution is (see
+CDF for the KKw (\\\gamma=1\\) distribution is (see
 [`pkkw`](https://evandeilton.github.io/gkwdist/reference/pkkw.md)): \$\$
 F(q) = 1 - \bigl\\1 - \bigl\[1 - (1 -
 q^\alpha)^\beta\bigr\]^\lambda\bigr\\^{\delta + 1} \$\$ Inverting this
@@ -97,10 +97,13 @@ formula.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
@@ -111,6 +114,14 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`rkkw`](https://evandeilton.github.io/gkwdist/reference/rkkw.md),
 [`qbeta`](https://rdrr.io/r/stats/Beta.html)
 
+Other quantile functions:
+[`qbeta_()`](https://evandeilton.github.io/gkwdist/reference/qbeta_.md),
+[`qbkw()`](https://evandeilton.github.io/gkwdist/reference/qbkw.md),
+[`qekw()`](https://evandeilton.github.io/gkwdist/reference/qekw.md),
+[`qgkw()`](https://evandeilton.github.io/gkwdist/reference/qgkw.md),
+[`qkw()`](https://evandeilton.github.io/gkwdist/reference/qkw.md),
+[`qmc()`](https://evandeilton.github.io/gkwdist/reference/qmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -118,7 +129,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Example values
 p_vals <- c(0.1, 0.5, 0.9)
 alpha_par <- 2.0
@@ -167,12 +177,12 @@ q_calc <- qkkw(p_check, alpha_par, beta_par, delta_par, lambda_par)
 p_recalc <- pkkw(q_calc, alpha_par, beta_par, delta_par, lambda_par)
 print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
 #> [1] "Original p: 0.75  Recalculated p: 0.75"
-# abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
+#> [1] TRUE
 
 # Boundary conditions
 print(qkkw(c(0, 1), alpha_par, beta_par, delta_par, lambda_par)) # Should be 0, 1
 #> [1] 0 1
 print(qkkw(c(-Inf, 0), alpha_par, beta_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
 #> [1] 0 1
-# }
 ```

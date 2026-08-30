@@ -47,11 +47,16 @@ dbkw(x, alpha = 1, beta = 1, gamma = 1, delta = 0, log = FALSE)
 A vector of density values (\\f(x)\\) or log-density values
 (\\\log(f(x))\\). The length of the result is determined by the
 recycling rule applied to the arguments (`x`, `alpha`, `beta`, `gamma`,
-`delta`). Returns `0` (or `-Inf` if `log = TRUE`) for `x` outside the
-interval (0, 1). An out-of-bound or missing parameter is an error, not a
-return value: the wrapper stops with a message naming the parameter. An
-infinite parameter is not currently intercepted there and reaches the
-C++ layer, which treats it as invalid.
+`delta`). Returns `0` (or `-Inf` if `log = TRUE`) for `x` strictly
+outside the interval \[0, 1\]. At the closed boundaries `x = 0` and
+`x = 1` the limiting density is returned rather than `0`, following the
+convention of base R's density functions (compare
+[`dbeta`](https://rdrr.io/r/stats/Beta.html)); depending on the
+parameters that limit is `0`, a finite positive value, or `Inf`. An
+out-of-bound or missing parameter is an error, not a return value: the
+wrapper stops with a message naming the parameter. An infinite parameter
+is not currently intercepted there and reaches the C++ layer, which
+treats it as invalid.
 
 ## Details
 
@@ -73,11 +78,14 @@ stability.
 ## References
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. *Journal of Statistical Computation and Simulation*
+distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
@@ -88,6 +96,14 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`rbkw`](https://evandeilton.github.io/gkwdist/reference/rbkw.md) (other
 BKw functions),
 
+Other density functions:
+[`dbeta_()`](https://evandeilton.github.io/gkwdist/reference/dbeta_.md),
+[`dekw()`](https://evandeilton.github.io/gkwdist/reference/dekw.md),
+[`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md),
+[`dkkw()`](https://evandeilton.github.io/gkwdist/reference/dkkw.md),
+[`dkw()`](https://evandeilton.github.io/gkwdist/reference/dkw.md),
+[`dmc()`](https://evandeilton.github.io/gkwdist/reference/dmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -95,7 +111,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Example values
 x_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -143,5 +158,4 @@ legend("topright",
   col = c("blue", "red", "green"), lty = 1, bty = "n"
 )
 
-# }
 ```

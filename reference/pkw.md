@@ -77,10 +77,12 @@ The implementation uses the closed-form expression for efficiency.
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type
 distribution with some tractability advantages. *Statistical
 Methodology*, *6*(1), 70-81.
+[doi:10.1016/j.stamet.2008.04.001](https://doi.org/10.1016/j.stamet.2008.04.001)
 
 ## See also
 
@@ -93,6 +95,14 @@ Methodology*, *6*(1), 70-81.
 [`rkw`](https://evandeilton.github.io/gkwdist/reference/rkw.md) (other
 Kw functions), [`pbeta`](https://rdrr.io/r/stats/Beta.html)
 
+Other cumulative distribution functions:
+[`pbeta_()`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
+[`pbkw()`](https://evandeilton.github.io/gkwdist/reference/pbkw.md),
+[`pekw()`](https://evandeilton.github.io/gkwdist/reference/pekw.md),
+[`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md),
+[`pkkw()`](https://evandeilton.github.io/gkwdist/reference/pkkw.md),
+[`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -100,7 +110,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -151,5 +160,4 @@ legend("bottomright",
   col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
 )
 
-# }
 ```

@@ -19,11 +19,11 @@ beta (\(\beta\))."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/gkwdist.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/into-gkwdist.html">Introduction to gkwdist: Generalized Kumaraswamy Distribution Family</a></li>
-    <li><a class="dropdown-item" href="../articles/theory-gkwdist.html">On the Statistical Properties and Computational Inference of the Generalized Kumaraswamy Distribution Family</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/theory-gkwdist.html">On the Statistical Properties and Computational Inference of the Generalized Kumaraswamy Distribution Family</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -98,9 +98,11 @@ generation method (<code><a href="rgkw.html">rgkw</a></code>) evaluated at \(\ga
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Kumaraswamy, P. (1980). A generalized probability density function for
-double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2), 79-88.</p>
+double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2), 79-88.
+<a href="https://doi.org/10.1016/0022-1694%2880%2990036-0" class="external-link">doi:10.1016/0022-1694(80)90036-0</a></p>
 <p>Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
-with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(1), 70-81.</p>
+with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(1), 70-81.
+<a href="https://doi.org/10.1016/j.stamet.2008.04.001" class="external-link">doi:10.1016/j.stamet.2008.04.001</a></p>
 <p>Devroye, L. (1986). <em>Non-Uniform Random Variate Generation</em>. Springer-Verlag.
 (General methods for random variate generation).</p>
     </div>
@@ -108,7 +110,14 @@ with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="rgkw.html">rgkw</a></code> (parent distribution random generation),
 <code><a href="dkw.html">dkw</a></code>, <code><a href="pkw.html">pkw</a></code>, <code><a href="qkw.html">qkw</a></code> (other Kw functions),
-<code><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></code></p></div>
+<code><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></code></p>
+<p>Other random generation functions:
+<code><a href="rbeta_.html">rbeta_()</a></code>,
+<code><a href="rbkw.html">rbkw()</a></code>,
+<code><a href="rekw.html">rekw()</a></code>,
+<code><a href="rgkw.html">rgkw()</a></code>,
+<code><a href="rkkw.html">rkkw()</a></code>,
+<code><a href="rmc.html">rmc()</a></code></p></div>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
@@ -117,8 +126,7 @@ with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2029</span><span class="op">)</span> <span class="co"># for reproducibility</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2029</span><span class="op">)</span> <span class="co"># for reproducibility</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Generate 1000 random values from a specific Kw distribution</span></span></span>
 <span class="r-in"><span><span class="va">alpha_par</span> <span class="op">&lt;-</span> <span class="fl">2.0</span></span></span>
@@ -169,7 +177,6 @@ with some tractability advantages. <em>Statistical Methodology</em>, <em>6</em>(
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">x_sample_gkw</span><span class="op">)</span><span class="op">)</span> <span class="co"># Should be similar</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.00568 0.30017 0.45069 0.45469 0.59646 0.95381 </span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

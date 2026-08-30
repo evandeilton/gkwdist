@@ -77,10 +77,13 @@ implemented directly.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 (Note: Specific Hessian formulas might be derived or sourced from
 additional references).
@@ -97,6 +100,14 @@ additional references).
 (density for BKw), [`optim`](https://rdrr.io/r/stats/optim.html),
 [`hessian`](https://rdrr.io/pkg/numDeriv/man/hessian.html) (for
 numerical Hessian comparison).
+
+Other Hessian functions:
+[`hsbeta()`](https://evandeilton.github.io/gkwdist/reference/hsbeta.md),
+[`hsekw()`](https://evandeilton.github.io/gkwdist/reference/hsekw.md),
+[`hsgkw()`](https://evandeilton.github.io/gkwdist/reference/hsgkw.md),
+[`hskkw()`](https://evandeilton.github.io/gkwdist/reference/hskkw.md),
+[`hskw()`](https://evandeilton.github.io/gkwdist/reference/hskw.md),
+[`hsmc()`](https://evandeilton.github.io/gkwdist/reference/hsmc.md)
 
 ## Author
 

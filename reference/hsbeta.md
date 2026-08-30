@@ -68,6 +68,8 @@ Univariate Distributions, Volume 2* (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 (Note: Specific Hessian formulas might be derived or sourced from
 additional references).
@@ -89,6 +91,14 @@ additional references).
 [`hessian`](https://rdrr.io/pkg/numDeriv/man/hessian.html) (for
 numerical Hessian comparison),
 [`trigamma`](https://rdrr.io/r/base/Special.html).
+
+Other Hessian functions:
+[`hsbkw()`](https://evandeilton.github.io/gkwdist/reference/hsbkw.md),
+[`hsekw()`](https://evandeilton.github.io/gkwdist/reference/hsekw.md),
+[`hsgkw()`](https://evandeilton.github.io/gkwdist/reference/hsgkw.md),
+[`hskkw()`](https://evandeilton.github.io/gkwdist/reference/hskkw.md),
+[`hskw()`](https://evandeilton.github.io/gkwdist/reference/hskw.md),
+[`hsmc()`](https://evandeilton.github.io/gkwdist/reference/hsmc.md)
 
 ## Author
 

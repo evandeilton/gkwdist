@@ -25,11 +25,11 @@ This function is suitable for maximum likelihood estimation."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/gkwdist.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/into-gkwdist.html">Introduction to gkwdist: Generalized Kumaraswamy Distribution Family</a></li>
-    <li><a class="dropdown-item" href="../articles/theory-gkwdist.html">On the Statistical Properties and Computational Inference of the Generalized Kumaraswamy Distribution Family</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/theory-gkwdist.html">On the Statistical Properties and Computational Inference of the Generalized Kumaraswamy Distribution Family</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -81,7 +81,11 @@ between 0 and 1 (exclusive).</p></dd>
     <p>Returns a single <code>double</code> value representing the negative
 log-likelihood (\(-\ell(\theta|\mathbf{x})\)). Returns <code>Inf</code>
 if any parameter values in <code>par</code> are invalid according to their
-constraints, or if any value in <code>data</code> is not in the interval (0, 1).</p>
+constraints, or if any value in <code>data</code> is not in the interval (0, 1);
+in the latter case a warning naming <code>data</code> is also signaled, because
+an infinite objective offers an optimizer no gradient direction to follow
+and more often means a sample on the wrong scale than a genuine fit
+failure.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -111,7 +115,9 @@ computed using log-gamma functions (<code><a href="https://rdrr.io/r/base/Specia
     <p>Johnson, N. L., Kotz, S., &amp; Balakrishnan, N. (1995). <em>Continuous Univariate
 Distributions, Volume 2</em> (2nd ed.). Wiley.</p>
 <p>Cordeiro, G. M., &amp; de Castro, M. (2011). A new family of generalized
-distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
+distributions. <em>Journal of Statistical Computation and Simulation</em>,
+<em>81</em>(7), 883-898.
+<a href="https://doi.org/10.1080/00949650903530745" class="external-link">doi:10.1080/00949650903530745</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -119,7 +125,14 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,</p>
 <code><a href="dbeta_.html">dbeta_</a></code>, <code><a href="pbeta_.html">pbeta_</a></code>, <code><a href="qbeta_.html">qbeta_</a></code>, <code><a href="rbeta_.html">rbeta_</a></code>,
 <code><a href="grbeta.html">grbeta</a></code> (gradient),
 <code><a href="hsbeta.html">hsbeta</a></code> (Hessian),
-<code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></code>, <code><a href="https://rdrr.io/r/base/Special.html" class="external-link">lbeta</a></code>.</p></div>
+<code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></code>, <code><a href="https://rdrr.io/r/base/Special.html" class="external-link">lbeta</a></code>.</p>
+<p>Other log-likelihood functions:
+<code><a href="llbkw.html">llbkw()</a></code>,
+<code><a href="llekw.html">llekw()</a></code>,
+<code><a href="llgkw.html">llgkw()</a></code>,
+<code><a href="llkkw.html">llkkw()</a></code>,
+<code><a href="llkw.html">llkw()</a></code>,
+<code><a href="llmc.html">llmc()</a></code></p></div>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

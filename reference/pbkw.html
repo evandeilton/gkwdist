@@ -25,11 +25,11 @@ a special case of the Generalized Kumaraswamy (GKw) distribution where
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/gkwdist.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/into-gkwdist.html">Introduction to gkwdist: Generalized Kumaraswamy Distribution Family</a></li>
-    <li><a class="dropdown-item" href="../articles/theory-gkwdist.html">On the Statistical Properties and Computational Inference of the Generalized Kumaraswamy Distribution Family</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/theory-gkwdist.html">On the Statistical Properties and Computational Inference of the Generalized Kumaraswamy Distribution Family</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -138,15 +138,25 @@ This is evaluated using the <code><a href="https://rdrr.io/r/stats/Beta.html" cl
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Cordeiro, G. M., &amp; de Castro, M. (2011). A new family of generalized
-distributions. <em>Journal of Statistical Computation and Simulation</em></p>
+distributions. <em>Journal of Statistical Computation and Simulation</em>,
+<em>81</em>(7), 883-898.
+<a href="https://doi.org/10.1080/00949650903530745" class="external-link">doi:10.1080/00949650903530745</a></p>
 <p>Kumaraswamy, P. (1980). A generalized probability density function for
-double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2), 79-88.</p>
+double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2), 79-88.
+<a href="https://doi.org/10.1016/0022-1694%2880%2990036-0" class="external-link">doi:10.1016/0022-1694(80)90036-0</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="pgkw.html">pgkw</a></code> (parent distribution CDF),
 <code><a href="dbkw.html">dbkw</a></code>, <code><a href="qbkw.html">qbkw</a></code>, <code><a href="rbkw.html">rbkw</a></code> (other BKw functions),
-<code><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">pbeta</a></code></p></div>
+<code><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">pbeta</a></code></p>
+<p>Other cumulative distribution functions:
+<code><a href="pbeta_.html">pbeta_()</a></code>,
+<code><a href="pekw.html">pekw()</a></code>,
+<code><a href="pgkw.html">pgkw()</a></code>,
+<code><a href="pkkw.html">pkkw()</a></code>,
+<code><a href="pkw.html">pkw()</a></code>,
+<code><a href="pmc.html">pmc()</a></code></p></div>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
@@ -155,8 +165,7 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="co"># Example values</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example values</span></span></span>
 <span class="r-in"><span><span class="va">q_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">alpha_par</span> <span class="op">&lt;-</span> <span class="fl">2.0</span></span></span>
 <span class="r-in"><span><span class="va">beta_par</span> <span class="op">&lt;-</span> <span class="fl">1.5</span></span></span>
@@ -204,7 +213,6 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 <span class="r-in"><span>  xlab <span class="op">=</span> <span class="st">"q"</span>, ylab <span class="op">=</span> <span class="st">"F(q)"</span>, col <span class="op">=</span> <span class="st">"blue"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="pbkw-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -1,7 +1,7 @@
-# Cumulative Distribution Function (CDF) of the kkw Distribution
+# Cumulative Distribution Function (CDF) of the KKw Distribution
 
 Computes the cumulative distribution function (CDF), \\P(X \le q)\\, for
-the Kumaraswamy-Kumaraswamy (kkw) distribution with parameters `alpha`
+the Kumaraswamy-Kumaraswamy (KKw) distribution with parameters `alpha`
 (\\\alpha\\), `beta` (\\\beta\\), `delta` (\\\delta\\), and `lambda`
 (\\\lambda\\). This distribution is defined on the interval (0, 1).
 
@@ -69,7 +69,7 @@ treats it as invalid.
 
 ## Details
 
-The Kumaraswamy-Kumaraswamy (kkw) distribution is a special case of the
+The Kumaraswamy-Kumaraswamy (KKw) distribution is a special case of the
 five-parameter Generalized Kumaraswamy distribution
 ([`pgkw`](https://evandeilton.github.io/gkwdist/reference/pgkw.md))
 obtained by setting the shape parameter \\\gamma = 1\\.
@@ -78,7 +78,7 @@ The CDF of the GKw distribution is \\F\_{GKw}(q) = I\_{y(q)}(\gamma,
 \delta+1)\\, where \\y(q) = \[1-(1-q^{\alpha})^{\beta}\]^{\lambda}\\ and
 \\I_x(a,b)\\ is the regularized incomplete beta function
 ([`pbeta`](https://rdrr.io/r/stats/Beta.html)). Setting \\\gamma=1\\
-utilizes the property \\I_x(1, b) = 1 - (1-x)^b\\, yielding the kkw CDF:
+utilizes the property \\I_x(1, b) = 1 - (1-x)^b\\, yielding the KKw CDF:
 \$\$ F(q; \alpha, \beta, \delta, \lambda) = 1 - \bigl\\1 - \bigl\[1 -
 (1 - q^\alpha)^\beta\bigr\]^\lambda\bigr\\^{\delta + 1} \$\$ for \\0 \<
 q \< 1\\.
@@ -89,11 +89,14 @@ handles `lower.tail` and `log.p` arguments appropriately.
 ## References
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. *Journal of Statistical Computation and Simulation*
+distributions. *Journal of Statistical Computation and Simulation*,
+*81*(7), 883-898.
+[doi:10.1080/00949650903530745](https://doi.org/10.1080/00949650903530745)
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 79-88.
+[doi:10.1016/0022-1694(80)90036-0](https://doi.org/10.1016/0022-1694%2880%2990036-0)
 
 ## See also
 
@@ -104,6 +107,14 @@ double-bounded random processes. *Journal of Hydrology*, *46*(1-2),
 [`rkkw`](https://evandeilton.github.io/gkwdist/reference/rkkw.md),
 [`pbeta`](https://rdrr.io/r/stats/Beta.html)
 
+Other cumulative distribution functions:
+[`pbeta_()`](https://evandeilton.github.io/gkwdist/reference/pbeta_.md),
+[`pbkw()`](https://evandeilton.github.io/gkwdist/reference/pbkw.md),
+[`pekw()`](https://evandeilton.github.io/gkwdist/reference/pekw.md),
+[`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md),
+[`pkw()`](https://evandeilton.github.io/gkwdist/reference/pkw.md),
+[`pmc()`](https://evandeilton.github.io/gkwdist/reference/pmc.md)
+
 ## Author
 
 Lopes, J. E.
@@ -111,7 +122,6 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -156,9 +166,8 @@ print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near ze
 curve_q <- seq(0.01, 0.99, length.out = 200)
 curve_p <- pkkw(curve_q, alpha_par, beta_par, delta_par, lambda_par)
 plot(curve_q, curve_p,
-  type = "l", main = "kkw CDF Example",
+  type = "l", main = "KKw CDF Example",
   xlab = "q", ylab = "F(q)", col = "blue", ylim = c(0, 1)
 )
 
-# }
 ```
