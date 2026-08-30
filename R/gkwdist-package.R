@@ -47,12 +47,15 @@
 #'     \eqn{(\gamma, \delta, \lambda)}. Set \eqn{\alpha = \beta = 1} in GKw.
 #'     Also known as Beta-Power distribution.}
 #'   \item{\strong{Kumaraswamy (Kw)}}{2 parameters: \eqn{(\alpha, \beta)}.
-#'     Set \eqn{\gamma = \delta = \lambda = 1} in GKw. Has closed-form CDF
-#'     and quantile function.}
+#'     Set \eqn{\gamma = 1}, \eqn{\delta = 0} and \eqn{\lambda = 1} in GKw.
+#'     Has closed-form CDF and quantile function.}
 #'   \item{\strong{Beta}}{2 parameters: \eqn{(\gamma, \delta)}.
 #'     Set \eqn{\alpha = \beta = \lambda = 1} in GKw. Classical beta
 #'     distribution with \code{shape1 = gamma}, \code{shape2 = delta + 1}.}
-#'   \item{\strong{Uniform}}{0 parameters. Set all shape parameters to 1.}
+#'   \item{\strong{Uniform}}{0 parameters. Set \eqn{\alpha = \beta = \gamma =
+#'     \lambda = 1} and \eqn{\delta = 0} in GKw. Note that \eqn{\delta = 0}, not
+#'     \eqn{\delta = 1}, is the neutral value: \eqn{\delta} enters the density
+#'     through \eqn{B(\gamma, \delta+1)} and \eqn{z^{\delta}}.}
 #' }
 #' }
 #'
