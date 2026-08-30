@@ -345,6 +345,15 @@ rescaled before use.</code></pre>
 <div class="section level3">
 <h3 id="documentation-fixes-1-1-6">Documentation Fixes<a class="anchor" aria-label="anchor" href="#documentation-fixes-1-1-6"></a></h3>
 <ul><li>
+<p><strong>Two sub-family constraints in the package overview were mathematically wrong</strong> (<code>R/gkwdist-package.R</code>): the “Distribution Family Hierarchy” block gave Kumaraswamy as “GKw with ” and the uniform as “set all shape parameters to 1”. In this parameterization  is neutral at <strong>0</strong>, not 1 – it enters through  and  – so both statements name a different distribution than the one they claim:</p>
+<pre><code>claim                                        max |difference|
+Kw(2.3, 3.1)  vs  GKw(2.3, 3.1, 1, 1, 1)              0.887
+Kw(2.3, 3.1)  vs  GKw(2.3, 3.1, 1, 0, 1)              0        &lt;- correct
+Uniform       vs  GKw(1, 1, 1, 1, 1)                  0.960
+Uniform       vs  GKw(1, 1, 1, 0, 1)                  0        &lt;- correct</code></pre>
+<p>This is the same off-by-one that the deleted <code>_pkgdown.yml</code> block carried, and it survived there because the overview was the one place where the constraints were never checked against the implementation. Every other statement of a sub-family constraint in the package – the <code>\itemize</code> list in <code><a href="../reference/dgkw.html">dgkw()</a></code>’s details, the <code>@details</code> of each family, and the <code>desc</code> lines in <code>_pkgdown.yml</code> – was verified numerically in this pass and is correct. The uniform entry now says explicitly why  rather than  is the neutral value, since that is what the two wrong statements had in common.</p>
+</li>
+<li>
 <p><strong>The <code>@return</code> of all seven densities denied the boundary contract</strong> (<code>R/gkw.R</code>, <code>R/bkw.R</code>, <code>R/kkw.R</code>, <code>R/ekw.R</code>, <code>R/bpmc.R</code>, <code>R/kw.R</code>, <code>R/beta.R</code>): once the closed boundaries began carrying the limiting density, the seven blocks still promised <code>0</code> – or <code>-Inf</code> on the log scale – for <code>x</code> “outside the interval (0, 1)”. No rendered page mentioned the limit at all, and 0 and 1 lie outside that open interval, so the sentence denied precisely the two points the change had added:</p>
 <pre><code>call                              documented   returned
 dgkw(c(0, 1), 0.5, 0.5, 1, 0, 1)       0 0      Inf Inf

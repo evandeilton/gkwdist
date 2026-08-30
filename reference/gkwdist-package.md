@@ -58,8 +58,8 @@ The GKw distribution nests seven important sub-models:
 
 - **Kumaraswamy (Kw)**:
 
-  2 parameters: \\(\alpha, \beta)\\. Set \\\gamma = \delta = \lambda =
-  1\\ in GKw. Has closed-form CDF and quantile function.
+  2 parameters: \\(\alpha, \beta)\\. Set \\\gamma = 1\\, \\\delta = 0\\
+  and \\\lambda = 1\\ in GKw. Has closed-form CDF and quantile function.
 
 - **Beta**:
 
@@ -69,7 +69,10 @@ The GKw distribution nests seven important sub-models:
 
 - **Uniform**:
 
-  0 parameters. Set all shape parameters to 1.
+  0 parameters. Set \\\alpha = \beta = \gamma = \lambda = 1\\ and
+  \\\delta = 0\\ in GKw. Note that \\\delta = 0\\, not \\\delta = 1\\,
+  is the neutral value: \\\delta\\ enters the density through
+  \\B(\gamma, \delta+1)\\ and \\z^{\delta}\\.
 
 ## Distribution Functions
 

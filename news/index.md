@@ -1149,6 +1149,30 @@
 
 ### Documentation Fixes
 
+- **Two sub-family constraints in the package overview were
+  mathematically wrong** (`R/gkwdist-package.R`): the “Distribution
+  Family Hierarchy” block gave Kumaraswamy as “GKw with ” and the
+  uniform as “set all shape parameters to 1”. In this parameterization
+  is neutral at **0**, not 1 – it enters through and – so both
+  statements name a different distribution than the one they claim:
+
+      claim                                        max |difference|
+      Kw(2.3, 3.1)  vs  GKw(2.3, 3.1, 1, 1, 1)              0.887
+      Kw(2.3, 3.1)  vs  GKw(2.3, 3.1, 1, 0, 1)              0        <- correct
+      Uniform       vs  GKw(1, 1, 1, 1, 1)                  0.960
+      Uniform       vs  GKw(1, 1, 1, 0, 1)                  0        <- correct
+
+  This is the same off-by-one that the deleted `_pkgdown.yml` block
+  carried, and it survived there because the overview was the one place
+  where the constraints were never checked against the implementation.
+  Every other statement of a sub-family constraint in the package – the
+  `\itemize` list in
+  [`dgkw()`](https://evandeilton.github.io/gkwdist/reference/dgkw.md)’s
+  details, the `@details` of each family, and the `desc` lines in
+  `_pkgdown.yml` – was verified numerically in this pass and is correct.
+  The uniform entry now says explicitly why rather than is the neutral
+  value, since that is what the two wrong statements had in common.
+
 - **The `@return` of all seven densities denied the boundary contract**
   (`R/gkw.R`, `R/bkw.R`, `R/kkw.R`, `R/ekw.R`, `R/bpmc.R`, `R/kw.R`,
   `R/beta.R`): once the closed boundaries began carrying the limiting

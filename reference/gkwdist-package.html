@@ -108,8 +108,8 @@ Also known as Beta-Power distribution.</p></dd>
 
 <dt><strong>Kumaraswamy (Kw)</strong></dt>
 <dd><p>2 parameters: \((\alpha, \beta)\).
-Set \(\gamma = \delta = \lambda = 1\) in GKw. Has closed-form CDF
-and quantile function.</p></dd>
+Set \(\gamma = 1\), \(\delta = 0\) and \(\lambda = 1\) in GKw.
+Has closed-form CDF and quantile function.</p></dd>
 
 <dt><strong>Beta</strong></dt>
 <dd><p>2 parameters: \((\gamma, \delta)\).
@@ -117,7 +117,10 @@ Set \(\alpha = \beta = \lambda = 1\) in GKw. Classical beta
 distribution with <code>shape1 = gamma</code>, <code>shape2 = delta + 1</code>.</p></dd>
 
 <dt><strong>Uniform</strong></dt>
-<dd><p>0 parameters. Set all shape parameters to 1.</p></dd>
+<dd><p>0 parameters. Set \(\alpha = \beta = \gamma =
+    \lambda = 1\) and \(\delta = 0\) in GKw. Note that \(\delta = 0\), not
+\(\delta = 1\), is the neutral value: \(\delta\) enters the density
+through \(B(\gamma, \delta+1)\) and \(z^{\delta}\).</p></dd>
 
 
 </dl></div>
