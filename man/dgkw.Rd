@@ -32,7 +32,11 @@ A vector of density values (\eqn{f(x)}) or log-density values
 (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 rule applied to the arguments (\code{x}, \code{alpha}, \code{beta},
 \code{gamma}, \code{delta}, \code{lambda}). Returns \code{0} (or \code{-Inf}
-if \code{log = TRUE}) for \code{x} outside the interval (0, 1).
+if \code{log = TRUE}) for \code{x} strictly outside the interval [0, 1]. At
+the closed boundaries \code{x = 0} and \code{x = 1} the limiting density is
+returned rather than \code{0}, following the convention of base R's density
+functions (compare \code{\link[stats]{dbeta}}); depending on the parameters
+that limit is \code{0}, a finite positive value, or \code{Inf}.
 An out-of-bound or missing parameter is an error, not a return value: the
 wrapper stops with a message naming the parameter. An infinite parameter
 is not currently intercepted there and reaches the C++ layer, which
@@ -70,7 +74,6 @@ The function includes checks for valid parameters and input values \code{x}.
 It uses numerical stabilization for \code{x} close to 0 or 1.
 }
 \examples{
-\donttest{
 # Simple density evaluation at a point
 dgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1) # Kw case
 
@@ -84,7 +87,7 @@ pdf_kw <- dgkw(x_vals, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 pdf_beta <- dgkw(x_vals, alpha = 1, beta = 1, gamma = 2, delta = 3, lambda = 1)
 # Compare with stats::dbeta
 pdf_beta_check <- stats::dbeta(x_vals, shape1 = 2, shape2 = 3 + 1)
-# max(abs(pdf_beta - pdf_beta_check)) # Should be close to zero
+print(max(abs(pdf_beta - pdf_beta_check))) # Should be close to zero
 
 # Exponentiated Kumaraswamy (gamma=1, delta=0)
 pdf_ekw <- dgkw(x_vals, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 2)
@@ -104,23 +107,37 @@ legend("topright",
 log.pdf_val <- dgkw(0.5, 2, 3, 1, 0, 1, log = TRUE)
 print(log.pdf_val)
 print(log(dgkw(0.5, 2, 3, 1, 0, 1))) # Should match
-}
 
 }
 \references{
+Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+generalized Kumaraswamy distribution. \emph{arXiv preprint arXiv:1004.0911}.
+\doi{10.48550/arXiv.1004.0911}
+
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
 \emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
 \code{\link[stats]{dbeta}}, \code{\link[stats]{integrate}}
+
+Other density functions:
+\code{\link[=dbeta_]{dbeta_()}},
+\code{\link[=dbkw]{dbkw()}},
+\code{\link[=dekw]{dekw()}},
+\code{\link[=dkkw]{dkkw()}},
+\code{\link[=dkw]{dkw()}},
+\code{\link[=dmc]{dmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{density}
+\concept{density functions}
+\concept{generalized kumaraswamy}
 \keyword{distribution}

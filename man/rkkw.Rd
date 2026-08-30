@@ -2,7 +2,7 @@
 % Please edit documentation in R/kkw.R
 \name{rkkw}
 \alias{rkkw}
-\title{Random Number Generation for the kkw Distribution}
+\title{Random Number Generation for the KKw Distribution}
 \usage{
 rkkw(n, alpha = 1, beta = 1, delta = 0, lambda = 1)
 }
@@ -23,7 +23,7 @@ Default: 0.0.}
 Default: 1.0.}
 }
 \value{
-A vector of length \code{n} containing random deviates from the kkw
+A vector of length \code{n} containing random deviates from the KKw
 distribution. The length of the result is determined by \code{n} and the
 recycling rule applied to the parameters (\code{alpha}, \code{beta},
 \code{delta}, \code{lambda}). An out-of-bound or missing parameter is an
@@ -32,7 +32,7 @@ parameter. An infinite parameter is not currently intercepted there and
 reaches the C++ layer, which treats it as invalid.
 }
 \description{
-Generates random deviates from the Kumaraswamy-Kumaraswamy (kkw)
+Generates random deviates from the Kumaraswamy-Kumaraswamy (KKw)
 distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}).
 This distribution is a special case of the Generalized Kumaraswamy (GKw)
@@ -40,7 +40,7 @@ distribution where the parameter \eqn{\gamma = 1}.
 }
 \details{
 The generation method uses the inverse transform method based on the quantile
-function (\code{\link{qkkw}}). The kkw quantile function is:
+function (\code{\link{qkkw}}). The KKw quantile function is:
 \deqn{
 Q(p) = \left[ 1 - \left\{ 1 - \left[ 1 - (1 - p)^{1/(\delta+1)} \right]^{1/\lambda} \right\}^{1/\beta} \right]^{1/\alpha}
 }
@@ -57,10 +57,9 @@ Substituting this \eqn{W} into the GKw transformation yields the same result
 as evaluating \eqn{Q(1-V)} above (noting \eqn{p = 1-V} is also Uniform).
 }
 \examples{
-\donttest{
 set.seed(2025) # for reproducibility
 
-# Generate 1000 random values from a specific kkw distribution
+# Generate 1000 random values from a specific KKw distribution
 alpha_par <- 2.0
 beta_par <- 3.0
 delta_par <- 0.5
@@ -75,7 +74,7 @@ summary(x_sample_kkw)
 # Histogram of generated values compared to theoretical density
 hist(x_sample_kkw,
   breaks = 30, freq = FALSE, # freq=FALSE for density
-  main = "Histogram of kkw Sample", xlab = "x", ylim = c(0, 3.5)
+  main = "Histogram of KKw Sample", xlab = "x", ylim = c(0, 3.5)
 )
 curve(
   dkkw(x,
@@ -96,7 +95,7 @@ emp_quantiles <- quantile(x_sample_kkw, prob_points, type = 7) # type 7 is defau
 
 plot(theo_quantiles, emp_quantiles,
   pch = 16, cex = 0.8,
-  main = "Q-Q Plot for kkw Distribution",
+  main = "Q-Q Plot for KKw Distribution",
   xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
 )
 abline(a = 0, b = 1, col = "blue", lty = 2)
@@ -111,15 +110,17 @@ print("Summary stats for rkkw sample:")
 print(summary(x_sample_kkw))
 print("Summary stats for rgkw(gamma=1) sample:")
 print(summary(x_sample_gkw)) # Should be similar
-}
 
 }
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verlag.
 (General methods for random variate generation).
@@ -128,9 +129,18 @@ Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verla
 \code{\link{rgkw}} (parent distribution random generation),
 \code{\link{dkkw}}, \code{\link{pkkw}}, \code{\link{qkkw}},
 \code{\link[stats]{runif}}, \code{\link[stats]{rbeta}}
+
+Other random generation functions:
+\code{\link[=rbeta_]{rbeta_()}},
+\code{\link[=rbkw]{rbkw()}},
+\code{\link[=rekw]{rekw()}},
+\code{\link[=rgkw]{rgkw()}},
+\code{\link[=rkw]{rkw()}},
+\code{\link[=rmc]{rmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{kumaraswamy-kumaraswamy}
+\concept{random generation functions}
 \keyword{distribution}
-\keyword{random}

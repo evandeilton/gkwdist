@@ -23,10 +23,15 @@ A vector of density values (\eqn{f(x)}) or log-density values
 (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 rule applied to the arguments (\code{x}, \code{alpha}, \code{beta}).
 Returns \code{0} (or \code{-Inf} if \code{log = TRUE}) for \code{x}
-outside the interval (0, 1). An out-of-bound or missing parameter is an
-error, not a return value: the wrapper stops with a message naming the
-parameter. An infinite parameter is not currently intercepted there and
-reaches the C++ layer, which treats it as invalid.
+strictly outside the interval [0, 1]. At the closed boundaries
+\code{x = 0} and \code{x = 1} the limiting density is returned rather than
+\code{0}, following the convention of base R's density functions (compare
+\code{\link[stats]{dbeta}}); depending on the parameters that limit is
+\code{0}, a finite positive value, or \code{Inf}.
+An out-of-bound or missing parameter is an error, not a return value: the
+wrapper stops with a message naming the parameter. An infinite parameter is
+not currently intercepted there and reaches the C++ layer, which treats it
+as invalid.
 }
 \description{
 Computes the probability density function (PDF) for the two-parameter
@@ -49,7 +54,6 @@ the Kumaraswamy-Kumaraswamy (\code{\link{dkkw}}) with \eqn{\delta = 0}
 and \eqn{\lambda = 1}.
 }
 \examples{
-\donttest{
 # Example values
 x_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -88,23 +92,32 @@ legend("top",
   col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
 )
 }
-}
 \references{
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 70-81.
+\doi{10.1016/j.stamet.2008.04.001}
 }
 \seealso{
 \code{\link{dgkw}} (parent distribution density),
 \code{\link{dekw}}, \code{\link{dkkw}},
 \code{\link{pkw}}, \code{\link{qkw}}, \code{\link{rkw}} (other Kw functions),
 \code{\link[stats]{dbeta}}
+
+Other density functions:
+\code{\link[=dbeta_]{dbeta_()}},
+\code{\link[=dbkw]{dbkw()}},
+\code{\link[=dekw]{dekw()}},
+\code{\link[=dgkw]{dgkw()}},
+\code{\link[=dkkw]{dkkw()}},
+\code{\link[=dmc]{dmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{density}
+\concept{density functions}
+\concept{kumaraswamy}
 \keyword{distribution}
-\keyword{kumaraswamy}

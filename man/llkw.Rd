@@ -2,7 +2,7 @@
 % Please edit documentation in R/kw.R
 \name{llkw}
 \alias{llkw}
-\title{Negative Log-Likelihood of the Kumaraswamy (Kw) Distribution}
+\title{Negative Log-Likelihood for the Kumaraswamy (Kw) Distribution}
 \usage{
 llkw(par, data)
 }
@@ -17,7 +17,11 @@ between 0 and 1 (exclusive).}
 Returns a single \code{double} value representing the negative
 log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
 if any parameter values in \code{par} are invalid according to their
-constraints, or if any value in \code{data} is not in the interval (0, 1).
+constraints, or if any value in \code{data} is not in the interval (0, 1);
+in the latter case a warning naming \code{data} is also signaled, because
+an infinite objective offers an optimizer no gradient direction to follow
+and more often means a sample on the wrong scale than a genuine fit
+failure.
 }
 \description{
 Computes the negative log-likelihood function for the two-parameter
@@ -431,9 +435,11 @@ legend("topright",
 \references{
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 70-81.
+\doi{10.1016/j.stamet.2008.04.001}
 }
 \seealso{
 \code{\link{llgkw}} (parent distribution negative log-likelihood),
@@ -441,11 +447,19 @@ with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 
 \code{\link{grkw}} (gradient),
 \code{\link{hskw}} (Hessian),
 \code{\link[stats]{optim}}
+
+Other log-likelihood functions:
+\code{\link[=llbeta]{llbeta()}},
+\code{\link[=llbkw]{llbkw()}},
+\code{\link[=llekw]{llekw()}},
+\code{\link[=llgkw]{llgkw()}},
+\code{\link[=llkkw]{llkkw()}},
+\code{\link[=llmc]{llmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{kumaraswamy}
+\concept{log-likelihood functions}
 \keyword{distribution}
-\keyword{kumaraswamy}
-\keyword{likelihood}
 \keyword{optimize}

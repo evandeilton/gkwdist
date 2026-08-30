@@ -68,7 +68,6 @@ via \code{qbeta(p, gamma, delta + 1, ...)} while respecting the
 GKw quantile function (\code{\link{qgkw}}) evaluated with \eqn{\alpha=1, \beta=1}.
 }
 \examples{
-\donttest{
 # Example values
 p_vals <- c(0.1, 0.5, 0.9)
 gamma_par <- 2.0
@@ -108,32 +107,43 @@ p_check <- 0.75
 q_calc <- qmc(p_check, gamma_par, delta_par, lambda_par) # Use lambda != 1
 p_recalc <- pmc(q_calc, gamma_par, delta_par, lambda_par)
 print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-# abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
 
 # Boundary conditions
 print(qmc(c(0, 1), gamma_par, delta_par, lambda_par)) # Should be 0, 1
 print(qmc(c(-Inf, 0), gamma_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
-}
 
 }
 \references{
 McDonald, J. B. (1984). Some generalized functions for the size distribution
-of income. \emph{Econometrica}, 52(3), 647-663.
+of income. \emph{Econometrica}, \emph{52}(3), 647-663.
+\doi{10.2307/1913469}
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{qgkw}} (parent distribution quantile function),
 \code{\link{dmc}}, \code{\link{pmc}}, \code{\link{rmc}} (other Mc functions),
 \code{\link[stats]{qbeta}}
+
+Other quantile functions:
+\code{\link[=qbeta_]{qbeta_()}},
+\code{\link[=qbkw]{qbkw()}},
+\code{\link[=qekw]{qekw()}},
+\code{\link[=qgkw]{qgkw()}},
+\code{\link[=qkkw]{qkkw()}},
+\code{\link[=qkw]{qkw()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{mcdonald}
+\concept{quantile functions}
 \keyword{distribution}
-\keyword{mcdonald}
-\keyword{quantile}

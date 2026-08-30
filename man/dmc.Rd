@@ -2,7 +2,7 @@
 % Please edit documentation in R/bpmc.R
 \name{dmc}
 \alias{dmc}
-\title{Density of the McDonald (Mc)/Beta Power Distribution Distribution}
+\title{Density of the McDonald (Mc)/Beta Power Distribution}
 \usage{
 dmc(x, gamma = 1, delta = 0, lambda = 1, log = FALSE)
 }
@@ -26,10 +26,15 @@ A vector of density values (\eqn{f(x)}) or log-density values
 (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 rule applied to the arguments (\code{x}, \code{gamma}, \code{delta},
 \code{lambda}). Returns \code{0} (or \code{-Inf} if
-\code{log = TRUE}) for \code{x} outside the interval (0, 1). An out-of-bound or missing parameter is an
-error, not a return value: the wrapper stops with a message naming the
-parameter. An infinite parameter is not currently intercepted there and
-reaches the C++ layer, which treats it as invalid.
+\code{log = TRUE}) for \code{x} strictly outside the interval [0, 1]. At the
+closed boundaries \code{x = 0} and \code{x = 1} the limiting density is
+returned rather than \code{0}, following the convention of base R's density
+functions (compare \code{\link[stats]{dbeta}}); depending on the parameters
+that limit is \code{0}, a finite positive value, or \code{Inf}.
+An out-of-bound or missing parameter is an error, not a return value: the
+wrapper stops with a message naming the parameter. An infinite parameter is
+not currently intercepted there and reaches the C++ layer, which treats it
+as invalid.
 }
 \description{
 Computes the probability density function (PDF) for the McDonald (Mc)
@@ -55,7 +60,6 @@ to the standard Beta distribution with parameters \eqn{\gamma} and
 \eqn{\delta+1}.
 }
 \examples{
-\donttest{
 # Example values
 x_vals <- c(0.2, 0.5, 0.8)
 gamma_par <- 2.0
@@ -95,27 +99,38 @@ legend("topright",
   legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
   col = c("blue", "red", "green"), lty = 1, bty = "n"
 )
-}
 
 }
 \references{
 McDonald, J. B. (1984). Some generalized functions for the size distribution
-of income. \emph{Econometrica}, 52(3), 647-663.
+of income. \emph{Econometrica}, \emph{52}(3), 647-663.
+\doi{10.2307/1913469}
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{dgkw}} (parent distribution density),
 \code{\link{pmc}}, \code{\link{qmc}}, \code{\link{rmc}} (other Mc functions),
 \code{\link[stats]{dbeta}}
+
+Other density functions:
+\code{\link[=dbeta_]{dbeta_()}},
+\code{\link[=dbkw]{dbkw()}},
+\code{\link[=dekw]{dekw()}},
+\code{\link[=dgkw]{dgkw()}},
+\code{\link[=dkkw]{dkkw()}},
+\code{\link[=dkw]{dkw()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{density}
+\concept{density functions}
+\concept{mcdonald}
 \keyword{distribution}
-\keyword{mcdonald}

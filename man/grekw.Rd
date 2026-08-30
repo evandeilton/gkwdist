@@ -351,9 +351,12 @@ Kumaraswamy distribution. \emph{Journal of the Franklin Institute}, \emph{349}(3
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 (Note: Specific gradient formulas might be derived or sourced from additional references).
 }
@@ -364,11 +367,19 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \code{\link{dekw}} (density for EKw),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{grad}} (for numerical gradient comparison).
+
+Other gradient functions:
+\code{\link[=grbeta]{grbeta()}},
+\code{\link[=grbkw]{grbkw()}},
+\code{\link[=grgkw]{grgkw()}},
+\code{\link[=grkkw]{grkkw()}},
+\code{\link[=grkw]{grkw()}},
+\code{\link[=grmc]{grmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{exponentiated kumaraswamy}
+\concept{gradient functions}
 \keyword{distribution}
-\keyword{gradient}
-\keyword{likelihood}
 \keyword{optimize}

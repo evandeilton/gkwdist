@@ -17,7 +17,11 @@ between 0 and 1 (exclusive).}
 Returns a single \code{double} value representing the negative
 log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
 if any parameter values in \code{par} are invalid according to their
-constraints, or if any value in \code{data} is not in the interval (0, 1).
+constraints, or if any value in \code{data} is not in the interval (0, 1);
+in the latter case a warning naming \code{data} is also signaled, because
+an infinite objective offers an optimizer no gradient direction to follow
+and more often means a sample on the wrong scale than a genuine fit
+failure.
 }
 \description{
 Computes the negative log-likelihood function for the standard Beta
@@ -328,6 +332,8 @@ Distributions, Volume 2} (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 }
 \seealso{
 \code{\link{llgkw}}, \code{\link{llmc}} (related negative log-likelihoods),
@@ -335,11 +341,19 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \code{\link{grbeta}} (gradient),
 \code{\link{hsbeta}} (Hessian),
 \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}.
+
+Other log-likelihood functions:
+\code{\link[=llbkw]{llbkw()}},
+\code{\link[=llekw]{llekw()}},
+\code{\link[=llgkw]{llgkw()}},
+\code{\link[=llkkw]{llkkw()}},
+\code{\link[=llkw]{llkw()}},
+\code{\link[=llmc]{llmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{beta}
+\concept{beta}
+\concept{log-likelihood functions}
 \keyword{distribution}
-\keyword{likelihood}
 \keyword{optimize}

@@ -66,7 +66,6 @@ matching the style of other functions in the related families. Boundary
 conditions (p=0, p=1) are handled explicitly.
 }
 \examples{
-\donttest{
 # Example values
 p_vals <- c(0.1, 0.5, 0.9)
 gamma_par <- 2.0 # Corresponds to shape1
@@ -109,12 +108,11 @@ p_check <- 0.75
 q_calc <- qbeta_(p_check, gamma_par, delta_par)
 p_recalc <- pbeta_(q_calc, gamma_par, delta_par)
 print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-# abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
 
 # Boundary conditions
 print(qbeta_(c(0, 1), gamma_par, delta_par)) # Should be 0, 1
 print(qbeta_(c(-Inf, 0), gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
-}
 
 }
 \references{
@@ -123,16 +121,26 @@ Distributions, Volume 2} (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 }
 \seealso{
 \code{\link[stats]{qbeta}} (standard R implementation),
 \code{\link{qgkw}} (parent distribution quantile function),
 \code{\link{qmc}} (McDonald/Beta Power quantile function),
 \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{rbeta_}}.
+
+Other quantile functions:
+\code{\link[=qbkw]{qbkw()}},
+\code{\link[=qekw]{qekw()}},
+\code{\link[=qgkw]{qgkw()}},
+\code{\link[=qkkw]{qkkw()}},
+\code{\link[=qkw]{qkw()}},
+\code{\link[=qmc]{qmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{beta}
+\concept{beta}
+\concept{quantile functions}
 \keyword{distribution}
-\keyword{quantile}

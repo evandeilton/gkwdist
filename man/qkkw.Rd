@@ -2,7 +2,7 @@
 % Please edit documentation in R/kkw.R
 \name{qkkw}
 \alias{qkkw}
-\title{Quantile Function of the Kumaraswamy-Kumaraswamy (kkw) Distribution}
+\title{Quantile Function of the Kumaraswamy-Kumaraswamy (KKw) Distribution}
 \usage{
 qkkw(
   p,
@@ -55,7 +55,7 @@ Boundary return values are adjusted accordingly for \code{lower.tail = FALSE}.
 }
 \description{
 Computes the quantile function (inverse CDF) for the Kumaraswamy-Kumaraswamy
-(kkw) distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
+(KKw) distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}).
 It finds the value \code{q} such that \eqn{P(X \le q) = p}. This distribution
 is a special case of the Generalized Kumaraswamy (GKw) distribution where
@@ -63,7 +63,7 @@ the parameter \eqn{\gamma = 1}.
 }
 \details{
 The quantile function \eqn{Q(p)} is the inverse of the CDF \eqn{F(q)}. The CDF
-for the kkw (\eqn{\gamma=1}) distribution is (see \code{\link{pkkw}}):
+for the KKw (\eqn{\gamma=1}) distribution is (see \code{\link{pkkw}}):
 \deqn{
 F(q) = 1 - \bigl\{1 - \bigl[1 - (1 - q^\alpha)^\beta\bigr]^\lambda\bigr\}^{\delta + 1}
 }
@@ -76,7 +76,6 @@ The function uses this closed-form expression and correctly handles the
 appropriately before applying the formula.
 }
 \examples{
-\donttest{
 # Example values
 p_vals <- c(0.1, 0.5, 0.9)
 alpha_par <- 2.0
@@ -118,28 +117,39 @@ p_check <- 0.75
 q_calc <- qkkw(p_check, alpha_par, beta_par, delta_par, lambda_par)
 p_recalc <- pkkw(q_calc, alpha_par, beta_par, delta_par, lambda_par)
 print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-# abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
 
 # Boundary conditions
 print(qkkw(c(0, 1), alpha_par, beta_par, delta_par, lambda_par)) # Should be 0, 1
 print(qkkw(c(-Inf, 0), alpha_par, beta_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
-}
 
 }
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{qgkw}} (parent distribution quantile function),
 \code{\link{dkkw}}, \code{\link{pkkw}}, \code{\link{rkkw}},
 \code{\link[stats]{qbeta}}
+
+Other quantile functions:
+\code{\link[=qbeta_]{qbeta_()}},
+\code{\link[=qbkw]{qbkw()}},
+\code{\link[=qekw]{qekw()}},
+\code{\link[=qgkw]{qgkw()}},
+\code{\link[=qkw]{qkw()}},
+\code{\link[=qmc]{qmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{kumaraswamy-kumaraswamy}
+\concept{quantile functions}
 \keyword{distribution}
-\keyword{quantile}

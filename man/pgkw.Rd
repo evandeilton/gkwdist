@@ -2,7 +2,7 @@
 % Please edit documentation in R/gkw.R
 \name{pgkw}
 \alias{pgkw}
-\title{Generalized Kumaraswamy Distribution CDF}
+\title{Cumulative Distribution Function (CDF) of the Generalized Kumaraswamy Distribution}
 \usage{
 pgkw(
   q,
@@ -78,7 +78,6 @@ The function utilizes numerical algorithms for computing the regularized
 incomplete beta function accurately, especially near the boundaries.
 }
 \examples{
-\donttest{
 # Simple CDF evaluation
 prob <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1) # Kw case
 print(prob)
@@ -116,7 +115,7 @@ cdf_kw <- pgkw(x_seq, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 cdf_beta_equiv <- pgkw(x_seq, alpha = 1, beta = 1, gamma = 2, delta = 3, lambda = 1)
 # Compare with stats::pbeta
 cdf_beta_check <- stats::pbeta(x_seq, shape1 = 2, shape2 = 3 + 1)
-# max(abs(cdf_beta_equiv - cdf_beta_check)) # Should be close to zero
+print(max(abs(cdf_beta_equiv - cdf_beta_check))) # Should be close to zero
 
 plot(x_seq, cdf_kw,
   type = "l", ylim = c(0, 1),
@@ -128,20 +127,35 @@ legend("bottomright",
   col = c("blue", "red"), lty = c(1, 2), bty = "n"
 )
 }
-}
 \references{
+Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+generalized Kumaraswamy distribution. \emph{arXiv preprint arXiv:1004.0911}.
+\doi{10.48550/arXiv.1004.0911}
+
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{dgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
 \code{\link[stats]{pbeta}}
+
+Other cumulative distribution functions:
+\code{\link[=pbeta_]{pbeta_()}},
+\code{\link[=pbkw]{pbkw()}},
+\code{\link[=pekw]{pekw()}},
+\code{\link[=pkkw]{pkkw()}},
+\code{\link[=pkw]{pkw()}},
+\code{\link[=pmc]{pmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{cumulative}
+\concept{cumulative distribution functions}
+\concept{generalized kumaraswamy}
 \keyword{distribution}

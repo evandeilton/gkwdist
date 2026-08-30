@@ -17,10 +17,13 @@ between 0 and 1 (exclusive).}
 }
 \value{
 Returns a single \code{double} value representing the negative
-log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns a large positive
-value (e.g., \code{Inf}) if any parameter values in \code{par} are invalid
-according to their constraints, or if any value in \code{data} is not in
-the interval (0, 1).
+log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
+if any parameter values in \code{par} are invalid according to their
+constraints, or if any value in \code{data} is not in the interval (0, 1);
+in the latter case a warning naming \code{data} is also signaled, because
+an infinite objective offers an optimizer no gradient direction to follow
+and more often means a sample on the wrong scale than a genuine fit
+failure.
 }
 \description{
 Computes the negative log-likelihood function for the five-parameter
@@ -547,20 +550,36 @@ grid(col = "gray90")
 
 }
 \references{
+Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+generalized Kumaraswamy distribution. \emph{arXiv preprint arXiv:1004.0911}.
+\doi{10.48550/arXiv.1004.0911}
+
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{dgkw}}, \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
 \code{\link{grgkw}}, \code{\link{hsgkw}} (gradient and Hessian),
 \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}, \code{\link[base]{log1p}}
+
+Other log-likelihood functions:
+\code{\link[=llbeta]{llbeta()}},
+\code{\link[=llbkw]{llbkw()}},
+\code{\link[=llekw]{llekw()}},
+\code{\link[=llkkw]{llkkw()}},
+\code{\link[=llkw]{llkw()}},
+\code{\link[=llmc]{llmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{generalized kumaraswamy}
+\concept{log-likelihood functions}
 \keyword{distribution}
-\keyword{likelihood}
 \keyword{optimize}

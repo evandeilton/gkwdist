@@ -20,13 +20,15 @@
 # 1. DENSITY FUNCTION (dkkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Density of the Kumaraswamy-Kumaraswamy (kkw) Distribution
+#' @title Density of the Kumaraswamy-Kumaraswamy (KKw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution density
+#' @family density functions
+#' @concept kumaraswamy-kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the probability density function (PDF) for the Kumaraswamy-Kumaraswamy
-#' (kkw) distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
+#' (KKw) distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 #' (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}).
 #' This distribution is defined on the interval (0, 1).
 #'
@@ -46,13 +48,18 @@
 #'   (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 #'   rule applied to the arguments (\code{x}, \code{alpha}, \code{beta},
 #'   \code{delta}, \code{lambda}). Returns \code{0} (or \code{-Inf} if
-#'   \code{log = TRUE}) for \code{x} outside the interval (0, 1). An out-of-bound or missing parameter is an
-#'   error, not a return value: the wrapper stops with a message naming the
-#'   parameter. An infinite parameter is not currently intercepted there and
-#'   reaches the C++ layer, which treats it as invalid.
+#'   \code{log = TRUE}) for \code{x} strictly outside the interval \[0, 1\]. At the
+#'   closed boundaries \code{x = 0} and \code{x = 1} the limiting density is
+#'   returned rather than \code{0}, following the convention of base R's density
+#'   functions (compare \code{\link[stats]{dbeta}}); depending on the parameters
+#'   that limit is \code{0}, a finite positive value, or \code{Inf}.
+#'   An out-of-bound or missing parameter is an error, not a return value: the
+#'   wrapper stops with a message naming the parameter. An infinite parameter is
+#'   not currently intercepted there and reaches the C++ layer, which treats it
+#'   as invalid.
 #'
 #' @details
-#' The Kumaraswamy-Kumaraswamy (kkw) distribution is a special case of the
+#' The Kumaraswamy-Kumaraswamy (KKw) distribution is a special case of the
 #' five-parameter Generalized Kumaraswamy distribution (\code{\link{dgkw}})
 #' obtained by setting the parameter \eqn{\gamma = 1}.
 #'
@@ -67,10 +74,13 @@
 #'
 #' @references
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{dgkw}} (parent distribution density),
@@ -78,7 +88,6 @@
 #' \code{\link[stats]{dbeta}}
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' x_vals <- c(0.2, 0.5, 0.8)
 #' alpha_par <- 2.0
@@ -109,10 +118,9 @@
 #' curve_x <- seq(0.01, 0.99, length.out = 200)
 #' curve_y <- dkkw(curve_x, alpha_par, beta_par, delta_par, lambda_par)
 #' plot(curve_x, curve_y,
-#'   type = "l", main = "kkw Density Example",
+#'   type = "l", main = "KKw Density Example",
 #'   xlab = "x", ylab = "f(x)", col = "blue"
 #' )
-#' }
 #'
 #' @export
 dkkw <- function(x, alpha = 1, beta = 1, delta = 0, lambda = 1, log = FALSE) {
@@ -151,13 +159,15 @@ dkkw <- function(x, alpha = 1, beta = 1, delta = 0, lambda = 1, log = FALSE) {
 # 2. DISTRIBUTION FUNCTION (pkkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Cumulative Distribution Function (CDF) of the kkw Distribution
+#' @title Cumulative Distribution Function (CDF) of the KKw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution cumulative
+#' @family cumulative distribution functions
+#' @concept kumaraswamy-kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the cumulative distribution function (CDF), \eqn{P(X \le q)}, for the
-#' Kumaraswamy-Kumaraswamy (kkw) distribution with parameters \code{alpha}
+#' Kumaraswamy-Kumaraswamy (KKw) distribution with parameters \code{alpha}
 #' (\eqn{\alpha}), \code{beta} (\eqn{\beta}), \code{delta} (\eqn{\delta}),
 #' and \code{lambda} (\eqn{\lambda}). This distribution is defined on the
 #' interval (0, 1).
@@ -187,7 +197,7 @@ dkkw <- function(x, alpha = 1, beta = 1, delta = 0, lambda = 1, log = FALSE) {
 #'   reaches the C++ layer, which treats it as invalid.
 #'
 #' @details
-#' The Kumaraswamy-Kumaraswamy (kkw) distribution is a special case of the
+#' The Kumaraswamy-Kumaraswamy (KKw) distribution is a special case of the
 #' five-parameter Generalized Kumaraswamy distribution (\code{\link{pgkw}})
 #' obtained by setting the shape parameter \eqn{\gamma = 1}.
 #'
@@ -195,7 +205,7 @@ dkkw <- function(x, alpha = 1, beta = 1, delta = 0, lambda = 1, log = FALSE) {
 #' where \eqn{y(q) = [1-(1-q^{\alpha})^{\beta}]^{\lambda}} and \eqn{I_x(a,b)}
 #' is the regularized incomplete beta function (\code{\link[stats]{pbeta}}).
 #' Setting \eqn{\gamma=1} utilizes the property \eqn{I_x(1, b) = 1 - (1-x)^b},
-#' yielding the kkw CDF:
+#' yielding the KKw CDF:
 #' \deqn{
 #' F(q; \alpha, \beta, \delta, \lambda) = 1 - \bigl\{1 - \bigl[1 - (1 - q^\alpha)^\beta\bigr]^\lambda\bigr\}^{\delta + 1}
 #' }
@@ -206,10 +216,13 @@ dkkw <- function(x, alpha = 1, beta = 1, delta = 0, lambda = 1, log = FALSE) {
 #'
 #' @references
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{pgkw}} (parent distribution CDF),
@@ -217,7 +230,6 @@ dkkw <- function(x, alpha = 1, beta = 1, delta = 0, lambda = 1, log = FALSE) {
 #' \code{\link[stats]{pbeta}}
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' q_vals <- c(0.2, 0.5, 0.8)
 #' alpha_par <- 2.0
@@ -256,10 +268,9 @@ dkkw <- function(x, alpha = 1, beta = 1, delta = 0, lambda = 1, log = FALSE) {
 #' curve_q <- seq(0.01, 0.99, length.out = 200)
 #' curve_p <- pkkw(curve_q, alpha_par, beta_par, delta_par, lambda_par)
 #' plot(curve_q, curve_p,
-#'   type = "l", main = "kkw CDF Example",
+#'   type = "l", main = "KKw CDF Example",
 #'   xlab = "q", ylab = "F(q)", col = "blue", ylim = c(0, 1)
 #' )
-#' }
 #'
 #' @export
 pkkw <- function(q, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
@@ -302,13 +313,15 @@ pkkw <- function(q, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 # 3. QUANTILE FUNCTION (qkkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Quantile Function of the Kumaraswamy-Kumaraswamy (kkw) Distribution
+#' @title Quantile Function of the Kumaraswamy-Kumaraswamy (KKw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution quantile
+#' @family quantile functions
+#' @concept kumaraswamy-kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the quantile function (inverse CDF) for the Kumaraswamy-Kumaraswamy
-#' (kkw) distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
+#' (KKw) distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 #' (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}).
 #' It finds the value \code{q} such that \eqn{P(X \le q) = p}. This distribution
 #' is a special case of the Generalized Kumaraswamy (GKw) distribution where
@@ -347,7 +360,7 @@ pkkw <- function(q, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #'
 #' @details
 #' The quantile function \eqn{Q(p)} is the inverse of the CDF \eqn{F(q)}. The CDF
-#' for the kkw (\eqn{\gamma=1}) distribution is (see \code{\link{pkkw}}):
+#' for the KKw (\eqn{\gamma=1}) distribution is (see \code{\link{pkkw}}):
 #' \deqn{
 #' F(q) = 1 - \bigl\{1 - \bigl[1 - (1 - q^\alpha)^\beta\bigr]^\lambda\bigr\}^{\delta + 1}
 #' }
@@ -362,9 +375,12 @@ pkkw <- function(q, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #' @references
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{qgkw}} (parent distribution quantile function),
@@ -372,7 +388,6 @@ pkkw <- function(q, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #' \code{\link[stats]{qbeta}}
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' p_vals <- c(0.1, 0.5, 0.9)
 #' alpha_par <- 2.0
@@ -414,12 +429,11 @@ pkkw <- function(q, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #' q_calc <- qkkw(p_check, alpha_par, beta_par, delta_par, lambda_par)
 #' p_recalc <- pkkw(q_calc, alpha_par, beta_par, delta_par, lambda_par)
 #' print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-#' # abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+#' print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
 #'
 #' # Boundary conditions
 #' print(qkkw(c(0, 1), alpha_par, beta_par, delta_par, lambda_par)) # Should be 0, 1
 #' print(qkkw(c(-Inf, 0), alpha_par, beta_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
-#' }
 #'
 #' @export
 qkkw <- function(p, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
@@ -467,12 +481,14 @@ qkkw <- function(p, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 # 4. RANDOM GENERATION (rkkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Random Number Generation for the kkw Distribution
+#' @title Random Number Generation for the KKw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution random
+#' @family random generation functions
+#' @concept kumaraswamy-kumaraswamy
+#' @keywords distribution
 #'
 #' @description
-#' Generates random deviates from the Kumaraswamy-Kumaraswamy (kkw)
+#' Generates random deviates from the Kumaraswamy-Kumaraswamy (KKw)
 #' distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 #' (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}).
 #' This distribution is a special case of the Generalized Kumaraswamy (GKw)
@@ -489,7 +505,7 @@ qkkw <- function(p, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #' @param lambda Shape parameter \code{lambda} > 0. Can be a scalar or a vector.
 #'   Default: 1.0.
 #'
-#' @return A vector of length \code{n} containing random deviates from the kkw
+#' @return A vector of length \code{n} containing random deviates from the KKw
 #'   distribution. The length of the result is determined by \code{n} and the
 #'   recycling rule applied to the parameters (\code{alpha}, \code{beta},
 #'   \code{delta}, \code{lambda}). An out-of-bound or missing parameter is an
@@ -499,7 +515,7 @@ qkkw <- function(p, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #'
 #' @details
 #' The generation method uses the inverse transform method based on the quantile
-#' function (\code{\link{qkkw}}). The kkw quantile function is:
+#' function (\code{\link{qkkw}}). The KKw quantile function is:
 #' \deqn{
 #' Q(p) = \left[ 1 - \left\{ 1 - \left[ 1 - (1 - p)^{1/(\delta+1)} \right]^{1/\lambda} \right\}^{1/\beta} \right]^{1/\alpha}
 #' }
@@ -517,10 +533,13 @@ qkkw <- function(p, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #'
 #' @references
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' Devroye, L. (1986). *Non-Uniform Random Variate Generation*. Springer-Verlag.
 #' (General methods for random variate generation).
@@ -531,10 +550,9 @@ qkkw <- function(p, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #' \code{\link[stats]{runif}}, \code{\link[stats]{rbeta}}
 #'
 #' @examples
-#' \donttest{
 #' set.seed(2025) # for reproducibility
 #'
-#' # Generate 1000 random values from a specific kkw distribution
+#' # Generate 1000 random values from a specific KKw distribution
 #' alpha_par <- 2.0
 #' beta_par <- 3.0
 #' delta_par <- 0.5
@@ -549,7 +567,7 @@ qkkw <- function(p, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #' # Histogram of generated values compared to theoretical density
 #' hist(x_sample_kkw,
 #'   breaks = 30, freq = FALSE, # freq=FALSE for density
-#'   main = "Histogram of kkw Sample", xlab = "x", ylim = c(0, 3.5)
+#'   main = "Histogram of KKw Sample", xlab = "x", ylim = c(0, 3.5)
 #' )
 #' curve(
 #'   dkkw(x,
@@ -570,7 +588,7 @@ qkkw <- function(p, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #'
 #' plot(theo_quantiles, emp_quantiles,
 #'   pch = 16, cex = 0.8,
-#'   main = "Q-Q Plot for kkw Distribution",
+#'   main = "Q-Q Plot for KKw Distribution",
 #'   xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
 #' )
 #' abline(a = 0, b = 1, col = "blue", lty = 2)
@@ -585,7 +603,6 @@ qkkw <- function(p, alpha = 1, beta = 1, delta = 0, lambda = 1, lower.tail = TRU
 #' print(summary(x_sample_kkw))
 #' print("Summary stats for rgkw(gamma=1) sample:")
 #' print(summary(x_sample_gkw)) # Should be similar
-#' }
 #'
 #' @export
 rkkw <- function(n, alpha = 1, beta = 1, delta = 0, lambda = 1) {
@@ -631,13 +648,15 @@ rkkw <- function(n, alpha = 1, beta = 1, delta = 0, lambda = 1) {
 # 5. NEGATIVE LOG-LIKELIHOOD (llkkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Negative Log-Likelihood for the kkw Distribution
+#' @title Negative Log-Likelihood for the KKw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize
+#' @family log-likelihood functions
+#' @concept kumaraswamy-kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the negative log-likelihood function for the Kumaraswamy-Kumaraswamy
-#' (kkw) distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
+#' (KKw) distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 #' (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}),
 #' given a vector of observations. This distribution is a special case of the
 #' Generalized Kumaraswamy (GKw) distribution where \eqn{\gamma = 1}.
@@ -651,10 +670,14 @@ rkkw <- function(n, alpha = 1, beta = 1, delta = 0, lambda = 1) {
 #' @return Returns a single \code{double} value representing the negative
 #'   log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
 #'   if any parameter values in \code{par} are invalid according to their
-#'   constraints, or if any value in \code{data} is not in the interval (0, 1).
+#'   constraints, or if any value in \code{data} is not in the interval (0, 1);
+#'   in the latter case a warning naming \code{data} is also signaled, because
+#'   an infinite objective offers an optimizer no gradient direction to follow
+#'   and more often means a sample on the wrong scale than a genuine fit
+#'   failure.
 #'
 #' @details
-#' The kkw distribution is the GKw distribution (\code{\link{dgkw}}) with \eqn{\gamma=1}.
+#' The KKw distribution is the GKw distribution (\code{\link{dgkw}}) with \eqn{\gamma=1}.
 #' Its probability density function (PDF) is:
 #' \deqn{
 #' f(x | \theta) = (\delta + 1) \lambda \alpha \beta x^{\alpha - 1} (1 - x^\alpha)^{\beta - 1} \bigl[1 - (1 - x^\alpha)^\beta\bigr]^{\lambda - 1} \bigl\{1 - \bigl[1 - (1 - x^\alpha)^\beta\bigr]^\lambda\bigr\}^{\delta}
@@ -679,9 +702,12 @@ rkkw <- function(n, alpha = 1, beta = 1, delta = 0, lambda = 1) {
 #' @references
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{llgkw}} (parent distribution negative log-likelihood),
@@ -1102,13 +1128,15 @@ llkkw <- function(par, data) {
 # 6. GRADIENT (grkkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Gradient of the Negative Log-Likelihood for the kkw Distribution
+#' @title Gradient of the Negative Log-Likelihood for the KKw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize gradient
+#' @family gradient functions
+#' @concept kumaraswamy-kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the gradient vector (vector of first partial derivatives) of the
-#' negative log-likelihood function for the Kumaraswamy-Kumaraswamy (kkw)
+#' negative log-likelihood function for the Kumaraswamy-Kumaraswamy (KKw)
 #' distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 #' (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}).
 #' This distribution is the special case of the Generalized Kumaraswamy (GKw)
@@ -1131,7 +1159,7 @@ llkkw <- function(par, data) {
 #'
 #' @details
 #' The components of the gradient vector of the negative log-likelihood
-#' (\eqn{-\nabla \ell(\theta | \mathbf{x})}) for the kkw (\eqn{\gamma=1}) model are:
+#' (\eqn{-\nabla \ell(\theta | \mathbf{x})}) for the KKw (\eqn{\gamma=1}) model are:
 #'
 #' \deqn{
 #' -\frac{\partial \ell}{\partial \alpha} = -\frac{n}{\alpha} - \sum_{i=1}^{n}\ln(x_i)
@@ -1167,14 +1195,17 @@ llkkw <- function(par, data) {
 #' @references
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #' @seealso
 #' \code{\link{grgkw}} (parent distribution gradient),
-#' \code{\link{llkkw}} (negative log-likelihood for kkw),
-#' \code{\link{hskkw}} (Hessian for kkw),
-#' \code{\link{dkkw}} (density for kkw),
+#' \code{\link{llkkw}} (negative log-likelihood for KKw),
+#' \code{\link{hskkw}} (Hessian for KKw),
+#' \code{\link{dkkw}} (density for KKw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{grad}} (for numerical gradient comparison).
 #'
@@ -1395,13 +1426,15 @@ grkkw <- function(par, data) {
 # 7. HESSIAN (hskkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Hessian Matrix of the Negative Log-Likelihood for the kkw Distribution
+#' @title Hessian Matrix of the Negative Log-Likelihood for the KKw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize hessian
+#' @family Hessian functions
+#' @concept kumaraswamy-kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the analytic 4x4 Hessian matrix (matrix of second partial derivatives)
-#' of the negative log-likelihood function for the Kumaraswamy-Kumaraswamy (kkw)
+#' of the negative log-likelihood function for the Kumaraswamy-Kumaraswamy (KKw)
 #' distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 #' (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}).
 #' This distribution is the special case of the Generalized Kumaraswamy (GKw)
@@ -1423,7 +1456,7 @@ grkkw <- function(par, data) {
 #'
 #' @details
 #' This function calculates the analytic second partial derivatives of the
-#' negative log-likelihood function based on the kkw log-likelihood
+#' negative log-likelihood function based on the KKw log-likelihood
 #' (\eqn{\gamma=1} case of GKw, see \code{\link{llkkw}}):
 #' \deqn{
 #' \ell(\theta | \mathbf{x}) = n[\ln(\delta+1) + \ln(\lambda) + \ln(\alpha) + \ln(\beta)]
@@ -1451,16 +1484,19 @@ grkkw <- function(par, data) {
 #'
 #' @references
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{hsgkw}} (parent distribution Hessian),
-#' \code{\link{llkkw}} (negative log-likelihood for kkw),
-#' \code{\link{grkkw}} (gradient for kkw),
-#' \code{\link{dkkw}} (density for kkw),
+#' \code{\link{llkkw}} (negative log-likelihood for KKw),
+#' \code{\link{grkkw}} (gradient for KKw),
+#' \code{\link{dkkw}} (density for KKw),
 #' \code{\link[stats]{optim}},
 #' \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).
 #'

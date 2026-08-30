@@ -29,10 +29,15 @@ A vector of density values (\eqn{f(x)}) or log-density values
 (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 rule applied to the arguments (\code{x}, \code{alpha}, \code{beta},
 \code{gamma}, \code{delta}). Returns \code{0} (or \code{-Inf} if
-\code{log = TRUE}) for \code{x} outside the interval (0, 1). An out-of-bound or missing parameter is an
-error, not a return value: the wrapper stops with a message naming the
-parameter. An infinite parameter is not currently intercepted there and
-reaches the C++ layer, which treats it as invalid.
+\code{log = TRUE}) for \code{x} strictly outside the interval [0, 1]. At the
+closed boundaries \code{x = 0} and \code{x = 1} the limiting density is
+returned rather than \code{0}, following the convention of base R's density
+functions (compare \code{\link[stats]{dbeta}}); depending on the parameters
+that limit is \code{0}, a finite positive value, or \code{Inf}.
+An out-of-bound or missing parameter is an error, not a return value: the
+wrapper stops with a message naming the parameter. An infinite parameter is
+not currently intercepted there and reaches the C++ layer, which treats it
+as invalid.
 }
 \description{
 Computes the probability density function (PDF) for the Beta-Kumaraswamy
@@ -56,7 +61,6 @@ Numerical evaluation is performed using algorithms similar to those for \code{dg
 ensuring stability.
 }
 \examples{
-\donttest{
 # Example values
 x_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -99,22 +103,33 @@ legend("topright",
   legend = c("gamma=0.5", "gamma=1.0", "gamma=2.0"),
   col = c("blue", "red", "green"), lty = 1, bty = "n"
 )
-}
 
 }
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{dgkw}} (parent distribution density),
 \code{\link{pbkw}}, \code{\link{qbkw}}, \code{\link{rbkw}} (other BKw functions),
+
+Other density functions:
+\code{\link[=dbeta_]{dbeta_()}},
+\code{\link[=dekw]{dekw()}},
+\code{\link[=dgkw]{dgkw()}},
+\code{\link[=dkkw]{dkkw()}},
+\code{\link[=dkw]{dkw()}},
+\code{\link[=dmc]{dmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{density}
+\concept{beta-kumaraswamy}
+\concept{density functions}
 \keyword{distribution}

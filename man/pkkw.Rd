@@ -2,7 +2,7 @@
 % Please edit documentation in R/kkw.R
 \name{pkkw}
 \alias{pkkw}
-\title{Cumulative Distribution Function (CDF) of the kkw Distribution}
+\title{Cumulative Distribution Function (CDF) of the KKw Distribution}
 \usage{
 pkkw(
   q,
@@ -48,13 +48,13 @@ reaches the C++ layer, which treats it as invalid.
 }
 \description{
 Computes the cumulative distribution function (CDF), \eqn{P(X \le q)}, for the
-Kumaraswamy-Kumaraswamy (kkw) distribution with parameters \code{alpha}
+Kumaraswamy-Kumaraswamy (KKw) distribution with parameters \code{alpha}
 (\eqn{\alpha}), \code{beta} (\eqn{\beta}), \code{delta} (\eqn{\delta}),
 and \code{lambda} (\eqn{\lambda}). This distribution is defined on the
 interval (0, 1).
 }
 \details{
-The Kumaraswamy-Kumaraswamy (kkw) distribution is a special case of the
+The Kumaraswamy-Kumaraswamy (KKw) distribution is a special case of the
 five-parameter Generalized Kumaraswamy distribution (\code{\link{pgkw}})
 obtained by setting the shape parameter \eqn{\gamma = 1}.
 
@@ -62,7 +62,7 @@ The CDF of the GKw distribution is \eqn{F_{GKw}(q) = I_{y(q)}(\gamma, \delta+1)}
 where \eqn{y(q) = [1-(1-q^{\alpha})^{\beta}]^{\lambda}} and \eqn{I_x(a,b)}
 is the regularized incomplete beta function (\code{\link[stats]{pbeta}}).
 Setting \eqn{\gamma=1} utilizes the property \eqn{I_x(1, b) = 1 - (1-x)^b},
-yielding the kkw CDF:
+yielding the KKw CDF:
 \deqn{
 F(q; \alpha, \beta, \delta, \lambda) = 1 - \bigl\{1 - \bigl[1 - (1 - q^\alpha)^\beta\bigr]^\lambda\bigr\}^{\delta + 1}
 }
@@ -72,7 +72,6 @@ The implementation uses this closed-form expression for efficiency and handles
 \code{lower.tail} and \code{log.p} arguments appropriately.
 }
 \examples{
-\donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -111,26 +110,37 @@ print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near ze
 curve_q <- seq(0.01, 0.99, length.out = 200)
 curve_p <- pkkw(curve_q, alpha_par, beta_par, delta_par, lambda_par)
 plot(curve_q, curve_p,
-  type = "l", main = "kkw CDF Example",
+  type = "l", main = "KKw CDF Example",
   xlab = "q", ylab = "F(q)", col = "blue", ylim = c(0, 1)
 )
-}
 
 }
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{pgkw}} (parent distribution CDF),
 \code{\link{dkkw}}, \code{\link{qkkw}}, \code{\link{rkkw}},
 \code{\link[stats]{pbeta}}
+
+Other cumulative distribution functions:
+\code{\link[=pbeta_]{pbeta_()}},
+\code{\link[=pbkw]{pbkw()}},
+\code{\link[=pekw]{pekw()}},
+\code{\link[=pgkw]{pgkw()}},
+\code{\link[=pkw]{pkw()}},
+\code{\link[=pmc]{pmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{cumulative}
+\concept{cumulative distribution functions}
+\concept{kumaraswamy-kumaraswamy}
 \keyword{distribution}

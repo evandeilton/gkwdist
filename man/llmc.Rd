@@ -18,7 +18,11 @@ between 0 and 1 (exclusive).}
 Returns a single \code{double} value representing the negative
 log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
 if any parameter values in \code{par} are invalid according to their
-constraints, or if any value in \code{data} is not in the interval (0, 1).
+constraints, or if any value in \code{data} is not in the interval (0, 1);
+in the latter case a warning naming \code{data} is also signaled, because
+an infinite objective offers an optimizer no gradient direction to follow
+and more often means a sample on the wrong scale than a genuine fit
+failure.
 }
 \description{
 Computes the negative log-likelihood function for the McDonald (Mc)
@@ -395,13 +399,17 @@ legend("topright",
 }
 \references{
 McDonald, J. B. (1984). Some generalized functions for the size distribution
-of income. \emph{Econometrica}, 52(3), 647-663.
+of income. \emph{Econometrica}, \emph{52}(3), 647-663.
+\doi{10.2307/1913469}
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{llgkw}} (parent distribution negative log-likelihood),
@@ -409,11 +417,19 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \code{\link{grmc}} (gradient),
 \code{\link{hsmc}} (Hessian),
 \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}
+
+Other log-likelihood functions:
+\code{\link[=llbeta]{llbeta()}},
+\code{\link[=llbkw]{llbkw()}},
+\code{\link[=llekw]{llekw()}},
+\code{\link[=llgkw]{llgkw()}},
+\code{\link[=llkkw]{llkkw()}},
+\code{\link[=llkw]{llkw()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{log-likelihood functions}
+\concept{mcdonald}
 \keyword{distribution}
-\keyword{likelihood}
-\keyword{mcdonald}
 \keyword{optimize}

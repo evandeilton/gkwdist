@@ -34,7 +34,9 @@
 
 #' @title Density of the Beta Distribution (gamma, delta+1 Parameterization)
 #' @author Lopes, J. E.
-#' @keywords distribution density beta
+#' @family density functions
+#' @concept beta
+#' @keywords distribution
 #'
 #' @description
 #' Computes the probability density function (PDF) for the standard Beta
@@ -57,10 +59,15 @@
 #'   (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 #'   rule applied to the arguments (\code{x}, \code{gamma}, \code{delta}).
 #'   Returns \code{0} (or \code{-Inf} if \code{log = TRUE}) for \code{x}
-#'   outside the interval (0, 1). An out-of-bound or missing parameter is an
-#'   error, not a return value: the wrapper stops with a message naming the
-#'   parameter. An infinite parameter is not currently intercepted there and
-#'   reaches the C++ layer, which treats it as invalid.
+#'   strictly outside the interval \[0, 1\]. At the closed boundaries
+#'   \code{x = 0} and \code{x = 1} the limiting density is returned rather than
+#'   \code{0}, matching \code{\link[stats]{dbeta}} with
+#'   \code{shape1 = gamma} and \code{shape2 = delta + 1}; depending on the
+#'   parameters that limit is \code{0}, a finite positive value, or \code{Inf}.
+#'   An out-of-bound or missing parameter is an error, not a return value: the
+#'   wrapper stops with a message naming the parameter. An infinite parameter is
+#'   not currently intercepted there and reaches the C++ layer, which treats it
+#'   as invalid.
 #'
 #' @details
 #' The probability density function (PDF) calculated by this function corresponds
@@ -87,6 +94,8 @@
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' @seealso
@@ -96,7 +105,6 @@
 #' \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}}.
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' x_vals <- c(0.2, 0.5, 0.8)
 #' gamma_par <- 2.0 # Corresponds to shape1
@@ -140,7 +148,6 @@
 #'   legend = c("dbeta_(gamma=2, delta=3)", "stats::dbeta(shape1=2, shape2=4)"),
 #'   col = c("blue", "red"), lty = c(1, 2), bty = "n"
 #' )
-#' }
 #'
 #' @export
 dbeta_ <- function(x, gamma = 1, delta = 0, log = FALSE) {
@@ -182,9 +189,11 @@ dbeta_ <- function(x, gamma = 1, delta = 0, log = FALSE) {
 # 2. DISTRIBUTION FUNCTION (pbeta_)
 # ----------------------------------------------------------------------------#
 
-#' @title CDF of the Beta Distribution (gamma, delta+1 Parameterization)
+#' @title Cumulative Distribution Function (CDF) of the Beta Distribution (gamma, delta+1 Parameterization)
 #' @author Lopes, J. E.
-#' @keywords distribution cumulative beta
+#' @family cumulative distribution functions
+#' @concept beta
+#' @keywords distribution
 #'
 #' @description
 #' Computes the cumulative distribution function (CDF), \eqn{F(q) = P(X \le q)},
@@ -237,6 +246,8 @@ dbeta_ <- function(x, gamma = 1, delta = 0, log = FALSE) {
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' @seealso
@@ -246,7 +257,6 @@ dbeta_ <- function(x, gamma = 1, delta = 0, log = FALSE) {
 #' \code{\link{dbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}}.
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' q_vals <- c(0.2, 0.5, 0.8)
 #' gamma_par <- 2.0 # Corresponds to shape1
@@ -295,7 +305,6 @@ dbeta_ <- function(x, gamma = 1, delta = 0, log = FALSE) {
 #'   legend = c("pbeta_(gamma=2, delta=3)", "stats::pbeta(shape1=2, shape2=4)"),
 #'   col = c("blue", "red"), lty = c(1, 2), bty = "n"
 #' )
-#' }
 #'
 #' @export
 pbeta_ <- function(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
@@ -334,7 +343,9 @@ pbeta_ <- function(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 
 #' @title Quantile Function of the Beta Distribution (gamma, delta+1 Parameterization)
 #' @author Lopes, J. E.
-#' @keywords distribution quantile beta
+#' @family quantile functions
+#' @concept beta
+#' @keywords distribution
 #'
 #' @description
 #' Computes the quantile function (inverse CDF) for the standard Beta
@@ -395,6 +406,8 @@ pbeta_ <- function(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' @seealso
@@ -404,7 +417,6 @@ pbeta_ <- function(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{rbeta_}}.
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' p_vals <- c(0.1, 0.5, 0.9)
 #' gamma_par <- 2.0 # Corresponds to shape1
@@ -447,12 +459,11 @@ pbeta_ <- function(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #' q_calc <- qbeta_(p_check, gamma_par, delta_par)
 #' p_recalc <- pbeta_(q_calc, gamma_par, delta_par)
 #' print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-#' # abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+#' print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
 #'
 #' # Boundary conditions
 #' print(qbeta_(c(0, 1), gamma_par, delta_par)) # Should be 0, 1
 #' print(qbeta_(c(-Inf, 0), gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
-#' }
 #'
 #' @export
 qbeta_ <- function(p, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
@@ -494,9 +505,11 @@ qbeta_ <- function(p, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 # 4. RANDOM GENERATION (rbeta_)
 # ----------------------------------------------------------------------------#
 
-#' @title Random Generation for the Beta Distribution (gamma, delta+1 Parameterization)
+#' @title Random Number Generation for the Beta Distribution (gamma, delta+1 Parameterization)
 #' @author Lopes, J. E.
-#' @keywords distribution random beta
+#' @family random generation functions
+#' @concept beta
+#' @keywords distribution
 #'
 #' @description
 #' Generates random deviates from the standard Beta distribution, using a
@@ -544,6 +557,8 @@ qbeta_ <- function(p, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' Devroye, L. (1986). *Non-Uniform Random Variate Generation*. Springer-Verlag.
@@ -555,7 +570,6 @@ qbeta_ <- function(p, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #' \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}.
 #'
 #' @examples
-#' \donttest{
 #' set.seed(2030) # for reproducibility
 #'
 #' # Generate 1000 samples using rbeta_
@@ -590,7 +604,6 @@ qbeta_ <- function(p, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE) {
 #' x_sample_mc <- rmc(1000, gamma = gamma_par, delta = delta_par, lambda = 1.0)
 #' print("Summary stats for rmc(l=1) sample:")
 #' print(summary(x_sample_mc))
-#' }
 #'
 #' @export
 rbeta_ <- function(n, gamma = 1, delta = 0) {
@@ -630,7 +643,9 @@ rbeta_ <- function(n, gamma = 1, delta = 0) {
 
 #' @title Negative Log-Likelihood for the Beta Distribution (gamma, delta+1 Parameterization)
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize beta
+#' @family log-likelihood functions
+#' @concept beta
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the negative log-likelihood function for the standard Beta
@@ -648,7 +663,11 @@ rbeta_ <- function(n, gamma = 1, delta = 0) {
 #' @return Returns a single \code{double} value representing the negative
 #'   log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
 #'   if any parameter values in \code{par} are invalid according to their
-#'   constraints, or if any value in \code{data} is not in the interval (0, 1).
+#'   constraints, or if any value in \code{data} is not in the interval (0, 1);
+#'   in the latter case a warning naming \code{data} is also signaled, because
+#'   an infinite objective offers an optimizer no gradient direction to follow
+#'   and more often means a sample on the wrong scale than a genuine fit
+#'   failure.
 #'
 #' @details
 #' This function calculates the negative log-likelihood for a Beta distribution
@@ -678,6 +697,8 @@ rbeta_ <- function(n, gamma = 1, delta = 0) {
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' @seealso
@@ -992,7 +1013,9 @@ llbeta <- function(par, data) {
 
 #' @title Gradient of the Negative Log-Likelihood for the Beta Distribution (gamma, delta+1 Parameterization)
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize gradient beta
+#' @family gradient functions
+#' @concept beta
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the gradient vector (vector of first partial derivatives) of the
@@ -1042,6 +1065,8 @@ llbeta <- function(par, data) {
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' (Note: Specific gradient formulas might be derived or sourced from additional references).
 #'
@@ -1269,7 +1294,9 @@ grbeta <- function(par, data) {
 
 #' @title Hessian Matrix of the Negative Log-Likelihood for the Beta Distribution (gamma, delta+1 Parameterization)
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize hessian beta
+#' @family Hessian functions
+#' @concept beta
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the analytic 2x2 Hessian matrix (matrix of second partial derivatives)
@@ -1324,6 +1351,8 @@ grbeta <- function(par, data) {
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' (Note: Specific Hessian formulas might be derived or sourced from additional references).
 #'

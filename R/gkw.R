@@ -22,7 +22,9 @@
 
 #' @title Density of the Generalized Kumaraswamy Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution density
+#' @family density functions
+#' @concept generalized kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the probability density function (PDF) for the five-parameter
@@ -46,7 +48,11 @@
 #'   (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 #'   rule applied to the arguments (\code{x}, \code{alpha}, \code{beta},
 #'   \code{gamma}, \code{delta}, \code{lambda}). Returns \code{0} (or \code{-Inf}
-#'   if \code{log = TRUE}) for \code{x} outside the interval (0, 1).
+#'   if \code{log = TRUE}) for \code{x} strictly outside the interval \[0, 1\]. At
+#'   the closed boundaries \code{x = 0} and \code{x = 1} the limiting density is
+#'   returned rather than \code{0}, following the convention of base R's density
+#'   functions (compare \code{\link[stats]{dbeta}}); depending on the parameters
+#'   that limit is \code{0}, a finite positive value, or \code{Inf}.
 #'   An out-of-bound or missing parameter is an error, not a return value: the
 #'   wrapper stops with a message naming the parameter. An infinite parameter
 #'   is not currently intercepted there and reaches the C++ layer, which
@@ -80,19 +86,24 @@
 #' It uses numerical stabilization for \code{x} close to 0 or 1.
 #'
 #' @references
+#' Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+#' generalized Kumaraswamy distribution. *arXiv preprint arXiv:1004.0911*.
+#' \doi{10.48550/arXiv.1004.0911}
+#'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
 #' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
 #' \code{\link[stats]{dbeta}}, \code{\link[stats]{integrate}}
 #'
 #' @examples
-#' \donttest{
 #' # Simple density evaluation at a point
 #' dgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1) # Kw case
 #'
@@ -106,7 +117,7 @@
 #' pdf_beta <- dgkw(x_vals, alpha = 1, beta = 1, gamma = 2, delta = 3, lambda = 1)
 #' # Compare with stats::dbeta
 #' pdf_beta_check <- stats::dbeta(x_vals, shape1 = 2, shape2 = 3 + 1)
-#' # max(abs(pdf_beta - pdf_beta_check)) # Should be close to zero
+#' print(max(abs(pdf_beta - pdf_beta_check))) # Should be close to zero
 #'
 #' # Exponentiated Kumaraswamy (gamma=1, delta=0)
 #' pdf_ekw <- dgkw(x_vals, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 2)
@@ -126,7 +137,6 @@
 #' log.pdf_val <- dgkw(0.5, 2, 3, 1, 0, 1, log = TRUE)
 #' print(log.pdf_val)
 #' print(log(dgkw(0.5, 2, 3, 1, 0, 1))) # Should match
-#' }
 #'
 #' @export
 dgkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
@@ -169,9 +179,11 @@ dgkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, log =
 # 2. DISTRIBUTION FUNCTION (pgkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Generalized Kumaraswamy Distribution CDF
+#' @title Cumulative Distribution Function (CDF) of the Generalized Kumaraswamy Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution cumulative
+#' @family cumulative distribution functions
+#' @concept generalized kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the cumulative distribution function (CDF) for the five-parameter
@@ -227,18 +239,24 @@ dgkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, log =
 #' incomplete beta function accurately, especially near the boundaries.
 #'
 #' @references
+#' Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+#' generalized Kumaraswamy distribution. *arXiv preprint arXiv:1004.0911*.
+#' \doi{10.48550/arXiv.1004.0911}
+#'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{dgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
 #' \code{\link[stats]{pbeta}}
 #'
 #' @examples
-#' \donttest{
 #' # Simple CDF evaluation
 #' prob <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1) # Kw case
 #' print(prob)
@@ -276,7 +294,7 @@ dgkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, log =
 #' cdf_beta_equiv <- pgkw(x_seq, alpha = 1, beta = 1, gamma = 2, delta = 3, lambda = 1)
 #' # Compare with stats::pbeta
 #' cdf_beta_check <- stats::pbeta(x_seq, shape1 = 2, shape2 = 3 + 1)
-#' # max(abs(cdf_beta_equiv - cdf_beta_check)) # Should be close to zero
+#' print(max(abs(cdf_beta_equiv - cdf_beta_check))) # Should be close to zero
 #'
 #' plot(x_seq, cdf_kw,
 #'   type = "l", ylim = c(0, 1),
@@ -287,7 +305,6 @@ dgkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1, log =
 #'   legend = c("Kw(2,3)", "Beta(2,4) equivalent"),
 #'   col = c("blue", "red"), lty = c(1, 2), bty = "n"
 #' )
-#' }
 #' @export
 pgkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
                  lower.tail = TRUE, log.p = FALSE) {
@@ -334,9 +351,11 @@ pgkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 # 3. QUANTILE FUNCTION (qgkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Generalized Kumaraswamy Distribution Quantile Function
+#' @title Quantile Function of the Generalized Kumaraswamy Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution quantile
+#' @family quantile functions
+#' @concept generalized kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the quantile function (inverse CDF) for the five-parameter
@@ -396,18 +415,24 @@ pgkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 #' arguments to powers are non-negative).
 #'
 #' @references
+#' Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+#' generalized Kumaraswamy distribution. *arXiv preprint arXiv:1004.0911*.
+#' \doi{10.48550/arXiv.1004.0911}
+#'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{dgkw}}, \code{\link{pgkw}}, \code{\link{rgkw}},
 #' \code{\link[stats]{qbeta}}
 #'
 #' @examples
-#' \donttest{
 #' # Basic quantile calculation (median)
 #' median_val <- qgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 #' print(median_val)
@@ -445,7 +470,6 @@ pgkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 #' x_val <- qgkw(p_val, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 #' p_check <- pgkw(x_val, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
 #' print(paste("Calculated p:", p_check, " (Expected:", p_val, ")"))
-#' }
 #' @export
 qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
                  lower.tail = TRUE, log.p = FALSE) {
@@ -497,9 +521,11 @@ qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 # 4. RANDOM GENERATION (rgkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Generalized Kumaraswamy Distribution Random Generation
+#' @title Random Number Generation for the Generalized Kumaraswamy Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution random
+#' @family random generation functions
+#' @concept generalized kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Generates random deviates from the five-parameter Generalized Kumaraswamy (GKw)
@@ -547,18 +573,24 @@ qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 #' maintained by handling potential edge cases during the transformations.
 #'
 #' @references
+#' Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+#' generalized Kumaraswamy distribution. *arXiv preprint arXiv:1004.0911*.
+#' \doi{10.48550/arXiv.1004.0911}
+#'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{dgkw}}, \code{\link{pgkw}}, \code{\link{qgkw}},
 #' \code{\link[stats]{rbeta}}, \code{\link[base]{set.seed}}
 #'
 #' @examples
-#' \donttest{
 #' set.seed(1234) # for reproducibility
 #'
 #' # Generate 1000 random values from a specific GKw distribution (Kw case)
@@ -593,7 +625,6 @@ qgkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1,
 #' samples_vec <- rgkw(n_param, alpha = alphas_vec, beta = 2, gamma = 1, delta = 0, lambda = 1)
 #' print(samples_vec) # One sample for each alpha value
 #' # Result length matches n=3, parameters alpha recycled accordingly
-#' }
 #' @export
 rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
   # Input validation
@@ -644,7 +675,9 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 
 #' @title Negative Log-Likelihood for the Generalized Kumaraswamy Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize
+#' @family log-likelihood functions
+#' @concept generalized kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the negative log-likelihood function for the five-parameter
@@ -660,10 +693,13 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #'   between 0 and 1 (exclusive).
 #'
 #' @return Returns a single \code{double} value representing the negative
-#'   log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns a large positive
-#'   value (e.g., \code{Inf}) if any parameter values in \code{par} are invalid
-#'   according to their constraints, or if any value in \code{data} is not in
-#'   the interval (0, 1).
+#'   log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
+#'   if any parameter values in \code{par} are invalid according to their
+#'   constraints, or if any value in \code{data} is not in the interval (0, 1);
+#'   in the latter case a warning naming \code{data} is also signaled, because
+#'   an infinite objective offers an optimizer no gradient direction to follow
+#'   and more often means a sample on the wrong scale than a genuine fit
+#'   failure.
 #'
 #' @details
 #' The probability density function (PDF) of the GKw distribution is given in
@@ -692,11 +728,18 @@ rgkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1) {
 #' }
 #'
 #' @references
+#' Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+#' generalized Kumaraswamy distribution. *arXiv preprint arXiv:1004.0911*.
+#' \doi{10.48550/arXiv.1004.0911}
+#'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{dgkw}}, \code{\link{pgkw}}, \code{\link{qgkw}}, \code{\link{rgkw}},
@@ -1227,7 +1270,9 @@ llgkw <- function(par, data) {
 
 #' @title Gradient of the Negative Log-Likelihood for the GKw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize gradient
+#' @family gradient functions
+#' @concept generalized kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the gradient vector (vector of partial derivatives) of the negative
@@ -1291,11 +1336,18 @@ llgkw <- function(par, data) {
 #' small or large numbers, often leveraging the Armadillo C++ library for efficiency.
 #'
 #' @references
+#' Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+#' generalized Kumaraswamy distribution. *arXiv preprint arXiv:1004.0911*.
+#' \doi{10.48550/arXiv.1004.0911}
+#'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{llgkw}} (negative log-likelihood),
@@ -1575,7 +1627,9 @@ grgkw <- function(par, data) {
 
 #' @title Hessian Matrix of the Negative Log-Likelihood for the GKw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize hessian
+#' @family Hessian functions
+#' @concept generalized kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the analytic Hessian matrix (matrix of second partial derivatives)
@@ -1630,11 +1684,18 @@ grgkw <- function(par, data) {
 #' efficiency, typically using C++.
 #'
 #' @references
+#' Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+#' generalized Kumaraswamy distribution. *arXiv preprint arXiv:1004.0911*.
+#' \doi{10.48550/arXiv.1004.0911}
+#'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-#' distributions. *Journal of Statistical Computation and Simulation*
+#' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #' @seealso
 #' \code{\link{llgkw}} (negative log-likelihood function),
 #' \code{\link{grgkw}} (gradient vector),

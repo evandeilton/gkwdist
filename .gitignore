@@ -17,3 +17,7 @@ TODO.md
 inst/paper/*.log
 inst/paper/*.aux
 inst/paper/*.out
+
+# Claude Code session state. .claude/worktrees/ holds linked git worktrees;
+# committing one records a gitlink that no clone can resolve.
+.claude/

@@ -59,7 +59,6 @@ appropriately before applying the formula. This is equivalent to the general
 GKw quantile function (\code{\link{qgkw}}) evaluated with \eqn{\gamma=1, \delta=0, \lambda=1}.
 }
 \examples{
-\donttest{
 # Example values
 p_vals <- c(0.1, 0.5, 0.9)
 alpha_par <- 2.0
@@ -92,29 +91,38 @@ p_check <- 0.75
 q_calc <- qkw(p_check, alpha_par, beta_par)
 p_recalc <- pkw(q_calc, alpha_par, beta_par)
 print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-# abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
 
 # Boundary conditions
 print(qkw(c(0, 1), alpha_par, beta_par)) # Should be 0, 1
 print(qkw(c(-Inf, 0), alpha_par, beta_par, log.p = TRUE)) # Should be 0, 1
-}
 
 }
 \references{
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 70-81.
+\doi{10.1016/j.stamet.2008.04.001}
 }
 \seealso{
 \code{\link{qgkw}} (parent distribution quantile function),
 \code{\link{dkw}}, \code{\link{pkw}}, \code{\link{rkw}} (other Kw functions),
 \code{\link[stats]{qbeta}}, \code{\link[stats]{qunif}}
+
+Other quantile functions:
+\code{\link[=qbeta_]{qbeta_()}},
+\code{\link[=qbkw]{qbkw()}},
+\code{\link[=qekw]{qekw()}},
+\code{\link[=qgkw]{qgkw()}},
+\code{\link[=qkkw]{qkkw()}},
+\code{\link[=qmc]{qmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{kumaraswamy}
+\concept{quantile functions}
 \keyword{distribution}
-\keyword{kumaraswamy}
-\keyword{quantile}

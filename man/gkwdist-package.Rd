@@ -508,7 +508,7 @@ RcppArmadillo: Accelerating R with high-performance C++ linear algebra.
 \code{\link[stats]{dbeta}} for beta distribution functions
 }
 \author{
-J. E. Lopes \email{evandeilton@gmail.com}
+Lopes, J. E. \email{evandeilton@gmail.com}
 \href{https://orcid.org/0009-0007-5887-4084}{ORCID: 0009-0007-5887-4084}
 
 LEG - Laboratory of Statistics and Geoinformation
@@ -517,4 +517,3 @@ PPGMNE - Graduate Program in Numerical Methods in Engineering
 
 Federal University of Paraná (UFPR), Brazil
 }
-\keyword{internal}

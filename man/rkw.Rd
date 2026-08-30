@@ -43,7 +43,6 @@ and applies this transformation. This is equivalent to the general GKw
 generation method (\code{\link{rgkw}}) evaluated at \eqn{\gamma=1, \delta=0, \lambda=1}.
 }
 \examples{
-\donttest{
 set.seed(2029) # for reproducibility
 
 # Generate 1000 random values from a specific Kw distribution
@@ -85,15 +84,16 @@ print("Summary stats for rkw sample:")
 print(summary(x_sample_kw))
 print("Summary stats for rgkw(gamma=1, delta=0, lambda=1) sample:")
 print(summary(x_sample_gkw)) # Should be similar
-}
 
 }
 \references{
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 70-81.
+\doi{10.1016/j.stamet.2008.04.001}
 
 Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verlag.
 (General methods for random variate generation).
@@ -102,10 +102,18 @@ Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verla
 \code{\link{rgkw}} (parent distribution random generation),
 \code{\link{dkw}}, \code{\link{pkw}}, \code{\link{qkw}} (other Kw functions),
 \code{\link[stats]{runif}}
+
+Other random generation functions:
+\code{\link[=rbeta_]{rbeta_()}},
+\code{\link[=rbkw]{rbkw()}},
+\code{\link[=rekw]{rekw()}},
+\code{\link[=rgkw]{rgkw()}},
+\code{\link[=rkkw]{rkkw()}},
+\code{\link[=rmc]{rmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{kumaraswamy}
+\concept{random generation functions}
 \keyword{distribution}
-\keyword{kumaraswamy}
-\keyword{random}

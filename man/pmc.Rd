@@ -2,7 +2,7 @@
 % Please edit documentation in R/bpmc.R
 \name{pmc}
 \alias{pmc}
-\title{CDF of the McDonald (Mc)/Beta Power Distribution}
+\title{Cumulative Distribution Function (CDF) of the McDonald (Mc)/Beta Power Distribution}
 \usage{
 pmc(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE)
 }
@@ -60,7 +60,6 @@ This is evaluated using the \code{\link[stats]{pbeta}} function as
 \code{pbeta(q^lambda, shape1 = gamma, shape2 = delta + 1)}.
 }
 \examples{
-\donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 gamma_par <- 2.0
@@ -110,27 +109,38 @@ legend("bottomright",
   legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
   col = c("blue", "red", "green"), lty = 1, bty = "n"
 )
-}
 
 }
 \references{
 McDonald, J. B. (1984). Some generalized functions for the size distribution
-of income. \emph{Econometrica}, 52(3), 647-663.
+of income. \emph{Econometrica}, \emph{52}(3), 647-663.
+\doi{10.2307/1913469}
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{pgkw}} (parent distribution CDF),
 \code{\link{dmc}}, \code{\link{qmc}}, \code{\link{rmc}} (other Mc functions),
 \code{\link[stats]{pbeta}}
+
+Other cumulative distribution functions:
+\code{\link[=pbeta_]{pbeta_()}},
+\code{\link[=pbkw]{pbkw()}},
+\code{\link[=pekw]{pekw()}},
+\code{\link[=pgkw]{pgkw()}},
+\code{\link[=pkkw]{pkkw()}},
+\code{\link[=pkw]{pkw()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{cumulative}
+\concept{cumulative distribution functions}
+\concept{mcdonald}
 \keyword{distribution}
-\keyword{mcdonald}

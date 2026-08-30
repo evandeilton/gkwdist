@@ -434,10 +434,13 @@ legend("topright",
 }
 \references{
 McDonald, J. B. (1984). Some generalized functions for the size distribution
-of income. \emph{Econometrica}, 52(3), 647-663.
+of income. \emph{Econometrica}, \emph{52}(3), 647-663.
+\doi{10.2307/1913469}
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 (Note: Specific Hessian formulas might be derived or sourced from additional references).
 }
@@ -449,12 +452,19 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),
 \code{\link[base]{trigamma}}.
+
+Other Hessian functions:
+\code{\link[=hsbeta]{hsbeta()}},
+\code{\link[=hsbkw]{hsbkw()}},
+\code{\link[=hsekw]{hsekw()}},
+\code{\link[=hsgkw]{hsgkw()}},
+\code{\link[=hskkw]{hskkw()}},
+\code{\link[=hskw]{hskw()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{Hessian functions}
+\concept{mcdonald}
 \keyword{distribution}
-\keyword{hessian}
-\keyword{likelihood}
-\keyword{mcdonald}
 \keyword{optimize}
