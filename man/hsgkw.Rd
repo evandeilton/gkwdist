@@ -403,11 +403,18 @@ grid(col = "gray90")
 }
 }
 \references{
+Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+generalized Kumaraswamy distribution. \emph{arXiv preprint arXiv:1004.0911}.
+\doi{10.48550/arXiv.1004.0911}
+
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{llgkw}} (negative log-likelihood function),
@@ -415,11 +422,19 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \code{\link{dgkw}} (density function),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).
+
+Other Hessian functions:
+\code{\link[=hsbeta]{hsbeta()}},
+\code{\link[=hsbkw]{hsbkw()}},
+\code{\link[=hsekw]{hsekw()}},
+\code{\link[=hskkw]{hskkw()}},
+\code{\link[=hskw]{hskw()}},
+\code{\link[=hsmc]{hsmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{Hessian functions}
+\concept{generalized kumaraswamy}
 \keyword{distribution}
-\keyword{hessian}
-\keyword{likelihood}
 \keyword{optimize}

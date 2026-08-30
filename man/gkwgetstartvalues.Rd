@@ -116,6 +116,13 @@ identical(before, .Random.seed)
 
 }
 \references{
-Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution with
-some tractability advantages. Statistical Methodology, 6(1), 70-81.
+Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
+with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 70-81.
+\doi{10.1016/j.stamet.2008.04.001}
+}
+\seealso{
+\code{\link{llgkw}}, \code{\link{llbkw}}, \code{\link{llkkw}},
+\code{\link{llekw}}, \code{\link{llmc}}, \code{\link{llkw}},
+\code{\link{llbeta}} (the objectives these values are meant to seed),
+\code{\link[stats]{optim}}
 }

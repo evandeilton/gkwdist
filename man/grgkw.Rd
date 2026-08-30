@@ -314,11 +314,18 @@ grid(col = "gray90")
 
 }
 \references{
+Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+generalized Kumaraswamy distribution. \emph{arXiv preprint arXiv:1004.0911}.
+\doi{10.48550/arXiv.1004.0911}
+
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{llgkw}} (negative log-likelihood),
@@ -327,11 +334,19 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
 \code{\link[base]{digamma}}
+
+Other gradient functions:
+\code{\link[=grbeta]{grbeta()}},
+\code{\link[=grbkw]{grbkw()}},
+\code{\link[=grekw]{grekw()}},
+\code{\link[=grkkw]{grkkw()}},
+\code{\link[=grkw]{grkw()}},
+\code{\link[=grmc]{grmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{generalized kumaraswamy}
+\concept{gradient functions}
 \keyword{distribution}
-\keyword{gradient}
-\keyword{likelihood}
 \keyword{optimize}

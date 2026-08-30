@@ -24,10 +24,15 @@ A vector of density values (\eqn{f(x)}) or log-density values
 (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 rule applied to the arguments (\code{x}, \code{gamma}, \code{delta}).
 Returns \code{0} (or \code{-Inf} if \code{log = TRUE}) for \code{x}
-outside the interval (0, 1). An out-of-bound or missing parameter is an
-error, not a return value: the wrapper stops with a message naming the
-parameter. An infinite parameter is not currently intercepted there and
-reaches the C++ layer, which treats it as invalid.
+strictly outside the interval [0, 1]. At the closed boundaries
+\code{x = 0} and \code{x = 1} the limiting density is returned rather than
+\code{0}, matching \code{\link[stats]{dbeta}} with
+\code{shape1 = gamma} and \code{shape2 = delta + 1}; depending on the
+parameters that limit is \code{0}, a finite positive value, or \code{Inf}.
+An out-of-bound or missing parameter is an error, not a return value: the
+wrapper stops with a message naming the parameter. An infinite parameter is
+not currently intercepted there and reaches the C++ layer, which treats it
+as invalid.
 }
 \description{
 Computes the probability density function (PDF) for the standard Beta
@@ -57,7 +62,6 @@ where \code{dbeta(x, shape1, shape2)} uses \code{shape2} directly. Here,
 \code{shape1 = gamma} and \code{shape2 = delta + 1}.
 }
 \examples{
-\donttest{
 # Example values
 x_vals <- c(0.2, 0.5, 0.8)
 gamma_par <- 2.0 # Corresponds to shape1
@@ -101,7 +105,6 @@ legend("topright",
   legend = c("dbeta_(gamma=2, delta=3)", "stats::dbeta(shape1=2, shape2=4)"),
   col = c("blue", "red"), lty = c(1, 2), bty = "n"
 )
-}
 
 }
 \references{
@@ -110,16 +113,26 @@ Distributions, Volume 2} (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 }
 \seealso{
 \code{\link[stats]{dbeta}} (standard R implementation),
 \code{\link{dgkw}} (parent distribution density),
 \code{\link{dmc}} (McDonald/Beta Power density),
 \code{\link{pbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}}.
+
+Other density functions:
+\code{\link[=dbkw]{dbkw()}},
+\code{\link[=dekw]{dekw()}},
+\code{\link[=dgkw]{dgkw()}},
+\code{\link[=dkkw]{dkkw()}},
+\code{\link[=dkw]{dkw()}},
+\code{\link[=dmc]{dmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{beta}
-\keyword{density}
+\concept{beta}
+\concept{density functions}
 \keyword{distribution}

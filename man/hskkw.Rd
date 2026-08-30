@@ -2,7 +2,7 @@
 % Please edit documentation in R/kkw.R
 \name{hskkw}
 \alias{hskkw}
-\title{Hessian Matrix of the Negative Log-Likelihood for the kkw Distribution}
+\title{Hessian Matrix of the Negative Log-Likelihood for the KKw Distribution}
 \usage{
 hskkw(par, data)
 }
@@ -24,7 +24,7 @@ not in the interval (0, 1).
 }
 \description{
 Computes the analytic 4x4 Hessian matrix (matrix of second partial derivatives)
-of the negative log-likelihood function for the Kumaraswamy-Kumaraswamy (kkw)
+of the negative log-likelihood function for the Kumaraswamy-Kumaraswamy (KKw)
 distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}).
 This distribution is the special case of the Generalized Kumaraswamy (GKw)
@@ -33,7 +33,7 @@ standard errors and in optimization algorithms.
 }
 \details{
 This function calculates the analytic second partial derivatives of the
-negative log-likelihood function based on the kkw log-likelihood
+negative log-likelihood function based on the KKw log-likelihood
 (\eqn{\gamma=1} case of GKw, see \code{\link{llkkw}}):
 \deqn{
 \ell(\theta | \mathbf{x}) = n[\ln(\delta+1) + \ln(\lambda) + \ln(\alpha) + \ln(\beta)]
@@ -343,23 +343,34 @@ grid(col = "gray90")
 }
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{hsgkw}} (parent distribution Hessian),
-\code{\link{llkkw}} (negative log-likelihood for kkw),
-\code{\link{grkkw}} (gradient for kkw),
-\code{\link{dkkw}} (density for kkw),
+\code{\link{llkkw}} (negative log-likelihood for KKw),
+\code{\link{grkkw}} (gradient for KKw),
+\code{\link{dkkw}} (density for KKw),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).
+
+Other Hessian functions:
+\code{\link[=hsbeta]{hsbeta()}},
+\code{\link[=hsbkw]{hsbkw()}},
+\code{\link[=hsekw]{hsekw()}},
+\code{\link[=hsgkw]{hsgkw()}},
+\code{\link[=hskw]{hskw()}},
+\code{\link[=hsmc]{hsmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{Hessian functions}
+\concept{kumaraswamy-kumaraswamy}
 \keyword{distribution}
-\keyword{hessian}
-\keyword{likelihood}
 \keyword{optimize}

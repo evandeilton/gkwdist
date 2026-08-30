@@ -213,7 +213,7 @@
 #' boundary values or becoming numerically unstable.
 #'
 #' @author
-#' J. E. Lopes \email{evandeilton@@gmail.com}
+#' Lopes, J. E. \email{evandeilton@@gmail.com}
 #' \href{https://orcid.org/0009-0007-5887-4084}{ORCID: 0009-0007-5887-4084}
 #'
 #' LEG - Laboratory of Statistics and Geoinformation
@@ -495,5 +495,4 @@
 #' cat("Best model by BIC:", comparison$Model[which.min(comparison$BIC)], "\n")
 #' }
 #'
-#' @keywords internal
 "_PACKAGE"

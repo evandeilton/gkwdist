@@ -2,7 +2,7 @@
 % Please edit documentation in R/beta.R
 \name{pbeta_}
 \alias{pbeta_}
-\title{CDF of the Beta Distribution (gamma, delta+1 Parameterization)}
+\title{Cumulative Distribution Function (CDF) of the Beta Distribution (gamma, delta+1 Parameterization)}
 \usage{
 pbeta_(q, gamma = 1, delta = 0, lower.tail = TRUE, log.p = FALSE)
 }
@@ -58,7 +58,6 @@ consistent parameter recycling and handling within the C++ environment,
 matching the style of other functions in the related families.
 }
 \examples{
-\donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 gamma_par <- 2.0 # Corresponds to shape1
@@ -107,7 +106,6 @@ legend("bottomright",
   legend = c("pbeta_(gamma=2, delta=3)", "stats::pbeta(shape1=2, shape2=4)"),
   col = c("blue", "red"), lty = c(1, 2), bty = "n"
 )
-}
 
 }
 \references{
@@ -116,16 +114,26 @@ Distributions, Volume 2} (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 }
 \seealso{
 \code{\link[stats]{pbeta}} (standard R implementation),
 \code{\link{pgkw}} (parent distribution CDF),
 \code{\link{pmc}} (McDonald/Beta Power CDF),
 \code{\link{dbeta_}}, \code{\link{qbeta_}}, \code{\link{rbeta_}}.
+
+Other cumulative distribution functions:
+\code{\link[=pbkw]{pbkw()}},
+\code{\link[=pekw]{pekw()}},
+\code{\link[=pgkw]{pgkw()}},
+\code{\link[=pkkw]{pkkw()}},
+\code{\link[=pkw]{pkw()}},
+\code{\link[=pmc]{pmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{beta}
-\keyword{cumulative}
+\concept{beta}
+\concept{cumulative distribution functions}
 \keyword{distribution}

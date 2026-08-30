@@ -18,7 +18,11 @@ between 0 and 1 (exclusive).}
 Returns a single \code{double} value representing the negative
 log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
 if any parameter values in \code{par} are invalid according to their
-constraints, or if any value in \code{data} is not in the interval (0, 1).
+constraints, or if any value in \code{data} is not in the interval (0, 1);
+in the latter case a warning naming \code{data} is also signaled, because
+an infinite objective offers an optimizer no gradient direction to follow
+and more often means a sample on the wrong scale than a genuine fit
+failure.
 }
 \description{
 Computes the negative log-likelihood function for the Exponentiated
@@ -460,9 +464,12 @@ Kumaraswamy distribution. \emph{Journal of the Franklin Institute}, \emph{349}(3
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{llgkw}} (parent distribution negative log-likelihood),
@@ -470,10 +477,19 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \code{\link{grekw}} (gradient),
 \code{\link{hsekw}} (Hessian),
 \code{\link[stats]{optim}}
+
+Other log-likelihood functions:
+\code{\link[=llbeta]{llbeta()}},
+\code{\link[=llbkw]{llbkw()}},
+\code{\link[=llgkw]{llgkw()}},
+\code{\link[=llkkw]{llkkw()}},
+\code{\link[=llkw]{llkw()}},
+\code{\link[=llmc]{llmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{exponentiated kumaraswamy}
+\concept{log-likelihood functions}
 \keyword{distribution}
-\keyword{likelihood}
 \keyword{optimize}

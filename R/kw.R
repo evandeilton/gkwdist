@@ -23,7 +23,9 @@
 
 #' @title Density of the Kumaraswamy (Kw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution density kumaraswamy
+#' @family density functions
+#' @concept kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the probability density function (PDF) for the two-parameter
@@ -42,10 +44,15 @@
 #'   (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 #'   rule applied to the arguments (\code{x}, \code{alpha}, \code{beta}).
 #'   Returns \code{0} (or \code{-Inf} if \code{log = TRUE}) for \code{x}
-#'   outside the interval (0, 1). An out-of-bound or missing parameter is an
-#'   error, not a return value: the wrapper stops with a message naming the
-#'   parameter. An infinite parameter is not currently intercepted there and
-#'   reaches the C++ layer, which treats it as invalid.
+#'   strictly outside the interval \[0, 1\]. At the closed boundaries
+#'   \code{x = 0} and \code{x = 1} the limiting density is returned rather than
+#'   \code{0}, following the convention of base R's density functions (compare
+#'   \code{\link[stats]{dbeta}}); depending on the parameters that limit is
+#'   \code{0}, a finite positive value, or \code{Inf}.
+#'   An out-of-bound or missing parameter is an error, not a return value: the
+#'   wrapper stops with a message naming the parameter. An infinite parameter is
+#'   not currently intercepted there and reaches the C++ layer, which treats it
+#'   as invalid.
 #'
 #' @details
 #' The probability density function (PDF) of the Kumaraswamy (Kw) distribution
@@ -65,10 +72,12 @@
 #' @references
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 #' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
+#' \doi{10.1016/j.stamet.2008.04.001}
 #'
 #'
 #' @seealso
@@ -78,7 +87,6 @@
 #' \code{\link[stats]{dbeta}}
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' x_vals <- c(0.2, 0.5, 0.8)
 #' alpha_par <- 2.0
@@ -116,7 +124,6 @@
 #'   legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
 #'   col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
 #' )
-#' }
 #' @export
 dkw <- function(x, alpha = 1, beta = 1, log = FALSE) {
   # Input validation
@@ -148,7 +155,9 @@ dkw <- function(x, alpha = 1, beta = 1, log = FALSE) {
 
 #' @title Cumulative Distribution Function (CDF) of the Kumaraswamy (Kw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution cumulative kumaraswamy
+#' @family cumulative distribution functions
+#' @concept kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the cumulative distribution function (CDF), \eqn{P(X \le q)}, for the
@@ -195,10 +204,12 @@ dkw <- function(x, alpha = 1, beta = 1, log = FALSE) {
 #' @references
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 #' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
+#' \doi{10.1016/j.stamet.2008.04.001}
 #'
 #'
 #' @seealso
@@ -207,7 +218,6 @@ dkw <- function(x, alpha = 1, beta = 1, log = FALSE) {
 #' \code{\link[stats]{pbeta}}
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' q_vals <- c(0.2, 0.5, 0.8)
 #' alpha_par <- 2.0
@@ -251,7 +261,6 @@ dkw <- function(x, alpha = 1, beta = 1, log = FALSE) {
 #'   legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
 #'   col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
 #' )
-#' }
 #'
 #' @export
 pkw <- function(q, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
@@ -288,7 +297,9 @@ pkw <- function(q, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
 
 #' @title Quantile Function of the Kumaraswamy (Kw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution quantile kumaraswamy
+#' @family quantile functions
+#' @concept kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the quantile function (inverse CDF) for the two-parameter
@@ -339,10 +350,12 @@ pkw <- function(q, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
 #' @references
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 #' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
+#' \doi{10.1016/j.stamet.2008.04.001}
 #'
 #'
 #' @seealso
@@ -351,7 +364,6 @@ pkw <- function(q, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
 #' \code{\link[stats]{qbeta}}, \code{\link[stats]{qunif}}
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' p_vals <- c(0.1, 0.5, 0.9)
 #' alpha_par <- 2.0
@@ -384,12 +396,11 @@ pkw <- function(q, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
 #' q_calc <- qkw(p_check, alpha_par, beta_par)
 #' p_recalc <- pkw(q_calc, alpha_par, beta_par)
 #' print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-#' # abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+#' print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
 #'
 #' # Boundary conditions
 #' print(qkw(c(0, 1), alpha_par, beta_par)) # Should be 0, 1
 #' print(qkw(c(-Inf, 0), alpha_par, beta_par, log.p = TRUE)) # Should be 0, 1
-#' }
 #'
 #' @export
 qkw <- function(p, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
@@ -431,7 +442,9 @@ qkw <- function(p, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
 
 #' @title Random Number Generation for the Kumaraswamy (Kw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution random kumaraswamy
+#' @family random generation functions
+#' @concept kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Generates random deviates from the two-parameter Kumaraswamy (Kw)
@@ -468,10 +481,12 @@ qkw <- function(p, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
 #' @references
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 #' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
+#' \doi{10.1016/j.stamet.2008.04.001}
 #'
 #'
 #' Devroye, L. (1986). *Non-Uniform Random Variate Generation*. Springer-Verlag.
@@ -483,7 +498,6 @@ qkw <- function(p, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
 #' \code{\link[stats]{runif}}
 #'
 #' @examples
-#' \donttest{
 #' set.seed(2029) # for reproducibility
 #'
 #' # Generate 1000 random values from a specific Kw distribution
@@ -525,7 +539,6 @@ qkw <- function(p, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE) {
 #' print(summary(x_sample_kw))
 #' print("Summary stats for rgkw(gamma=1, delta=0, lambda=1) sample:")
 #' print(summary(x_sample_gkw)) # Should be similar
-#' }
 #'
 #' @export
 rkw <- function(n, alpha = 1, beta = 1) {
@@ -563,9 +576,11 @@ rkw <- function(n, alpha = 1, beta = 1) {
 # 5. NEGATIVE LOG-LIKELIHOOD (llkw)
 # ----------------------------------------------------------------------------#
 
-#' @title Negative Log-Likelihood of the Kumaraswamy (Kw) Distribution
+#' @title Negative Log-Likelihood for the Kumaraswamy (Kw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize kumaraswamy
+#' @family log-likelihood functions
+#' @concept kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the negative log-likelihood function for the two-parameter
@@ -581,7 +596,11 @@ rkw <- function(n, alpha = 1, beta = 1) {
 #' @return Returns a single \code{double} value representing the negative
 #'   log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
 #'   if any parameter values in \code{par} are invalid according to their
-#'   constraints, or if any value in \code{data} is not in the interval (0, 1).
+#'   constraints, or if any value in \code{data} is not in the interval (0, 1);
+#'   in the latter case a warning naming \code{data} is also signaled, because
+#'   an infinite objective offers an optimizer no gradient direction to follow
+#'   and more often means a sample on the wrong scale than a genuine fit
+#'   failure.
 #'
 #' @details
 #' The Kumaraswamy (Kw) distribution's probability density function (PDF) is
@@ -605,10 +624,12 @@ rkw <- function(n, alpha = 1, beta = 1) {
 #' @references
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 #' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
+#' \doi{10.1016/j.stamet.2008.04.001}
 #'
 #'
 #' @seealso
@@ -1034,7 +1055,9 @@ llkw <- function(par, data) {
 
 #' @title Gradient of the Negative Log-Likelihood for the Kumaraswamy (Kw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize gradient kumaraswamy
+#' @family gradient functions
+#' @concept kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the gradient vector (vector of first partial derivatives) of the
@@ -1075,10 +1098,12 @@ llkw <- function(par, data) {
 #' @references
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 #' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
+#' \doi{10.1016/j.stamet.2008.04.001}
 #'
 #' (Note: Specific gradient formulas might be derived or sourced from additional references).
 #'
@@ -1314,7 +1339,9 @@ grkw <- function(par, data) {
 
 #' @title Hessian Matrix of the Negative Log-Likelihood for the Kw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize hessian kumaraswamy
+#' @family Hessian functions
+#' @concept kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the analytic 2x2 Hessian matrix (matrix of second partial derivatives)
@@ -1369,10 +1396,12 @@ grkw <- function(par, data) {
 #' @references
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 #' with some tractability advantages. *Statistical Methodology*, *6*(1), 70-81.
+#' \doi{10.1016/j.stamet.2008.04.001}
 #'
 #' (Note: Specific Hessian formulas might be derived or sourced from additional references).
 #'

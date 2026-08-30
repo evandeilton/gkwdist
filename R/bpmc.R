@@ -20,9 +20,11 @@
 # 1. DENSITY FUNCTION (dmc)
 # ----------------------------------------------------------------------------#
 
-#' @title Density of the McDonald (Mc)/Beta Power Distribution Distribution
+#' @title Density of the McDonald (Mc)/Beta Power Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution density mcdonald
+#' @family density functions
+#' @concept mcdonald
+#' @keywords distribution
 #'
 #' @description
 #' Computes the probability density function (PDF) for the McDonald (Mc)
@@ -44,10 +46,15 @@
 #'   (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 #'   rule applied to the arguments (\code{x}, \code{gamma}, \code{delta},
 #'   \code{lambda}). Returns \code{0} (or \code{-Inf} if
-#'   \code{log = TRUE}) for \code{x} outside the interval (0, 1). An out-of-bound or missing parameter is an
-#'   error, not a return value: the wrapper stops with a message naming the
-#'   parameter. An infinite parameter is not currently intercepted there and
-#'   reaches the C++ layer, which treats it as invalid.
+#'   \code{log = TRUE}) for \code{x} strictly outside the interval \[0, 1\]. At the
+#'   closed boundaries \code{x = 0} and \code{x = 1} the limiting density is
+#'   returned rather than \code{0}, following the convention of base R's density
+#'   functions (compare \code{\link[stats]{dbeta}}); depending on the parameters
+#'   that limit is \code{0}, a finite positive value, or \code{Inf}.
+#'   An out-of-bound or missing parameter is an error, not a return value: the
+#'   wrapper stops with a message naming the parameter. An infinite parameter is
+#'   not currently intercepted there and reaches the C++ layer, which treats it
+#'   as invalid.
 #'
 #' @details
 #' The probability density function (PDF) of the McDonald (Mc) distribution
@@ -68,14 +75,18 @@
 #'
 #' @references
 #' McDonald, J. B. (1984). Some generalized functions for the size distribution
-#' of income. *Econometrica*, 52(3), 647-663.
+#' of income. *Econometrica*, *52*(3), 647-663.
+#' \doi{10.2307/1913469}
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' @seealso
@@ -84,7 +95,6 @@
 #' \code{\link[stats]{dbeta}}
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' x_vals <- c(0.2, 0.5, 0.8)
 #' gamma_par <- 2.0
@@ -124,7 +134,6 @@
 #'   legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
 #'   col = c("blue", "red", "green"), lty = 1, bty = "n"
 #' )
-#' }
 #'
 #' @export
 dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
@@ -159,9 +168,11 @@ dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
 # 2. DISTRIBUTION FUNCTION (pmc)
 # ----------------------------------------------------------------------------#
 
-#' @title CDF of the McDonald (Mc)/Beta Power Distribution
+#' @title Cumulative Distribution Function (CDF) of the McDonald (Mc)/Beta Power Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution cumulative mcdonald
+#' @family cumulative distribution functions
+#' @concept mcdonald
+#' @keywords distribution
 #'
 #' @description
 #' Computes the cumulative distribution function (CDF), \eqn{F(q) = P(X \le q)},
@@ -211,14 +222,18 @@ dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
 #'
 #' @references
 #' McDonald, J. B. (1984). Some generalized functions for the size distribution
-#' of income. *Econometrica*, 52(3), 647-663.
+#' of income. *Econometrica*, *52*(3), 647-663.
+#' \doi{10.2307/1913469}
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' @seealso
@@ -227,7 +242,6 @@ dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
 #' \code{\link[stats]{pbeta}}
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' q_vals <- c(0.2, 0.5, 0.8)
 #' gamma_par <- 2.0
@@ -277,7 +291,6 @@ dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
 #'   legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
 #'   col = c("blue", "red", "green"), lty = 1, bty = "n"
 #' )
-#' }
 #'
 #' @export
 pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
@@ -318,7 +331,9 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 
 #' @title Quantile Function of the McDonald (Mc)/Beta Power Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution quantile mcdonald
+#' @family quantile functions
+#' @concept mcdonald
+#' @keywords distribution
 #'
 #' @description
 #' Computes the quantile function (inverse CDF) for the McDonald (Mc) distribution
@@ -376,14 +391,18 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 #'
 #' @references
 #' McDonald, J. B. (1984). Some generalized functions for the size distribution
-#' of income. *Econometrica*, 52(3), 647-663.
+#' of income. *Econometrica*, *52*(3), 647-663.
+#' \doi{10.2307/1913469}
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' @seealso
@@ -392,7 +411,6 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 #' \code{\link[stats]{qbeta}}
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' p_vals <- c(0.1, 0.5, 0.9)
 #' gamma_par <- 2.0
@@ -432,12 +450,11 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 #' q_calc <- qmc(p_check, gamma_par, delta_par, lambda_par) # Use lambda != 1
 #' p_recalc <- pmc(q_calc, gamma_par, delta_par, lambda_par)
 #' print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-#' # abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+#' print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
 #'
 #' # Boundary conditions
 #' print(qmc(c(0, 1), gamma_par, delta_par, lambda_par)) # Should be 0, 1
 #' print(qmc(c(-Inf, 0), gamma_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
-#' }
 #'
 #' @export
 qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
@@ -483,7 +500,9 @@ qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 
 #' @title Random Number Generation for the McDonald (Mc)/Beta Power Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution random mcdonald
+#' @family random generation functions
+#' @concept mcdonald
+#' @keywords distribution
 #'
 #' @description
 #' Generates random deviates from the McDonald (Mc) distribution (also known as
@@ -527,14 +546,18 @@ qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 #'
 #' @references
 #' McDonald, J. B. (1984). Some generalized functions for the size distribution
-#' of income. *Econometrica*, 52(3), 647-663.
+#' of income. *Econometrica*, *52*(3), 647-663.
+#' \doi{10.2307/1913469}
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' Devroye, L. (1986). *Non-Uniform Random Variate Generation*. Springer-Verlag.
@@ -546,7 +569,6 @@ qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 #' \code{\link[stats]{rbeta}}
 #'
 #' @examples
-#' \donttest{
 #' set.seed(2028) # for reproducibility
 #'
 #' # Generate 1000 random values from a specific Mc distribution
@@ -604,7 +626,6 @@ qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 #' print(summary(x_sample_mc_qq))
 #' print("Summary stats for rgkw(alpha=1, beta=1) sample:")
 #' print(summary(x_sample_gkw)) # Should be similar
-#' }
 #'
 #' @export
 rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
@@ -648,7 +669,9 @@ rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
 
 #' @title Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize mcdonald
+#' @family log-likelihood functions
+#' @concept mcdonald
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the negative log-likelihood function for the McDonald (Mc)
@@ -667,7 +690,11 @@ rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
 #' @return Returns a single \code{double} value representing the negative
 #'   log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
 #'   if any parameter values in \code{par} are invalid according to their
-#'   constraints, or if any value in \code{data} is not in the interval (0, 1).
+#'   constraints, or if any value in \code{data} is not in the interval (0, 1);
+#'   in the latter case a warning naming \code{data} is also signaled, because
+#'   an infinite objective offers an optimizer no gradient direction to follow
+#'   and more often means a sample on the wrong scale than a genuine fit
+#'   failure.
 #'
 #' @details
 #' The McDonald (Mc) distribution is the GKw distribution (\code{\link{dmc}})
@@ -690,14 +717,18 @@ rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
 #'
 #' @references
 #' McDonald, J. B. (1984). Some generalized functions for the size distribution
-#' of income. *Econometrica*, 52(3), 647-663.
+#' of income. *Econometrica*, *52*(3), 647-663.
+#' \doi{10.2307/1913469}
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' @seealso
@@ -1085,7 +1116,9 @@ llmc <- function(par, data) {
 
 #' @title Gradient of the Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize gradient mcdonald
+#' @family gradient functions
+#' @concept mcdonald
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the gradient vector (vector of first partial derivatives) of the
@@ -1134,10 +1167,13 @@ llmc <- function(par, data) {
 #'
 #' @references
 #' McDonald, J. B. (1984). Some generalized functions for the size distribution
-#' of income. *Econometrica*, 52(3), 647-663.
+#' of income. *Econometrica*, *52*(3), 647-663.
+#' \doi{10.2307/1913469}
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' (Note: Specific gradient formulas might be derived or sourced from additional references).
 #'
@@ -1541,7 +1577,9 @@ grmc <- function(par, data) {
 
 #' @title Hessian Matrix of the Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize hessian mcdonald
+#' @family Hessian functions
+#' @concept mcdonald
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the analytic 3x3 Hessian matrix (matrix of second partial derivatives)
@@ -1605,10 +1643,13 @@ grmc <- function(par, data) {
 #'
 #' @references
 #' McDonald, J. B. (1984). Some generalized functions for the size distribution
-#' of income. *Econometrica*, 52(3), 647-663.
+#' of income. *Econometrica*, *52*(3), 647-663.
+#' \doi{10.2307/1913469}
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' (Note: Specific Hessian formulas might be derived or sourced from additional references).
 #'

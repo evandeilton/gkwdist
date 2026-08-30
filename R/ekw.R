@@ -18,7 +18,9 @@
 #' @title Density of the Exponentiated Kumaraswamy (EKw) Distribution
 #'
 #' @author Lopes, J. E.
-#' @keywords distribution density
+#' @family density functions
+#' @concept exponentiated kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the probability density function (PDF) for the Exponentiated
@@ -40,10 +42,15 @@
 #'   (\eqn{\log(f(x))}). The length of the result is determined by the recycling
 #'   rule applied to the arguments (\code{x}, \code{alpha}, \code{beta},
 #'   \code{lambda}). Returns \code{0} (or \code{-Inf} if
-#'   \code{log = TRUE}) for \code{x} outside the interval (0, 1). An out-of-bound or missing parameter is an
-#'   error, not a return value: the wrapper stops with a message naming the
-#'   parameter. An infinite parameter is not currently intercepted there and
-#'   reaches the C++ layer, which treats it as invalid.
+#'   \code{log = TRUE}) for \code{x} strictly outside the interval \[0, 1\]. At the
+#'   closed boundaries \code{x = 0} and \code{x = 1} the limiting density is
+#'   returned rather than \code{0}, following the convention of base R's density
+#'   functions (compare \code{\link[stats]{dbeta}}); depending on the parameters
+#'   that limit is \code{0}, a finite positive value, or \code{Inf}.
+#'   An out-of-bound or missing parameter is an error, not a return value: the
+#'   wrapper stops with a message naming the parameter. An infinite parameter is
+#'   not currently intercepted there and reaches the C++ layer, which treats it
+#'   as invalid.
 #'
 #' @details
 #' The probability density function (PDF) of the Exponentiated Kumaraswamy (EKw)
@@ -65,16 +72,18 @@
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' @seealso
 #' \code{\link{dgkw}} (parent distribution density),
 #' \code{\link{pekw}}, \code{\link{qekw}}, \code{\link{rekw}} (other EKw functions),
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' x_vals <- c(0.2, 0.5, 0.8)
 #' alpha_par <- 2.0
@@ -114,7 +123,6 @@
 #'   legend = c("lambda=0.5", "lambda=1.0 (Kw)", "lambda=2.0"),
 #'   col = c("blue", "red", "green"), lty = 1, bty = "n"
 #' )
-#' }
 #'
 #' @export
 dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
@@ -145,7 +153,9 @@ dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
 
 #' @title Cumulative Distribution Function (CDF) of the EKw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution cumulative
+#' @family cumulative distribution functions
+#' @concept exponentiated kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the cumulative distribution function (CDF), \eqn{P(X \le q)}, for the
@@ -201,9 +211,12 @@ dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' @seealso
@@ -211,7 +224,6 @@ dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
 #' \code{\link{dekw}}, \code{\link{qekw}}, \code{\link{rekw}} (other EKw functions),
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' q_vals <- c(0.2, 0.5, 0.8)
 #' alpha_par <- 2.0
@@ -259,7 +271,6 @@ dekw <- function(x, alpha = 1, beta = 1, lambda = 1, log = FALSE) {
 #'   legend = c("lambda=0.5", "lambda=1.0 (Kw)", "lambda=2.0"),
 #'   col = c("blue", "red", "green"), lty = 1, bty = "n"
 #' )
-#' }
 #'
 #' @export
 pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
@@ -296,7 +307,9 @@ pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 
 #' @title Quantile Function of the Exponentiated Kumaraswamy (EKw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution quantile
+#' @family quantile functions
+#' @concept exponentiated kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Computes the quantile function (inverse CDF) for the Exponentiated
@@ -355,9 +368,12 @@ pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' @seealso
@@ -366,7 +382,6 @@ pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #' \code{\link[stats]{qunif}}
 #'
 #' @examples
-#' \donttest{
 #' # Example values
 #' p_vals <- c(0.1, 0.5, 0.9)
 #' alpha_par <- 2.0
@@ -406,12 +421,11 @@ pekw <- function(q, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #' q_calc <- qekw(p_check, alpha_par, beta_par, lambda_par)
 #' p_recalc <- pekw(q_calc, alpha_par, beta_par, lambda_par)
 #' print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-#' # abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+#' print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
 #'
 #' # Boundary conditions
 #' print(qekw(c(0, 1), alpha_par, beta_par, lambda_par)) # Should be 0, 1
 #' print(qekw(c(-Inf, 0), alpha_par, beta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
-#' }
 #'
 #' @export
 qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
@@ -449,7 +463,9 @@ qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 
 #' @title Random Number Generation for the Exponentiated Kumaraswamy (EKw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution random
+#' @family random generation functions
+#' @concept exponentiated kumaraswamy
+#' @keywords distribution
 #'
 #' @description
 #' Generates random deviates from the Exponentiated Kumaraswamy (EKw)
@@ -496,9 +512,12 @@ qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' Devroye, L. (1986). *Non-Uniform Random Variate Generation*. Springer-Verlag.
@@ -510,7 +529,6 @@ qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #' \code{\link[stats]{runif}}
 #'
 #' @examples
-#' \donttest{
 #' set.seed(2027) # for reproducibility
 #'
 #' # Generate 1000 random values from a specific EKw distribution
@@ -556,7 +574,6 @@ qekw <- function(p, alpha = 1, beta = 1, lambda = 1, lower.tail = TRUE, log.p = 
 #' print(summary(x_sample_ekw))
 #' print("Summary stats for rgkw(gamma=1, delta=0) sample:")
 #' print(summary(x_sample_gkw)) # Should be similar
-#' }
 #'
 #' @export
 rekw <- function(n, alpha = 1, beta = 1, lambda = 1) {
@@ -590,7 +607,9 @@ rekw <- function(n, alpha = 1, beta = 1, lambda = 1) {
 
 #' @title Negative Log-Likelihood for the Exponentiated Kumaraswamy (EKw) Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize
+#' @family log-likelihood functions
+#' @concept exponentiated kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the negative log-likelihood function for the Exponentiated
@@ -609,7 +628,11 @@ rekw <- function(n, alpha = 1, beta = 1, lambda = 1) {
 #' @return Returns a single \code{double} value representing the negative
 #'   log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
 #'   if any parameter values in \code{par} are invalid according to their
-#'   constraints, or if any value in \code{data} is not in the interval (0, 1).
+#'   constraints, or if any value in \code{data} is not in the interval (0, 1);
+#'   in the latter case a warning naming \code{data} is also signaled, because
+#'   an infinite objective offers an optimizer no gradient direction to follow
+#'   and more often means a sample on the wrong scale than a genuine fit
+#'   failure.
 #'
 #' @details
 #' The Exponentiated Kumaraswamy (EKw) distribution is the GKw distribution
@@ -641,9 +664,12 @@ rekw <- function(n, alpha = 1, beta = 1, lambda = 1) {
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #'
 #' @seealso
@@ -1082,7 +1108,9 @@ llekw <- function(par, data) {
 
 #' @title Gradient of the Negative Log-Likelihood for the EKw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize gradient
+#' @family gradient functions
+#' @concept exponentiated kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the gradient vector (vector of first partial derivatives) of the
@@ -1139,10 +1167,13 @@ llekw <- function(par, data) {
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' (Note: Specific gradient formulas might be derived or sourced from additional references).
 #'
@@ -1462,7 +1493,9 @@ grekw <- function(par, data) {
 
 #' @title Hessian Matrix of the Negative Log-Likelihood for the EKw Distribution
 #' @author Lopes, J. E.
-#' @keywords distribution likelihood optimize hessian
+#' @family Hessian functions
+#' @concept exponentiated kumaraswamy
+#' @keywords distribution optimize
 #'
 #' @description
 #' Computes the analytic 3x3 Hessian matrix (matrix of second partial derivatives)
@@ -1520,10 +1553,13 @@ grekw <- function(par, data) {
 #'
 #' Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 #' distributions. *Journal of Statistical Computation and Simulation*,
+#' *81*(7), 883-898.
+#' \doi{10.1080/00949650903530745}
 #'
 #'
 #' Kumaraswamy, P. (1980). A generalized probability density function for
 #' double-bounded random processes. *Journal of Hydrology*, *46*(1-2), 79-88.
+#' \doi{10.1016/0022-1694(80)90036-0}
 #'
 #' (Note: Specific Hessian formulas might be derived or sourced from additional references).
 #'

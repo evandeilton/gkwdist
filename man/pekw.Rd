@@ -61,7 +61,6 @@ The implementation uses this closed-form expression for efficiency and handles
 \code{lower.tail} and \code{log.p} arguments appropriately.
 }
 \examples{
-\donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -109,7 +108,6 @@ legend("bottomright",
   legend = c("lambda=0.5", "lambda=1.0 (Kw)", "lambda=2.0"),
   col = c("blue", "red", "green"), lty = 1, bty = "n"
 )
-}
 
 }
 \references{
@@ -118,16 +116,28 @@ Kumaraswamy distribution. \emph{Journal of the Franklin Institute}, \emph{349}(3
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{pgkw}} (parent distribution CDF),
 \code{\link{dekw}}, \code{\link{qekw}}, \code{\link{rekw}} (other EKw functions),
+
+Other cumulative distribution functions:
+\code{\link[=pbeta_]{pbeta_()}},
+\code{\link[=pbkw]{pbkw()}},
+\code{\link[=pgkw]{pgkw()}},
+\code{\link[=pkkw]{pkkw()}},
+\code{\link[=pkw]{pkw()}},
+\code{\link[=pmc]{pmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{cumulative}
+\concept{cumulative distribution functions}
+\concept{exponentiated kumaraswamy}
 \keyword{distribution}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/kkw.R
 \name{llkkw}
 \alias{llkkw}
-\title{Negative Log-Likelihood for the kkw Distribution}
+\title{Negative Log-Likelihood for the KKw Distribution}
 \usage{
 llkkw(par, data)
 }
@@ -18,17 +18,21 @@ between 0 and 1 (exclusive).}
 Returns a single \code{double} value representing the negative
 log-likelihood (\eqn{-\ell(\theta|\mathbf{x})}). Returns \code{Inf}
 if any parameter values in \code{par} are invalid according to their
-constraints, or if any value in \code{data} is not in the interval (0, 1).
+constraints, or if any value in \code{data} is not in the interval (0, 1);
+in the latter case a warning naming \code{data} is also signaled, because
+an infinite objective offers an optimizer no gradient direction to follow
+and more often means a sample on the wrong scale than a genuine fit
+failure.
 }
 \description{
 Computes the negative log-likelihood function for the Kumaraswamy-Kumaraswamy
-(kkw) distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
+(KKw) distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}),
 given a vector of observations. This distribution is a special case of the
 Generalized Kumaraswamy (GKw) distribution where \eqn{\gamma = 1}.
 }
 \details{
-The kkw distribution is the GKw distribution (\code{\link{dgkw}}) with \eqn{\gamma=1}.
+The KKw distribution is the GKw distribution (\code{\link{dgkw}}) with \eqn{\gamma=1}.
 Its probability density function (PDF) is:
 \deqn{
 f(x | \theta) = (\delta + 1) \lambda \alpha \beta x^{\alpha - 1} (1 - x^\alpha)^{\beta - 1} \bigl[1 - (1 - x^\alpha)^\beta\bigr]^{\lambda - 1} \bigl\{1 - \bigl[1 - (1 - x^\alpha)^\beta\bigr]^\lambda\bigr\}^{\delta}
@@ -435,9 +439,12 @@ grid(col = "gray90")
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{llgkw}} (parent distribution negative log-likelihood),
@@ -445,10 +452,19 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \code{\link{grkkw}} (gradient),
 \code{\link{hskkw}} (Hessian),
 \code{\link[stats]{optim}}
+
+Other log-likelihood functions:
+\code{\link[=llbeta]{llbeta()}},
+\code{\link[=llbkw]{llbkw()}},
+\code{\link[=llekw]{llekw()}},
+\code{\link[=llgkw]{llgkw()}},
+\code{\link[=llkw]{llkw()}},
+\code{\link[=llmc]{llmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{kumaraswamy-kumaraswamy}
+\concept{log-likelihood functions}
 \keyword{distribution}
-\keyword{likelihood}
 \keyword{optimize}

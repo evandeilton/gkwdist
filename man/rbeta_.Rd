@@ -2,7 +2,7 @@
 % Please edit documentation in R/beta.R
 \name{rbeta_}
 \alias{rbeta_}
-\title{Random Generation for the Beta Distribution (gamma, delta+1 Parameterization)}
+\title{Random Number Generation for the Beta Distribution (gamma, delta+1 Parameterization)}
 \usage{
 rbeta_(n, gamma = 1, delta = 0)
 }
@@ -51,7 +51,6 @@ consistent parameter recycling and handling within the C++ environment,
 matching the style of other functions in the related families.
 }
 \examples{
-\donttest{
 set.seed(2030) # for reproducibility
 
 # Generate 1000 samples using rbeta_
@@ -86,7 +85,6 @@ print(summary(x_sample_gkw))
 x_sample_mc <- rmc(1000, gamma = gamma_par, delta = delta_par, lambda = 1.0)
 print("Summary stats for rmc(l=1) sample:")
 print(summary(x_sample_mc))
-}
 
 }
 \references{
@@ -95,6 +93,8 @@ Distributions, Volume 2} (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verlag.
 }
@@ -103,10 +103,18 @@ Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verla
 \code{\link{rgkw}} (parent distribution random generation),
 \code{\link{rmc}} (McDonald/Beta Power random generation),
 \code{\link{dbeta_}}, \code{\link{pbeta_}}, \code{\link{qbeta_}}.
+
+Other random generation functions:
+\code{\link[=rbkw]{rbkw()}},
+\code{\link[=rekw]{rekw()}},
+\code{\link[=rgkw]{rgkw()}},
+\code{\link[=rkkw]{rkkw()}},
+\code{\link[=rkw]{rkw()}},
+\code{\link[=rmc]{rmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{beta}
+\concept{beta}
+\concept{random generation functions}
 \keyword{distribution}
-\keyword{random}

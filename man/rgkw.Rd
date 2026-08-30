@@ -2,7 +2,7 @@
 % Please edit documentation in R/gkw.R
 \name{rgkw}
 \alias{rgkw}
-\title{Generalized Kumaraswamy Distribution Random Generation}
+\title{Random Number Generation for the Generalized Kumaraswamy Distribution}
 \usage{
 rgkw(n, alpha = 1, beta = 1, gamma = 1, delta = 0, lambda = 1)
 }
@@ -59,7 +59,6 @@ are recycled to match the length required by \code{n}. Numerical stability is
 maintained by handling potential edge cases during the transformations.
 }
 \examples{
-\donttest{
 set.seed(1234) # for reproducibility
 
 # Generate 1000 random values from a specific GKw distribution (Kw case)
@@ -95,20 +94,35 @@ samples_vec <- rgkw(n_param, alpha = alphas_vec, beta = 2, gamma = 1, delta = 0,
 print(samples_vec) # One sample for each alpha value
 # Result length matches n=3, parameters alpha recycled accordingly
 }
-}
 \references{
+Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new
+generalized Kumaraswamy distribution. \emph{arXiv preprint arXiv:1004.0911}.
+\doi{10.48550/arXiv.1004.0911}
+
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{dgkw}}, \code{\link{pgkw}}, \code{\link{qgkw}},
 \code{\link[stats]{rbeta}}, \code{\link[base]{set.seed}}
+
+Other random generation functions:
+\code{\link[=rbeta_]{rbeta_()}},
+\code{\link[=rbkw]{rbkw()}},
+\code{\link[=rekw]{rekw()}},
+\code{\link[=rkkw]{rkkw()}},
+\code{\link[=rkw]{rkw()}},
+\code{\link[=rmc]{rmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{generalized kumaraswamy}
+\concept{random generation functions}
 \keyword{distribution}
-\keyword{random}

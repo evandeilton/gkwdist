@@ -2,7 +2,7 @@
 % Please edit documentation in R/kkw.R
 \name{grkkw}
 \alias{grkkw}
-\title{Gradient of the Negative Log-Likelihood for the kkw Distribution}
+\title{Gradient of the Negative Log-Likelihood for the KKw Distribution}
 \usage{
 grkkw(par, data)
 }
@@ -25,7 +25,7 @@ interval (0, 1).
 }
 \description{
 Computes the gradient vector (vector of first partial derivatives) of the
-negative log-likelihood function for the Kumaraswamy-Kumaraswamy (kkw)
+negative log-likelihood function for the Kumaraswamy-Kumaraswamy (KKw)
 distribution with parameters \code{alpha} (\eqn{\alpha}), \code{beta}
 (\eqn{\beta}), \code{delta} (\eqn{\delta}), and \code{lambda} (\eqn{\lambda}).
 This distribution is the special case of the Generalized Kumaraswamy (GKw)
@@ -34,7 +34,7 @@ optimization algorithms for maximum likelihood estimation.
 }
 \details{
 The components of the gradient vector of the negative log-likelihood
-(\eqn{-\nabla \ell(\theta | \mathbf{x})}) for the kkw (\eqn{\gamma=1}) model are:
+(\eqn{-\nabla \ell(\theta | \mathbf{x})}) for the KKw (\eqn{\gamma=1}) model are:
 
 \deqn{
 -\frac{\partial \ell}{\partial \alpha} = -\frac{n}{\alpha} - \sum_{i=1}^{n}\ln(x_i)
@@ -262,22 +262,33 @@ grid(col = "gray90")
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{grgkw}} (parent distribution gradient),
-\code{\link{llkkw}} (negative log-likelihood for kkw),
-\code{\link{hskkw}} (Hessian for kkw),
-\code{\link{dkkw}} (density for kkw),
+\code{\link{llkkw}} (negative log-likelihood for KKw),
+\code{\link{hskkw}} (Hessian for KKw),
+\code{\link{dkkw}} (density for KKw),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{grad}} (for numerical gradient comparison).
+
+Other gradient functions:
+\code{\link[=grbeta]{grbeta()}},
+\code{\link[=grbkw]{grbkw()}},
+\code{\link[=grekw]{grekw()}},
+\code{\link[=grgkw]{grgkw()}},
+\code{\link[=grkw]{grkw()}},
+\code{\link[=grmc]{grmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{gradient functions}
+\concept{kumaraswamy-kumaraswamy}
 \keyword{distribution}
-\keyword{gradient}
-\keyword{likelihood}
 \keyword{optimize}

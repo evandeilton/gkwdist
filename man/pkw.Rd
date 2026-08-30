@@ -55,7 +55,6 @@ The Kw distribution is a special case of several generalized distributions:
 The implementation uses the closed-form expression for efficiency.
 }
 \examples{
-\donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -99,24 +98,33 @@ legend("bottomright",
   legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
   col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
 )
-}
 
 }
 \references{
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 70-81.
+\doi{10.1016/j.stamet.2008.04.001}
 }
 \seealso{
 \code{\link{pgkw}}, \code{\link{pekw}}, \code{\link{pkkw}} (related generalized CDFs),
 \code{\link{dkw}}, \code{\link{qkw}}, \code{\link{rkw}} (other Kw functions),
 \code{\link[stats]{pbeta}}
+
+Other cumulative distribution functions:
+\code{\link[=pbeta_]{pbeta_()}},
+\code{\link[=pbkw]{pbkw()}},
+\code{\link[=pekw]{pekw()}},
+\code{\link[=pgkw]{pgkw()}},
+\code{\link[=pkkw]{pkkw()}},
+\code{\link[=pmc]{pmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{cumulative}
+\concept{cumulative distribution functions}
+\concept{kumaraswamy}
 \keyword{distribution}
-\keyword{kumaraswamy}

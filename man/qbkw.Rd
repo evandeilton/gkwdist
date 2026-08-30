@@ -81,7 +81,6 @@ via \code{qbeta(p, gamma, delta + 1, ...)} while respecting the
 \code{lower.tail} and \code{log.p} arguments.
 }
 \examples{
-\donttest{
 # Example values
 p_vals <- c(0.1, 0.5, 0.9)
 alpha_par <- 2.0
@@ -122,28 +121,39 @@ p_check <- 0.75
 q_calc <- qbkw(p_check, alpha_par, beta_par, gamma_par, delta_par)
 p_recalc <- pbkw(q_calc, alpha_par, beta_par, gamma_par, delta_par)
 print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-# abs(p_check - p_recalc) < 1e-9 # Should be TRUE
+print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
 
 # Boundary conditions
 print(qbkw(c(0, 1), alpha_par, beta_par, gamma_par, delta_par)) # Should be 0, 1
 print(qbkw(c(-Inf, 0), alpha_par, beta_par, gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
-}
 
 }
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{qgkw}} (parent distribution quantile function),
 \code{\link{dbkw}}, \code{\link{pbkw}}, \code{\link{rbkw}} (other BKw functions),
 \code{\link[stats]{qbeta}}
+
+Other quantile functions:
+\code{\link[=qbeta_]{qbeta_()}},
+\code{\link[=qekw]{qekw()}},
+\code{\link[=qgkw]{qgkw()}},
+\code{\link[=qkkw]{qkkw()}},
+\code{\link[=qkw]{qkw()}},
+\code{\link[=qmc]{qmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{beta-kumaraswamy}
+\concept{quantile functions}
 \keyword{distribution}
-\keyword{quantile}

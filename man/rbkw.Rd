@@ -54,7 +54,6 @@ For the BKw distribution, \eqn{\lambda=1}. Therefore, the algorithm simplifies t
 This procedure is implemented efficiently, handling parameter recycling as needed.
 }
 \examples{
-\donttest{
 set.seed(2026) # for reproducibility
 
 # Generate 1000 random values from a specific BKw distribution
@@ -108,15 +107,17 @@ print("Summary stats for rbkw sample:")
 print(summary(x_sample_bkw))
 print("Summary stats for rgkw(lambda=1) sample:")
 print(summary(x_sample_gkw)) # Should be similar
-}
 
 }
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verlag.
 (General methods for random variate generation).
@@ -125,9 +126,18 @@ Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verla
 \code{\link{rgkw}} (parent distribution random generation),
 \code{\link{dbkw}}, \code{\link{pbkw}}, \code{\link{qbkw}} (other BKw functions),
 \code{\link[stats]{rbeta}}
+
+Other random generation functions:
+\code{\link[=rbeta_]{rbeta_()}},
+\code{\link[=rekw]{rekw()}},
+\code{\link[=rgkw]{rgkw()}},
+\code{\link[=rkkw]{rkkw()}},
+\code{\link[=rkw]{rkw()}},
+\code{\link[=rmc]{rmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{beta-kumaraswamy}
+\concept{random generation functions}
 \keyword{distribution}
-\keyword{random}

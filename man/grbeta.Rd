@@ -245,6 +245,8 @@ Distributions, Volume 2} (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 (Note: Specific gradient formulas might be derived or sourced from additional references).
 }
@@ -256,12 +258,19 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{grad}} (for numerical gradient comparison),
 \code{\link[base]{digamma}}.
+
+Other gradient functions:
+\code{\link[=grbkw]{grbkw()}},
+\code{\link[=grekw]{grekw()}},
+\code{\link[=grgkw]{grgkw()}},
+\code{\link[=grkkw]{grkkw()}},
+\code{\link[=grkw]{grkw()}},
+\code{\link[=grmc]{grmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{beta}
+\concept{beta}
+\concept{gradient functions}
 \keyword{distribution}
-\keyword{gradient}
-\keyword{likelihood}
 \keyword{optimize}

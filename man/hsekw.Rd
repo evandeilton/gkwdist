@@ -396,9 +396,12 @@ Kumaraswamy distribution. \emph{Journal of the Franklin Institute}, \emph{349}(3
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 (Note: Specific Hessian formulas might be derived or sourced from additional references).
 }
@@ -409,11 +412,19 @@ double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79
 \code{\link{dekw}} (density for EKw),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).
+
+Other Hessian functions:
+\code{\link[=hsbeta]{hsbeta()}},
+\code{\link[=hsbkw]{hsbkw()}},
+\code{\link[=hsgkw]{hsgkw()}},
+\code{\link[=hskkw]{hskkw()}},
+\code{\link[=hskw]{hskw()}},
+\code{\link[=hsmc]{hsmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{Hessian functions}
+\concept{exponentiated kumaraswamy}
 \keyword{distribution}
-\keyword{hessian}
-\keyword{likelihood}
 \keyword{optimize}

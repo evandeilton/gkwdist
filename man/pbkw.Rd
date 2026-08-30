@@ -70,7 +70,6 @@ F(q; \alpha, \beta, \gamma, \delta) = I_{1 - (1 - q^\alpha)^\beta}(\gamma, \delt
 This is evaluated using the \code{\link[stats]{pbeta}} function.
 }
 \examples{
-\donttest{
 # Example values
 q_vals <- c(0.2, 0.5, 0.8)
 alpha_par <- 2.0
@@ -112,23 +111,34 @@ plot(curve_q, curve_p,
   type = "l", main = "BKw CDF Example",
   xlab = "q", ylab = "F(q)", col = "blue", ylim = c(0, 1)
 )
-}
 
 }
 \references{
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
-distributions. \emph{Journal of Statistical Computation and Simulation}
+distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 }
 \seealso{
 \code{\link{pgkw}} (parent distribution CDF),
 \code{\link{dbkw}}, \code{\link{qbkw}}, \code{\link{rbkw}} (other BKw functions),
 \code{\link[stats]{pbeta}}
+
+Other cumulative distribution functions:
+\code{\link[=pbeta_]{pbeta_()}},
+\code{\link[=pekw]{pekw()}},
+\code{\link[=pgkw]{pgkw()}},
+\code{\link[=pkkw]{pkkw()}},
+\code{\link[=pkw]{pkw()}},
+\code{\link[=pmc]{pmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{cumulative}
+\concept{beta-kumaraswamy}
+\concept{cumulative distribution functions}
 \keyword{distribution}

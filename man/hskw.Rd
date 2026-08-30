@@ -290,9 +290,11 @@ grid(col = "gray90")
 \references{
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 Jones, M. C. (2009). Kumaraswamy's distribution: A beta-type distribution
 with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 70-81.
+\doi{10.1016/j.stamet.2008.04.001}
 
 (Note: Specific Hessian formulas might be derived or sourced from additional references).
 }
@@ -303,12 +305,19 @@ with some tractability advantages. \emph{Statistical Methodology}, \emph{6}(1), 
 \code{\link{dkw}} (density for Kw),
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison).
+
+Other Hessian functions:
+\code{\link[=hsbeta]{hsbeta()}},
+\code{\link[=hsbkw]{hsbkw()}},
+\code{\link[=hsekw]{hsekw()}},
+\code{\link[=hsgkw]{hsgkw()}},
+\code{\link[=hskkw]{hskkw()}},
+\code{\link[=hsmc]{hsmc()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{Hessian functions}
+\concept{kumaraswamy}
 \keyword{distribution}
-\keyword{hessian}
-\keyword{kumaraswamy}
-\keyword{likelihood}
 \keyword{optimize}

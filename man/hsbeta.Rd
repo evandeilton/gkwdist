@@ -303,6 +303,8 @@ Distributions, Volume 2} (2nd ed.). Wiley.
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 (Note: Specific Hessian formulas might be derived or sourced from additional references).
 }
@@ -314,12 +316,19 @@ distributions. \emph{Journal of Statistical Computation and Simulation},
 \code{\link[stats]{optim}},
 \code{\link[numDeriv]{hessian}} (for numerical Hessian comparison),
 \code{\link[base]{trigamma}}.
+
+Other Hessian functions:
+\code{\link[=hsbkw]{hsbkw()}},
+\code{\link[=hsekw]{hsekw()}},
+\code{\link[=hsgkw]{hsgkw()}},
+\code{\link[=hskkw]{hskkw()}},
+\code{\link[=hskw]{hskw()}},
+\code{\link[=hsmc]{hsmc()}}
 }
 \author{
 Lopes, J. E.
 }
-\keyword{beta}
+\concept{Hessian functions}
+\concept{beta}
 \keyword{distribution}
-\keyword{hessian}
-\keyword{likelihood}
 \keyword{optimize}

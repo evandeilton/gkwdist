@@ -52,7 +52,6 @@ algorithm simplifies significantly:
 This procedure is implemented efficiently, handling parameter recycling as needed.
 }
 \examples{
-\donttest{
 set.seed(2028) # for reproducibility
 
 # Generate 1000 random values from a specific Mc distribution
@@ -110,18 +109,21 @@ print("Summary stats for rmc sample:")
 print(summary(x_sample_mc_qq))
 print("Summary stats for rgkw(alpha=1, beta=1) sample:")
 print(summary(x_sample_gkw)) # Should be similar
-}
 
 }
 \references{
 McDonald, J. B. (1984). Some generalized functions for the size distribution
-of income. \emph{Econometrica}, 52(3), 647-663.
+of income. \emph{Econometrica}, \emph{52}(3), 647-663.
+\doi{10.2307/1913469}
 
 Cordeiro, G. M., & de Castro, M. (2011). A new family of generalized
 distributions. \emph{Journal of Statistical Computation and Simulation},
+\emph{81}(7), 883-898.
+\doi{10.1080/00949650903530745}
 
 Kumaraswamy, P. (1980). A generalized probability density function for
 double-bounded random processes. \emph{Journal of Hydrology}, \emph{46}(1-2), 79-88.
+\doi{10.1016/0022-1694(80)90036-0}
 
 Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verlag.
 (General methods for random variate generation).
@@ -130,10 +132,18 @@ Devroye, L. (1986). \emph{Non-Uniform Random Variate Generation}. Springer-Verla
 \code{\link{rgkw}} (parent distribution random generation),
 \code{\link{dmc}}, \code{\link{pmc}}, \code{\link{qmc}} (other Mc functions),
 \code{\link[stats]{rbeta}}
+
+Other random generation functions:
+\code{\link[=rbeta_]{rbeta_()}},
+\code{\link[=rbkw]{rbkw()}},
+\code{\link[=rekw]{rekw()}},
+\code{\link[=rgkw]{rgkw()}},
+\code{\link[=rkkw]{rkkw()}},
+\code{\link[=rkw]{rkw()}}
 }
 \author{
 Lopes, J. E.
 }
+\concept{mcdonald}
+\concept{random generation functions}
 \keyword{distribution}
-\keyword{mcdonald}
-\keyword{random}
