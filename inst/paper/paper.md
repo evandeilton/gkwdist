@@ -102,7 +102,7 @@ inversion.
 | KKw (`kkw`) | 4 | $\gamma=1$ | Yes |
 | EKw (`ekw`) | 3 | $\gamma=1, \delta=0$ | Yes |
 | Mc (`mc`) | 3 | $\alpha=\beta=1$ | No |
-| Kw (`kw`) | 2 | $\gamma=\delta=0, \lambda=1$ | Yes |
+| Kw (`kw`) | 2 | $\gamma=1, \delta=0, \lambda=1$ | Yes |
 | Beta (`beta_`) | 2 | $\alpha=\beta=\lambda=1$ | No |
 
 # State of the Field
@@ -131,9 +131,9 @@ below possible.
 
 The package exports 49 functions following R's distribution conventions:
 `d`/`p`/`q`/`r` for each sub-family, plus `ll`, `gr` and `hs` for the negative
-log-likelihood, its gradient and its Hessian, and `gkwgetstartvalues()` for
-moment-based starting values. The theory vignette derives the score and observed
-information for each sub-family in full.
+log-likelihood, its gradient and its Hessian. A further export,
+`gkwgetstartvalues()`, supplies moment-based starting values. The theory
+vignette derives the score and observed information for each sub-family in full.
 
 Because every sub-family is the GKw distribution with parameters fixed, each
 specialised routine has an exact reference: the general GKw routine evaluated at
@@ -167,7 +167,7 @@ is built to make the parsimonious members easy to fit and compare.
 `gkwdist` is the computational foundation of `gkwreg` [@gkwreg], published in
 this journal, which declares it among its imports and relies on it for every
 density, distribution and quantile evaluation. The package has been on CRAN since
-November 2025 and downloaded more than 4,400 times, currently around 160 times a
+November 2025 and downloaded more than 4,700 times, currently around 350 times a
 month. Development has proceeded publicly since October 2025 across five tagged
 releases, with continuous integration, a changelog, contribution guidelines and
 an issue tracker.
