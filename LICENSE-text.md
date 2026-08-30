@@ -1,4 +1,4 @@
 # License
 
     YEAR: 2025
-    COPYRIGHT HOLDER: gkwreg authors
+    COPYRIGHT HOLDER: gkwdist authors
