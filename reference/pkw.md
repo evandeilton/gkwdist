@@ -42,11 +42,13 @@ pkw(q, alpha = 1, beta = 1, lower.tail = TRUE, log.p = FALSE)
 A vector of probabilities, \\F(q)\\, or their logarithms/complements
 depending on `lower.tail` and `log.p`. The length of the result is
 determined by the recycling rule applied to the arguments (`q`, `alpha`,
-`beta`). Returns `0` (or `-Inf` if `log.p = TRUE`) for `q <= 0` and `1`
-(or `0` if `log.p = TRUE`) for `q >= 1`. An out-of-bound or missing
-parameter is an error, not a return value: the wrapper stops with a
-message naming the parameter. An infinite parameter is not currently
-intercepted there and reaches the C++ layer, which treats it as invalid.
+`beta`). When `lower.tail = TRUE`, returns `0` (or `-Inf` if
+`log.p = TRUE`) for `q <= 0` and `1` (or `0` if `log.p = TRUE`) for
+`q >= 1`. An out-of-bound or missing parameter is an error, not a return
+value: the wrapper stops with a message naming the parameter. An
+infinite parameter is not currently intercepted there and reaches the
+C++ layer, which treats it as invalid. Boundary return values are
+adjusted accordingly for `lower.tail = FALSE`.
 
 ## Details
 

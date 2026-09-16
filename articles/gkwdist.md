@@ -15,7 +15,8 @@ improvements over pure R implementations.
   random generation
 - **Analytical derivatives**: log-likelihood, gradient, and Hessian for
   efficient inference
-- **High performance**: C++ implementation with 10-100× speedup
+- **High performance**: analytical score and Hessian roughly 9× and 38×
+  faster than numerical differentiation
 - **No external dependencies**: Uses only base R functions in examples
 
 ``` r
@@ -36,22 +37,22 @@ density function:
 f(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda\alpha\beta x^{\alpha-1}}{B(\gamma, \delta+1)} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma\lambda-1} \{1-[1-(1-x^\alpha)^\beta]^\lambda\}^\delta
 ```
 
-for $`x \in (0,1)`$ and all parameters positive, where
-$`B(\cdot, \cdot)`$ denotes the beta function.
+for $`x \in (0,1)`$, with $`\alpha, \beta, \gamma, \lambda > 0`$ and
+$`\delta \geq 0`$, where $`B(\cdot, \cdot)`$ denotes the beta function.
 
 ### Nested Sub-families
 
 The GKw distribution generalizes several important distributions:
 
-| Distribution                    | Parameters    | Relationship  |
-|:--------------------------------|:--------------|:--------------|
-| Generalized Kumaraswamy (GKw)   | α, β, γ, δ, λ | Full model    |
-| Beta-Kumaraswamy (BKw)          | α, β, γ, δ    | λ = 1         |
-| Kumaraswamy-Kumaraswamy (KKw)   | α, β, δ, λ    | γ = 1         |
-| Exponentiated Kumaraswamy (EKw) | α, β, λ       | γ = 1, δ = 0  |
-| McDonald (Mc)                   | γ, δ, λ       | α = β = 1     |
-| Kumaraswamy (Kw)                | α, β          | γ = δ = λ = 1 |
-| Beta                            | γ, δ          | α = β = λ = 1 |
+| Distribution                    | Parameters    | Relationship        |
+|:--------------------------------|:--------------|:--------------------|
+| Generalized Kumaraswamy (GKw)   | α, β, γ, δ, λ | Full model          |
+| Beta-Kumaraswamy (BKw)          | α, β, γ, δ    | λ = 1               |
+| Kumaraswamy-Kumaraswamy (KKw)   | α, β, δ, λ    | γ = 1               |
+| Exponentiated Kumaraswamy (EKw) | α, β, λ       | γ = 1, δ = 0        |
+| McDonald (Mc)                   | γ, δ, λ       | α = β = 1           |
+| Kumaraswamy (Kw)                | α, β          | γ = 1, δ = 0, λ = 1 |
+| Beta                            | γ, δ          | α = β = λ = 1       |
 
 Nested Structure of GKw Family {.table}
 
@@ -571,7 +572,8 @@ system.time({
   cpp_ll <- llkw(c(2, 3), data_large)
 })
 
-# Typical results: C++ is 10-50× faster
+# Typical result: the C++ log-likelihood is about 3x faster than
+# accumulating the density in R (n = 10,000)
 ```
 
 ------------------------------------------------------------------------

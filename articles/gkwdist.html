@@ -92,8 +92,8 @@ quantile, and random generation</li>
 <strong>Analytical derivatives</strong>: log-likelihood, gradient,
 and Hessian for efficient inference</li>
 <li>
-<strong>High performance</strong>: C++ implementation with 10-100×
-speedup</li>
+<strong>High performance</strong>: analytical score and Hessian
+roughly 9× and 38× faster than numerical differentiation</li>
 <li>
 <strong>No external dependencies</strong>: Uses only base R
 functions in examples</li>
@@ -113,8 +113,12 @@ functions in examples</li>
 probability density function:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>;</mo><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>,</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mi>λ</mi><mi>α</mi><mi>β</mi><msup><mi>x</mi><mrow><mi>α</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mrow><mi>β</mi><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">[</mo><mn>1</mn><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mi>β</mi></msup><msup><mo stretchy="false" form="postfix">]</mo><mrow><mi>γ</mi><mi>λ</mi><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>−</mo><mo stretchy="false" form="prefix">[</mo><mn>1</mn><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>x</mi><mi>α</mi></msup><msup><mo stretchy="false" form="postfix">)</mo><mi>β</mi></msup><msup><mo stretchy="false" form="postfix">]</mo><mi>λ</mi></msup><msup><mo stretchy="false" form="postfix">}</mo><mi>δ</mi></msup></mrow><annotation encoding="application/x-tex">f(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda\alpha\beta x^{\alpha-1}}{B(\gamma, \delta+1)} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma\lambda-1} \{1-[1-(1-x^\alpha)^\beta]^\lambda\}^\delta</annotation></semantics></math></p>
 <p>for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x \in (0,1)</annotation></semantics></math>
-and all parameters positive, where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x \in (0,1)</annotation></semantics></math>,
+with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>,</mo><mi>β</mi><mo>,</mo><mi>γ</mi><mo>,</mo><mi>λ</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\alpha, \beta, \gamma, \lambda &gt; 0</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta \geq 0</annotation></semantics></math>,
+where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo stretchy="false" form="prefix">(</mo><mi>⋅</mi><mo>,</mo><mi>⋅</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">B(\cdot, \cdot)</annotation></semantics></math>
 denotes the beta function.</p>
 </div>
@@ -158,7 +162,7 @@ denotes the beta function.</p>
 <tr class="even">
 <td align="left">Kumaraswamy (Kw)</td>
 <td align="left">α, β</td>
-<td align="left">γ = δ = λ = 1</td>
+<td align="left">γ = 1, δ = 0, λ = 1</td>
 </tr>
 <tr class="odd">
 <td align="left">Beta</td>
@@ -718,7 +722,8 @@ uncertainty of parameter estimates.</p>
 <span>  <span class="va">cpp_ll</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llkw.html">llkw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, <span class="va">data_large</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Typical results: C++ is 10-50× faster</span></span></code></pre></div>
+<span><span class="co"># Typical result: the C++ log-likelihood is about 3x faster than</span></span>
+<span><span class="co"># accumulating the density in R (n = 10,000)</span></span></code></pre></div>
 <hr>
 </div>
 </div>
