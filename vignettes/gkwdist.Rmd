@@ -33,7 +33,7 @@ The **gkwdist** package provides a comprehensive implementation of the Generaliz
 - **Seven nested distributions**: GKw, BKw, KKw, EKw, Mc, Kw, and Beta
 - **Standard distribution functions**: density, CDF, quantile, and random generation
 - **Analytical derivatives**: log-likelihood, gradient, and Hessian for efficient inference
-- **High performance**: C++ implementation with 10-100× speedup
+- **High performance**: analytical score and Hessian roughly 9× and 38× faster than numerical differentiation
 - **No external dependencies**: Uses only base R functions in examples
 ```{r load_package}
 library(gkwdist)
@@ -49,7 +49,7 @@ The five-parameter Generalized Kumaraswamy distribution has probability density 
 
 $$f(x; \alpha, \beta, \gamma, \delta, \lambda) = \frac{\lambda\alpha\beta x^{\alpha-1}}{B(\gamma, \delta+1)} (1-x^\alpha)^{\beta-1} [1-(1-x^\alpha)^\beta]^{\gamma\lambda-1} \{1-[1-(1-x^\alpha)^\beta]^\lambda\}^\delta$$
 
-for $x \in (0,1)$ and all parameters positive, where $B(\cdot, \cdot)$ denotes the beta function.
+for $x \in (0,1)$, with $\alpha, \beta, \gamma, \lambda > 0$ and $\delta \geq 0$, where $B(\cdot, \cdot)$ denotes the beta function.
 
 ## Nested Sub-families
 
@@ -71,7 +71,7 @@ family_structure <- data.frame(
   ),
   Relationship = c(
     "Full model", "λ = 1", "γ = 1", "γ = 1, δ = 0",
-    "α = β = 1", "γ = δ = λ = 1", "α = β = λ = 1"
+    "α = β = 1", "γ = 1, δ = 0, λ = 1", "α = β = λ = 1"
   )
 )
 
@@ -501,7 +501,8 @@ system.time({
   cpp_ll <- llkw(c(2, 3), data_large)
 })
 
-# Typical results: C++ is 10-50× faster
+# Typical result: the C++ log-likelihood is about 3x faster than
+# accumulating the density in R (n = 10,000)
 ```
 
 ---
