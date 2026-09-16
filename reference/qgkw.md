@@ -66,9 +66,11 @@ A vector of quantiles corresponding to the given probabilities `p`. The
 length of the result is determined by the recycling rule applied to the
 arguments (`p`, `alpha`, `beta`, `gamma`, `delta`, `lambda`). Returns:
 
-- `0` for `p = 0` (or `p = -Inf` if `log.p = TRUE`).
+- `0` for `p = 0` (or `p = -Inf` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
-- `1` for `p = 1` (or `p = 0` if `log.p = TRUE`).
+- `1` for `p = 1` (or `p = 0` if `log.p = TRUE`, when
+  `lower.tail = TRUE`).
 
 - `NaN` for `p < 0` or `p > 1` (or corresponding log scale).
 
@@ -76,6 +78,9 @@ arguments (`p`, `alpha`, `beta`, `gamma`, `delta`, `lambda`). Returns:
   the wrapper stops with a message naming the parameter. An infinite
   parameter is not currently intercepted there and reaches the C++
   layer, which treats it as invalid.
+
+Boundary return values are adjusted accordingly for
+`lower.tail = FALSE`.
 
 ## Details
 
