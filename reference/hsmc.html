@@ -117,10 +117,9 @@ $$
 \delta\sum_{i=1}^{n}\frac{x_i^{\lambda}[\ln(x_i)]^2}{(1-x_i^{\lambda})^2}
 $$</p>
 <p>where \(\psi'(\cdot)\) is the trigamma function (<code><a href="https://rdrr.io/r/base/Special.html" class="external-link">trigamma</a></code>).
-(<em>Note: The formula for \(\partial^2 \ell / \partial \lambda^2\) provided in the source
-comment was different and potentially related to the expected information matrix;
-the formula shown here is derived from the gradient provided earlier. Verification
-is recommended.</em>)</p>
+The \(\partial^2 \ell / \partial \lambda^2\) term matches the C++ implementation
+(<code>src/bpmc.cpp</code>) and is covered by the numerical Hessian checks in
+<code>tests/testthat/test-derivatives-validation.R</code>.</p>
 <p>The returned matrix is symmetric, with rows/columns corresponding to
 \(\gamma, \delta, \lambda\).</p>
     </div>

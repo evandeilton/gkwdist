@@ -102,7 +102,7 @@ Lopes, J. E.
 
 ``` r
 # \donttest{
-## Example 1: Basic Examples
+## Example 1: Basic Gradient Evaluation
 
 # Generate sample data with more stable parameters
 set.seed(123)
@@ -113,407 +113,117 @@ data <- rmc(n,
   lambda = true_params[3]
 )
 
-# Evaluate Hessian at true parameters
-hess_true <- hsmc(par = true_params, data = data)
-cat("Hessian matrix at true parameters:\n")
-#> Hessian matrix at true parameters:
-print(hess_true, digits = 4)
-#>        [,1]   [,2]   [,3]
-#> [1,]  445.6 -199.3  783.2
-#> [2,] -199.3  131.0 -369.8
-#> [3,]  783.2 -369.8 1416.2
+# Evaluate the gradient at the true parameters
+grad_true <- grmc(par = true_params, data = data)
+names(grad_true) <- c("gamma", "delta", "lambda")
+cat("Gradient at true parameters:\n")
+#> Gradient at true parameters:
+print(grad_true)
+#>      gamma      delta     lambda 
+#> -13.504792   6.525193 -24.769059 
+cat("Gradient norm:", sqrt(sum(grad_true^2)), "\n")
+#> Gradient norm: 28.95624 
 
-# Check symmetry
-cat(
-  "\nSymmetry check (max |H - H^T|):",
-  max(abs(hess_true - t(hess_true))), "\n"
-)
+
+## Example 2: Numerical Verification with numDeriv::grad()
+
+# grmc() returns the gradient of the *negative* log-likelihood minimized
+# by llmc(). numDeriv::grad() differentiates llmc() itself by finite
+# differences, so the two should agree closely at any parameter vector,
+# not just at the MLE.
+if (requireNamespace("numDeriv", quietly = TRUE)) {
+  test_points <- rbind(
+    c(1.5, 2.0, 1.0),
+    as.numeric(true_params),
+    c(2.5, 3.0, 2.0)
+  )
+
+  cat("\nAnalytical (grmc) vs numerical (numDeriv::grad) gradient:\n")
+  for (i in seq_len(nrow(test_points))) {
+    par_i <- test_points[i, ]
+    grad_analytic <- grmc(par = par_i, data = data)
+    grad_numeric <- numDeriv::grad(func = llmc, x = par_i, data = data)
+
+    comparison <- data.frame(
+      Parameter = c("gamma", "delta", "lambda"),
+      Analytical = grad_analytic,
+      Numerical = grad_numeric,
+      Abs_Diff = abs(grad_analytic - grad_numeric)
+    )
+    cat("\nPoint", i, ": (", paste(round(par_i, 2), collapse = ", "), ")\n")
+    print(comparison, digits = 8, row.names = FALSE)
+  }
+}
 #> 
-#> Symmetry check (max |H - H^T|): 0 
+#> Analytical (grmc) vs numerical (numDeriv::grad) gradient:
+#> 
+#> Point 1 : ( 1.5, 2, 1 )
+#>  Parameter  Analytical   Numerical      Abs_Diff
+#>      gamma  -569.17827  -569.17827 1.7215825e-08
+#>      delta   298.19112   298.19112 3.8869075e-08
+#>     lambda -1172.76622 -1172.76622 1.1249836e-07
+#> 
+#> Point 2 : ( 2, 2.5, 1.5 )
+#>  Parameter  Analytical   Numerical      Abs_Diff
+#>      gamma -13.5047924 -13.5047924 5.1955441e-08
+#>      delta   6.5251933   6.5251933 2.8501302e-08
+#>     lambda -24.7690588 -24.7690589 9.6862262e-08
+#> 
+#> Point 3 : ( 2.5, 3, 2 )
+#>  Parameter Analytical  Numerical      Abs_Diff
+#>      gamma  476.65067  476.65067 4.7074764e-08
+#>      delta -168.29540 -168.29540 9.6466408e-09
+#>     lambda  769.57550  769.57550 6.4076062e-08
 
 
-## Example 2: Hessian Properties at MLE
+## Example 3: Gradient-Based Optimization Convergence
 
-# Fit model
-fit <- optim(
+# Supplying the analytical gradient lets BFGS skip its internal
+# finite-difference approximation
+fit_with_grad <- optim(
   par = c(1.5, 2.0, 1.0),
   fn = llmc,
   gr = grmc,
   data = data,
   method = "BFGS",
-  hessian = TRUE
+  control = list(trace = 0)
 )
 
-mle <- fit$par
+# Same starting point and objective, relying on optim()'s own
+# finite-difference gradient instead
+fit_no_grad <- optim(
+  par = c(1.5, 2.0, 1.0),
+  fn = llmc,
+  data = data,
+  method = "BFGS",
+  control = list(trace = 0)
+)
+
+mle <- fit_with_grad$par
 names(mle) <- c("gamma", "delta", "lambda")
 
-# Hessian at MLE
-hessian_at_mle <- hsmc(par = mle, data = data)
-cat("\nHessian at MLE:\n")
+comparison <- data.frame(
+  Method = c("Analytical gradient", "Finite-difference"),
+  Gamma = c(fit_with_grad$par[1], fit_no_grad$par[1]),
+  Delta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
+  Lambda = c(fit_with_grad$par[3], fit_no_grad$par[3]),
+  NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
+  Fn_Evals = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
+)
+cat("\nOptimization comparison:\n")
 #> 
-#> Hessian at MLE:
-print(hessian_at_mle, digits = 4)
-#>        [,1]    [,2]   [,3]
-#> [1,]  754.3 -216.43  783.2
-#> [2,] -216.4   99.01 -238.6
-#> [3,]  783.2 -238.57  820.1
+#> Optimization comparison:
+print(comparison, digits = 6, row.names = FALSE)
+#>               Method   Gamma   Delta  Lambda NegLogLik Fn_Evals
+#>  Analytical gradient 1.45821 2.64432 1.95583  -310.101       82
+#>    Finite-difference 1.46074 2.64340 1.95329  -310.101       80
 
-# Compare with optim's numerical Hessian
-cat("\nComparison with optim Hessian:\n")
+# At the MLE, the gradient of the negative log-likelihood should vanish
+grad_at_mle <- grmc(par = mle, data = data)
+cat("\nGradient at MLE:", grad_at_mle, "\n")
 #> 
-#> Comparison with optim Hessian:
-cat(
-  "Max absolute difference:",
-  max(abs(hessian_at_mle - fit$hessian)), "\n"
-)
-#> Max absolute difference: 0.0002574134 
-
-# Eigenvalue analysis
-eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
-cat("\nEigenvalues:\n")
-#> 
-#> Eigenvalues:
-print(eigenvals)
-#> [1] 1638.4186859   34.1207859    0.8213602
-
-cat("\nPositive definite:", all(eigenvals > 0), "\n")
-#> 
-#> Positive definite: TRUE 
-cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
-#> Condition number: 1994.763 
-
-
-## Example 3: Standard Errors and Confidence Intervals
-
-# Observed information matrix
-obs_info <- hessian_at_mle
-
-# Variance-covariance matrix
-vcov_matrix <- solve(obs_info)
-cat("\nVariance-Covariance Matrix:\n")
-#> 
-#> Variance-Covariance Matrix:
-print(vcov_matrix, digits = 6)
-#>           [,1]      [,2]      [,3]
-#> [1,]  0.528826 -0.203770 -0.564330
-#> [2,] -0.203770  0.112290  0.227275
-#> [3,] -0.564330  0.227275  0.606294
-
-# Standard errors
-se <- sqrt(diag(vcov_matrix))
-names(se) <- c("gamma", "delta", "lambda")
-
-# Correlation matrix
-corr_matrix <- cov2cor(vcov_matrix)
-cat("\nCorrelation Matrix:\n")
-#> 
-#> Correlation Matrix:
-print(corr_matrix, digits = 4)
-#>         [,1]    [,2]    [,3]
-#> [1,]  1.0000 -0.8362 -0.9966
-#> [2,] -0.8362  1.0000  0.8710
-#> [3,] -0.9966  0.8710  1.0000
-
-# Confidence intervals
-z_crit <- qnorm(0.975)
-results <- data.frame(
-  Parameter = c("gamma", "delta", "lambda"),
-  True = true_params,
-  MLE = mle,
-  SE = se,
-  CI_Lower = mle - z_crit * se,
-  CI_Upper = mle + z_crit * se
-)
-print(results, digits = 4)
-#>        Parameter True   MLE     SE CI_Lower CI_Upper
-#> gamma      gamma  2.0 1.458 0.7272  0.03292    2.884
-#> delta      delta  2.5 2.644 0.3351  1.98755    3.301
-#> lambda    lambda  1.5 1.956 0.7786  0.42971    3.482
-
-
-## Example 4: Determinant and Trace Analysis
-
-# Compute at different points
-test_params <- rbind(
-  c(1.5, 2.0, 1.0),
-  c(2.0, 2.5, 1.5),
-  mle,
-  c(2.5, 3.0, 2.0)
-)
-
-hess_properties <- data.frame(
-  Gamma = numeric(),
-  Delta = numeric(),
-  Lambda = numeric(),
-  Determinant = numeric(),
-  Trace = numeric(),
-  Min_Eigenval = numeric(),
-  Max_Eigenval = numeric(),
-  Cond_Number = numeric(),
-  stringsAsFactors = FALSE
-)
-
-for (i in 1:nrow(test_params)) {
-  H <- hsmc(par = test_params[i, ], data = data)
-  eigs <- eigen(H, only.values = TRUE)$values
-
-  hess_properties <- rbind(hess_properties, data.frame(
-    Gamma = test_params[i, 1],
-    Delta = test_params[i, 2],
-    Lambda = test_params[i, 3],
-    Determinant = det(H),
-    Trace = sum(diag(H)),
-    Min_Eigenval = min(eigs),
-    Max_Eigenval = max(eigs),
-    Cond_Number = max(eigs) / min(eigs)
-  ))
-}
-
-cat("\nHessian Properties at Different Points:\n")
-#> 
-#> Hessian Properties at Different Points:
-print(hess_properties, digits = 4, row.names = FALSE)
-#>  Gamma Delta Lambda Determinant Trace Min_Eigenval Max_Eigenval Cond_Number
-#>  1.500 2.000  1.000   -28036436  3709     -19.4941         3292    -168.864
-#>  2.000 2.500  1.500      569493  1993       8.3039         1949     234.745
-#>  1.458 2.644  1.956       45917  1673       0.8214         1638    1994.763
-#>  2.500 3.000  2.000   -20506346  1293    -238.7457         1473      -6.171
-
-
-## Example 5: Curvature Visualization (All pairs side by side)
-
-# Create grids around MLE with wider range (±1.5)
-gamma_grid <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = 25)
-delta_grid <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = 25)
-lambda_grid <- seq(mle[3] - 1.5, mle[3] + 1.5, length.out = 25)
-
-gamma_grid <- gamma_grid[gamma_grid > 0]
-delta_grid <- delta_grid[delta_grid > 0]
-lambda_grid <- lambda_grid[lambda_grid > 0]
-
-# Compute curvature measures for all pairs
-determinant_surface_gd <- matrix(NA, nrow = length(gamma_grid), ncol = length(delta_grid))
-trace_surface_gd <- matrix(NA, nrow = length(gamma_grid), ncol = length(delta_grid))
-
-determinant_surface_gl <- matrix(NA, nrow = length(gamma_grid), ncol = length(lambda_grid))
-trace_surface_gl <- matrix(NA, nrow = length(gamma_grid), ncol = length(lambda_grid))
-
-determinant_surface_dl <- matrix(NA, nrow = length(delta_grid), ncol = length(lambda_grid))
-trace_surface_dl <- matrix(NA, nrow = length(delta_grid), ncol = length(lambda_grid))
-
-# Gamma vs Delta
-for (i in seq_along(gamma_grid)) {
-  for (j in seq_along(delta_grid)) {
-    H <- hsmc(c(gamma_grid[i], delta_grid[j], mle[3]), data)
-    determinant_surface_gd[i, j] <- det(H)
-    trace_surface_gd[i, j] <- sum(diag(H))
-  }
-}
-
-# Gamma vs Lambda
-for (i in seq_along(gamma_grid)) {
-  for (j in seq_along(lambda_grid)) {
-    H <- hsmc(c(gamma_grid[i], mle[2], lambda_grid[j]), data)
-    determinant_surface_gl[i, j] <- det(H)
-    trace_surface_gl[i, j] <- sum(diag(H))
-  }
-}
-
-# Delta vs Lambda
-for (i in seq_along(delta_grid)) {
-  for (j in seq_along(lambda_grid)) {
-    H <- hsmc(c(mle[1], delta_grid[i], lambda_grid[j]), data)
-    determinant_surface_dl[i, j] <- det(H)
-    trace_surface_dl[i, j] <- sum(diag(H))
-  }
-}
-
-# Plot
-
-# Determinant plots
-contour(gamma_grid, delta_grid, determinant_surface_gd,
-  xlab = expression(gamma), ylab = expression(delta),
-  main = "Determinant: Gamma vs Delta", las = 1,
-  col = "#2E4057", lwd = 1.5, nlevels = 15
-)
-points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-grid(col = "gray90")
-
-
-contour(gamma_grid, lambda_grid, determinant_surface_gl,
-  xlab = expression(gamma), ylab = expression(lambda),
-  main = "Determinant: Gamma vs Lambda", las = 1,
-  col = "#2E4057", lwd = 1.5, nlevels = 15
-)
-points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-grid(col = "gray90")
-
-
-contour(delta_grid, lambda_grid, determinant_surface_dl,
-  xlab = expression(delta), ylab = expression(lambda),
-  main = "Determinant: Delta vs Lambda", las = 1,
-  col = "#2E4057", lwd = 1.5, nlevels = 15
-)
-points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-grid(col = "gray90")
-
-
-# Trace plots
-contour(gamma_grid, delta_grid, trace_surface_gd,
-  xlab = expression(gamma), ylab = expression(delta),
-  main = "Trace: Gamma vs Delta", las = 1,
-  col = "#2E4057", lwd = 1.5, nlevels = 15
-)
-points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-grid(col = "gray90")
-
-
-contour(gamma_grid, lambda_grid, trace_surface_gl,
-  xlab = expression(gamma), ylab = expression(lambda),
-  main = "Trace: Gamma vs Lambda", las = 1,
-  col = "#2E4057", lwd = 1.5, nlevels = 15
-)
-points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-grid(col = "gray90")
-
-
-contour(delta_grid, lambda_grid, trace_surface_dl,
-  xlab = expression(delta), ylab = expression(lambda),
-  main = "Trace: Delta vs Lambda", las = 1,
-  col = "#2E4057", lwd = 1.5, nlevels = 15
-)
-points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-grid(col = "gray90")
-
-legend("topright",
-  legend = c("MLE", "True"),
-  col = c("#8B0000", "#006400"),
-  pch = c(19, 17),
-  bty = "n", cex = 0.8
-)
-
-
-
-## Example 6: Confidence Ellipses (All pairs side by side)
-
-# Extract all 2x2 submatrices
-vcov_gd <- vcov_matrix[1:2, 1:2]
-vcov_gl <- vcov_matrix[c(1, 3), c(1, 3)]
-vcov_dl <- vcov_matrix[2:3, 2:3]
-
-# Create confidence ellipses
-theta <- seq(0, 2 * pi, length.out = 100)
-chi2_val <- qchisq(0.95, df = 2)
-
-# Gamma vs Delta ellipse
-# The observed information is not guaranteed positive definite at a
-# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
-# below stays finite and the region remains drawable.
-eig_decomp_gd <- eigen(vcov_gd, symmetric = TRUE)
-eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
-ellipse_gd <- matrix(NA, nrow = 100, ncol = 2)
-for (i in 1:100) {
-  v <- c(cos(theta[i]), sin(theta[i]))
-  ellipse_gd[i, ] <- mle[1:2] + sqrt(chi2_val) *
-    (eig_decomp_gd$vectors %*% diag(sqrt(eig_decomp_gd$values)) %*% v)
-}
-
-# Gamma vs Lambda ellipse
-# The observed information is not guaranteed positive definite at a
-# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
-# below stays finite and the region remains drawable.
-eig_decomp_gl <- eigen(vcov_gl, symmetric = TRUE)
-eig_decomp_gl$values <- pmax(eig_decomp_gl$values, 0)
-ellipse_gl <- matrix(NA, nrow = 100, ncol = 2)
-for (i in 1:100) {
-  v <- c(cos(theta[i]), sin(theta[i]))
-  ellipse_gl[i, ] <- mle[c(1, 3)] + sqrt(chi2_val) *
-    (eig_decomp_gl$vectors %*% diag(sqrt(eig_decomp_gl$values)) %*% v)
-}
-
-# Delta vs Lambda ellipse
-# The observed information is not guaranteed positive definite at a
-# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
-# below stays finite and the region remains drawable.
-eig_decomp_dl <- eigen(vcov_dl, symmetric = TRUE)
-eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
-ellipse_dl <- matrix(NA, nrow = 100, ncol = 2)
-for (i in 1:100) {
-  v <- c(cos(theta[i]), sin(theta[i]))
-  ellipse_dl[i, ] <- mle[2:3] + sqrt(chi2_val) *
-    (eig_decomp_dl$vectors %*% diag(sqrt(eig_decomp_dl$values)) %*% v)
-}
-
-# Marginal confidence intervals
-se_gd <- sqrt(diag(vcov_gd))
-ci_gamma_gd <- mle[1] + c(-1, 1) * 1.96 * se_gd[1]
-ci_delta_gd <- mle[2] + c(-1, 1) * 1.96 * se_gd[2]
-
-se_gl <- sqrt(diag(vcov_gl))
-ci_gamma_gl <- mle[1] + c(-1, 1) * 1.96 * se_gl[1]
-ci_lambda_gl <- mle[3] + c(-1, 1) * 1.96 * se_gl[2]
-
-se_dl <- sqrt(diag(vcov_dl))
-ci_delta_dl <- mle[2] + c(-1, 1) * 1.96 * se_dl[1]
-ci_lambda_dl <- mle[3] + c(-1, 1) * 1.96 * se_dl[2]
-
-# Plot
-
-# Gamma vs Delta
-plot(ellipse_gd[, 1], ellipse_gd[, 2],
-  type = "l", lwd = 2, col = "#2E4057",
-  xlab = expression(gamma), ylab = expression(delta),
-  main = "Gamma vs Delta", las = 1, xlim = range(ellipse_gd[, 1], ci_gamma_gd),
-  ylim = range(ellipse_gd[, 2], ci_delta_gd)
-)
-abline(v = ci_gamma_gd, col = "#808080", lty = 3, lwd = 1.5)
-abline(h = ci_delta_gd, col = "#808080", lty = 3, lwd = 1.5)
-points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-grid(col = "gray90")
-
-
-# Gamma vs Lambda
-plot(ellipse_gl[, 1], ellipse_gl[, 2],
-  type = "l", lwd = 2, col = "#2E4057",
-  xlab = expression(gamma), ylab = expression(lambda),
-  main = "Gamma vs Lambda", las = 1, xlim = range(ellipse_gl[, 1], ci_gamma_gl),
-  ylim = range(ellipse_gl[, 2], ci_lambda_gl)
-)
-abline(v = ci_gamma_gl, col = "#808080", lty = 3, lwd = 1.5)
-abline(h = ci_lambda_gl, col = "#808080", lty = 3, lwd = 1.5)
-points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-grid(col = "gray90")
-
-
-# Delta vs Lambda
-plot(ellipse_dl[, 1], ellipse_dl[, 2],
-  type = "l", lwd = 2, col = "#2E4057",
-  xlab = expression(delta), ylab = expression(lambda),
-  main = "Delta vs Lambda", las = 1, xlim = range(ellipse_dl[, 1], ci_delta_dl),
-  ylim = range(ellipse_dl[, 2], ci_lambda_dl)
-)
-abline(v = ci_delta_dl, col = "#808080", lty = 3, lwd = 1.5)
-abline(h = ci_lambda_dl, col = "#808080", lty = 3, lwd = 1.5)
-points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-grid(col = "gray90")
-
-legend("topright",
-  legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-  pch = c(19, 17, NA, NA),
-  lty = c(NA, NA, 1, 3),
-  lwd = c(NA, NA, 2, 1.5),
-  bty = "n", cex = 0.8
-)
-
+#> Gradient at MLE: -0.06057962 0.01657138 -0.05932882 
+cat("Max absolute component:", max(abs(grad_at_mle)), "\n")
+#> Max absolute component: 0.06057962 
 # }
 ```

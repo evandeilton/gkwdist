@@ -61,11 +61,10 @@ positive log-likelihood (\\\ell\\). The function returns the
 \$\$
 
 where \\\psi'(\cdot)\\ is the trigamma function
-([`trigamma`](https://rdrr.io/r/base/Special.html)). (*Note: The formula
-for \\\partial^2 \ell / \partial \lambda^2\\ provided in the source
-comment was different and potentially related to the expected
-information matrix; the formula shown here is derived from the gradient
-provided earlier. Verification is recommended.*)
+([`trigamma`](https://rdrr.io/r/base/Special.html)). The \\\partial^2
+\ell / \partial \lambda^2\\ term matches the C++ implementation
+(`src/bpmc.cpp`) and is covered by the numerical Hessian checks in
+`tests/testthat/test-derivatives-validation.R`.
 
 The returned matrix is symmetric, with rows/columns corresponding to
 \\\gamma, \delta, \lambda\\.
