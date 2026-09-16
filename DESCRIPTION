@@ -32,6 +32,7 @@ LinkingTo:
     RcppArmadillo
 Suggests: 
     knitr,
+    microbenchmark,
     numDeriv,
     rmarkdown,
     testthat (>= 3.0.0)
