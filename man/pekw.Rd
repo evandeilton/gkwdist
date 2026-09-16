@@ -28,12 +28,14 @@ Can be a scalar or a vector. Default: 1.0.}
 A vector of probabilities, \eqn{F(q)}, or their logarithms/complements
 depending on \code{lower.tail} and \code{log.p}. The length of the result
 is determined by the recycling rule applied to the arguments (\code{q},
-\code{alpha}, \code{beta}, \code{lambda}). Returns \code{0} (or \code{-Inf}
-if \code{log.p = TRUE}) for \code{q <= 0} and \code{1} (or \code{0} if
-\code{log.p = TRUE}) for \code{q >= 1}. An out-of-bound or missing parameter is an
-error, not a return value: the wrapper stops with a message naming the
-parameter. An infinite parameter is not currently intercepted there and
-reaches the C++ layer, which treats it as invalid.
+\code{alpha}, \code{beta}, \code{lambda}). When \code{lower.tail = TRUE},
+returns \code{0} (or \code{-Inf} if \code{log.p = TRUE}) for \code{q <= 0}
+and \code{1} (or \code{0} if \code{log.p = TRUE}) for \code{q >= 1}. An
+out-of-bound or missing parameter is an error, not a return value: the
+wrapper stops with a message naming the parameter. An infinite parameter
+is not currently intercepted there and reaches the C++ layer, which
+treats it as invalid.
+Boundary return values are adjusted accordingly for \code{lower.tail = FALSE}.
 }
 \description{
 Computes the cumulative distribution function (CDF), \eqn{P(X \le q)}, for the
