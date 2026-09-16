@@ -11,13 +11,13 @@ Source:
 [`inst/CITATION`](https://github.com/evandeilton/gkwdist/blob/main/inst/CITATION)
 
 Lopes, J.E. (2026). gkwdist: Generalized Kumaraswamy Distribution
-Family. R package version 1.1.5.
+Family. R package version 1.1.6.
 https://CRAN.R-project.org/package=gkwdist
 
     @Manual{,
       title = {{gkwdist}: Generalized Kumaraswamy Distribution Family},
       author = {José Evandeilton Lopes},
       year = {2026},
-      note = {R package version 1.1.5},
+      note = {R package version 1.1.6},
       url = {https://CRAN.R-project.org/package=gkwdist},
     }

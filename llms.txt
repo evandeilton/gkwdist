@@ -17,8 +17,8 @@ for maximum computational efficiency.
 and bounded data - Standard R distribution API: `d*`, `p*`, `q*`, `r*` -
 Analytical log-likelihood, gradient, and Hessian functions - **All
 functions implemented in C++** for optimal performance - Analytical
-score and Hessian roughly 9× and 38× faster than Richardson
-extrapolation - Numerically stable in log space for observations near
+score and Hessian substantially faster than numerical (Richardson)
+differentiation - Numerically stable in log space for observations near
 the boundaries
 
 ------------------------------------------------------------------------
@@ -50,6 +50,13 @@ devtools::install_github("evandeilton/gkwdist")
 | **McDonald (Beta Power)** | `mc` | $`\gamma, \delta, \lambda`$ | `dmc`, `pmc`, `qmc`, `rmc`, `llmc`, `grmc`, `hsmc` |
 | **Kumaraswamy** | `kw` | $`\alpha, \beta`$ | `dkw`, `pkw`, `qkw`, `rkw`, `llkw`, `grkw`, `hskw` |
 | **Beta** | `beta_` | $`\gamma, \delta`$ | `dbeta_`, `pbeta_`, `qbeta_`, `rbeta_`, `llbeta`, `grbeta`, `hsbeta` |
+| **Uniform** | — | *(none)* | *(none — degenerate case)* |
+
+**Note:** Uniform is the degenerate 0-parameter case
+$`\alpha = \beta = \gamma = \lambda = 1`$, $`\delta = 0`$. It has no
+dedicated functions in this package; use base R’s `dunif`, `punif`,
+`qunif`, `runif`, or call the GKw functions directly,
+e.g. `dgkw(x, 1, 1, 1, 0, 1)`.
 
 ### Function Types
 
@@ -344,19 +351,21 @@ Q_{\text{Beta}}(p; \gamma, \delta) = I_p^{-1}(\gamma, \delta+1)
 ## Hierarchical Structure
 
 ``` R
-                              GKw(α, β, γ, δ, λ)
-                              /               \
-                           λ = 1             γ = 1
-                            /                    \
-                   BKw(α, β, γ, δ)         KKw(α, β, δ, λ)
-                         |                          |
-                     α = β = 1                    δ = 0
-                         |                          |
-                    MC(γ, δ, λ)              EKw(α, β, λ)
-                         |                          |
-                      λ = 1                       λ = 1
-                         |                          |
-                    Beta(γ, δ)                   Kw(α, β)
+                           GKw(α, β, γ, δ, λ)
+                                    │
+          ┌─────────────────────────┼─────────────────────────┐
+          │                         │                         │
+        λ = 1                   α = β = 1                   γ = 1
+          │                         │                         │
+   BKw(α, β, γ, δ)             MC(γ, δ, λ)             KKw(α, β, δ, λ)
+          │                         │                         │
+      α = β = 1                   λ = 1                     δ = 0
+          │                         │                         │
+     Beta(γ, δ)                Beta(γ, δ)               EKw(α, β, λ)
+                                                              │
+                                                            λ = 1
+                                                              │
+                                                          Kw(α, β)
 ```
 
 **Note:** The Beta distribution is obtained from MC by setting
@@ -746,12 +755,17 @@ plot(benchmark)
 # The larger gain is in the derivatives, where the analytical forms replace
 # numerical differentiation entirely:
 data5 <- rgkw(20000, 2, 3, 1.5, 0.5, 2)
+par5 <- c(2, 3, 1.5, 0.5, 2)
 microbenchmark(
-  analytical = grgkw(c(2, 3, 1.5, 0.5, 2), data5),
-  numeric    = numDeriv::grad(function(p) llgkw(p, data5), c(2, 3, 1.5, 0.5, 2)),
+  grad_analytical = grgkw(par5, data5),
+  grad_numeric    = numDeriv::grad(function(p) llgkw(p, data5), par5),
+  hess_analytical = hsgkw(par5, data5),
+  hess_numeric    = numDeriv::hessian(function(p) llgkw(p, data5), par5),
   times = 20
 )
-# Typical results: analytical score ~9x faster, analytical Hessian ~38x faster
+# Typical result: both the analytical gradient and the analytical Hessian
+# are substantially faster than their numerical counterparts (commonly by
+# more than an order of magnitude); the exact factor depends on hardware.
 ```
 
 **Why C++ Implementation Matters:**
@@ -832,16 +846,6 @@ microbenchmark(
 ``` r
 
 citation("gkwdist")
-```
-
-``` bibtex
-@Manual{gkwdist2025,
-  title  = {gkwdist: Generalized Kumaraswamy Distribution Family},
-  author = {José Evandeilton Lopes},
-  year   = {2025},
-  note   = {R package},
-  url    = {https://github.com/evandeilton/gkwdist}
-}
 ```
 
 ## Author

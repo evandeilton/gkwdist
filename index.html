@@ -65,7 +65,7 @@ family and its seven nested sub-models for bounded continuous data.
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
 <p><code>gkwdist</code> implements the <strong>Generalized Kumaraswamy (GKw)</strong> distribution family and its seven nested sub-models for bounded continuous data on <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0,1)</annotation></semantics></math>. All functions are implemented in <strong>C++</strong> via RcppArmadillo for maximum computational efficiency.</p>
-<p><strong>Key Features:</strong> - Seven flexible distributions for proportions, rates, and bounded data - Standard R distribution API: <code>d*</code>, <code>p*</code>, <code>q*</code>, <code>r*</code> - Analytical log-likelihood, gradient, and Hessian functions - <strong>All functions implemented in C++</strong> for optimal performance - Analytical score and Hessian roughly 9× and 38× faster than Richardson extrapolation - Numerically stable in log space for observations near the boundaries</p>
+<p><strong>Key Features:</strong> - Seven flexible distributions for proportions, rates, and bounded data - Standard R distribution API: <code>d*</code>, <code>p*</code>, <code>q*</code>, <code>r*</code> - Analytical log-likelihood, gradient, and Hessian functions - <strong>All functions implemented in C++</strong> for optimal performance - Analytical score and Hessian substantially faster than numerical (Richardson) differentiation - Numerically stable in log space for observations near the boundaries</p>
 <hr>
 </div>
 <div class="section level2">
@@ -156,8 +156,15 @@ family and its seven nested sub-models for bounded continuous data.
 <code>dbeta_</code>, <code>pbeta_</code>, <code>qbeta_</code>, <code>rbeta_</code>, <code>llbeta</code>, <code>grbeta</code>, <code>hsbeta</code>
 </td>
 </tr>
+<tr>
+<td align="left"><strong>Uniform</strong></td>
+<td align="center">—</td>
+<td align="left"><em>(none)</em></td>
+<td align="left"><em>(none — degenerate case)</em></td>
+</tr>
 </tbody>
 </table>
+<p><strong>Note:</strong> Uniform is the degenerate 0-parameter case <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mi>β</mi><mo>=</mo><mi>γ</mi><mo>=</mo><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\alpha = \beta = \gamma = \lambda = 1</annotation></semantics></math>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta = 0</annotation></semantics></math>. It has no dedicated functions in this package; use base R’s <code>dunif</code>, <code>punif</code>, <code>qunif</code>, <code>runif</code>, or call the GKw functions directly, e.g. <code>dgkw(x, 1, 1, 1, 0, 1)</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="function-types">Function Types<a class="anchor" aria-label="anchor" href="#function-types"></a>
@@ -308,19 +315,21 @@ family and its seven nested sub-models for bounded continuous data.
 <div class="section level2">
 <h2 id="hierarchical-structure">Hierarchical Structure<a class="anchor" aria-label="anchor" href="#hierarchical-structure"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>                              <span class="fu">GKw</span>(α, β, γ, δ, λ)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                              <span class="sc">/</span>               \</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>                           λ <span class="ot">=</span> <span class="dv">1</span>             γ <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>                            <span class="sc">/</span>                    \</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>                   <span class="fu">BKw</span>(α, β, γ, δ)         <span class="fu">KKw</span>(α, β, δ, λ)</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>                         <span class="sc">|</span>                          <span class="er">|</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>                     α <span class="ot">=</span> β <span class="ot">=</span> <span class="dv">1</span>                    δ <span class="ot">=</span> <span class="dv">0</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>                         <span class="sc">|</span>                          <span class="er">|</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>                    <span class="fu">MC</span>(γ, δ, λ)              <span class="fu">EKw</span>(α, β, λ)</span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>                         <span class="sc">|</span>                          <span class="er">|</span></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>                      λ <span class="ot">=</span> <span class="dv">1</span>                       λ <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>                         <span class="sc">|</span>                          <span class="er">|</span></span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>                    <span class="fu">Beta</span>(γ, δ)                   <span class="fu">Kw</span>(α, β)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>                           <span class="fu">GKw</span>(α, β, γ, δ, λ)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                                    │</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>          ┌─────────────────────────┼─────────────────────────┐</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>          │                         │                         │</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>        λ <span class="ot">=</span> <span class="dv">1</span>                   α <span class="ot">=</span> β <span class="ot">=</span> <span class="dv">1</span>                   γ <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>          │                         │                         │</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>   <span class="fu">BKw</span>(α, β, γ, δ)             <span class="fu">MC</span>(γ, δ, λ)             <span class="fu">KKw</span>(α, β, δ, λ)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>          │                         │                         │</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>      α <span class="ot">=</span> β <span class="ot">=</span> <span class="dv">1</span>                   λ <span class="ot">=</span> <span class="dv">1</span>                     δ <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>          │                         │                         │</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>     <span class="fu">Beta</span>(γ, δ)                <span class="fu">Beta</span>(γ, δ)               <span class="fu">EKw</span>(α, β, λ)</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>                                                              │</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>                                                            λ <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>                                                              │</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>                                                          <span class="fu">Kw</span>(α, β)</span></code></pre></div>
 <p><strong>Note:</strong> The Beta distribution is obtained from MC by setting <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda = 1</annotation></semantics></math>, or from GKw by setting <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mi>β</mi><mo>=</mo><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\alpha = \beta = \lambda = 1</annotation></semantics></math>. The Kumaraswamy distribution is obtained from EKw by setting <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda = 1</annotation></semantics></math>, or from GKw by setting <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\gamma = 1</annotation></semantics></math>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\delta = 0</annotation></semantics></math>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda = 1</annotation></semantics></math>.</p>
 <hr>
 </div>
@@ -680,7 +689,7 @@ family and its seven nested sub-models for bounded continuous data.
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rkw.html">rkw</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Compare log-likelihood computation</span></span>
-<span><span class="va">benchmark</span> <span class="op">&lt;-</span> <span class="fu">microbenchmark</span><span class="op">(</span></span>
+<span><span class="va">benchmark</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/microbenchmark/man/microbenchmark.html" class="external-link">microbenchmark</a></span><span class="op">(</span></span>
 <span>  R_sum_log_d <span class="op">=</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fu"><a href="reference/dkw.html">dkw</a></span><span class="op">(</span><span class="va">data</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,  <span class="co"># Manual negative log-likelihood</span></span>
 <span>  Cpp_ll <span class="op">=</span> <span class="fu"><a href="reference/llkw.html">llkw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, <span class="va">data</span><span class="op">)</span>,               <span class="co"># C++ negative log-likelihood</span></span>
 <span>  times <span class="op">=</span> <span class="fl">100</span></span>
@@ -694,12 +703,17 @@ family and its seven nested sub-models for bounded continuous data.
 <span><span class="co"># The larger gain is in the derivatives, where the analytical forms replace</span></span>
 <span><span class="co"># numerical differentiation entirely:</span></span>
 <span><span class="va">data5</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rgkw.html">rgkw</a></span><span class="op">(</span><span class="fl">20000</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu">microbenchmark</span><span class="op">(</span></span>
-<span>  analytical <span class="op">=</span> <span class="fu"><a href="reference/grgkw.html">grgkw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span>, <span class="va">data5</span><span class="op">)</span>,</span>
-<span>  numeric    <span class="op">=</span> <span class="fu">numDeriv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/numDeriv/man/grad.html" class="external-link">grad</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="fu"><a href="reference/llgkw.html">llgkw</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">data5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span><span class="va">par5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/microbenchmark/man/microbenchmark.html" class="external-link">microbenchmark</a></span><span class="op">(</span></span>
+<span>  grad_analytical <span class="op">=</span> <span class="fu"><a href="reference/grgkw.html">grgkw</a></span><span class="op">(</span><span class="va">par5</span>, <span class="va">data5</span><span class="op">)</span>,</span>
+<span>  grad_numeric    <span class="op">=</span> <span class="fu">numDeriv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/numDeriv/man/grad.html" class="external-link">grad</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="fu"><a href="reference/llgkw.html">llgkw</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">data5</span><span class="op">)</span>, <span class="va">par5</span><span class="op">)</span>,</span>
+<span>  hess_analytical <span class="op">=</span> <span class="fu"><a href="reference/hsgkw.html">hsgkw</a></span><span class="op">(</span><span class="va">par5</span>, <span class="va">data5</span><span class="op">)</span>,</span>
+<span>  hess_numeric    <span class="op">=</span> <span class="fu">numDeriv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/numDeriv/man/hessian.html" class="external-link">hessian</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="fu"><a href="reference/llgkw.html">llgkw</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">data5</span><span class="op">)</span>, <span class="va">par5</span><span class="op">)</span>,</span>
 <span>  times <span class="op">=</span> <span class="fl">20</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co"># Typical results: analytical score ~9x faster, analytical Hessian ~38x faster</span></span></code></pre></div>
+<span><span class="co"># Typical result: both the analytical gradient and the analytical Hessian</span></span>
+<span><span class="co"># are substantially faster than their numerical counterparts (commonly by</span></span>
+<span><span class="co"># more than an order of magnitude); the exact factor depends on hardware.</span></span></code></pre></div>
 <p><strong>Why C++ Implementation Matters:</strong></p>
 <ul>
 <li>
@@ -804,13 +818,6 @@ family and its seven nested sub-models for bounded continuous data.
 </h2>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"gkwdist"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">gkwdist2025</span>,</span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="dt">title</span>  = {gkwdist: Generalized Kumaraswamy Distribution Family},</span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="dt">author</span> = {José Evandeilton Lopes},</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="dt">year</span>   = {2025},</span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="dt">note</span>   = {R package},</span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  <span class="dt">url</span>    = {https://github.com/evandeilton/gkwdist}</span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a>
