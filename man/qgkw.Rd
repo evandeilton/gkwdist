@@ -45,14 +45,17 @@ The length of the result is determined by the recycling rule applied to
 the arguments (\code{p}, \code{alpha}, \code{beta}, \code{gamma},
 \code{delta}, \code{lambda}). Returns:
 \itemize{
-\item \code{0} for \code{p = 0} (or \code{p = -Inf} if \code{log.p = TRUE}).
-\item \code{1} for \code{p = 1} (or \code{p = 0} if \code{log.p = TRUE}).
+\item \code{0} for \code{p = 0} (or \code{p = -Inf} if \code{log.p = TRUE},
+when \code{lower.tail = TRUE}).
+\item \code{1} for \code{p = 1} (or \code{p = 0} if \code{log.p = TRUE},
+when \code{lower.tail = TRUE}).
 \item \code{NaN} for \code{p < 0} or \code{p > 1} (or corresponding log scale).
 \item An out-of-bound or missing parameter is an error, not a
 return value: the wrapper stops with a message naming the parameter.
 An infinite parameter is not currently intercepted there and reaches
 the C++ layer, which treats it as invalid.
 }
+Boundary return values are adjusted accordingly for \code{lower.tail = FALSE}.
 }
 \description{
 Computes the quantile function (inverse CDF) for the five-parameter
