@@ -61,10 +61,9 @@ log-likelihood (\eqn{\ell}). The function returns the \strong{negative} of these
 }
 
 where \eqn{\psi'(\cdot)} is the trigamma function (\code{\link[base]{trigamma}}).
-(\emph{Note: The formula for \eqn{\partial^2 \ell / \partial \lambda^2} provided in the source
-comment was different and potentially related to the expected information matrix;
-the formula shown here is derived from the gradient provided earlier. Verification
-is recommended.})
+The \eqn{\partial^2 \ell / \partial \lambda^2} term matches the C++ implementation
+(\code{src/bpmc.cpp}) and is covered by the numerical Hessian checks in
+\code{tests/testthat/test-derivatives-validation.R}.
 
 The returned matrix is symmetric, with rows/columns corresponding to
 \eqn{\gamma, \delta, \lambda}.
