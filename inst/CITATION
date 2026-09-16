@@ -8,12 +8,12 @@ bibentry(
                     email = "evandeilton@gmail.com",
                     comment = c(ORCID = "0009-0007-5887-4084")),
   year     = "2026",
-  note     = "R package version 1.1.5",
+  note     = "R package version 1.1.6",
   url      = "https://CRAN.R-project.org/package=gkwdist",
   textVersion = paste(
     "Lopes, J.E. (2026).",
     "gkwdist: Generalized Kumaraswamy Distribution Family.",
-    "R package version 1.1.5.",
+    "R package version 1.1.6.",
     "https://CRAN.R-project.org/package=gkwdist"
   )
 )
