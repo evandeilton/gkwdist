@@ -117,7 +117,16 @@ if (length(left)) stop("unfilled placeholders: ", paste(unique(left), collapse =
 if (check_only) {
   if (!file.exists(out_html)) stop("no built cheat sheet at ", out_html)
   current <- paste(readLines(out_html, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
-  if (!identical(current, html)) {
+
+  # The comparison drops the thumbnails' SVG path data. Those are hundreds of
+  # coordinates printed to one decimal, and a last-digit difference on another
+  # machine's libm would fail this check -- and with it the site build -- for a
+  # curve nobody could see move. What the check is for is the staleness a reader
+  # would notice: the version string, an edited template, a gained or lost
+  # export. Those all survive the substitution. A density that genuinely moves
+  # is caught by the package's own regression tests, not here.
+  curves <- function(x) gsub('(<path class="[al]" d=")[^"]*"', '\\1...."', x)
+  if (!identical(curves(current), curves(html))) {
     stop("cheatsheet/ is stale: ", basename(out_html), " does not match a fresh ",
          "build for gkwdist ", version, ". Run: Rscript cheatsheet/build.R")
   }

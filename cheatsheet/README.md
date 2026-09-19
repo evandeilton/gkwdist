@@ -46,9 +46,15 @@ Rscript cheatsheet/build.R --check
 ```
 
 exits non-zero if the committed HTML differs from a fresh build — a bumped
-version, an edited template, a moved density. The pkgdown workflow runs it
-before building the site, so a release that forgets to regenerate the sheet
+version, an edited template, a gained or lost export. The pkgdown workflow runs
+it before building the site, so a release that forgets to regenerate the sheet
 fails CI rather than publishing the wrong version number.
+
+The comparison ignores the thumbnails' SVG coordinates. They are hundreds of
+numbers printed to one decimal, and a last-digit difference on another machine's
+libm would fail the check — and with it the site build — over a curve nobody
+could see move. A density that genuinely moves is the package's regression
+tests' job, not this one's.
 
 **On release: bump `DESCRIPTION`, then run `Rscript cheatsheet/build.R` and
 commit both generated files.**
