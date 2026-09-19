@@ -33,6 +33,11 @@ jobs:
           extra-packages: any::pkgdown, local::.
           needs: website
 
+      # The sheet prints the package version, so a release that forgets to
+      # regenerate it would publish a stale one. This fails the build instead.
+      - name: Cheat sheet is current
+        run: Rscript cheatsheet/build.R --check
+
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
