@@ -21,3 +21,7 @@ inst/paper/*.out
 # Claude Code session state. .claude/worktrees/ holds linked git worktrees;
 # committing one records a gitlink that no clone can resolve.
 .claude/
+
+# Agent scaffolding. The files stay on disk -- CLAUDE.md points at them -- but
+# they are not part of the package's published source.
+.agents/
