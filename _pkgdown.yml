@@ -9,10 +9,20 @@ navbar:
     left: [intro, reference, articles, cheatsheet, news]
     right: [search, github]
   components:
+    # pkgdown's default Articles menu leaves out the vignette named after the
+    # package, because `intro` already carries it as "Get started". Listed
+    # explicitly here so both vignettes are reachable from the menu too.
+    articles:
+      text: Articles
+      menu:
+      - text: Introduction to gkwdist
+        href: articles/gkwdist.html
+      - text: Statistical properties and computational inference
+        href: articles/theory-gkwdist.html
     cheatsheet:
-      text: Cheat sheet
-      href: cheatsheet/gkwdist-cheatsheet.html
-      aria-label: "gkwdist cheat sheet"
+      text: Cheat sheet (PDF)
+      href: cheatsheet/gkwdist-cheatsheet.pdf
+      aria-label: "gkwdist cheat sheet, PDF"
     github:
       icon: fab fa-github fa-lg
       href: https://github.com/evandeilton/gkwdist
