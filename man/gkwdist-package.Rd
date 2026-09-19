@@ -19,8 +19,17 @@ The Generalized Kumaraswamy distribution, proposed by Carrasco, Ferrari and
 Cordeiro (2010), extends the Kumaraswamy distribution (Jones, 2009) by
 incorporating three additional shape parameters. This generalization provides
 remarkable flexibility in accommodating various density shapes including
-unimodality, bimodality, asymmetry, J-shapes, inverted J-shapes, U-shapes,
-bathtub shapes, and heavy or light tails.
+unimodality, asymmetry, J-shapes, inverted J-shapes, U-shapes, bathtub
+shapes, and heavy or light tails.
+
+That flexibility stops short of bimodality. Across roughly 330,000 parameter
+vectors spanning \eqn{(10^{-3}, 300)} in each of the five parameters, no
+density with two interior modes was found: every shape was monotone,
+unimodal, or U-shaped. A second peak arises only as a divergence at
+\eqn{x = 0} or \eqn{x = 1} --- see the boundary limits documented in
+\code{\link{dgkw}} --- never as a second interior hump. Data with two
+separated interior modes calls for a mixture, not a larger member of this
+family.
 }
 
 \subsection{Mathematical Specification}{
@@ -161,7 +170,8 @@ The GKw distribution family is particularly suitable for modeling:
 
 Compared to the classical Beta distribution, the GKw family offers:
 \itemize{
-\item Greater flexibility in density shapes (bimodal, U-shaped, bathtub)
+\item Greater flexibility in density shapes (U-shaped, bathtub, J and
+reverse J)
 \item Better accommodation of asymmetry and tail behavior
 \item Closed-form CDF and quantile for some sub-models (Kw, EKw, KKw)
 \item Computational efficiency via C++ implementation

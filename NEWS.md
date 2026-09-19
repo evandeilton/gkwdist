@@ -955,6 +955,49 @@
 
 ## Documentation Fixes
 
+* **Bimodality was claimed in four places and the family does not reach it**
+  (`R/gkwdist-package.R`, `README.Rmd`, `README.md`, `vignettes/gkwdist.Rmd`):
+  the overview listed bimodality among the shapes the GKw accommodates, the
+  "Advantages" list said "bimodal, U-shaped, bathtub", and both shape-selection
+  tables offered GKw for "Bimodal or U-shaped" data.
+
+  No density with two interior modes was found in roughly 330,000 parameter
+  vectors:
+
+  ```
+  search                                            draws   2+ interior modes
+  structured grid, 7 x 7 x 6 x 5 x 6                8,820           0
+  log-uniform (0.05, 30)^5, 4001-point grid       200,000           0
+  log-uniform (1e-3, 300)^5, 3001-point grid      120,000           0
+  ```
+
+  The third sweep first flagged 644 candidates, every one of them with
+  \eqn{\alpha > 160}. At that size \eqn{x^{\alpha}} underflows for all but a
+  sliver next to 1, so a grid uniform in \eqn{x} cannot resolve the density.
+  The extra peaks are jitter: for
+  \eqn{(\alpha, \beta, \gamma, \delta, \lambda) =}
+  (225.7, 70.1, 0.041, 8.04, 2.48) their count grows with resolution -- 2, then
+  5, then 55 as the grid goes 3001, 30001, 300001 points -- at heights some
+  thirty orders of magnitude below the mode at 19.23. On a grid uniform in
+  \eqn{x^{\alpha}} each flagged case has at most one interior mode.
+
+  Every shape observed was monotone, unimodal or U-shaped. A second peak appears
+  only as a divergence at a boundary, governed by the exponents
+  \eqn{\alpha\gamma\lambda - 1} and \eqn{\beta(\delta+1) - 1} already
+  documented in `dgkw()`. U-shapes and bathtubs are real and those claims stand;
+  only bimodality is removed. The overview now states what the family does
+  instead, so that data with two separated interior modes is sent to a mixture
+  rather than to a larger member of this family. The claim is reported as what
+  it is -- a search, not a proof.
+
+* **The vignette's U-shape recommendation named a condition that does not hold
+  for EKw** (`vignettes/gkwdist.Rmd`): the row replacing the bimodal one first
+  read "Kumaraswamy or Exponentiated Kw (\eqn{\alpha, \beta < 1})". For EKw
+  the left-hand exponent is \eqn{\alpha\lambda - 1}, so
+  \eqn{\alpha, \beta < 1} is not sufficient: `dekw(c(1e-8, 1e-4, 0.1), 0.5,
+  0.5, 3)` is 1.9e-05, 1.9e-03, 8.6e-02 -- rising from 0, not a U. The row now
+  names Kumaraswamy alone, where \eqn{\alpha, \beta < 1} is exactly right.
+
 * **Two sub-family constraints in the package overview were mathematically
   wrong** (`R/gkwdist-package.R`): the "Distribution Family Hierarchy" block
   gave Kumaraswamy as "GKw with \eqn{\gamma = \delta = \lambda = 1}" and the
@@ -1272,6 +1315,49 @@
   vignettes already cited the latter.
 
 ## Packaging
+
+* **A cheat sheet, generated rather than written** (`cheatsheet/`,
+  `pkgdown/assets/cheatsheet/`): two A4 pages covering the family tree, all 49
+  exported functions, the `d`/`p`/`q`/`r` contract, the shapes the family
+  reaches, the maximum-likelihood recipe, the per-family `par` ordering and the
+  nested-model map. It is published at `/cheatsheet/` on the pkgdown site and
+  linked from the navbar and the home sidebar.
+
+  Nothing on the sheet is typed twice, because a sheet that prints the package
+  version would be stale at the first release. `cheatsheet/build.R` fills the
+  template from the package itself: the version from `DESCRIPTION`, the logo
+  from `man/figures`, the six density curves from the package's own `d*`
+  functions, and the function count and matrix from the namespace. A gained or
+  lost export is a build error rather than a quietly wrong sheet.
+
+  `Rscript cheatsheet/build.R --check` exits non-zero when the committed HTML
+  differs from a fresh build, and the pkgdown workflow runs it before building
+  the site, so a release that forgets to regenerate the sheet fails CI instead
+  of publishing the wrong version number. Both directories are in
+  `.Rbuildignore`; neither reaches the tarball.
+
+* **`inst/CITATION` named the version and the year by hand** and had to be
+  edited at every release to stay true -- the same staleness the cheat sheet is
+  built to avoid. Both now come from the package metadata: the version from
+  `meta$Version`, the year from the `Date/Publication` field CRAN adds to the
+  installed `DESCRIPTION`, falling back to the current year on a development
+  install where that field does not exist. `citation("gkwdist")` follows a
+  version bump on its own.
+
+  ```
+  metadata                                    citation reads
+  Version 1.1.6, no Date/Publication          "(2026) ... version 1.1.6"
+  Version 1.0.9, Date/Publication 2025-03-04  "(2025) ... version 1.0.9"
+  ```
+
+  `tools:::.check_citation()` reports no problems.
+
+* **The README lost what the vignettes already carry.** 777 lines to 221: the
+  seven mathematical specifications now live only in `theory-gkwdist`, which
+  derives them with proofs, and seven of the nine worked examples only in
+  `gkwdist`. What stays is the overview, the hierarchy, the function table, two
+  quick starts, and pointers to the cheat sheet, the vignettes and the
+  reference index.
 
 * **`RcppArmadillo` moved out of `Imports`.** It was listed there only because
   `R/zzz.R` carried `@import RcppArmadillo`, which put `import(RcppArmadillo)`
