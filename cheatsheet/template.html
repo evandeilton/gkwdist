@@ -1,0 +1,558 @@
+<!--
+  gkwdist cheat sheet -- TEMPLATE. Do not edit the generated files.
+
+  Build with:  Rscript cheatsheet/build.R
+
+  Every double-brace placeholder is filled in by build.R: the version comes from
+  DESCRIPTION, the logo from man/figures/gkwdist.png, and each density thumbnail
+  is an SVG path computed from the package's own d* functions (see PANELS in
+  build.R). Output goes to pkgdown/assets/cheatsheet/, which pkgdown publishes
+  at /cheatsheet/. Nothing here is typed by hand twice.
+-->
+<title>gkwdist Cheat Sheet</title>
+<style>
+  @page { size: 297mm 210mm; margin: 0; }
+  :root{
+    --ink:#2C3E50; --green:#2DBE6E; --blue:#338FCE; --coral:#D44B3E;
+    --rule:#D5DBE1; --soft:#F3F6F8; --mut:#6A7B8C; --bg:#FFFFFF;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#9AA7B2;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+       color:var(--ink);font-size:6.9pt;line-height:1.32;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page{width:297mm;height:210mm;background:var(--bg);padding:6.5mm 8mm 4mm;margin:0 auto 6mm;
+        display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto minmax(0,1fr) auto;
+        column-gap:6mm;row-gap:3mm;overflow:hidden;position:relative}
+  @media print{ body{background:#fff} .page{margin:0;page-break-after:always} .page:last-child{page-break-after:auto} }
+
+  /* ---- masthead ---- */
+  .mast{grid-column:1/-1;display:flex;align-items:flex-end;gap:5mm;
+        border-bottom:1.6pt solid var(--ink);padding-bottom:1.6mm}
+  .mast img{height:15mm;width:auto;display:block}
+  .mast h1{margin:0;font-size:20pt;font-weight:700;letter-spacing:-.4pt;line-height:1}
+  .mast h1 small{font-weight:300;color:var(--mut);font-size:11pt;letter-spacing:0}
+  .mast .sub{margin:.6mm 0 0;font-size:7.4pt;color:var(--mut);max-width:118mm}
+  .mast .tag{margin-left:auto;text-align:right;font-size:6.2pt;color:var(--mut);line-height:1.45}
+  .mast .tag b{color:var(--ink);font-size:7pt}
+  .mast.cont{border-bottom-width:.8pt;padding-bottom:1mm}
+  .mast.cont h1{font-size:13pt}
+
+  .col{display:flex;flex-direction:column;gap:2.2mm;min-width:0}
+
+  /* ---- section ---- */
+  h2{margin:0 0 1.2mm;font-size:8.2pt;font-weight:700;letter-spacing:.3pt;text-transform:uppercase;
+     border-bottom:.9pt solid var(--ink);padding-bottom:.5mm;display:flex;align-items:baseline;gap:1.5mm}
+  h2 span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--mut);font-size:6.6pt}
+  h3{margin:1.4mm 0 .7mm;font-size:7pt;font-weight:700;color:var(--ink)}
+  p{margin:0 0 1mm}
+  .mut{color:var(--mut)}
+  ul{margin:.4mm 0 .8mm;padding-left:3.2mm}
+  li{margin-bottom:.5mm}
+
+  code,kbd{font-family:"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;font-size:6.3pt}
+  code{color:var(--ink)}
+  .fn{font-weight:700;color:var(--coral)}
+  pre{margin:.6mm 0 1mm;padding:1.4mm 1.8mm;background:var(--soft);border-left:1.4pt solid var(--blue);
+      font-family:"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;font-size:6.2pt;line-height:1.4;
+      white-space:pre;overflow:hidden}
+  pre .c{color:var(--mut)}
+  pre .k{color:var(--coral);font-weight:700}
+
+  table{border-collapse:collapse;width:100%;font-size:6.2pt}
+  th{text-align:left;font-weight:700;border-bottom:.7pt solid var(--ink);padding:.5mm .8mm .5mm 0;
+     font-size:6pt;letter-spacing:.2pt;text-transform:uppercase;color:var(--mut)}
+  td{padding:.55mm .8mm .55mm 0;border-bottom:.35pt solid var(--rule);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.n,th.n{text-align:center;padding-right:0}
+  .mono td{font-family:"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace}
+
+  .box{background:var(--soft);border:.5pt solid var(--rule);border-radius:1mm;padding:1.6mm 2mm}
+  .box.warn{background:#FDF2F0;border-color:#F0C4BC}
+  .box.warn b{color:var(--coral)}
+  .box h3{margin-top:0}
+
+  /* ---- family matrix ---- */
+  .matrix{font-size:5.7pt;table-layout:fixed}
+  .matrix col.fam{width:30%} .matrix col.fn{width:10%}
+  .matrix th{text-align:center;padding-bottom:.6mm;padding-right:0}
+  .matrix th:first-child{text-align:left}
+  .matrix td{text-align:center;font-family:"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+             padding:.5mm 0;border-bottom:.35pt solid var(--rule);overflow:hidden}
+  .matrix td:first-child{text-align:left;font-family:inherit;white-space:normal;
+                         line-height:1.15;padding-right:1mm}
+  .matrix td:first-child b{font-size:6.2pt}
+  .matrix .np{display:block;color:var(--mut);font-family:"SF Mono",Menlo,Consolas,monospace;
+              font-size:5.3pt}
+  .matrix .grp td{background:#EAF3FA}
+  .matrix tr td:nth-child(n+6){background:#FBF2F1}
+  .matrix .grp td:nth-child(n+6){background:#FBF2F1}
+
+  /* ---- shape gallery ---- */
+  .gal{display:grid;grid-template-columns:1fr 1fr;gap:1.6mm 2.4mm}
+  .gal figure{margin:0}
+  .thumb{width:100%;height:auto;display:block;background:#FBFCFD;border:.4pt solid var(--rule);
+         border-radius:.8mm}
+  .thumb .a{fill:var(--blue);fill-opacity:.16}
+  .thumb .l{fill:none;stroke:var(--blue);stroke-width:1.5;stroke-linejoin:round}
+  .thumb .ax{stroke:var(--rule);stroke-width:.7}
+  .gal figcaption{font-size:5.8pt;line-height:1.3;margin-top:.3mm}
+  .gal figcaption b{display:block;font-size:6.2pt}
+  .gal figcaption code{font-size:5.7pt;color:var(--mut)}
+
+  .lead{font-size:6.6pt;color:var(--mut);margin-bottom:1.2mm}
+  .kbd{display:inline-block;background:var(--ink);color:#fff;border-radius:.6mm;padding:0 .8mm;
+       font-family:"SF Mono",Menlo,monospace;font-size:5.8pt;font-weight:700}
+  .pill{display:inline-block;border-radius:3mm;padding:0 1.2mm;font-size:5.8pt;font-weight:700;color:#fff}
+  .p-g{background:var(--green)} .p-b{background:var(--blue)} .p-c{background:var(--coral)} .p-i{background:var(--ink)}
+
+  .foot{grid-column:1/-1;border-top:.8pt solid var(--rule);padding-top:1.2mm;margin-top:1mm;
+        display:flex;gap:4mm;font-size:5.8pt;color:var(--mut);align-items:baseline}
+  .foot b{color:var(--ink)}
+  .foot .r{margin-left:auto}
+
+  .tree{width:100%;height:auto;display:block;margin:.5mm 0 1mm}
+  .tree .bx{fill:#fff;stroke:var(--ink);stroke-width:1}
+  .tree .bx.hi{fill:var(--ink)}
+  .tree .bx.lf{fill:#EAF3FA;stroke:var(--blue)}
+  .tree .nm{font:700 8px "Helvetica Neue",Helvetica,Arial,sans-serif;fill:var(--ink)}
+  .tree .nm.w{fill:#fff}
+  .tree .pr{font:7px "SF Mono",Menlo,Consolas,monospace;fill:var(--mut)}
+  .tree .pr.w{fill:#C3CEDA}
+  .tree .ed{fill:none;stroke:var(--mut);stroke-width:.9}
+  .tree .lb{font:700 6.6px "SF Mono",Menlo,Consolas,monospace;fill:var(--coral)}
+  .tree .np{font:700 6.5px "Helvetica Neue",Helvetica,Arial,sans-serif;fill:#fff}
+</style>
+
+<!-- ══════════════════════════ PAGE 1 ══════════════════════════ -->
+<section class="page">
+  <header class="mast">
+    <img src="{{LOGO}}" alt="gkwdist logo">
+    <div>
+      <h1>gkwdist <small>:: cheat sheet</small></h1>
+      <p class="sub">Seven <b>nested</b> distributions for bounded continuous data on the open interval
+        (0,&nbsp;1) — proportions, rates, shares, indices. Densities, CDFs, quantiles, random
+        generation, and <b>analytical</b> log-likelihood, score and Hessian, all in C++.</p>
+    </div>
+    <div class="tag"><b>version {{VERSION}}</b><br>
+      evandeilton.github.io/gkwdist<br>
+      <code>install.packages("gkwdist")</code></div>
+  </header>
+
+  <!-- ─────────── column 1 ─────────── -->
+  <div class="col">
+    <section>
+      <h2>The family <span>one distribution, seven models</span></h2>
+      <p class="lead">Every model below is <b>GKw with parameters held fixed</b>. Follow an edge to
+        fix a parameter and drop to a simpler model; the number in the badge is how many free
+        parameters remain.</p>
+      <svg class="tree" viewBox="0 0 340 222" role="img" aria-label="Nesting hierarchy of the GKw family">
+  <defs><marker id="ar" viewBox="0 0 8 8" refX="4" refY="7" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0 0 L8 0 L4 7 Z" fill="#6A7B8C"/></marker></defs>
+
+  <path class="ed" d="M170 28 V46 H50 V60"  marker-end="url(#ar)"/>
+  <path class="ed" d="M170 28 V60"          marker-end="url(#ar)"/>
+  <path class="ed" d="M170 28 V46 H290 V60" marker-end="url(#ar)"/>
+  <path class="ed" d="M50 90 V108 H170 V122" marker-end="url(#ar)"/>
+  <path class="ed" d="M170 90 V122"          marker-end="url(#ar)"/>
+  <path class="ed" d="M290 90 V122"          marker-end="url(#ar)"/>
+  <path class="ed" d="M290 152 V184"         marker-end="url(#ar)"/>
+
+  <text class="lb" x="104" y="43" text-anchor="middle">λ = 1</text>
+  <text class="lb" x="176" y="56">α = β = 1</text>
+  <text class="lb" x="234" y="43" text-anchor="middle">γ = 1</text>
+  <text class="lb" x="108" y="103" text-anchor="middle">α = β = 1</text>
+  <text class="lb" x="176" y="118">λ = 1</text>
+  <text class="lb" x="296" y="110">δ = 0</text>
+  <text class="lb" x="296" y="172">λ = 1</text>
+
+  <g><rect class="bx hi" x="118" y="2" width="104" height="26" rx="2.5"/>
+     <text class="nm w" x="126" y="13">GKw</text>
+     <text class="pr w" x="126" y="23">α β γ δ λ</text>
+     <circle cx="208" cy="15" r="7.5" fill="#2DBE6E"/><text class="np" x="208" y="17.5" text-anchor="middle">5</text></g>
+
+  <g><rect class="bx" x="4" y="64" width="92" height="26" rx="2.5"/>
+     <text class="nm" x="12" y="75">BKw</text><text class="pr" x="12" y="85">α β γ δ</text>
+     <circle cx="82" cy="77" r="7.5" fill="#338FCE"/><text class="np" x="82" y="79.5" text-anchor="middle">4</text></g>
+
+  <g><rect class="bx" x="124" y="64" width="92" height="26" rx="2.5"/>
+     <text class="nm" x="132" y="75">Mc</text><text class="pr" x="132" y="85">γ δ λ</text>
+     <circle cx="202" cy="77" r="7.5" fill="#338FCE"/><text class="np" x="202" y="79.5" text-anchor="middle">3</text></g>
+
+  <g><rect class="bx" x="244" y="64" width="92" height="26" rx="2.5"/>
+     <text class="nm" x="252" y="75">KKw</text><text class="pr" x="252" y="85">α β δ λ</text>
+     <circle cx="322" cy="77" r="7.5" fill="#338FCE"/><text class="np" x="322" y="79.5" text-anchor="middle">4</text></g>
+
+  <g><rect class="bx lf" x="124" y="126" width="92" height="26" rx="2.5"/>
+     <text class="nm" x="132" y="137">Beta</text><text class="pr" x="132" y="147">γ δ</text>
+     <circle cx="202" cy="139" r="7.5" fill="#D44B3E"/><text class="np" x="202" y="141.5" text-anchor="middle">2</text></g>
+
+  <g><rect class="bx" x="244" y="126" width="92" height="26" rx="2.5"/>
+     <text class="nm" x="252" y="137">EKw</text><text class="pr" x="252" y="147">α β λ</text>
+     <circle cx="322" cy="139" r="7.5" fill="#338FCE"/><text class="np" x="322" y="141.5" text-anchor="middle">3</text></g>
+
+  <g><rect class="bx lf" x="244" y="188" width="92" height="26" rx="2.5"/>
+     <text class="nm" x="252" y="199">Kw</text><text class="pr" x="252" y="209">α β</text>
+     <circle cx="322" cy="201" r="7.5" fill="#D44B3E"/><text class="np" x="322" y="203.5" text-anchor="middle">2</text></g>
+
+  <text class="pr" x="4" y="200" style="font-size:7px">Closed-form CDF</text>
+  <text class="pr" x="4" y="209" style="font-size:7px">and quantile:</text>
+  <text class="nm" x="4" y="219" style="font-size:7.5px">Kw · EKw · KKw</text>
+</svg>
+      <p class="mut" style="margin-top:.6mm"><b>Uniform</b> is <code>GKw(1, 1, 1, 0, 1)</code> — the
+        neutral value of every parameter. <b>Kw</b> and <b>Beta</b> are <i>not</i> nested in one
+        another, and neither are <b>EKw</b>/<b>Mc</b> or <b>BKw</b>/<b>KKw</b>.</p>
+    </section>
+
+    <section>
+      <h2>What each parameter does</h2>
+      <table>
+        <tr><td style="width:13mm"><code><b>α &gt; 0</b></code></td>
+            <td>Exponent on <code>x</code>. Governs the density near&nbsp;<b>0</b>.</td></tr>
+        <tr><td><code><b>β &gt; 0</b></code></td>
+            <td>Exponent on <code>1−x^α</code>. Governs the density near&nbsp;<b>1</b>.</td></tr>
+        <tr><td><code><b>γ &gt; 0</b></code><br><code><b>δ ≥ 0</b></code></td>
+            <td>The <code>Beta(γ, δ+1)</code> generator that reshapes the Kumaraswamy core.
+                <b>δ = 0</b> — not 1 — is the neutral value.</td></tr>
+        <tr><td><code><b>λ &gt; 0</b></code></td>
+            <td>Exponentiation (power) parameter.</td></tr>
+      </table>
+    </section>
+
+    <section class="box">
+      <h3>Boundary rule — what happens at x = 0 and x = 1</h3>
+      <p>Each endpoint is decided by the sign of a single exponent. <code>d*()</code> returns the
+        <b>limit</b>, as base R does, not 0.</p>
+      <table class="mono" style="margin-top:.6mm">
+        <tr><th>at</th><th>exponent</th><th class="n">&gt; 0</th><th class="n">= 0</th><th class="n">&lt; 0</th></tr>
+        <tr><td><b>x=0</b></td><td>α·γ·λ − 1</td><td class="n">0</td><td class="n">const</td><td class="n"><b>Inf</b></td></tr>
+        <tr><td><b>x=1</b></td><td>β·(δ+1) − 1</td><td class="n">0</td><td class="n">const</td><td class="n"><b>Inf</b></td></tr>
+      </table>
+      <p class="mut" style="margin-top:.8mm">Each sub-family inherits the rule through its own fixed
+        values: for <code>Kw(α,β)</code> they read <code>α−1</code> and <code>β−1</code>.
+        <code>dkw(0, 0.5, 1)</code> is <code>Inf</code>; <code>dbeta_(1, 2, 0)</code> is <code>2</code>.</p>
+    </section>
+  </div>
+
+  <!-- ─────────── column 2 ─────────── -->
+  <div class="col">
+    <section>
+      <h2>{{NFUN}} functions, one naming rule</h2>
+      <p class="lead"><b>prefix + family code.</b> Row = your model, column = the job.
+        <span class="pill p-b">blue</span> distribution API &nbsp;
+        <span class="pill p-c">red</span> likelihood API.</p>
+      <table class="matrix">
+        <colgroup><col class="fam"><col class="fn"><col class="fn"><col class="fn"><col class="fn">
+                  <col class="fn"><col class="fn"><col class="fn"></colgroup>
+        <tr><th>Family <span style="font-weight:400;text-transform:none">(code)</span></th>
+            <th>d<br><span class="mut" style="font-weight:400">PDF</span></th>
+            <th>p<br><span class="mut" style="font-weight:400">CDF</span></th>
+            <th>q<br><span class="mut" style="font-weight:400">quant</span></th>
+            <th>r<br><span class="mut" style="font-weight:400">rand</span></th>
+            <th>ll<br><span class="mut" style="font-weight:400">−logL</span></th>
+            <th>gr<br><span class="mut" style="font-weight:400">−score</span></th>
+            <th>hs<br><span class="mut" style="font-weight:400">−Hess</span></th></tr>
+        <tr class="grp"><td><b>Gen. Kumaraswamy</b> <span class="np">gkw · 5p</span></td>
+            <td>dgkw</td><td>pgkw</td><td>qgkw</td><td>rgkw</td><td>llgkw</td><td>grgkw</td><td>hsgkw</td></tr>
+        <tr><td><b>Beta-Kumaraswamy</b> <span class="np">bkw · 4p</span></td>
+            <td>dbkw</td><td>pbkw</td><td>qbkw</td><td>rbkw</td><td>llbkw</td><td>grbkw</td><td>hsbkw</td></tr>
+        <tr><td><b>Kum.-Kumaraswamy</b> <span class="np">kkw · 4p</span></td>
+            <td>dkkw</td><td>pkkw</td><td>qkkw</td><td>rkkw</td><td>llkkw</td><td>grkkw</td><td>hskkw</td></tr>
+        <tr><td><b>Exp. Kumaraswamy</b> <span class="np">ekw · 3p</span></td>
+            <td>dekw</td><td>pekw</td><td>qekw</td><td>rekw</td><td>llekw</td><td>grekw</td><td>hsekw</td></tr>
+        <tr><td><b>McDonald</b> <span class="np">mc · 3p</span></td>
+            <td>dmc</td><td>pmc</td><td>qmc</td><td>rmc</td><td>llmc</td><td>grmc</td><td>hsmc</td></tr>
+        <tr><td><b>Kumaraswamy</b> <span class="np">kw · 2p</span></td>
+            <td>dkw</td><td>pkw</td><td>qkw</td><td>rkw</td><td>llkw</td><td>grkw</td><td>hskw</td></tr>
+        <tr><td><b>Beta</b> <span class="np">beta_ · 2p</span></td>
+            <td>dbeta_</td><td>pbeta_</td><td>qbeta_</td><td>rbeta_</td><td>llbeta</td><td>grbeta</td><td>hsbeta</td></tr>
+      </table>
+      <p class="mut" style="margin-top:.9mm"><b>Mind the underscore.</b> Only the Beta row is
+        irregular: <code>d/p/q/r</code> keep the trailing <code>_</code> so they do not mask
+        <code>stats::dbeta</code> — the likelihood trio does not.
+        <code>llbeta</code>, <b>not</b> <code>llbeta_</code>.</p>
+    </section>
+
+    <section>
+      <h2>Distribution functions <span>d · p · q · r</span></h2>
+      <pre><span class="k">d</span>gkw(x, alpha, beta, gamma, delta, lambda, log = FALSE)
+<span class="k">p</span>gkw(q, ...,  lower.tail = TRUE, log.p = FALSE)
+<span class="k">q</span>gkw(p, ...,  lower.tail = TRUE, log.p = FALSE)
+<span class="k">r</span>gkw(n, ...)</pre>
+      <p>A sub-family drops the parameters it fixes:
+        <code>dkw(x, alpha, beta, log = FALSE)</code>.</p>
+      <table style="margin-top:.8mm">
+        <tr><td style="width:19mm"><code><b>log</b></code>, <code><b>log.p</b></code></td>
+            <td>Work on the log scale. Use them instead of <code>log(d…)</code> near the boundaries.</td></tr>
+        <tr><td><code><b>lower.tail</b></code></td>
+            <td><code>FALSE</code> gives <code>P(X &gt; q)</code>, computed directly rather than as
+                <code>1 − p</code>.</td></tr>
+        <tr><td><code><b>n</b></code></td>
+            <td><code>length(n) &gt; 1</code> means <code>length(n)</code> draws;
+                <code>n = 0</code> gives <code>numeric(0)</code>.</td></tr>
+      </table>
+      <h3>The base-R contract these keep</h3>
+      <ul>
+        <li><b>Recycling.</b> <code>x</code> and every parameter are recycled to a common length:
+            <code>dkw(c(.3,.6), c(1,2,3,4), 2)</code> gives 4 values.</li>
+        <li><b>Attributes.</b> <code>dim</code>, <code>dimnames</code> and <code>names</code> of the
+            first argument survive when the lengths agree, as in <code>stats::dbeta</code>.</li>
+        <li><b>Outside [0,1]</b> the density is 0; at the two endpoints it is the limit (box, left).</li>
+        <li><b>An invalid parameter is an error</b> — <code>α ≤ 0</code>, <code>δ &lt; 0</code>,
+            <code>NA</code> all <code>stop()</code>. They do not return <code>NaN</code>.</li>
+        <li><b>Defaults are the neutral values</b>, so <code>dgkw(x)</code> is the uniform density.</li>
+      </ul>
+    </section>
+
+  </div>
+
+  <!-- ─────────── column 3 ─────────── -->
+  <div class="col">
+    <section>
+      <h2>Shapes the family reaches</h2>
+      <p class="lead">Real output. The boundary rule (column&nbsp;1) predicts each end.</p>
+      <div class="gal">
+        <figure>{{unimodal}}<figcaption><b>Unimodal</b><code>dkw(x, 2, 5)</code></figcaption></figure>
+        <figure>{{ushape}}<figcaption><b>U-shaped</b><code>dkw(x, 0.5, 0.5)</code></figcaption></figure>
+        <figure>{{jup}}<figcaption><b>J — increasing</b><code>dkw(x, 3, 0.6)</code></figcaption></figure>
+        <figure>{{jdown}}<figcaption><b>Reverse J</b><code>dkw(x, 0.6, 3)</code></figcaption></figure>
+        <figure>{{spike0}}<figcaption><b>Spike at 0 + mode</b><code>dgkw(x, .2, .4, .6, 5, 6)</code></figcaption></figure>
+        <figure>{{spike1}}<figcaption><b>Mode + spike at 1</b><code>dgkw(x, 6, .2, 1.2, 2, .2)</code></figcaption></figure>
+      </div>
+      <p class="mut" style="margin-top:1mm"><b>What it will not do.</b> At most <b>one interior
+        mode</b> — a second peak is always a divergence at 0 or 1, as in the bottom row. Two interior
+        humps need a mixture, not a bigger GKw.</p>
+    </section>
+
+    <section class="box">
+      <h3>Where this Beta differs from <code>stats</code></h3>
+      <p><code>δ = 0</code> is neutral, so the second shape sits at <code>δ + 1</code>:</p>
+      <pre style="border-left-color:var(--coral)">dbeta_(x, gamma, delta) <span class="c">==</span> stats::dbeta(x, gamma, delta + 1)</pre>
+      <p>That shape is therefore always <b>≥ 1</b>: this Beta <b>cannot be U-shaped</b>. Use
+        <code>Kw</code>, <code>EKw</code> or <code>GKw</code> for a bathtub on (0,1).</p>
+    </section>
+
+    <section>
+      <h2>Pick a starting family</h2>
+      <table>
+        <tr><th>Your data</th><th>Start with</th></tr>
+        <tr><td>Single hump, roughly symmetric</td><td><b>Beta</b> <span class="mut">2p</span></td></tr>
+        <tr><td>Single hump, skewed</td><td><b>Kw</b> <span class="mut">2p — closed-form CDF &amp; quantile</span></td></tr>
+        <tr><td>Monotone (J or reverse J)</td><td><b>Kw</b> or <b>Beta</b></td></tr>
+        <tr><td>U-shaped / mass at both ends</td><td><b>Kw</b>, <b>EKw</b> <span class="mut">(α, β &lt; 1)</span></td></tr>
+        <tr><td>Heavy tail on one side only</td><td><b>EKw</b> or <b>Mc</b> <span class="mut">3p</span></td></tr>
+        <tr><td>An explicit power transform</td><td><b>Mc</b> <span class="mut">λ is that power</span></td></tr>
+        <tr><td>Stubborn residual shape</td><td><b>BKw</b>, <b>KKw</b>, then <b>GKw</b></td></tr>
+      </table>
+      <p class="mut" style="margin-top:.8mm"><b>Fit up, not down.</b> Add a parameter only when a
+        likelihood-ratio test (page&nbsp;2) says it earns its place.</p>
+    </section>
+  </div>
+</section>
+
+<!-- ══════════════════════════ PAGE 2 ══════════════════════════ -->
+<section class="page">
+  <header class="mast cont">
+    <div>
+      <h1>gkwdist <small>:: estimation, inference and model choice</small></h1>
+    </div>
+    <div class="tag">page 2 of 2 &nbsp;·&nbsp; <b>version {{VERSION}}</b></div>
+  </header>
+
+  <!-- ─────────── column 1 ─────────── -->
+  <div class="col">
+    <section>
+      <h2>Fit by maximum likelihood</h2>
+      <p class="lead">Objective, gradient and Hessian drop straight into <code>stats::optim</code>.</p>
+      <pre>x &lt;- rekw(2000, 2, 3, 1.5)        <span class="c"># data on (0,1)</span>
+
+start &lt;- <span class="k">gkwgetstartvalues</span>(x, family = "ekw")
+
+fit &lt;- optim(start,
+             fn     = <span class="k">llekw</span>,   <span class="c"># −logL</span>
+             gr     = <span class="k">grekw</span>,   <span class="c"># −score</span>
+             data   = x,       <span class="c"># passed through</span>
+             method = "BFGS",
+             hessian = TRUE)
+
+est &lt;- fit$par                    <span class="c"># MLE</span>
+logLik &lt;- -fit$value              <span class="c"># note the sign</span>
+se  &lt;- sqrt(diag(solve(fit$hessian)))
+ci  &lt;- est + outer(se, c(-1.96, 1.96))</pre>
+      <p><code>fn</code> is already the <i>negative</i> log-likelihood, so <code>optim</code>'s default
+        minimisation is the right direction and <code>fit$hessian</code> is the <b>observed
+        information</b> — invert it directly, no sign flip.</p>
+      <p>For the exact information matrix, use the analytical Hessian:</p>
+      <pre>se &lt;- sqrt(diag(solve( <span class="k">hsekw</span>(est, x) )))</pre>
+      <p class="mut">They agree to ~5e−7 relative: <code>optim</code>'s is a finite difference.</p>
+    </section>
+
+    <section>
+      <h2>Starting values</h2>
+      <pre><span class="k">gkwgetstartvalues</span>(x, family = "gkw", n_starts = 5)</pre>
+      <p>Method of moments by Nelder–Mead, returning a <b>named</b> vector already in the
+        <code>par</code> order that family's <code>ll*</code> expects.
+        <code>family</code> is one of <code>"gkw" "bkw" "kkw" "ekw" "mc" "kw" "beta"</code>
+        (case-insensitive).</p>
+      <ul>
+        <li><b>Deterministic.</b> <code>set.seed()</code> has no effect and it never touches
+            <code>.Random.seed</code>. Widen the search with <code>n_starts</code>; there is no seed.</li>
+        <li>Four fixed starting points are always used, so <code>n_starts &lt; 4</code> behaves as 4;
+            cost grows linearly and the objective is non-increasing in <code>n_starts</code>.</li>
+        <li>Results are clipped to a box — α, β ∈ (0.1, 50), γ ∈ (0.1, 10) but (0.1, 50) for
+            <code>"beta"</code>, δ ∈ (0.01, 10), λ ∈ (0.1, 20) — so a value sitting exactly on a
+            bound is a <b>hint that the box bit</b>, not an estimate.</li>
+        <li>Values outside (0,1) are truncated <b>with a warning</b>. Treat that warning as a scale
+            problem in the data — a 0–100 percentage — not as noise.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Return values under failure</h2>
+      <table>
+        <tr><th>Situation</th><th>ll*</th><th>gr* / hs*</th></tr>
+        <tr><td>Bad <code>par</code> (≤ 0, wrong length, <code>NA</code>)</td>
+            <td><code><b>Inf</b></code></td><td><code><b>NaN</b></code></td></tr>
+        <tr><td>Data outside (0,1)</td>
+            <td><code><b>Inf</b></code> + warning</td><td><code><b>NaN</b></code></td></tr>
+      </table>
+      <p class="mut" style="margin-top:.8mm">An infinite objective gives the optimiser no direction —
+        it sits there reporting convergence. <b>Screen first:</b>
+        <code>stopifnot(all(x &gt; 0 &amp; x &lt; 1))</code>. An exact 0 or 1 is the usual culprit;
+        squeeze it in with <code>(x*(n-1) + 0.5)/n</code>.</p>
+    </section>
+  </div>
+
+  <!-- ─────────── column 2 ─────────── -->
+  <div class="col">
+    <section>
+      <h2>Likelihood functions <span>ll · gr · hs</span></h2>
+      <pre><span class="k">ll</span>gkw(par, data)   <span class="c">→ scalar   −ℓ(θ)</span>
+<span class="k">gr</span>gkw(par, data)   <span class="c">→ vector   −∇ℓ(θ)</span>
+<span class="k">hs</span>gkw(par, data)   <span class="c">→ matrix   −∇²ℓ(θ)</span></pre>
+      <p>All three carry a <b>minus sign</b>: minimise <code>ll*</code>, and
+        <code>hs*(est, x)</code> <i>is</i> the observed information.
+        <code>par</code> is a plain numeric vector — the names are ignored, only the
+        <b>order</b> matters.</p>
+    </section>
+
+    <section class="box warn">
+      <h3>⚠ <code>par</code> order differs by family</h3>
+      <p>The vector is <b>positional</b>. A mis-ordered <code>par</code> is not an error — it silently
+        fits the wrong model.</p>
+      <table class="mono" style="margin-top:.8mm;table-layout:fixed">
+        <colgroup><col style="width:16%"><col style="width:10%"><col></colgroup>
+        <tr><th>Family</th><th class="n">len</th><th>par = c( … )</th></tr>
+        <tr><td><b>gkw</b></td><td class="n">5</td><td>alpha, beta, gamma, delta, lambda</td></tr>
+        <tr><td><b>bkw</b></td><td class="n">4</td><td>alpha, beta, gamma, delta <span class="mut">— no λ</span></td></tr>
+        <tr><td><b>kkw</b></td><td class="n">4</td><td>alpha, beta, delta, lambda <span class="mut">— no γ</span></td></tr>
+        <tr><td><b>ekw</b></td><td class="n">3</td><td>alpha, beta, lambda</td></tr>
+        <tr><td><b>mc</b></td><td class="n">3</td><td>gamma, delta, lambda</td></tr>
+        <tr><td><b>kw</b></td><td class="n">2</td><td>alpha, beta</td></tr>
+        <tr><td><b>beta</b></td><td class="n">2</td><td>gamma, delta</td></tr>
+      </table>
+      <p style="margin-top:.8mm"><b>bkw</b> and <b>kkw</b> are the trap: both take four, and they are
+        not the same four. Let <code>gkwgetstartvalues()</code> build the vector and the order comes
+        out right for free.</p>
+    </section>
+
+    <section>
+      <h2>Why analytical derivatives</h2>
+      <p>One pass over the data instead of a finite-difference stencil per parameter. Measured at
+        <code>n = 20 000</code>, GKw, against <code>numDeriv</code>:</p>
+      <table class="mono">
+        <tr><th></th><th class="n">gr*()</th><th class="n">numDeriv</th><th class="n"></th></tr>
+        <tr><td>score</td><td class="n">2.8 ms</td><td class="n">61 ms</td><td class="n"><b>≈22×</b></td></tr>
+        <tr><td>Hessian</td><td class="n">4.0 ms</td><td class="n">177 ms</td><td class="n"><b>≈44×</b></td></tr>
+      </table>
+      <p class="mut" style="margin-top:.6mm">Agreement with <code>numDeriv</code> to ~9e−6 absolute —
+        the difference is the finite-difference truncation error, not the analytical form.</p>
+    </section>
+
+    <section>
+      <h2>Fit all seven, then rank</h2>
+      <pre>fam &lt;- c("gkw","bkw","kkw","ekw","mc","kw","beta")
+ll  &lt;- list(llgkw, llbkw, llkkw, llekw, llmc, llkw, llbeta)
+gr  &lt;- list(grgkw, grbkw, grkkw, grekw, grmc, grkw, grbeta)
+
+tab &lt;- Map(function(f, l, g) {
+  s &lt;- gkwgetstartvalues(x, family = f)
+  o &lt;- optim(s, l, g, data = x, method = "BFGS")
+  c(k = length(s), AIC = 2*o$value + 2*length(s))
+}, fam, ll, gr)
+
+tab &lt;- do.call(rbind, tab); tab[order(tab[, "AIC"]), ]</pre>
+      <p class="mut">The three lists run in the same order as page 1's matrix, and
+        <code>gkwgetstartvalues()</code> returns each <code>par</code> already in the order its
+        family expects — nothing is aligned by hand.</p>
+    </section>
+  </div>
+
+  <!-- ─────────── column 3 ─────────── -->
+  <div class="col">
+    <section>
+      <h2>Compare nested models</h2>
+      <p class="lead">Comparable by likelihood-ratio test only if one is the other with parameters
+        fixed; <code>df</code> counts them.</p>
+      <table class="mono">
+        <tr><th>Full</th><th>Reduced</th><th>Constraint</th><th class="n">df</th></tr>
+        <tr><td>gkw</td><td>bkw</td><td>λ = 1</td><td class="n">1</td></tr>
+        <tr><td>gkw</td><td>kkw</td><td>γ = 1</td><td class="n">1</td></tr>
+        <tr><td>gkw</td><td>mc</td><td>α = β = 1</td><td class="n">2</td></tr>
+        <tr><td>bkw</td><td>beta</td><td>α = β = 1</td><td class="n">2</td></tr>
+        <tr><td>kkw</td><td>ekw</td><td>δ = 0 <b>†</b></td><td class="n">1</td></tr>
+        <tr><td>mc</td><td>beta</td><td>λ = 1</td><td class="n">1</td></tr>
+        <tr><td>ekw</td><td>kw</td><td>λ = 1</td><td class="n">1</td></tr>
+        <tr><td>gkw</td><td>ekw</td><td>γ = 1, δ = 0 <b>†</b></td><td class="n">2</td></tr>
+        <tr><td>gkw</td><td>kw</td><td>γ = 1, δ = 0, λ = 1 <b>†</b></td><td class="n">3</td></tr>
+        <tr><td>gkw</td><td>beta</td><td>α = β = λ = 1</td><td class="n">3</td></tr>
+      </table>
+      <pre style="margin-top:1mm">lrt &lt;- 2 * (fit_red$value - fit_full$value)
+pchisq(lrt, df, lower.tail = FALSE)</pre>
+      <p><b>†</b> <code>δ = 0</code> is on the <b>boundary</b>, so <code>χ²(df)</code> is
+        conservative: the null is <code>0.5·χ²(df−1) + 0.5·χ²(df)</code>.</p>
+      <p class="mut"><b>Not nested:</b> kw vs beta, ekw vs mc, bkw vs kkw. Compare those with AIC/BIC
+        only.</p>
+    </section>
+
+    <section>
+      <h2>Information criteria</h2>
+      <pre>k &lt;- length(fit$par);  ll &lt;- -fit$value
+AIC &lt;- -2*ll + 2*k
+BIC &lt;- -2*ll + k*log(length(x))</pre>
+      <p class="mut">Lower is better; a gap under ~2 is not evidence. All seven are fitted to the
+        <i>same</i> <code>x</code>, so they compare directly.</p>
+    </section>
+
+    <section>
+      <h2>Check the fit</h2>
+      <pre><span class="c"># PIT residuals — uniform if the model holds</span>
+u &lt;- pekw(x, est[1], est[2], est[3])
+ks.test(u, "punif")
+
+<span class="c"># Q-Q against the fitted quantiles</span>
+q &lt;- qekw(ppoints(length(x)), est[1], est[2], est[3])
+qqplot(q, sort(x)); abline(0, 1, col = 2)</pre>
+      <p class="mut">Estimating from the same <code>x</code> makes the KS p-value optimistic.</p>
+    </section>
+
+    <section class="box warn">
+      <h3>Traps worth a second look</h3>
+      <ul style="margin-bottom:0">
+        <li><code>δ = 0</code>, not 1, is neutral — <code>dgkw(x, 1,1,1,<b>0</b>,1)</code> is uniform.</li>
+        <li><code>llbeta</code> has no underscore, <code>dbeta_</code> does — and
+            <code>dbeta_(x, g, d)</code> is <code>stats::dbeta(x, g, <b>d+1</b>)</code>.</li>
+        <li><code>ll*</code> returns <code>+Inf</code>, never an error, on a contaminated sample.</li>
+        <li><code>gkwgetstartvalues()</code> ignores <code>set.seed()</code>.</li>
+        <li><code>%&gt;%</code> is re-exported but <b>deprecated</b> — take it from magrittr, or use
+            <code>|&gt;</code>.</li>
+      </ul>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <span><b>gkwdist {{VERSION}}</b> · MIT</span>
+    <span>José Evandeilton Lopes · LEG / PPGMNE, UFPR</span>
+    <span><code>citation("gkwdist")</code> · <code>vignette("gkwdist")</code></span>
+    <span class="r">Carrasco, Ferrari &amp; Cordeiro (2010) · Jones (2009) · Kumaraswamy (1980) ·
+      McDonald (1984) &nbsp;|&nbsp; github.com/evandeilton/gkwdist</span>
+  </footer>
+</section>
