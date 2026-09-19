@@ -650,14 +650,22 @@ grid(col = "gray90")
 
 ### When to Use Each Distribution
 
-| **Data Characteristics** | **Recommended Distribution**      | **Parameters** |
-|:-------------------------|:----------------------------------|:---------------|
-| Symmetric, unimodal      | Beta                              | 2              |
-| Asymmetric, unimodal     | Kumaraswamy                       | 2              |
-| Flexible unimodal        | Exponentiated Kumaraswamy         | 3              |
-| Bimodal or U-shaped      | Generalized Kumaraswamy           | 5              |
-| J-shaped (monotonic)     | Kumaraswamy or Beta               | 2              |
-| Unknown shape            | Start with Kw, test nested models | 2-5            |
+| **Data Characteristics** | **Recommended Distribution** | **Parameters** |
+|:---|:---|:---|
+| Symmetric, unimodal | Beta | 2 |
+| Asymmetric, unimodal | Kumaraswamy | 2 |
+| Flexible unimodal | Exponentiated Kumaraswamy | 3 |
+| U-shaped or bathtub | Kumaraswamy ($`\alpha, \beta < 1`$) | 2 |
+| J-shaped (monotonic) | Kumaraswamy or Beta | 2 |
+| Unknown shape | Start with Kw and work up the nested models to GKw | 2-5 |
+
+The family does not appear to reach bimodality. Across roughly 330,000
+parameter vectors spanning $`(10^{-3}, 300)`$ in each of the five
+parameters, no density with two interior modes was found: every shape
+was monotone, unimodal or U-shaped. A second peak arises only as a
+divergence at $`x = 0`$ or $`x = 1`$, never as a second interior hump.
+Data with two separated interior modes calls for a mixture rather than a
+larger member of this family.
 
 ### Model Selection Workflow
 
@@ -728,7 +736,7 @@ sessionInfo()
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] digest_0.6.39     desc_1.4.3        R6_2.6.1          fastmap_1.2.0    
-#>  [5] xfun_0.60         magrittr_2.0.5    cachem_1.1.0      knitr_1.52       
+#>  [5] xfun_0.61         magrittr_2.0.5    cachem_1.1.0      knitr_1.52       
 #>  [9] htmltools_0.5.9   rmarkdown_2.32    lifecycle_1.0.5   cli_3.6.6        
 #> [13] sass_0.4.10       pkgdown_2.2.1     textshaping_1.0.5 jquerylib_0.1.4  
 #> [17] systemfonts_1.3.2 compiler_4.6.1    tools_4.6.1       ragg_1.5.2       
