@@ -1336,6 +1336,22 @@
   of publishing the wrong version number. Both directories are in
   `.Rbuildignore`; neither reaches the tarball.
 
+* **`inst/CITATION` named the version and the year by hand** and had to be
+  edited at every release to stay true -- the same staleness the cheat sheet is
+  built to avoid. Both now come from the package metadata: the version from
+  `meta$Version`, the year from the `Date/Publication` field CRAN adds to the
+  installed `DESCRIPTION`, falling back to the current year on a development
+  install where that field does not exist. `citation("gkwdist")` follows a
+  version bump on its own.
+
+  ```
+  metadata                                    citation reads
+  Version 1.1.6, no Date/Publication          "(2026) ... version 1.1.6"
+  Version 1.0.9, Date/Publication 2025-03-04  "(2025) ... version 1.0.9"
+  ```
+
+  `tools:::.check_citation()` reports no problems.
+
 * **The README lost what the vignettes already carry.** 777 lines to 221: the
   seven mathematical specifications now live only in `theory-gkwdist`, which
   derives them with proofs, and seven of the nine worked examples only in

@@ -1,3 +1,11 @@
+# Version and year are read from the package metadata rather than typed here, so
+# a release cannot leave the citation naming an older version. CRAN adds
+# `Date/Publication` to the installed DESCRIPTION; a development install has no
+# such field and falls back to the current year.
+version <- meta$Version
+year <- sub("-.*", "", meta$`Date/Publication`)
+if (!length(year) || is.na(year) || !nzchar(year)) year <- format(Sys.Date(), "%Y")
+
 citHeader("To cite gkwdist in publications use:")
 
 bibentry(
@@ -7,13 +15,13 @@ bibentry(
                     family = "Lopes",
                     email = "evandeilton@gmail.com",
                     comment = c(ORCID = "0009-0007-5887-4084")),
-  year     = "2026",
-  note     = "R package version 1.1.6",
+  year     = year,
+  note     = paste("R package version", version),
   url      = "https://CRAN.R-project.org/package=gkwdist",
-  textVersion = paste(
-    "Lopes, J.E. (2026).",
-    "gkwdist: Generalized Kumaraswamy Distribution Family.",
-    "R package version 1.1.6.",
+  textVersion = paste0(
+    "Lopes, J.E. (", year, "). ",
+    "gkwdist: Generalized Kumaraswamy Distribution Family. ",
+    "R package version ", version, ". ",
     "https://CRAN.R-project.org/package=gkwdist"
   )
 )
