@@ -71,7 +71,7 @@ family_structure <- data.frame(
   ),
   Relationship = c(
     "Full model", "λ = 1", "γ = 1", "γ = 1, δ = 0",
-    "α = β = 1", "γ = δ = λ = 1", "α = β = λ = 1"
+    "α = β = 1", "γ = 1, δ = 0, λ = 1", "α = β = λ = 1"
   )
 )
 
@@ -570,9 +570,16 @@ grid(col = "gray90")
 | Symmetric, unimodal | Beta | 2 |
 | Asymmetric, unimodal | Kumaraswamy | 2 |
 | Flexible unimodal | Exponentiated Kumaraswamy | 3 |
-| Bimodal or U-shaped | Generalized Kumaraswamy | 5 |
+| U-shaped or bathtub | Kumaraswamy ($\alpha, \beta < 1$) | 2 |
 | J-shaped (monotonic) | Kumaraswamy or Beta | 2 |
-| Unknown shape | Start with Kw, test nested models | 2-5 |
+| Unknown shape | Start with Kw and work up the nested models to GKw | 2-5 |
+
+The family does not appear to reach bimodality. Across roughly 330,000 parameter
+vectors spanning $(10^{-3}, 300)$ in each of the five parameters, no density with
+two interior modes was found: every shape was monotone, unimodal or U-shaped. A
+second peak arises only as a divergence at $x = 0$ or $x = 1$, never as a second
+interior hump. Data with two separated interior modes calls for a mixture rather
+than a larger member of this family.
 
 ## Model Selection Workflow
 

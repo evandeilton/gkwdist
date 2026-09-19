@@ -955,6 +955,77 @@
 
 ## Documentation Fixes
 
+* **The README hierarchy diagram routed McDonald through BKw** (`README.Rmd`,
+  `README.md`): the ASCII tree drew
+  `BKw --(alpha = beta = 1)--> MC(gamma, delta, lambda)`, but BKw has already
+  fixed \eqn{\lambda = 1}, so that edge lands on Beta, not on an Mc with a free
+  \eqn{\lambda}. Mc descends from GKw directly.
+
+  Differences below are `max |a - b| / |b|` with `b` the second density, over a
+  999-point grid on (0, 1).
+
+  ```
+  claim                                            max rel. difference
+  Mc(1.7, 2.4, 1.4)  vs  BKw(1, 1, 1.7, 2.4)              2.14
+  Mc(1.7, 2.4, 1)    vs  BKw(1, 1, 1.7, 2.4)              1.8e-15   <- what that edge gives
+  Mc(1.7, 2.4, 1.4)  vs  GKw(1, 1, 1.7, 2.4, 1.4)         3.6e-15   <- correct parent
+  ```
+
+  The redrawn tree gives GKw three children -- BKw, Mc and KKw -- and shows Beta
+  reached from both BKw (\eqn{\alpha = \beta = 1}) and Mc
+  (\eqn{\lambda = 1}). All seven nesting identities were then re-verified
+  against the implementation over 3,000 parameter vectors drawn log-uniformly
+  from \eqn{(0.05, 30)^5}, each on a 999-point grid. GKw to EKw and GKw to Kw
+  agree bitwise; the largest disagreement anywhere is 3.4e-13 relative, on GKw
+  to BKw.
+
+* **The introductory vignette still carried the `delta = 1` off-by-one**
+  (`vignettes/gkwdist.Rmd`): the `Nested Structure of GKw Family` table gave
+  Kumaraswamy as "gamma = delta = lambda = 1". This is the same error corrected
+  in the package overview below, which had not been propagated to the vignette.
+
+  ```
+  Kw(2.3, 3.1)  vs  GKw(2.3, 3.1, 1, 1, 1)            7.6e7
+  Kw(2.3, 3.1)  vs  GKw(2.3, 3.1, 1, 0, 1)            0         <- correct
+  ```
+
+  The other six rows of that table were checked in the same pass and are
+  correct.
+
+* **Bimodality was claimed in four places and the family does not reach it**
+  (`R/gkwdist-package.R`, `README.Rmd`, `README.md`, `vignettes/gkwdist.Rmd`):
+  the overview listed bimodality among the shapes the GKw accommodates, the
+  "Advantages" list said "bimodal, U-shaped, bathtub", and both shape-selection
+  tables offered GKw for "Bimodal or U-shaped" data.
+
+  No density with two interior modes was found in roughly 330,000 parameter
+  vectors:
+
+  ```
+  search                                            draws   2+ interior modes
+  structured grid, 7 x 7 x 6 x 5 x 6                8,820           0
+  log-uniform (0.05, 30)^5, 4001-point grid       200,000           0
+  log-uniform (1e-3, 300)^5, 3001-point grid      120,000           0
+  ```
+
+  The third sweep first flagged 644 candidates, every one of them with
+  \eqn{\alpha > 160}. At that size \eqn{x^{\alpha}} underflows for all but a
+  sliver next to 1, so a grid uniform in \eqn{x} cannot resolve the density.
+  The extra peaks are jitter: for
+  \eqn{(\alpha, \beta, \gamma, \delta, \lambda) =}
+  (225.7, 70.1, 0.041, 8.04, 2.48) their count grows with resolution -- 2, then
+  5, then 55 as the grid goes 3001, 30001, 300001 points -- at heights some
+  thirty orders of magnitude below the mode at 19.23. On a grid uniform in
+  \eqn{x^{\alpha}} each flagged case has at most one interior mode.
+
+  Every shape observed was monotone, unimodal or U-shaped. A second peak appears
+  only as a divergence at a boundary, governed by the exponents
+  \eqn{\alpha\gamma\lambda - 1} and \eqn{\beta(\delta+1) - 1} already
+  documented in `dgkw()`. U-shapes and bathtubs are real and those claims stand;
+  only bimodality is removed, and the overview now states what the family does
+  instead, so that data with two separated interior modes is sent to a mixture
+  rather than to a larger member of this family.
+
 * **Two sub-family constraints in the package overview were mathematically
   wrong** (`R/gkwdist-package.R`): the "Distribution Family Hierarchy" block
   gave Kumaraswamy as "GKw with \eqn{\gamma = \delta = \lambda = 1}" and the

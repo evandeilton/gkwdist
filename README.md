@@ -274,25 +274,28 @@ $$\text{Var}(X) = \frac{\gamma(\delta+1)}{(\gamma+\delta+1)^2(\gamma+\delta+2)}$
 
 ## Hierarchical Structure
 
-                                  GKw(α, β, γ, δ, λ)
-                                  /               \
-                               λ = 1             γ = 1
-                                /                    \
-                       BKw(α, β, γ, δ)         KKw(α, β, δ, λ)
-                             |                          |
-                         α = β = 1                    δ = 0
-                             |                          |
-                        MC(γ, δ, λ)              EKw(α, β, λ)
-                             |                          |
-                          λ = 1                       λ = 1
-                             |                          |
-                        Beta(γ, δ)                   Kw(α, β)
+                              GKw(α, β, γ, δ, λ)
+                    λ = 1       /      |      \       γ = 1
+                              /    α = β = 1    \
+              BKw(α, β, γ, δ)     Mc(γ, δ, λ)     KKw(α, β, δ, λ)
+                            \          |                 |
+                  α = β = 1   \      λ = 1             δ = 0
+                                \      |                 |
+                                  Beta(γ, δ)       EKw(α, β, λ)
+                                                         |
+                                                       λ = 1
+                                                         |
+                                                     Kw(α, β)
 
-**Note:** The Beta distribution is obtained from MC by setting
-$\lambda = 1$, or from GKw by setting $\alpha = \beta = \lambda = 1$.
-The Kumaraswamy distribution is obtained from EKw by setting
-$\lambda = 1$, or from GKw by setting $\gamma = 1$, $\delta = 0$,
-$\lambda = 1$.
+**Note:** Mc descends from GKw directly, by setting
+$\alpha = \beta = 1$. It is *not* reachable from BKw, which has already
+fixed $\lambda = 1$: setting $\alpha = \beta = 1$ in BKw gives
+Beta$(\gamma, \delta)$, which is why both left-hand branches meet there.
+So Beta is obtained from Mc by setting $\lambda = 1$, from BKw by setting
+$\alpha = \beta = 1$, or from GKw by setting
+$\alpha = \beta = \lambda = 1$. The Kumaraswamy distribution is obtained
+from EKw by setting $\lambda = 1$, or from GKw by setting $\gamma = 1$,
+$\delta = 0$, $\lambda = 1$.
 
 ------------------------------------------------------------------------
 
@@ -692,7 +695,7 @@ microbenchmark(
 |:---|:---|:---|
 | Unimodal, symmetric | **Beta** | Parsimony; well-studied properties |
 | Unimodal, asymmetric | **Kumaraswamy** | Closed-form CDF and quantile |
-| Bimodal or U-shaped | **GKw** or **BKw** | Maximum flexibility |
+| U-shaped or bathtub | **GKw** or **BKw** | Maximum flexibility |
 | Extreme skewness | **KKw** or **EKw** | Fine control over tail behavior |
 | J-shaped (monotonic) | **Kw** or **Beta** | With appropriate parameter values |
 | Power transformations | **McDonald** | Explicit power parameter $\lambda$ |
