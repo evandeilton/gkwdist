@@ -20,9 +20,12 @@ navbar:
       - text: Statistical properties and computational inference
         href: articles/theory-gkwdist.html
     cheatsheet:
-      text: Cheat sheet (PDF)
-      href: cheatsheet/gkwdist-cheatsheet.pdf
-      aria-label: "gkwdist cheat sheet, PDF"
+      text: Cheatsheet
+      menu:
+      - text: View the two sheets
+        href: cheatsheet/gkwdist-cheatsheet.html
+      - text: Download the PDF
+        href: cheatsheet/gkwdist-cheatsheet.pdf
     github:
       icon: fab fa-github fa-lg
       href: https://github.com/evandeilton/gkwdist
@@ -155,7 +158,9 @@ home:
     Fast C++ implementation of the Generalized Kumaraswamy distribution 
     family and its seven nested sub-models for bounded continuous data.
   links:
-  - text: Cheat sheet (PDF)
+  - text: View the two sheets
+    href: cheatsheet/gkwdist-cheatsheet.html
+  - text: Download the PDF
     href: cheatsheet/gkwdist-cheatsheet.pdf
 
 development:
