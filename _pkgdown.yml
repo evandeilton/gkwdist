@@ -10,9 +10,9 @@ navbar:
     right: [search, github]
   components:
     cheatsheet:
-      text: Cheat sheet
-      href: cheatsheet/gkwdist-cheatsheet.html
-      aria-label: "gkwdist cheat sheet"
+      text: Cheat sheet (PDF)
+      href: cheatsheet/gkwdist-cheatsheet.pdf
+      aria-label: "gkwdist cheat sheet, PDF"
     github:
       icon: fab fa-github fa-lg
       href: https://github.com/evandeilton/gkwdist
