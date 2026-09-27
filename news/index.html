@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">gkwdist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,26 @@
       <small>Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.7" id="gkwdist-117">gkwdist 1.1.7<a class="anchor" aria-label="anchor" href="#gkwdist-117"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-1-1-7">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-1-7"></a></h3>
+<ul><li><p><strong>Log-space chain, subnormal band</strong> (<code>utils.h</code>, <code>gkw.cpp</code>, <code>bkw.cpp</code>, <code>kkw.cpp</code>): the underflow bridge fired only at an exact 0, so for <code>x^alpha</code> in <code>[5e-324, 2.2e-308)</code> <code>ll*</code>, <code>gr*</code> and <code>hs*</code> were silently wrong. <code>llbkw(c(161.8, 2, 1.5, 1), c(.01, .3, .6, .9))</code> was 1522.87 against a true 1523.21, and the gradient was off by up to 16%. The bridge now covers the band. Ordinary data is bit-identical.</p></li>
+<li><p><strong>EKw had no bridge</strong> (<code>ekw.cpp</code>): <code><a href="../reference/dekw.html">dekw()</a></code>, <code><a href="../reference/llekw.html">llekw()</a></code>, <code><a href="../reference/grekw.html">grekw()</a></code> and <code><a href="../reference/hsekw.html">hsekw()</a></code> returned <code>-Inf</code>, <code>+Inf</code> or <code>NaN</code> where the nested GKw is finite, and <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim()</a></code> stopped on them. They now match <code>dgkw(gamma = 1, delta = 0)</code>.</p></li>
+<li><p><strong>Tails flushed to 0 or 1</strong> in the p, q and r functions of GKw, BKw, KKw, EKw, Kw and Mc. <code>pgkw(1e-9, 40, 2, 0.05, 0.5, 0.1)</code> returned 0 (true 0.0164), and <code><a href="../reference/rgkw.html">rgkw()</a></code> drew exact zeros that <code><a href="../reference/llgkw.html">llgkw()</a></code> then rejected. The same held in the deep upper tail on the log scale (<code>log.p = TRUE</code>, log probabilities below about -718). RNG streams are otherwise unchanged.</p></li>
+<li><p><strong>Upper tail of <code><a href="../reference/qgkw.html">qgkw()</a></code> and <code><a href="../reference/qmc.html">qmc()</a></code></strong>: both now reflect above y = 1/2, as <code><a href="../reference/qbkw.html">qbkw()</a></code> already did. <code>qgkw(1e-26, 2, 3, 1.5, 0.5, 1.2, lower.tail = FALSE)</code> returned exactly 1.</p></li>
+<li><p><strong><code><a href="../reference/pgkw.html">pgkw()</a></code> and <code><a href="../reference/pbkw.html">pbkw()</a></code> with <code>log.p = TRUE</code></strong> returned 0 near 1 for a tiny negative log-probability.</p></li>
+<li><p><strong><code><a href="../reference/hsgkw.html">hsgkw()</a></code> rebuilt in log space</strong>: it returned <code>NaN</code> where <code><a href="../reference/llgkw.html">llgkw()</a></code> and <code><a href="../reference/grgkw.html">grgkw()</a></code> are finite (e.g. <code>beta = 200</code>). It is now finite there, matches <code>numDeriv</code> to 5e-9, equals <code><a href="../reference/hskkw.html">hskkw()</a></code> at <code>gamma = 1</code>, and is about 2x faster.</p></li>
+<li><p><strong>Memory leak on caught warnings</strong>: a warning raised from C++ and caught by <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch()</a></code> or <code>options(warn = 2)</code> skipped the C++ destructors (308 MB over 20 calls on 2e6 values). Warnings now unwind cleanly; messages are unchanged.</p></li>
+<li><p><strong><code>gkwgetstartvalues(family = "beta")</code></strong> started from <code>Beta(gamma, delta + 2)</code> instead of <code>Beta(gamma, delta + 1)</code>. Starting values are now the same on every compiler.</p></li>
+<li><p><strong>Missing data</strong> give the documented value in all seven families: <code>+Inf</code> from <code>ll*()</code>, <code>NaN</code> from <code>gr*()</code> and <code>hs*()</code>.</p></li>
+<li><p><code>safe_exp()</code> no longer returns <code>Inf</code> for results between <code>DBL_MAX / 10</code> and <code>DBL_MAX</code>.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="validation-1-1-7">Validation<a class="anchor" aria-label="anchor" href="#validation-1-1-7"></a></h3>
+<p>Analytic gradients and Hessians against <code>numDeriv</code> over 265 cases in all seven families: maximum relative error 6.4e-10 and 5.4e-9 (before: 2e-2 and 1.0). Two tests that pinned the old, wrong values were corrected.</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.6" id="gkwdist-116">gkwdist 1.1.6<a class="anchor" aria-label="anchor" href="#gkwdist-116"></a></h2>
 <div class="section level3">

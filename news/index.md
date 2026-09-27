@@ -1,5 +1,82 @@
 # Changelog
 
+## gkwdist 1.1.7
+
+### Bug Fixes
+
+- **Log-space chain, subnormal band** (`utils.h`, `gkw.cpp`, `bkw.cpp`,
+  `kkw.cpp`): the underflow bridge fired only at an exact 0, so for
+  `x^alpha` in `[5e-324, 2.2e-308)` `ll*`, `gr*` and `hs*` were silently
+  wrong. `llbkw(c(161.8, 2, 1.5, 1), c(.01, .3, .6, .9))` was 1522.87
+  against a true 1523.21, and the gradient was off by up to 16%. The
+  bridge now covers the band. Ordinary data is bit-identical.
+
+- **EKw had no bridge** (`ekw.cpp`):
+  [`dekw()`](https://evandeilton.github.io/gkwdist/reference/dekw.md),
+  [`llekw()`](https://evandeilton.github.io/gkwdist/reference/llekw.md),
+  [`grekw()`](https://evandeilton.github.io/gkwdist/reference/grekw.md)
+  and
+  [`hsekw()`](https://evandeilton.github.io/gkwdist/reference/hsekw.md)
+  returned `-Inf`, `+Inf` or `NaN` where the nested GKw is finite, and
+  [`optim()`](https://rdrr.io/r/stats/optim.html) stopped on them. They
+  now match `dgkw(gamma = 1, delta = 0)`.
+
+- **Tails flushed to 0 or 1** in the p, q and r functions of GKw, BKw,
+  KKw, EKw, Kw and Mc. `pgkw(1e-9, 40, 2, 0.05, 0.5, 0.1)` returned 0
+  (true 0.0164), and
+  [`rgkw()`](https://evandeilton.github.io/gkwdist/reference/rgkw.md)
+  drew exact zeros that
+  [`llgkw()`](https://evandeilton.github.io/gkwdist/reference/llgkw.md)
+  then rejected. The same held in the deep upper tail on the log scale
+  (`log.p = TRUE`, log probabilities below about -718). RNG streams are
+  otherwise unchanged.
+
+- **Upper tail of
+  [`qgkw()`](https://evandeilton.github.io/gkwdist/reference/qgkw.md)
+  and
+  [`qmc()`](https://evandeilton.github.io/gkwdist/reference/qmc.md)**:
+  both now reflect above y = 1/2, as
+  [`qbkw()`](https://evandeilton.github.io/gkwdist/reference/qbkw.md)
+  already did. `qgkw(1e-26, 2, 3, 1.5, 0.5, 1.2, lower.tail = FALSE)`
+  returned exactly 1.
+
+- **[`pgkw()`](https://evandeilton.github.io/gkwdist/reference/pgkw.md)
+  and
+  [`pbkw()`](https://evandeilton.github.io/gkwdist/reference/pbkw.md)
+  with `log.p = TRUE`** returned 0 near 1 for a tiny negative
+  log-probability.
+
+- **[`hsgkw()`](https://evandeilton.github.io/gkwdist/reference/hsgkw.md)
+  rebuilt in log space**: it returned `NaN` where
+  [`llgkw()`](https://evandeilton.github.io/gkwdist/reference/llgkw.md)
+  and
+  [`grgkw()`](https://evandeilton.github.io/gkwdist/reference/grgkw.md)
+  are finite (e.g. `beta = 200`). It is now finite there, matches
+  `numDeriv` to 5e-9, equals
+  [`hskkw()`](https://evandeilton.github.io/gkwdist/reference/hskkw.md)
+  at `gamma = 1`, and is about 2x faster.
+
+- **Memory leak on caught warnings**: a warning raised from C++ and
+  caught by [`tryCatch()`](https://rdrr.io/r/base/conditions.html) or
+  `options(warn = 2)` skipped the C++ destructors (308 MB over 20 calls
+  on 2e6 values). Warnings now unwind cleanly; messages are unchanged.
+
+- **`gkwgetstartvalues(family = "beta")`** started from
+  `Beta(gamma, delta + 2)` instead of `Beta(gamma, delta + 1)`. Starting
+  values are now the same on every compiler.
+
+- **Missing data** give the documented value in all seven families:
+  `+Inf` from `ll*()`, `NaN` from `gr*()` and `hs*()`.
+
+- `safe_exp()` no longer returns `Inf` for results between
+  `DBL_MAX / 10` and `DBL_MAX`.
+
+### Validation
+
+Analytic gradients and Hessians against `numDeriv` over 265 cases in all
+seven families: maximum relative error 6.4e-10 and 5.4e-9 (before: 2e-2
+and 1.0). Two tests that pinned the old, wrong values were corrected.
+
 ## gkwdist 1.1.6
 
 ### Numerical Utilities
