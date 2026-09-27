@@ -43,7 +43,12 @@ constexpr double EPSILON      = std::numeric_limits<double>::epsilon();        /
   constexpr double LOG_DBL_MIN      = -708.3964185322641;  // log(std::numeric_limits<double>::min())
   constexpr double LOG_DBL_MIN_SAFE = -706.09383343927004; // log(DBL_MIN_SAFE)
   constexpr double LOG_DBL_MAX      = 707.48012780038994;  // log(DBL_MAX_SAFE)
-  
+  // log(std::numeric_limits<double>::max()). The overflow tests in safe_exp()
+  // and safe_pow() used LOG_DBL_MAX above, which is log(DBL_MAX / 10), and so
+  // returned +Inf for every result in (1.8e307, 1.8e308] that a double holds:
+  // dkw(5e-324, 0.045, 1) is 2.57e307 and came back Inf.
+  constexpr double LOG_DBL_MAX_EXACT = 709.78271289338397; // log(DBL_MAX)
+
   // Mathematical constants (maximum precision)
   constexpr double LN2          = 0.6931471805599453094172321214581766;  // log(2)
   constexpr double SQRT_EPSILON = 1.4901161193847656e-08;  // sqrt(EPSILON) for double
@@ -51,6 +56,7 @@ constexpr double EPSILON      = std::numeric_limits<double>::epsilon();        /
   // Optimized thresholds for numerical stability (based on Mächler 2012)
   constexpr double LOG1MEXP_CROSSOVER = -0.6931471805599453;  // -log(2)
   constexpr double LOG1MEXP_TINY      = -1.0e-14;  // Threshold for Taylor expansion
+  constexpr double LOG_LOG1MEXP_TINY  = -32.236191301916641;  // log(1e-14) = log(-LOG1MEXP_TINY)
   constexpr double LOG1PEXP_LOWER     = -37.0;     // Below: exp(x) alone suffices
   constexpr double LOG1PEXP_MEDIUM    = 18.0;      // Transition to log1p formulation
   constexpr double LOG1PEXP_UPPER     = 33.3;      // Transition to x + exp(-x)
@@ -170,6 +176,181 @@ inline double gkw_log1mexp(double u) {
   return std::log1p(-std::exp(u));
 }
 
+/*
+ * ===========================================================================
+ * ONE LINK OF THE LOG-SPACE CHAIN
+ * ===========================================================================
+ * Every family walks some part of the chain
+ *
+ *     v = 1 - x^alpha        w = 1 - v^beta        z = 1 - w^lambda
+ *
+ * and each link has the same shape: given t = log(p) and s = log(1 - p) =
+ * gkw_log1mexp(t), it needs log(1 - (1 - p)^c) = log(1 - exp(c*s)). The quantile
+ * and random-number routines walk the same link backwards, with c = 1/beta.
+ *
+ * The direct answer gkw_log1mexp(c*s) is exact while s and c*s are normal
+ * doubles, and it was always used. It fails in two ways once p is tiny, where
+ * s ~ -p. When p < 5e-324, s is exactly 0 and log1mexp(0) = -Inf; the former
+ * chains bridged that case alone, on `s == 0.0`. But for p in [5e-324, 2.2e-308)
+ * s is a subnormal with only a few significant bits, and log1mexp() takes it at
+ * face value. With x = c(.01,.3,.6,.9), llbkw(c(161.8, 2, 1.5, 1), x) came back
+ * 1522.8725 against a true 1523.2107 -- 0.34 nats -- and the error jumped about
+ * as alpha moved, so an optimiser walking that ridge saw a jagged objective and
+ * a gradient 16% off.
+ *
+ * Both failures have the same cure. -c*s is a product of positive numbers, so
+ * its logarithm, log(c) + log(-s), is exact in log space however small the
+ * product is, and log1mexp() of a tiny argument is only its logarithm:
+ * log(1 - exp(u)) = log(-u) + u/2 for u > -1e-14. log(-s) itself is exact from
+ * t: -log(1 - p) = p (1 + p/2 + ...), so log(-s) = t + p/2 + ..., and once s is
+ * subnormal p/2 is below the last bit of t.
+ *
+ * The branch fires only where the direct form had lost its digits, so ordinary
+ * data is bit-identical.
+ */
+
+/**
+ * gkw_log_neg_log1mexp: log(-s) for s = gkw_log1mexp(t), exact even where s
+ * itself is subnormal or has underflowed to 0.
+ */
+inline double gkw_log_neg_log1mexp(double t, double s) {
+  const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
+  return (s < -DBL_MIN_NORMAL) ? std::log(-s) : t;
+}
+
+/**
+ * gkw_log1mexp_pow: log(1 - exp(cs)), where cs = c*s and s = gkw_log1mexp(t).
+ *
+ * The caller passes cs as it computed it (beta * log_v forwards, log_v / beta
+ * backwards) so that the direct branch is bit-identical to the code it
+ * replaces. log(c) is formed only on the bridged branch.
+ */
+inline double gkw_log1mexp_pow(double t, double s, double cs, double c) {
+  const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
+  if (s < -DBL_MIN_NORMAL && cs < -DBL_MIN_NORMAL) return gkw_log1mexp(cs);
+  if (ISNAN(s) || ISNAN(cs)) return s + cs;
+
+  // m = log(-cs), exact in log space; then the same three regions as
+  // gkw_log1mexp(), reached through m instead of through cs.
+  const double m = std::log(c) + gkw_log_neg_log1mexp(t, s);
+  if (m < LOG_LOG1MEXP_TINY) return m - 0.5 * std::exp(m);
+  return gkw_log1mexp(-std::exp(m));
+}
+
+/**
+ * gkw_log_inv_link: the chain walked backwards,
+ *   log(x^alpha) = log(1 - (1 - w)^(1/beta))   given log(w),
+ * which is what the quantile and random-number routines of GKw, KKw and EKw
+ * invert through. The former form, gkw_log1mexp(gkw_log1mexp(log_w) / beta),
+ * lost the whole lower tail once w < 5e-324: qgkw(0.01, 40, 2, .05, .5, .1)
+ * returned exactly 0, and rgkw(1e5, 40, 2, .05, .5, .1) drew 2,579 exact zeros
+ * -- values outside the open support that llgkw() then rejects, so the
+ * sampler's own output could not be fitted.
+ */
+inline double gkw_log_inv_link_s(double log_w, double log_1mw, double beta) {
+  return gkw_log1mexp_pow(log_w, log_1mw, log_1mw / beta, 1.0 / beta);
+}
+
+// The same link when only log(w) is known. Callers that also hold log(1 - w)
+// more accurately -- the upper tail, where w is near 1 and log(w) is a
+// subnormal or 0 -- pass it to gkw_log_inv_link_s() instead: forming it here as
+// gkw_log1mexp(log_w) would flush that tail to x = 1.
+inline double gkw_log_inv_link(double log_w, double beta) {
+  return gkw_log_inv_link_s(log_w, gkw_log1mexp(log_w), beta);  // log(1 - w) = beta * log(v)
+}
+
+/**
+ * gkw_pbeta_from_log: R::pbeta(y, a, b, lower_tail, log_p) for a y known only
+ * through its logarithm.
+ *
+ * Where y is a normal double this is R::pbeta(exp(log_y), ...) exactly. Below
+ * DBL_MIN, exp(log_y) is subnormal or 0 and pbeta returns 0 -- but I_y(a, b) is
+ * not small there when a is: I_y(a, b) = y^a / (a B(a, b)) (1 + O(y)), and at
+ * y < 2.2e-308 the O(y) term is below the last bit. pgkw(1e-09, 40, 2, 0.05,
+ * 0.5, 0.1) returned 0 against a true 0.0163855.
+ */
+inline double gkw_pbeta_from_log(double log_y, double a, double b,
+                                 bool lower_tail, bool log_p) {
+  if (!(log_y < LOG_DBL_MIN)) {
+    return R::pbeta(std::exp(log_y), a, b, lower_tail, log_p);
+  }
+  double log_F = a * log_y - std::log(a) - R::lbeta(a, b);
+  if (log_F > 0.0) log_F = 0.0;
+  if (lower_tail) return log_p ? log_F : std::exp(log_F);
+  return log_p ? gkw_log1mexp(log_F) : -std::expm1(log_F);
+}
+
+/**
+ * gkw_log_qbeta_tiny: log(I^-1(p; a, b)) for a quantile R::qbeta() cannot hold.
+ *
+ * The inverse of the expansion above, log(y) = [log(F) + log(a) + log B(a,b)]/a,
+ * with F the lower-tail probability recovered without subtraction. It is meant
+ * for the case where R::qbeta() returned a y below DBL_MIN, including 0: with a
+ * small a the quantile y = (F a B)^(1/a) underflows while the x it maps to is
+ * perfectly ordinary.
+ */
+inline double gkw_log_qbeta_tiny(double pp, double a, double b,
+                                 bool lower_tail, bool log_p) {
+  double log_F;
+  if (lower_tail) log_F = log_p ? pp : std::log(pp);
+  else            log_F = log_p ? gkw_log1mexp(pp) : std::log1p(-pp);
+  return (log_F + std::log(a) + R::lbeta(a, b)) / a;
+}
+
+/**
+ * gkw_log_qbeta: log(y) and log(1 - y) for y = I^-1(p; a, b), accurate in both
+ * tails.
+ *
+ * Above 1/2 a double holds y no more finely than 1.1e-16, so 1 - y is taken
+ * straight from R::qbeta through the symmetry I_y(a, b) = 1 - I_{1-y}(b, a),
+ * exactly as qbkw() already did. Without it
+ * qgkw(1e-26, 2, 3, 1.5, 0.5, 1.2, lower.tail = FALSE) returned exactly 1, where
+ * the true 1 - x is 6.98e-07. Whichever of y and 1 - y is small, R::qbeta
+ * saturates it at about 1.1e-308, so below DBL_MIN its logarithm comes from the
+ * expansion above -- on the reflected side too, where the saturated value put
+ * qgkw(-750, 2, 100, 1, 0, 1, lower.tail = FALSE, log.p = TRUE) on a plateau at
+ * 1 - x = 4.16e-04 against a true 2.77e-04.
+ */
+inline void gkw_log_qbeta(double pp, double a, double b,
+                          bool lower_tail, bool log_p,
+                          double& log_y, double& log_1my) {
+  const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
+  const double y = R::qbeta(pp, a, b, lower_tail, log_p);
+  if (y > 0.5) {
+    const double omy = R::qbeta(pp, b, a, !lower_tail, log_p);
+    log_1my = (omy >= DBL_MIN_NORMAL) ? std::log(omy)
+                                      : gkw_log_qbeta_tiny(pp, b, a, !lower_tail, log_p);
+    log_y = std::log1p(-omy);
+  } else {
+    log_y = (y >= DBL_MIN_NORMAL) ? std::log(y)
+                                  : gkw_log_qbeta_tiny(pp, a, b, lower_tail, log_p);
+    log_1my = std::log1p(-y);
+  }
+}
+
+/**
+ * gkw_warning: raise an R warning without leaking the caller's C++ state.
+ *
+ * Rcpp::warning() is a bare Rf_warning(). When the warning is turned into an
+ * error (options(warn = 2)) or caught by tryCatch(warning = ), R leaves through
+ * a longjmp, which skips every C++ destructor on the way out: the Armadillo copy
+ * of the data and the Rcpp handles protecting the inputs were never released.
+ * Twenty calls of grbkw() on 2e6 observations under
+ * tryCatch(warning = function(w) NULL) grew the process by 308 MB.
+ *
+ * Calling base::warning() through Rcpp::Function evaluates it under
+ * R_UnwindProtect: a longjmp is caught, rethrown as a C++ exception that unwinds
+ * the stack normally, and resumed by the generated wrapper once every frame has
+ * been cleaned up. The message and the call it names -- the exported R function
+ * -- are unchanged.
+ */
+template <typename... Args>
+inline void gkw_warning(const char* fmt, Args&&... args) {
+  const std::string msg = tfm::format(fmt, std::forward<Args>(args)...);
+  Rcpp::Function warning_fn = Rcpp::Environment::base_env()["warning"];
+  warning_fn(msg);
+}
+
 /**
  * log1pexp: Compute log(1 + exp(x)) with protection against overflow
  * 
@@ -261,10 +442,10 @@ inline double safe_log(double x) {
  */
 inline double safe_exp(double x) {
   // Handle overflow
-  if (x > LOG_DBL_MAX) {
+  if (x > LOG_DBL_MAX_EXACT) {
     return R_PosInf;
   }
-  
+
   // Handle severe underflow
   if (x < LOG_DBL_MIN - 10.0) {
     return 0.0;
@@ -353,7 +534,7 @@ inline double safe_pow(double x, double y) {
     double log_result = std::abs(y) * log_abs_x;
     
     // Check for overflow/underflow
-    if (log_result > LOG_DBL_MAX) {
+    if (log_result > LOG_DBL_MAX_EXACT) {
       return y_is_odd ? R_NegInf : R_PosInf;
     }
     if (log_result < LOG_DBL_MIN) {
@@ -380,7 +561,7 @@ inline double safe_pow(double x, double y) {
     double log_result = y * log_x;
     
     // Early overflow/underflow detection
-    if (log_result > LOG_DBL_MAX) {
+    if (log_result > LOG_DBL_MAX_EXACT) {
       return R_PosInf;
     }
     if (log_result < LOG_DBL_MIN) {

@@ -94,12 +94,17 @@
 //
 // Each substitution is the first-order limit and agrees with log1mexp() to the
 // last bits wherever both are representable: at log_w = -1e-300 with lambda = 2
-// the two forms give -690.09 and -690.09. The branches fire only where the old
-// code produced -Inf, so ordinary data is bit-identical.
+// the two forms give -690.09 and -690.09.
 //
 // This is what made llgkw() return NaN where the likelihood is finite:
 // llgkw(c(1, 300, 1, 0, 1), c(.8,.85,.9,.95)) gave NaN for an exact 2609.84,
 // because log_z came back -Inf and delta was 0, and 0 * -Inf is NaN.
+//
+// The bridge used to fire on `log_v == 0.0` and `log_w == 0.0` alone, which
+// left a band where the linear quantity is subnormal rather than 0 and
+// log1mexp() reads its few remaining bits as if they were exact. Each link now
+// goes through gkw_log1mexp_pow() in utils.h, which bridges the whole band and
+// is bit-identical to the direct form everywhere else.
 static inline void gkw_log_chain(double log_x, double alpha, double beta,
                                  double lambda,
                                  double& log_x_alpha, double& log_v,
@@ -108,11 +113,9 @@ static inline void gkw_log_chain(double log_x, double alpha, double beta,
   log_x_alpha  = alpha * log_x;
   log_v        = gkw_log1mexp(log_x_alpha);
   log_v_beta   = beta * log_v;
-  log_w        = (log_v == 0.0) ? (std::log(beta) + log_x_alpha)
-                                : gkw_log1mexp(log_v_beta);
+  log_w        = gkw_log1mexp_pow(log_x_alpha, log_v, log_v_beta, beta);
   log_w_lambda = lambda * log_w;
-  log_z        = (log_w == 0.0) ? (std::log(lambda) + log_v_beta)
-                                : gkw_log1mexp(log_w_lambda);
+  log_z        = gkw_log1mexp_pow(log_v_beta, log_w, log_w_lambda, lambda);
 }
 
 // log_v and log_w each underflow to 0 in the regime where their true values are
@@ -143,9 +146,14 @@ static inline double gkw_mul_small_log(double log_small, double log_magnitude,
   //
   // The direct multiply is kept wherever exp(E) cannot overflow, so ordinary
   // data is bit-identical and pays nothing for the extra log().
-  if (log_small == 0.0) return -std::exp(log_magnitude + E);
-  if (E < 700.0)        return log_small * std::exp(E);
-  return -std::exp(std::log(-log_small) + E);
+  //
+  // A subnormal log_small is no better than 0 as a factor: it carries only a
+  // few significant bits, so the direct multiply returned the product to that
+  // precision. log(-log_small) comes from gkw_log_neg_log1mexp(), which takes
+  // the magnitude from one level up whenever log_small is not a normal double.
+  const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
+  if (log_small < -DBL_MIN_NORMAL && E < 700.0) return log_small * std::exp(E);
+  return -std::exp(gkw_log_neg_log1mexp(log_magnitude, log_small) + E);
 }
 
 
@@ -310,7 +318,7 @@ Rcpp::NumericVector dgkw(
     // defensive code testing is.nan() saw nothing. dgkw() returning 0 where
     // man/dgkw.Rd promises NaN is a real and separate inconsistency; it is
     // recorded rather than papered over with a message.
-    Rcpp::warning("dgkw: invalid parameters");
+    gkw_warning("dgkw: invalid parameters");
   }
 
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);
@@ -442,17 +450,44 @@ Rcpp::NumericVector pgkw(
     // it was: the lower tail never changes, and neither does any upper tail with
     // y <= 1/2. LOG1MEXP_CROSSOVER is -log(2), the same point gkw_log1mexp()
     // uses to decide which of y and 1 - y a double can hold.
-    double log_w = gkw_log1mexp(b * gkw_log1mexp(a * std::log(qi)));
+    //
+    // The same reflection serves the lower tail on the log scale: with y near 1
+    // log F = log(1 - I_{1-y}(delta+1, gamma)) is a tiny negative number that
+    // R::pbeta(y, ., ., log = TRUE) rounds to exactly 0 --
+    // pgkw(1 - 1e-6, 2, 3, 1.5, 2, 0.8, log.p = TRUE) returned 0 for a true
+    // -5.73e-52. The lower tail on the probability scale is left as it was.
+    //
+    // At the other end, log_w is the first link of the chain and underflowed as
+    // the chain did: once a*log(q) < -745 it came back -Inf and F was exactly 0,
+    // so pgkw(1e-09, 40, 2, 0.05, 0.5, 0.1) returned 0 for a true 0.0163855.
+    // gkw_log1mexp_pow() keeps log_w, and gkw_pbeta_from_log() carries a y below
+    // DBL_MIN through the leading term of the incomplete beta.
+    //
+    // The reflected branch needs 1 - y, and near x = 1 it is -expm1(l*log_w)
+    // only while log_w is a normal double; past that 1 - y is taken through its
+    // logarithm, bridged from log(v^beta) exactly as log_z is in the chain.
+    // Without it pgkw(x, 2, 100, 1, 0, 1, lower.tail = FALSE, log.p = TRUE) was
+    // -Inf at x = 0.99972, where pkw() gives -750.
+    const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
+    double log_q_alpha = a * std::log(qi);
+    double log_v = gkw_log1mexp(log_q_alpha);
+    double log_v_beta = b * log_v;
+    double log_w = gkw_log1mexp_pow(log_q_alpha, log_v, log_v_beta, b);
     double log_y = l * log_w;
-    if (!lower_tail && log_y > LOG1MEXP_CROSSOVER) {
-      result(i) = R::pbeta(-std::expm1(log_y), d + 1.0, g, /*lower*/ 1, log_p);
+    if ((!lower_tail || log_p) && log_y > LOG1MEXP_CROSSOVER) {
+      if (log_w < -DBL_MIN_NORMAL && log_y < -DBL_MIN_NORMAL) {
+        result(i) = R::pbeta(-std::expm1(log_y), d + 1.0, g, !lower_tail, log_p);
+      } else {
+        double log_1my = gkw_log1mexp_pow(log_v_beta, log_w, log_y, l);
+        result(i) = gkw_pbeta_from_log(log_1my, d + 1.0, g, !lower_tail, log_p);
+      }
     } else {
-      result(i) = R::pbeta(std::exp(log_y), g, d + 1.0, lower_tail, log_p);
+      result(i) = gkw_pbeta_from_log(log_y, g, d + 1.0, lower_tail, log_p);
     }
   }
   
   if (bad_par) {
-    Rcpp::warning("pgkw: NAs produced");
+    gkw_warning("pgkw: NAs produced");
   }
 
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);
@@ -564,13 +599,23 @@ Rcpp::NumericVector qgkw(
     // y = I^-1_{gamma,delta+1}(u); w = y^(1/lambda); x = [1-(1-w)^(1/beta)]^(1/alpha).
     // lower_tail and log_p go straight to R::qbeta instead of being undone by
     // exp() and 1 - p first.
-    double y = R::qbeta(pp, g, d + 1.0, lower_tail, log_p);
-    double log_w = std::log(y) / l;
-    result(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_w) / b) / a);
+    //
+    // log(y) and log(1 - y) come from gkw_log_qbeta(), which reflects above
+    // y = 1/2 the way qbkw() always has and pgkw() does -- log(y) of a y rounded
+    // to the double grid near 1 put qgkw(1e-26, 2, 3, 1.5, 0.5, 1.2,
+    // lower.tail = FALSE) at exactly 1 -- and carries whichever of the two is
+    // below DBL_MIN through its leading term. The chain is then inverted from
+    // both ends: log(1 - w) is bridged from log(1 - y), so neither a tiny w nor
+    // a w next to 1 is flushed.
+    double log_y, log_1my;
+    gkw_log_qbeta(pp, g, d + 1.0, lower_tail, log_p, log_y, log_1my);
+    double log_w   = log_y / l;
+    double log_1mw = gkw_log1mexp_pow(log_1my, log_y, log_w, 1.0 / l);
+    result(i) = std::exp(gkw_log_inv_link_s(log_w, log_1mw, b) / a);
   }
   
   if (bad_par) {
-    Rcpp::warning("qgkw: NAs produced");
+    gkw_warning("qgkw: NAs produced");
   }
 
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);
@@ -623,7 +668,7 @@ Rcpp::NumericVector rgkw(
   // reaching the `i % vec.n_elem` recycling with a zero divisor.
   if (alpha_vec.n_elem == 0 || beta_vec.n_elem == 0 || gamma_vec.n_elem == 0 ||
       delta_vec.n_elem == 0 || lambda_vec.n_elem == 0) {
-    Rcpp::warning("rgkw: NAs produced");
+    gkw_warning("rgkw: NAs produced");
     return Rcpp::NumericVector(n, NA_REAL);
   }
 
@@ -659,12 +704,17 @@ Rcpp::NumericVector rgkw(
     // than through 1 - v and 1 - v^(1/beta) in linear arithmetic.
     // The draw itself is untouched, so the RNG stream is identical to
     // before; only the inversion that follows it changes.
+    //
+    // gkw_log_inv_link() rather than two bare log1mexp() calls: once
+    // log(vi)/lambda fell below -745 the inner one returned 0 and the draw came
+    // out exactly 0. rgkw(1e5, 40, 2, 0.05, 0.5, 0.1) drew 2,579 zeros, none of
+    // them from R::rbeta, and llgkw() rejected the sample it had just produced.
     double log_w = std::log(vi) / l;
-    result(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_w) / b) / a);
+    result(i) = std::exp(gkw_log_inv_link(log_w, b) / a);
   }
   
   if (bad_par) {
-    Rcpp::warning("rgkw: NAs produced");
+    gkw_warning("rgkw: NAs produced");
   }
 
   return Rcpp::NumericVector(result.memptr(), result.memptr() + result.n_elem);
@@ -724,7 +774,12 @@ double llgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   // in comparing likelihoods rather than in optim(), which refuses to start at
   // either infinity: on data holding a single 0, the GKw family won every
   // selection by nll = -Inf and AIC = -Inf.
-  if (arma::any(x <= 0) || arma::any(x >= 1)) {
+  //
+  // has_nan() is part of the test: a NaN or NA compares false against both
+  // bounds, so it passed straight through and llgkw() returned NA where llbkw(),
+  // llkkw(), llekw() and llmc() return +Inf -- the value the help page promises
+  // for data that is not in (0, 1).
+  if (x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     return R_PosInf;
   }
   
@@ -808,9 +863,13 @@ Rcpp::NumericVector grgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   }
   
   // Convert and validate data
+  //
+  // has_nan() is part of the test, as in llgkw(): without it NA data reached
+  // the loop and came back as a NaN vector under a warning that blamed the
+  // boundary of the support.
   arma::vec x = Rcpp::as<arma::vec>(data);
-  
-  if (arma::any(x <= 0) || arma::any(x >= 1)) {
+
+  if (x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     return Rcpp::NumericVector(5, R_NaN);
   }
   
@@ -901,8 +960,8 @@ Rcpp::NumericVector grgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   // silent NaN vector.
   if (!R_finite(d_alpha) || !R_finite(d_beta) || !R_finite(d_gamma) || 
       !R_finite(d_delta) || !R_finite(d_lambda)) {
-      Rcpp::warning("grgkw: the log-space chain reached the boundary of the "
-                    "support for at least one observation; returning NaN");
+      gkw_warning("grgkw: the log-space chain reached the boundary of the "
+                  "support for at least one observation; returning NaN");
       return Rcpp::NumericVector(5, R_NaN);
   }
   
@@ -960,7 +1019,7 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   
   // Convert and validate data
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (arma::any(x <= 0) || arma::any(x >= 1)) {
+  if (x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     Rcpp::NumericMatrix nanH(5, 5);
     nanH.fill(R_NaN);
     return nanH;
@@ -990,147 +1049,98 @@ Rcpp::NumericMatrix hsgkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   H(2, 3) += n * R::trigamma(gamma + delta + 1);
   H(3, 2) = H(2, 3);
   
-  // Accumulators for mixed derivatives involving λ
-  double acc_gamma_lambda = 0.0;
-  double acc_delta_lambda = 0.0;
-  double acc_alpha_lambda = 0.0;
-  double acc_beta_lambda = 0.0;
-
-  // Set when an observation cannot be evaluated. Skipping such an observation
-  // would silently compute the Hessian of a smaller sample: with beta = 500 and
-  // four observations every one of them was dropped and the result was the
-  // constant terms alone, H(alpha,alpha) = n/alpha^2 = 4 against a true 1996.3
-  // -- finite, symmetric, free of NaN, and wrong by a factor of 499. A visible
-  // failure is the correct answer until the chain is reworked in log space.
-  bool degenerate = false;
-
   // ---- Observation-dependent terms ----
-  for (int i = 0; i < n; i++) {
-    double xi = x(i);
-    
-    // Compute A = x^α and derivatives
-    double ln_xi = safe_log(xi);
-    double A = safe_pow(xi, alpha);
-    double dA_dalpha = A * ln_xi;
-    double d2A_dalpha2 = A * ln_xi * ln_xi;
-    
-    // v = 1 - A and derivatives (using log-space for v)
-    double log_A = alpha * ln_xi;
-    double log_v = gkw_log1mexp(log_A);
-    if (!R_finite(log_v)) { degenerate = true; break; }
-    double v = safe_exp(log_v);
-    double ln_v = log_v;
-    double dv_dalpha = -dA_dalpha;
-    double d2v_dalpha2 = -d2A_dalpha2;
-    
-    // --- L6: (β-1) ln(v) contributions ---
-    double d2L6_dalpha2 = (beta - 1.0) * ((d2v_dalpha2 * v - dv_dalpha * dv_dalpha) / (v * v));
-    double d2L6_dalpha_dbeta = dv_dalpha / v;
-    
-    // --- L7: (γλ - 1) ln(w), where w = 1 - v^β ---
-    double log_v_beta = beta * log_v;
-    double log_w = gkw_log1mexp(log_v_beta);
-    if (!R_finite(log_w)) { degenerate = true; break; }
-    double w = safe_exp(log_w);
-    double ln_w = log_w;
-    
-    // Derivatives of w
-    double v_beta_m1 = safe_pow(v, beta - 1.0);
-    double dw_dv = -beta * v_beta_m1;
-    double dw_dalpha = dw_dv * dv_dalpha;
-    
-    double d2w_dalpha2 = -beta * ((beta - 1.0) * safe_pow(v, beta - 2.0) * (dv_dalpha * dv_dalpha)
-                                    + v_beta_m1 * d2v_dalpha2);
-    double d2L7_dalpha2 = (gamma * lambda - 1.0) * ((d2w_dalpha2 * w - (dw_dalpha * dw_dalpha)) / (w * w));
-    
-    double dw_dbeta = -safe_pow(v, beta) * ln_v;
-    double d2w_dbeta2 = -safe_pow(v, beta) * (ln_v * ln_v);
-    double d2L7_dbeta2 = (gamma * lambda - 1.0) * ((d2w_dbeta2 * w - (dw_dbeta * dw_dbeta)) / (w * w));
-    
-    double d_dw_dalpha_dbeta = -safe_pow(v, beta - 1.0) * (1.0 + beta * ln_v) * dv_dalpha;
-    double d2L7_dalpha_dbeta = (gamma * lambda - 1.0) * ((d_dw_dalpha_dbeta / w) - (dw_dalpha * dw_dbeta) / (w * w));
-    
-    // --- L8: δ ln(z), where z = 1 - w^λ ---
-    double log_w_lambda = lambda * log_w;
-    double log_z = gkw_log1mexp(log_w_lambda);
-    if (!R_finite(log_z)) { degenerate = true; break; }
-    double z = safe_exp(log_z);
-    
-    double w_lambda_m1 = safe_pow(w, lambda - 1.0);
-    double dz_dalpha = -lambda * w_lambda_m1 * dw_dalpha;
-    
-    double d2z_dalpha2 = -lambda * ((lambda - 1.0) * safe_pow(w, lambda - 2.0) * (dw_dalpha * dw_dalpha)
-                                      + w_lambda_m1 * d2w_dalpha2);
-    double d2L8_dalpha2 = delta * ((d2z_dalpha2 * z - dz_dalpha * dz_dalpha) / (z * z));
-    
-    double dz_dbeta = -lambda * w_lambda_m1 * dw_dbeta;
-    double d2z_dbeta2 = -lambda * ((lambda - 1.0) * safe_pow(w, lambda - 2.0) * (dw_dbeta * dw_dbeta)
-                                     + w_lambda_m1 * d2w_dbeta2);
-    double d2L8_dbeta2 = delta * ((d2z_dbeta2 * z - dz_dbeta * dz_dbeta) / (z * z));
-    
-    double d_dw_dalpha_dbeta_2 = -lambda * ((lambda - 1.0) * safe_pow(w, lambda - 2.0) * dw_dbeta * dw_dalpha
-                                              + w_lambda_m1 * d_dw_dalpha_dbeta);
-    double d2L8_dalpha_dbeta = delta * ((d_dw_dalpha_dbeta_2 / z) - (dz_dalpha * dz_dbeta) / (z * z));
-    
-    double dz_dlambda = -safe_pow(w, lambda) * ln_w;
-    double d2z_dlambda2 = -safe_pow(w, lambda) * (ln_w * ln_w);
-    double d2L8_dlambda2 = delta * ((d2z_dlambda2 * z - dz_dlambda * dz_dlambda) / (z * z));
-    
-    double d_dalpha_dz_dlambda = -w_lambda_m1 * dw_dalpha - lambda * ln_w * w_lambda_m1 * dw_dalpha;
-    double d2L8_dalpha_dlambda = delta * ((d_dalpha_dz_dlambda / z) - (dz_dlambda * dz_dalpha) / (z * z));
-    
-    double d_dbeta_dz_dlambda = -w_lambda_m1 * dw_dbeta - lambda * ln_w * w_lambda_m1 * dw_dbeta;
-    double d2L8_dbeta_dlambda = delta * ((d_dbeta_dz_dlambda / z) - (dz_dlambda * dz_dbeta) / (z * z));
-    
-    // Validate intermediate results
-    if (!R_finite(d2L6_dalpha2) || !R_finite(d2L7_dalpha2) || !R_finite(d2L8_dalpha2) ||
-        !R_finite(d2L6_dalpha_dbeta) || !R_finite(d2L7_dalpha_dbeta) || !R_finite(d2L8_dalpha_dbeta) ||
-        !R_finite(d2L7_dbeta2) || !R_finite(d2L8_dbeta2) ||
-        !R_finite(d2L8_dlambda2) ||
-        !R_finite(dw_dalpha) || !R_finite(dw_dbeta) ||
-        !R_finite(dz_dalpha) || !R_finite(dz_dbeta) ||
-        !R_finite(dz_dlambda)) {
-        Rcpp::NumericMatrix nanH(5, 5);
-      nanH.fill(R_NaN);
-      return nanH;
-    }
-    
-    // ---- Accumulate upper-triangle Hessian contributions ----
-    H(0, 0) += d2L6_dalpha2 + d2L7_dalpha2 + d2L8_dalpha2;
-    H(0, 1) += d2L6_dalpha_dbeta + d2L7_dalpha_dbeta + d2L8_dalpha_dbeta;
-    H(1, 1) += d2L7_dbeta2 + d2L8_dbeta2;
-    H(4, 4) += d2L8_dlambda2;
-    H(0, 2) += lambda * (dw_dalpha / w);
-    H(1, 2) += lambda * (dw_dbeta / w);
-    H(0, 3) += dz_dalpha / z;
-    H(1, 3) += dz_dbeta / z;
+  //
+  // Built from the same log-space blocks as hskkw(), which is this Hessian at
+  // gamma = 1. The former code worked in linear space: it formed v, w and z as
+  // doubles, about a dozen safe_pow() calls per observation, and ratios such as
+  // (w''w - w'^2)/w^2 whose factors overflow long before the ratio is large. It
+  // returned NaN where llgkw(), grgkw() and every other family's Hessian are
+  // finite -- hsgkw(c(1, 200, 1.5, 2, 1), c(.1,.25,.4,.72,.99)) was all NaN while
+  // hskkw() at the same point agrees with numDeriv to 7.5e-8 -- and one path
+  // returned that NaN without a word.
+  //
+  // Per observation, with P = dlog(v)/dalpha, Q = dlog(w)/dalpha,
+  // R = dlog(w)/dbeta, U = dlog(z)/dalpha, V = dlog(z)/dbeta and
+  // W = dlog(z)/dlambda, the log-likelihood contributes
+  //
+  //   (alpha-1) log(x) + (beta-1) log(v) + (gamma*lambda-1) log(w) + delta log(z)
+  //
+  // so hskkw()'s blocks carry over with (lambda-1) replaced by gamma*lambda-1 on
+  // the log(w) term. gamma enters only through that coefficient, which gives
+  // the gamma row: d2l/dalpha dgamma = lambda*Q, d2l/dbeta dgamma = lambda*R,
+  // d2l/dgamma dlambda = log(w), and gamma*Q, gamma*R in the lambda column.
+  const double c_w = gamma * lambda - 1.0;
 
-    // λ mixed derivatives
-    acc_alpha_lambda += gamma * (dw_dalpha / w) + d2L8_dalpha_dlambda;
-    acc_beta_lambda  += gamma * (dw_dbeta  / w) + d2L8_dbeta_dlambda;
-    acc_gamma_lambda += ln_w;
-    acc_delta_lambda += dz_dlambda / z;
+  for (int i = 0; i < n; i++) {
+    double log_xi = std::log(x(i));
+
+    double log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z;
+    gkw_log_chain(log_xi, alpha, beta, lambda,
+                  log_x_alpha, log_v, log_v_beta, log_w, log_w_lambda, log_z);
+
+    double log_v_beta_m1   = (beta - 1.0) * log_v;
+    double log_w_lambda_m1 = (lambda - 1.0) * log_w;
+
+    // PS = -P*S, TPS = -P*S*T, TQ = T*Q and TR = T*R, with S = v^beta/w and
+    // T = w^lambda/z, each written as one exp() of a sum of logs so that
+    // neither ratio has to be representable on its own; see hskkw().
+    double P   = -log_xi * std::exp(log_x_alpha - log_v);
+    double PS  =  log_xi * std::exp(log_x_alpha + log_v_beta_m1 - log_w);
+    double Q   =  beta * PS;
+    double R   = -gkw_mul_small_log(log_v, log_x_alpha, log_v_beta - log_w);
+    double TPS =  log_xi * std::exp(log_x_alpha + log_v_beta_m1 +
+                                    log_w_lambda_m1 - log_z);
+    double TQ  =  beta * TPS;
+    double TR  = -gkw_mul_small_log(log_v, log_x_alpha,
+                                    log_v_beta + log_w_lambda_m1 - log_z);
+    double U   = -lambda * TQ;
+    double V   = -lambda * TR;
+    double W   = -gkw_mul_small_log(log_w, log_v_beta, log_w_lambda - log_z);
+
+    double dP_dalpha = P * (log_xi - P);
+    double dQ_dalpha = Q * (log_xi - P + beta * P - Q);
+    double dQ_dbeta  = PS * (1.0 + beta * (log_v - R));
+    double dR_dbeta  = R * (log_v - R);
+
+    double dU_dalpha = -lambda * TQ * (lambda * Q - U + log_xi - P + beta * P - Q);
+    double dU_dbeta  = -lambda * (TQ * (lambda * R - V) +
+                                  TPS * (1.0 + beta * (log_v - R)));
+    double dU_dlambda = -TQ * (1.0 + lambda * (log_w - W));
+    double dV_dbeta  = -lambda * TR * (lambda * R - V + log_v - R);
+    double dV_dlambda = -TR * (1.0 + lambda * (log_w - W));
+    double dW_dlambda = W * (log_w - W);
+
+    // alpha row
+    H(0, 0) += (beta - 1.0) * dP_dalpha + c_w * dQ_dalpha + delta * dU_dalpha;
+    H(0, 1) += P + c_w * dQ_dbeta + delta * dU_dbeta;
+    H(0, 2) += lambda * Q;
+    H(0, 3) += U;
+    H(0, 4) += gamma * Q + delta * dU_dlambda;
+
+    // beta row
+    H(1, 1) += c_w * dR_dbeta + delta * dV_dbeta;
+    H(1, 2) += lambda * R;
+    H(1, 3) += V;
+    H(1, 4) += gamma * R + delta * dV_dlambda;
+
+    // gamma, delta and lambda rows
+    H(2, 4) += log_w;
+    H(3, 4) += W;
+    H(4, 4) += delta * dW_dlambda;
   }
 
-  // An observation that could not be evaluated must not simply be left out of
-  // the sum: the remaining terms would still be returned as a finite, symmetric
-  // matrix that silently describes a smaller sample. Report the failure the same
-  // way the intermediate-value check below already does.
-  if (degenerate) {
-    Rcpp::warning("hsgkw: the log-space chain underflowed for at least one observation; returning NaN");
+  // Only the upper triangle is accumulated above; mirror it
+  H = arma::symmatu(H);
+
+  // An entry that is still not finite here is a genuine boundary, and the whole
+  // matrix goes with it, as in the other six families.
+  if (!H.is_finite()) {
+    gkw_warning("Hessian calculation produced non-finite values in hsgkw");
     Rcpp::NumericMatrix nanH(5, 5);
     nanH.fill(R_NaN);
     return nanH;
   }
-
-  // Apply accumulated λ mixed derivatives (upper triangle)
-  H(0, 4) = acc_alpha_lambda;
-  H(1, 4) = acc_beta_lambda;
-  H(2, 4) = acc_gamma_lambda;
-  H(3, 4) = acc_delta_lambda;
-
-  // Symmetrize once after all accumulations
-  H = arma::symmatu(H);
 
   // Return NEGATIVE Hessian (for minimization of negative log-likelihood)
   return Rcpp::wrap(-H);

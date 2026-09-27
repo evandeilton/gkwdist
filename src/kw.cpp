@@ -302,8 +302,13 @@ Rcpp::NumericVector pkw(
     double log_x_alpha = a * std::log(xx);
 
     // F = 1 - (1 - x^alpha)^beta
-    double log_surv = b * gkw_log1mexp(log_x_alpha);
-    double log_cdf  = gkw_log1mexp(log_surv);
+    //
+    // log F goes through gkw_log1mexp_pow(), which bridges the point where
+    // log(1 - x^alpha) underflows: the bare log1mexp(log_surv) returned -Inf
+    // there, and pkw(1e-100, 4, 3, log.p = TRUE) was -Inf for a true -919.94.
+    double log_v    = gkw_log1mexp(log_x_alpha);
+    double log_surv = b * log_v;
+    double log_cdf  = gkw_log1mexp_pow(log_x_alpha, log_v, log_surv, b);
 
     // Emit the requested tail on the requested scale without ever forming
     // 1 - p or log(p) from a value that has already lost its digits.
@@ -408,7 +413,11 @@ Rcpp::NumericVector qkw(
     if (log_1mu == R_NegInf) { out(i) = 1.0; continue; }
 
     // Q(u) = [1 - (1-u)^(1/beta)]^(1/alpha)
-    out(i) = std::exp(gkw_log1mexp(log_1mu / b) / a);
+    //
+    // Bridged through log(u) where log(1 - u) is no longer a normal double: for
+    // u < 2.2e-308 the bare form lost the quantile, although x = (u/beta)^(1/alpha)
+    // is ordinary once alpha is large.
+    out(i) = std::exp(gkw_log1mexp_pow(log_u, log_1mu, log_1mu / b, 1.0 / b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -464,7 +473,7 @@ Rcpp::NumericVector rkw(
   // (rbeta(3, numeric(0), 1) is NA NA NA with a warning) instead of
   // reaching the `i % vec.n_elem` recycling with a zero divisor.
   if (a_vec.n_elem == 0 || b_vec.n_elem == 0) {
-    Rcpp::warning("rkw: NAs produced");
+    gkw_warning("rkw: NAs produced");
     return Rcpp::NumericVector(n, NA_REAL);
   }
 
@@ -502,7 +511,7 @@ Rcpp::NumericVector rkw(
   }
 
   if (bad_par) {
-    Rcpp::warning("rkw: NAs produced");
+    gkw_warning("rkw: NAs produced");
   }
 
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -556,7 +565,7 @@ double llkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   if (x.n_elem < 1) {
     return R_PosInf;
   }
-  if (arma::any(x <= 0.0) || arma::any(x >= 1.0)) {
+  if (x.has_nan() || arma::any(x <= 0.0) || arma::any(x >= 1.0)) {
     return R_PosInf;
   }
   
@@ -622,7 +631,7 @@ Rcpp::NumericVector grkw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   
   // Convert and validate data
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (arma::any(x <= 0) || arma::any(x >= 1)) {
+  if (x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     return Rcpp::NumericVector(2, R_NaN);
   }
   
@@ -719,7 +728,7 @@ Rcpp::NumericMatrix hskw(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   
   // Convert and validate data
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (arma::any(x <= 0) || arma::any(x >= 1)) {
+  if (x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     return nanHess;
   }
   

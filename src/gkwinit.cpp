@@ -1,9 +1,36 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
+#include <cctype>
 #include <cmath>
 #include <limits>
 #include <random>
 #include <string>
+#include "utils.h"   // gkw_warning()
+
+/**
+ * A uniform draw on [a, b) whose bits are fixed by the C++ standard.
+ *
+ * std::mt19937 is fully specified, but std::uniform_real_distribution is not:
+ * the mapping from engine output to double is left to the implementation, so
+ * the "deterministic" starting values could differ between libstdc++ (GCC,
+ * the CRAN Linux and Windows toolchains), libc++ (macOS) and MSVC. This spells
+ * out the libstdc++ mapping -- two 32-bit words combined as
+ * (w1 + w2 * 2^32) / 2^64, with the rare 1.0 stepped down to the largest double
+ * below it, then u * (b - a) + a -- which was checked bit for bit against
+ * std::uniform_real_distribution<double> on GCC 15 over 10^6 draws. Linux
+ * results are therefore unchanged; every other platform now matches them.
+ */
+struct gkw_uniform {
+  double a, b;
+  gkw_uniform(double lo, double hi) : a(lo), b(hi) {}
+  double operator()(std::mt19937 &gen) const {
+    const double w1 = static_cast<double>(gen());
+    const double w2 = static_cast<double>(gen());
+    double u = (w1 + w2 * 4294967296.0) / 18446744073709551616.0;
+    if (u >= 1.0) u = std::nextafter(1.0, 0.0);
+    return u * (b - a) + a;
+  }
+};
 
 /**
  * Computes the probability density function (PDF) of the Generalized Kumaraswamy distribution
@@ -524,11 +551,11 @@ std::vector<arma::vec> generate_initial_points(const arma::vec &sample_moments,
     initial_points.push_back(arma::vec({1.0, 1.0, 1.0, 0.1, 1.0}));
     initial_points.push_back(arma::vec({4.0, 2.0, 0.8, 0.5, 1.0}));
 
-    std::uniform_real_distribution<double> dist_alpha(0.5, 10.0);
-    std::uniform_real_distribution<double> dist_beta(0.5, 10.0);
-    std::uniform_real_distribution<double> dist_gamma(0.5, 2.0);
-    std::uniform_real_distribution<double> dist_delta(0.1, 1.0);
-    std::uniform_real_distribution<double> dist_lambda(0.5, 2.0);
+    gkw_uniform dist_alpha(0.5, 10.0);
+    gkw_uniform dist_beta(0.5, 10.0);
+    gkw_uniform dist_gamma(0.5, 2.0);
+    gkw_uniform dist_delta(0.1, 1.0);
+    gkw_uniform dist_lambda(0.5, 2.0);
 
     for (int i = initial_points.size(); i < n_starts; i++) {
       initial_points.push_back(arma::vec({
@@ -543,10 +570,10 @@ std::vector<arma::vec> generate_initial_points(const arma::vec &sample_moments,
     initial_points.push_back(arma::vec({1.0, 1.0, 0.8, 0.3}));
     initial_points.push_back(arma::vec({3.0, 2.0, 1.5, 0.5}));
 
-    std::uniform_real_distribution<double> dist_alpha(0.5, 10.0);
-    std::uniform_real_distribution<double> dist_beta(0.5, 10.0);
-    std::uniform_real_distribution<double> dist_gamma(0.5, 2.0);
-    std::uniform_real_distribution<double> dist_delta(0.1, 1.0);
+    gkw_uniform dist_alpha(0.5, 10.0);
+    gkw_uniform dist_beta(0.5, 10.0);
+    gkw_uniform dist_gamma(0.5, 2.0);
+    gkw_uniform dist_delta(0.1, 1.0);
 
     for (int i = initial_points.size(); i < n_starts; i++) {
       initial_points.push_back(arma::vec({
@@ -560,10 +587,10 @@ std::vector<arma::vec> generate_initial_points(const arma::vec &sample_moments,
     initial_points.push_back(arma::vec({1.0, 1.0, 0.3, 1.2}));
     initial_points.push_back(arma::vec({3.0, 2.0, 0.7, 1.5}));
 
-    std::uniform_real_distribution<double> dist_alpha(0.5, 10.0);
-    std::uniform_real_distribution<double> dist_beta(0.5, 10.0);
-    std::uniform_real_distribution<double> dist_delta(0.1, 1.0);
-    std::uniform_real_distribution<double> dist_lambda(0.5, 2.0);
+    gkw_uniform dist_alpha(0.5, 10.0);
+    gkw_uniform dist_beta(0.5, 10.0);
+    gkw_uniform dist_delta(0.1, 1.0);
+    gkw_uniform dist_lambda(0.5, 2.0);
 
     for (int i = initial_points.size(); i < n_starts; i++) {
       initial_points.push_back(arma::vec({
@@ -577,9 +604,9 @@ std::vector<arma::vec> generate_initial_points(const arma::vec &sample_moments,
     initial_points.push_back(arma::vec({1.0, 1.0, 1.2}));
     initial_points.push_back(arma::vec({3.0, 2.0, 1.5}));
 
-    std::uniform_real_distribution<double> dist_alpha(0.5, 10.0);
-    std::uniform_real_distribution<double> dist_beta(0.5, 10.0);
-    std::uniform_real_distribution<double> dist_lambda(0.5, 2.0);
+    gkw_uniform dist_alpha(0.5, 10.0);
+    gkw_uniform dist_beta(0.5, 10.0);
+    gkw_uniform dist_lambda(0.5, 2.0);
 
     for (int i = initial_points.size(); i < n_starts; i++) {
       initial_points.push_back(arma::vec({
@@ -596,9 +623,9 @@ std::vector<arma::vec> generate_initial_points(const arma::vec &sample_moments,
     initial_points.push_back(arma::vec({2.0, 2.0, 1.2}));
     initial_points.push_back(arma::vec({1.5, 1.5, 1.5}));
 
-    std::uniform_real_distribution<double> dist_gamma(0.5, 5.0);
-    std::uniform_real_distribution<double> dist_delta(0.5, 5.0);
-    std::uniform_real_distribution<double> dist_lambda(0.5, 2.0);
+    gkw_uniform dist_gamma(0.5, 5.0);
+    gkw_uniform dist_delta(0.5, 5.0);
+    gkw_uniform dist_lambda(0.5, 2.0);
 
     for (int i = initial_points.size(); i < n_starts; i++) {
       initial_points.push_back(arma::vec({
@@ -612,16 +639,21 @@ std::vector<arma::vec> generate_initial_points(const arma::vec &sample_moments,
     initial_points.push_back(arma::vec({1.0, 1.0}));
     initial_points.push_back(arma::vec({3.0, 2.0}));
 
-    std::uniform_real_distribution<double> dist_alpha(0.5, 10.0);
-    std::uniform_real_distribution<double> dist_beta(0.5, 10.0);
+    gkw_uniform dist_alpha(0.5, 10.0);
+    gkw_uniform dist_beta(0.5, 10.0);
 
     for (int i = initial_points.size(); i < n_starts; i++) {
       initial_points.push_back(arma::vec({dist_alpha(gen), dist_beta(gen)}));
     }
   }
   else if (family == "beta") {
+    // Method of moments for Beta(gamma, delta + 1), the package's
+    // parameterisation: the second shape is delta + 1, so delta is one less
+    // than the classical moment estimate (1 - m1) * k. The former line
+    // returned (1 - m1) * k itself, an off-by-one that put this start at
+    // Beta(gamma, delta + 2) and matched neither sample moment.
     double gamma_init = m1 * ((m1 * (1.0 - m1) / var) - 1.0);
-    double delta_init = (1.0 - m1) * ((m1 * (1.0 - m1) / var) - 1.0);
+    double delta_init = (1.0 - m1) * ((m1 * (1.0 - m1) / var) - 1.0) - 1.0;
     gamma_init = std::min(50.0, std::max(0.1, gamma_init));
     delta_init = std::min(50.0, std::max(0.1, delta_init));
 
@@ -630,8 +662,8 @@ std::vector<arma::vec> generate_initial_points(const arma::vec &sample_moments,
     initial_points.push_back(arma::vec({1.0, 1.0}));
     initial_points.push_back(arma::vec({3.0, 2.0}));
 
-    std::uniform_real_distribution<double> dist_gamma(0.5, 10.0);
-    std::uniform_real_distribution<double> dist_delta(0.5, 10.0);
+    gkw_uniform dist_gamma(0.5, 10.0);
+    gkw_uniform dist_delta(0.5, 10.0);
 
     for (int i = initial_points.size(); i < n_starts; i++) {
       initial_points.push_back(arma::vec({dist_gamma(gen), dist_delta(gen)}));
@@ -816,7 +848,10 @@ arma::vec constrain_parameters(const arma::vec &theta, const std::string &family
 Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
                                      std::string family = "gkw",
                                      int n_starts = 5) {
- std::transform(family.begin(), family.end(), family.begin(), ::tolower);
+ // ::tolower on a plain char is undefined for negative values (any byte above
+ // 0x7F where char is signed); it must see the value as unsigned char.
+ std::transform(family.begin(), family.end(), family.begin(),
+                [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
  if (family != "gkw" && family != "bkw" && family != "kkw" &&
      family != "ekw" && family != "mc" && family != "kw" && family != "beta") {
@@ -824,7 +859,7 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
  }
 
  if (x.size() == 0) {
-   Rcpp::warning("Empty input vector");
+   gkw_warning("Empty input vector");
    int npar = get_npar(family);
    Rcpp::NumericVector result(npar, Rcpp::NumericVector::get_na());
    result.attr("names") = get_param_names(family);
@@ -857,7 +892,7 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
      }
    }
    if (n_outside > 0) {
-     Rcpp::warning(
+     gkw_warning(
        "gkwgetstartvalues: %d of %d observations lie outside the open interval "
        "(0,1) (observed range [%g, %g]) and were clamped to it; the estimates "
        "below are those of the clamped sample. Data on a percentage or 0-100 "
@@ -865,7 +900,7 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
        n_outside, (int)clean.size(), lo, hi);
    }
    if (clean.empty()) {
-     Rcpp::warning("No valid (non-NA, finite, in (0,1)) observations found.");
+     gkw_warning("No valid (non-NA, finite, in (0,1)) observations found.");
      int npar = get_npar(family);
      Rcpp::NumericVector result(npar, Rcpp::NumericVector::get_na());
      result.attr("names") = get_param_names(family);
@@ -876,7 +911,7 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
    int n = data.n_elem;
 
    if(n < 10) {
-     Rcpp::warning("Insufficient data for robust estimation (n < 10). Results may be unreliable.");
+     gkw_warning("Insufficient data for robust estimation (n < 10). Results may be unreliable.");
    }
 
    arma::vec sample_moments(5, arma::fill::zeros);
@@ -929,7 +964,7 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
    }
 
    if (!found_valid_solution) {
-     Rcpp::warning("Could not find valid parameter estimates. Using defaults.");
+     gkw_warning("Could not find valid parameter estimates. Using defaults.");
      if (family == "gkw") {
        best_theta = arma::vec({1.0, 1.0, 1.0, 0.1, 1.0});
      } else if (family == "bkw") {
@@ -956,14 +991,20 @@ Rcpp::NumericVector gkwgetstartvalues(const Rcpp::NumericVector &x,
    result.attr("names") = get_param_names(family);
 
    return result;
+ } catch (Rcpp::LongjumpException &) {
+   // An R condition raised by one of the warnings above (options(warn = 2), or
+   // a tryCatch(warning = ) handler) unwinds as this exception. It has to reach
+   // the generated wrapper, which resumes R's longjmp; catch (...) below would
+   // swallow it and raise a second, unrelated warning in its place.
+   throw;
  } catch (std::exception &e) {
-   Rcpp::warning("Exception in parameter estimation: %s", e.what());
+   gkw_warning("Exception in parameter estimation: %s", e.what());
    int npar = get_npar(family);
    Rcpp::NumericVector result(npar, Rcpp::NumericVector::get_na());
    result.attr("names") = get_param_names(family);
    return result;
  } catch (...) {
-   Rcpp::warning("Unknown exception in parameter estimation");
+   gkw_warning("Unknown exception in parameter estimation");
    int npar = get_npar(family);
    Rcpp::NumericVector result(npar, Rcpp::NumericVector::get_na());
    result.attr("names") = get_param_names(family);

@@ -447,7 +447,7 @@ Rcpp::NumericVector rbeta_(
   // (rbeta(3, numeric(0), 1) is NA NA NA with a warning) instead of
   // reaching the `i % vec.n_elem` recycling with a zero divisor.
   if (g_vec.n_elem == 0 || d_vec.n_elem == 0) {
-    Rcpp::warning("rbeta_: NAs produced");
+    gkw_warning("rbeta_: NAs produced");
     return Rcpp::NumericVector(n, NA_REAL);
   }
 
@@ -478,7 +478,7 @@ Rcpp::NumericVector rbeta_(
   }
 
   if (bad_par) {
-    Rcpp::warning("rbeta_: NAs produced");
+    gkw_warning("rbeta_: NAs produced");
   }
 
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -532,7 +532,7 @@ double llbeta(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   if (x.n_elem < 1) {
     return R_PosInf;
   }
-  if (arma::any(x <= 0.0) || arma::any(x >= 1.0)) {
+  if (x.has_nan() || arma::any(x <= 0.0) || arma::any(x >= 1.0)) {
     return R_PosInf;
   }
   
@@ -602,7 +602,7 @@ Rcpp::NumericVector grbeta(const Rcpp::NumericVector& par, const Rcpp::NumericVe
   if (x.n_elem < 1) {
     return Rcpp::NumericVector(2, R_NaN);
   }
-  if (arma::any(x <= 0.0) || arma::any(x >= 1.0)) {
+  if (x.has_nan() || arma::any(x <= 0.0) || arma::any(x >= 1.0)) {
     return Rcpp::NumericVector(2, R_NaN);
   }
   
@@ -688,7 +688,7 @@ Rcpp::NumericMatrix hsbeta(const Rcpp::NumericVector& par, const Rcpp::NumericVe
   if (x.n_elem < 1) {
     return nanHess;
   }
-  if (arma::any(x <= 0.0) || arma::any(x >= 1.0)) {
+  if (x.has_nan() || arma::any(x <= 0.0) || arma::any(x >= 1.0)) {
     return nanHess;
   }
   
