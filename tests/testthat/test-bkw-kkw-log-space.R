@@ -13,13 +13,18 @@
 # 1. The likelihood collapsed to +Inf once alpha*log(min(x)) crossed -745, on
 #    entirely ordinary data. With x = c(0.01, 0.3, 0.6, 0.9):
 #
-#      alpha = 161  llbkw(c(a,2,1.5,1), x) = 1515.5261017902   (correct)
+#      alpha = 161  llbkw(c(a,2,1.5,1), x) = 1515.5261017902   (true 1515.5201319383)
 #      alpha = 162  llbkw(c(a,2,1.5,1), x) = Inf               (true 1525.1333577380)
-#      alpha = 161  llkkw(c(a,2,1,1.5), x) = 1516.4186759096   (correct)
+#      alpha = 161  llkkw(c(a,2,1,1.5), x) = 1516.4186759096   (true 1516.4127060577)
 #      alpha = 162  llkkw(c(a,2,1,1.5), x) = Inf               (true 1526.0259318659)
 #
 #    and every larger alpha stayed at Inf -- an artificial plateau on the
 #    likelihood surface that an optimiser will happily sit on.
+#
+#    The alpha = 161 values were pinned here as correct, and were not: x^alpha
+#    is a subnormal at alpha*log(0.01) = -741.4, and the chain read its few
+#    remaining bits as exact. The true values above are from a __float128
+#    evaluation of the same likelihood; see test-subnormal-band.R.
 #
 # 2. dbkw() and dkkw() dropped such observations entirely and returned the fill
 #    value: dbkw(1e-300, 2, 1.5, 1.2, 0.5, log = TRUE) was -Inf where
@@ -74,9 +79,9 @@ test_that("llbkw and llkkw stay finite past alpha*log(min(x)) = -745", {
                  info = paste("llkkw vs llgkw, alpha =", a))
   }
   # the exact values either side of the old cliff
-  expect_equal(llbkw(c(161, 2, 1.5, 1), X_PLATEAU), 1515.5261017902, tolerance = 1e-10)
+  expect_equal(llbkw(c(161, 2, 1.5, 1), X_PLATEAU), 1515.5201319383, tolerance = 1e-10)
   expect_equal(llbkw(c(162, 2, 1.5, 1), X_PLATEAU), 1525.1333577380, tolerance = 1e-10)
-  expect_equal(llkkw(c(161, 2, 1, 1.5), X_PLATEAU), 1516.4186759096, tolerance = 1e-10)
+  expect_equal(llkkw(c(161, 2, 1, 1.5), X_PLATEAU), 1516.4127060577, tolerance = 1e-10)
   expect_equal(llkkw(c(162, 2, 1, 1.5), X_PLATEAU), 1526.0259318659, tolerance = 1e-10)
   # the likelihood is monotone in alpha here, so no plateau survives
   ll <- vapply(160:200, function(a) llbkw(c(a, 2, 1.5, 1), X_PLATEAU), numeric(1))

@@ -1,3 +1,147 @@
+# gkwdist 1.1.7
+
+## Critical Bug Fixes
+
+* **The log-space chain was bridged only at an exact 0, not across the
+  subnormal band before it** (`utils.h`, `gkw.cpp`, `bkw.cpp`, `kkw.cpp`): the
+  chain `v = 1 - x^alpha`, `w = 1 - v^beta`, `z = 1 - w^lambda` substituted the
+  first-order limit when `log(v)` or `log(w)` had underflowed to exactly 0. For
+  `x^alpha` in `[5e-324, 2.2e-308)` `log(v)` is a subnormal with a few
+  significant bits, and `log1mexp()` read them as exact. The likelihood was
+  wrong without being infinite, and non-monotone in the parameter. Against a
+  `__float128` evaluation, with `x = c(.01, .3, .6, .9)`:
+
+  ```
+  call                            returned          exact
+  llbkw(c(160,   2, 1.5, 1), x)   1505.907066025    1505.907060458
+  llbkw(c(161,   2, 1.5, 1), x)   1515.526101790    1515.520131938
+  llbkw(c(161.8, 2, 1.5, 1), x)   1522.872468240    1523.210700324
+  ```
+
+  The alpha component of `grbkw()` dipped by 16% across the band, and one level
+  down a step of 1e-6 in lambda moved `llkkw()` by 0.35 nats around a smooth
+  1108.129. Each link now goes through `gkw_log1mexp_pow()`, which forms
+  `log(-c * log(v))` as `log(c) + log(-log(v))` -- exact in log space however
+  small the product -- whenever `log(v)` or `c * log(v)` is not a normal double.
+  The direct branch is unchanged, so ordinary data is bit-identical. The
+  `*_mul_small_log()` helpers of the gradients and Hessians take the same exact
+  magnitude. `tests/testthat/test-bkw-kkw-log-space.R` pinned the two wrong
+  alpha = 161 values as correct; they are replaced by the exact ones.
+
+* **EKw never received the chain bridge** (`ekw.cpp`): `dekw()`, `llekw()`,
+  `grekw()` and `hsekw()` computed `log1mexp(beta * log(v))` directly, so they
+  broke where every other family had been repaired.
+  `dekw(1e-200, 4, 3, 0.2, log = TRUE)` returned `-Inf` against the 92.10 of the
+  nested `dgkw()`; `llekw()` was `+Inf` for alpha >= 162 on the data above,
+  where `llkkw(delta = 0)` gives 1528.80; `grekw()` returned `Inf -Inf 1022.6`
+  next to a finite likelihood, and `optim(method = "L-BFGS-B")` stopped with
+  "non-finite value supplied". EKw now shares the bridged chain, forms Q and R
+  as single exponentials of sums of logs as `grbkw()` does, and fails
+  uniformly with a warning, like the other six families, when a component is
+  genuinely non-finite.
+
+* **The lower tail of the p, q and r functions was flushed to exactly 0**
+  (`gkw.cpp`, `bkw.cpp`, `kkw.cpp`, `ekw.cpp`, `kw.cpp`, `bpmc.cpp`): the CDFs
+  walked the same unbridged chain, and the quantile and random-number routines
+  inverted it through two bare `log1mexp()` calls, which return 0 once
+  `log(w)` falls below -745.
+
+  ```
+  call                                   returned   exact
+  pgkw(1e-9, 40, 2, 0.05, 0.5, 0.1)      0          0.0163855
+  pbkw(1e-9, 40, 2, 0.01, 0.5)           0          2.54e-04
+  qgkw(0.01, 40, 2, 0.05, 0.5, 0.1)      0          8.47e-11
+  qkkw(1e-8, 40, 2, 0.5, 0.02)           0          5.92e-11
+  pkw(1e-100, 4, 3, log.p = TRUE)        -Inf       -919.94
+  pmc(1e-10, 0.05, 0.5, 40)              0          1.03e-20
+  ```
+
+  `rgkw(1e5, 40, 2, 0.05, 0.5, 0.1)` drew 2,579 exact zeros -- none of them
+  from `R::rbeta` -- and `llgkw()` then rejected the sample it had just
+  produced; `rekw()`, `rkkw()` and `rbkw()` did the same for small lambda or
+  gamma. The chain and its inverse are bridged (`gkw_log_inv_link()`), and an
+  incomplete-beta argument or quantile below `DBL_MIN` is carried through the
+  leading term `I_y(a, b) = y^a / (a B(a, b))` (`gkw_pbeta_from_log()`,
+  `gkw_log_qbeta_tiny()`). Every changed quantile on a 404,313-value grid was
+  checked by its round trip through the matching p function: none got worse,
+  and a quantile below the smallest double is now 0 rather than a saturated
+  1e-308. The draws themselves are untouched, so every RNG stream is
+  identical wherever it did not produce a zero.
+
+* **`qgkw()` and `qmc()` lost the upper tail** (`gkw.cpp`, `bpmc.cpp`): both
+  took `log(y)` of a Beta quantile rounded to the double grid near 1, where
+  `qbkw()` had always reflected through `I_y(a, b) = 1 - I_{1-y}(b, a)`.
+  `qgkw(1e-26, 2, 3, 1.5, 0.5, 1.2, lower.tail = FALSE)` returned exactly 1,
+  outside the open support, for a true `1 - x` of 6.98e-07; the relative error
+  of `1 - x` was already 8.8e-3 at p = 1e-22. Both now reflect above y = 1/2.
+  Where a residual error remains it equals that of the best neighbouring
+  double: the quantile is resolved to the conditioning limit.
+
+* **`pgkw()` and `pbkw()` rounded the lower tail on the log scale to 0 near 1**
+  (`gkw.cpp`, `bkw.cpp`): `pgkw(1 - 1e-6, 2, 3, 1.5, 2, 0.8, log.p = TRUE)`
+  returned 0 for a true -5.73e-52. The reflection that already served the upper
+  tail now serves this case too; against `log1p(-upper tail)` the maximum
+  relative error over the grid fell from 11 to 1.1e-14. The lower tail on the
+  probability scale is unchanged.
+
+* **`hsgkw()` was still built in linear space** (`gkw.cpp`): it formed v, w and
+  z as doubles, about a dozen `safe_pow()` calls per observation, and ratios
+  whose factors overflow long before the ratio is large. It returned NaN where
+  `llgkw()`, `grgkw()` and the other six Hessians are finite --
+  `hsgkw(c(1, 200, 1.5, 2, 1), c(.1, .25, .4, .72, .99))` was all NaN, one path
+  without a warning -- and `test-hessian-degenerate.R` asserted that NaN "until
+  the chain is reworked in log space". It is now built from the log-space blocks
+  of `hskkw()`, with `gamma * lambda - 1` on the `log(w)` term and the gamma row
+  it implies. Over 265 parameter/data combinations spanning all seven families:
+
+  ```
+                            before     after
+  non-finite ll / gr / hs   14/17/46   0/0/0
+  gr  vs numDeriv::grad     2.0e-02    6.4e-10
+  hs  vs numDeriv::jacobian 1.0        5.4e-09
+  hs  vs numDeriv::hessian  0.45       3.4e-09
+  ```
+
+  Where the old `hsgkw()` was finite the new one agrees with it to 3.3e-13, and
+  at gamma = 1 it equals `hskkw()`. The Beta, Kw and Mc derivatives are
+  bit-identical.
+
+* **A warning raised from C++ leaked the call's memory when it was caught**
+  (all files): `Rcpp::warning()` is a bare `Rf_warning()`. Under
+  `options(warn = 2)`, or when `tryCatch(warning = )` or a calling handler
+  leaves by an error, R exits through a longjmp that skips every C++
+  destructor, so the Armadillo copy of the data and the Rcpp handles on the
+  inputs were never released. Twenty `grbkw()` calls on 2e6 observations grew
+  the process by 308 MB under `tryCatch(warning = function(w) NULL)` and by
+  305 MB under `warn = 2`; both now grow by 0. `gkw_warning()` raises the same
+  message through `base::warning()` under `R_UnwindProtect`, so the stack
+  unwinds normally before R resumes; the message and the call it names are
+  unchanged. `gkwgetstartvalues()` rethrows that unwind past its `catch (...)`,
+  which would otherwise have swallowed it.
+
+* **`gkwgetstartvalues(family = "beta")` started from the wrong member of the
+  family** (`gkwinit.cpp`): the moment-based starting point computed the
+  classical Beta estimate `(1 - m) * k` for delta, but the package's Beta is
+  `Beta(gamma, delta + 1)`, so delta is one less. The start sat at
+  `Beta(gamma, delta + 2)`. A failed quadrature also used to be replaced by
+  `beta / (r/alpha + beta)`, which is not a moment of any member of the family
+  and overwrote legitimately tiny moments (below 1e-14) with a value of order 1;
+  such a moment is now skipped. The other six families return bit-identical
+  starting values.
+
+* **Smaller fixes.** `llgkw()`, `llkw()` and `llbeta()` returned `NA` for
+  missing data where the other four families return `+Inf`, the value the help
+  pages promise for data not in (0, 1); `grekw()`, `grmc()`, `grkw()` and
+  `grbeta()` returned `NA` where the pages promise `NaN`. All seven families now
+  agree (`+Inf`, a `NaN` vector, a `NaN` matrix). `safe_exp()` and `safe_pow()`
+  tested overflow against `log(DBL_MAX / 10)` and returned `Inf` for results a
+  double holds: `dkw(5e-324, 0.045, 1)` is 2.57e307. The extra starting points
+  of `gkwgetstartvalues()` came from `std::uniform_real_distribution`, whose
+  mapping is implementation-defined; it is now written out, bit-for-bit the
+  libstdc++ mapping (checked over 10^6 draws), so Linux results are unchanged
+  and other toolchains match them. `::tolower` is no longer applied to a
+  possibly negative `char`.
+
 # gkwdist 1.1.6
 
 ## Numerical Utilities

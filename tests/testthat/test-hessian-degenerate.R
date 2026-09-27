@@ -13,31 +13,57 @@
 # With five observations one survived, and the function returned the Hessian of
 # a single point as if it were the Hessian of five.
 #
-# Computing those terms correctly needs the log-space rework of gkw.cpp. Until
-# then the honest answer is a visible failure, which is what the function's own
-# intermediate-value check already does further down.
+# The interim fix returned NaN with a warning, the honest answer until the
+# chain was reworked in log space. That rework is done: hsgkw() is now built
+# from the same log-space blocks as hskkw(), so these cases have their true
+# Hessians. The reference is the nesting identity -- at gamma = 1, delta = 0,
+# lambda = 1 the (alpha, beta) block is hskw() -- and numDeriv where delta is
+# far enough from 0 for a central difference.
 
-test_that("hsgkw returns NaN and warns when the chain underflows", {
+test_that("hsgkw is finite where the chain underflows, and equals the nested Kw", {
   degenerate <- list(
     list(x = c(0.80, 0.85, 0.90, 0.95), par = c(1, 500, 1, 0, 1)),
     list(x = c(0.80, 0.85, 0.90, 0.95, 0.10), par = c(1, 500, 1, 0, 1)),
     list(x = c(0.5, 0.6, 0.7), par = c(1, 2000, 1, 0, 1))
   )
   for (cs in degenerate) {
-    expect_warning(H <- hsgkw(cs$par, cs$x), "underflow")
+    expect_silent(H <- hsgkw(cs$par, cs$x))
     expect_true(is.matrix(H))
     expect_equal(dim(H), c(5L, 5L))
-    expect_true(all(is.nan(H)))
+    expect_true(all(is.finite(H)))
+    expect_equal(H, t(H))
+    expect_equal(H[1:2, 1:2], hskw(cs$par[1:2], cs$x), tolerance = 1e-12)
   }
 })
 
 test_that("hsgkw no longer reports the Hessian of a smaller sample", {
   # The specific number the old code returned: n / alpha^2 with every
-  # observation dropped. Nothing about it looked wrong from the outside.
+  # observation dropped. The true value is 1996.267.
   x <- c(0.80, 0.85, 0.90, 0.95)
-  H <- suppressWarnings(hsgkw(c(1, 500, 1, 0, 1), x))
+  H <- hsgkw(c(1, 500, 1, 0, 1), x)
   expect_false(isTRUE(all.equal(H[1, 1], length(x))))
-  expect_true(is.nan(H[1, 1]))
+  expect_equal(H[1, 1], 1996.267, tolerance = 1e-6)
+})
+
+test_that("hsgkw matches numDeriv in the regime that used to return NaN", {
+  skip_if_not_installed("numDeriv")
+  x5 <- c(0.10, 0.25, 0.40, 0.72, 0.99)
+  cases <- list(
+    list(x = c(0.80, 0.85, 0.90, 0.95), par = c(1, 500, 1, 0.3, 1)),
+    list(x = c(0.5, 0.6, 0.7), par = c(1, 2000, 1, 0.3, 1)),
+    list(x = x5, par = c(1, 200, 1.5, 2, 1)),
+    list(x = x5, par = c(2, 300, 1, 0.5, 1)),
+    list(x = c(x5, 1e-9), par = c(40, 2, 0.5, 0.5, 0.3))
+  )
+  for (cs in cases) {
+    H <- hsgkw(cs$par, cs$x)
+    J <- numDeriv::jacobian(function(q) as.numeric(grgkw(q, cs$x)), cs$par)
+    Hn <- numDeriv::hessian(function(q) llgkw(q, cs$x), cs$par)
+    info <- paste(cs$par, collapse = ",")
+    expect_true(all(is.finite(H)), info = info)
+    expect_lt(max(abs(H - J)) / max(abs(J)), 1e-7)
+    expect_lt(max(abs(H - Hn)) / max(abs(Hn)), 1e-7)
+  }
 })
 
 test_that("well-behaved parameters are untouched", {

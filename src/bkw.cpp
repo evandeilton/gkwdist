@@ -107,18 +107,22 @@
 // llbkw() then returned +Inf where the likelihood is finite. With
 // x = c(0.01, 0.3, 0.6, 0.9) and par = c(alpha, 2, 1.5, 1),
 //
-//   alpha = 161  llbkw = 1515.5261017902   (correct)
 //   alpha = 162  llbkw = Inf               (true value 1525.1333577380)
 //
 // and every larger alpha stayed at Inf, which an optimiser will happily sit on.
+//
+// Bridging only `log_v == 0.0` still left the band just before it, where log_v
+// is a subnormal rather than 0. There the likelihood was wrong without being
+// infinite -- alpha = 161 gave 1515.5261017902 against a true 1515.5201319383,
+// and alpha = 161.8 was 0.34 nats off -- so the link now goes through
+// gkw_log1mexp_pow() in utils.h, which bridges the whole band.
 static inline void bkw_log_chain(double log_x, double alpha, double beta,
                                  double& log_x_alpha, double& log_v,
                                  double& log_v_beta, double& log_w) {
   log_x_alpha = alpha * log_x;
   log_v       = gkw_log1mexp(log_x_alpha);
   log_v_beta  = beta * log_v;
-  log_w       = (log_v == 0.0) ? (std::log(beta) + log_x_alpha)
-                               : gkw_log1mexp(log_v_beta);
+  log_w       = gkw_log1mexp_pow(log_x_alpha, log_v, log_v_beta, beta);
 }
 
 // log_v underflows to 0 in the regime where its true value is -x^alpha. The
@@ -146,9 +150,12 @@ static inline double bkw_mul_small_log(double log_small, double log_magnitude,
   //
   // The direct multiply is kept wherever exp(E) cannot overflow, so ordinary
   // data is bit-identical and pays nothing for the extra log().
-  if (log_small == 0.0) return -std::exp(log_magnitude + E);
-  if (E < 700.0)        return log_small * std::exp(E);
-  return -std::exp(std::log(-log_small) + E);
+  //
+  // A subnormal log_small is no better than 0 as a factor; see
+  // gkw_mul_small_log() in gkw.cpp.
+  const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
+  if (log_small < -DBL_MIN_NORMAL && E < 700.0) return log_small * std::exp(E);
+  return -std::exp(gkw_log_neg_log1mexp(log_magnitude, log_small) + E);
 }
 
 
@@ -408,11 +415,25 @@ Rcpp::NumericVector pbkw(
     // the small quantity into pbeta. Below it the direct form already holds the
     // small quantity, so the lower tail and any upper tail with z <= 1/2 are
     // untouched. LOG1MEXP_CROSSOVER is -log(2).
-    double log_v_beta = b * gkw_log1mexp(log_x_alpha);   // log(1 - z)
-    if (!lower_tail && log_v_beta < LOG1MEXP_CROSSOVER) {
-      res(i) = R::pbeta(std::exp(log_v_beta), d + 1.0, g, /*lower*/ 1, log_p);
-    } else {
+    //
+    // The same reflection serves the lower tail on the log scale, where
+    // R::pbeta(z, ., ., log = TRUE) of a z near 1 rounds log F to exactly 0.
+    //
+    // At the other end z itself underflowed: -expm1(b*log(v)) is only as good as
+    // log(v), which is a subnormal or 0 once a*log(q) < -708, and
+    // pbkw(1e-09, 40, 2, 0.01, 0.5) returned 0 for a true 2.54e-04. There z is
+    // taken through its logarithm, from the bridged chain link, and a z below
+    // DBL_MIN through the leading term of the incomplete beta.
+    const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
+    double log_v = gkw_log1mexp(log_x_alpha);
+    double log_v_beta = b * log_v;                        // log(1 - z)
+    if ((!lower_tail || log_p) && log_v_beta < LOG1MEXP_CROSSOVER) {
+      res(i) = R::pbeta(std::exp(log_v_beta), d + 1.0, g, !lower_tail, log_p);
+    } else if (log_v < -DBL_MIN_NORMAL && log_v_beta < -DBL_MIN_NORMAL) {
       res(i) = R::pbeta(-std::expm1(log_v_beta), g, d + 1.0, lower_tail, log_p);
+    } else {
+      double log_z = gkw_log1mexp_pow(log_x_alpha, log_v, log_v_beta, b);
+      res(i) = gkw_pbeta_from_log(log_z, g, d + 1.0, lower_tail, log_p);
     }
   }
   
@@ -518,7 +539,19 @@ Rcpp::NumericVector qbkw(
     double log_1mz = (z <= 0.5)
       ? std::log1p(-z)
       : std::log(R::qbeta(pp, d + 1.0, g, !lower_tail, log_p));
-    res(i) = std::exp(gkw_log1mexp(log_1mz / b) / a);
+
+    // Once z < 2.2e-308, log1p(-z) is a subnormal or 0 and
+    // gkw_log1mexp(log_1mz / b) lost the quantile with it: qbkw returned 0 in
+    // the deep lower tail. gkw_log1mexp_pow() bridges that band from log(z),
+    // which is formed only there, and through gkw_log_qbeta_tiny() when R::qbeta
+    // itself could not hold z.
+    const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
+    double log_z = R_NegInf;
+    if (!(log_1mz < -DBL_MIN_NORMAL)) {
+      log_z = (z >= DBL_MIN_NORMAL) ? std::log(z)
+                                    : gkw_log_qbeta_tiny(pp, g, d + 1.0, lower_tail, log_p);
+    }
+    res(i) = std::exp(gkw_log1mexp_pow(log_z, log_1mz, log_1mz / b, 1.0 / b) / a);
   }
   
   return Rcpp::NumericVector(res.memptr(), res.memptr() + res.n_elem);
@@ -577,7 +610,7 @@ Rcpp::NumericVector rbkw(
   // (rbeta(3, numeric(0), 1) is NA NA NA with a warning) instead of
   // reaching the `i % vec.n_elem` recycling with a zero divisor.
   if (alpha_vec.n_elem == 0 || beta_vec.n_elem == 0 || gamma_vec.n_elem == 0 || delta_vec.n_elem == 0) {
-    Rcpp::warning("rbkw: NAs produced");
+    gkw_warning("rbkw: NAs produced");
     return Rcpp::NumericVector(n, NA_REAL);
   }
 
@@ -615,11 +648,18 @@ Rcpp::NumericVector rbkw(
     // digits that subtraction threw away.
     // The draw itself is untouched, so the RNG stream is identical to
     // before; only the inversion that follows it changes.
-    out(i) = std::exp(gkw_log1mexp(std::log1p(-V) / b) / a);
+    //
+    // log1p(-V) is itself a subnormal or 0 once V < 2.2e-308, which a small
+    // gamma produces; the inversion then goes through log(V) instead, as in
+    // qbkw() above.
+    const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
+    double log_1mV = std::log1p(-V);
+    double log_V = (log_1mV < -DBL_MIN_NORMAL) ? R_NegInf : std::log(V);
+    out(i) = std::exp(gkw_log1mexp_pow(log_V, log_1mV, log_1mV / b, 1.0 / b) / a);
   }
 
   if (bad_par) {
-    Rcpp::warning("rbkw: NAs produced");
+    gkw_warning("rbkw: NAs produced");
   }
 
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -754,7 +794,7 @@ double llbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
 Rcpp::NumericVector grbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
   // Validate parameter vector length
   if (par.size() < 4) {
-    Rcpp::warning("Parameter vector must have at least 4 elements for BKw");
+    gkw_warning("Parameter vector must have at least 4 elements for BKw");
     return Rcpp::NumericVector(4, R_NaN);
   }
   
@@ -766,7 +806,7 @@ Rcpp::NumericVector grbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   
   // Validate parameters using consistent checker
   if (!check_bkw_pars(alpha, beta, gamma, delta)) {
-    Rcpp::warning("Invalid parameters in grbkw");
+    gkw_warning("Invalid parameters in grbkw");
     return Rcpp::NumericVector(4, R_NaN);
   }
   
@@ -774,7 +814,7 @@ Rcpp::NumericVector grbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   arma::vec x = Rcpp::as<arma::vec>(data);
 
   if (x.n_elem == 0 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
-    Rcpp::warning("Data must be strictly in (0,1) and non-empty for grbkw");
+    gkw_warning("Data must be strictly in (0,1) and non-empty for grbkw");
     return Rcpp::NumericVector(4, R_NaN);
   }
   
@@ -850,7 +890,7 @@ Rcpp::NumericVector grbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   // Final validity check
   if (!std::isfinite(d_alpha) || !std::isfinite(d_beta) ||
       !std::isfinite(d_gamma) || !std::isfinite(d_delta)) {
-    Rcpp::warning("Gradient calculation produced non-finite values in grbkw");
+    gkw_warning("Gradient calculation produced non-finite values in grbkw");
     return Rcpp::NumericVector(4, R_NaN);
   }
 
@@ -896,7 +936,7 @@ Rcpp::NumericMatrix hsbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   
   // Validate parameter vector length
   if (par.size() < 4) {
-    Rcpp::warning("Parameter vector must have at least 4 elements for BKw");
+    gkw_warning("Parameter vector must have at least 4 elements for BKw");
     return nanH;
   }
   
@@ -908,7 +948,7 @@ Rcpp::NumericMatrix hsbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   
   // Validate parameters using consistent checker
   if (!check_bkw_pars(alpha, beta, gamma, delta)) {
-    Rcpp::warning("Invalid parameters in hsbkw");
+    gkw_warning("Invalid parameters in hsbkw");
     return nanH;
   }
   
@@ -916,7 +956,7 @@ Rcpp::NumericMatrix hsbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   arma::vec x = Rcpp::as<arma::vec>(data);
 
   if (x.n_elem == 0 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
-    Rcpp::warning("Data must be strictly in (0,1) and non-empty for hsbkw");
+    gkw_warning("Data must be strictly in (0,1) and non-empty for hsbkw");
     return nanH;
   }
   
@@ -981,7 +1021,7 @@ Rcpp::NumericMatrix hsbkw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 
   // Final validity check
   if (!H.is_finite()) {
-    Rcpp::warning("Hessian calculation produced non-finite values");
+    gkw_warning("Hessian calculation produced non-finite values");
     return nanH;
   }
   

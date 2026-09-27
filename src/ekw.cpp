@@ -81,6 +81,42 @@
 #include <RcppArmadillo.h>
 #include "utils.h"
 
+// ----------------------------------------------------------------------------
+// Shared log-space chain for the EKw likelihood family
+// ----------------------------------------------------------------------------
+//
+// EKw is GKw at gamma = 1, delta = 0, so it needs only the first two links,
+//
+//     v = 1 - x^alpha        w = 1 - v^beta
+//
+// and the second one has the regime every other family already bridges: as
+// x -> 0, log_v = log1p(-x^alpha) ~ -x^alpha is a subnormal and then exactly 0,
+// log1mexp(beta*log_v) is -Inf, but w -> beta * x^alpha. EKw never received that
+// bridge. dekw(1e-200, 4, 3, 0.2, log = TRUE) returned -Inf against the 92.10
+// of dgkw(1e-200, 4, 3, 1, 0, 0.2, log = TRUE); llekw() plateaued at +Inf and
+// grekw() returned NaN and Inf on data where the nested llkkw(delta = 0) is
+// finite, so optim(method = "L-BFGS-B") stopped with "non-finite value
+// supplied". This is bkw_log_chain() in bkw.cpp, which keeps
+// EKw(a,b,l) == GKw(a,b,1,0,l) exact.
+static inline void ekw_log_chain(double log_x, double alpha, double beta,
+                                 double& log_x_alpha, double& log_v,
+                                 double& log_v_beta, double& log_w) {
+  log_x_alpha = alpha * log_x;
+  log_v       = gkw_log1mexp(log_x_alpha);
+  log_v_beta  = beta * log_v;
+  log_w       = gkw_log1mexp_pow(log_x_alpha, log_v, log_v_beta, beta);
+}
+
+// log_v * exp(E) for a log_v that may be a subnormal or 0 while exp(E) has
+// overflowed by the reciprocal amount -- 0 * Inf is NaN, and a subnormal * Inf
+// is -Inf. This mirrors gkw_mul_small_log() in gkw.cpp exactly.
+static inline double ekw_mul_small_log(double log_small, double log_magnitude,
+                                       double E) {
+  const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
+  if (log_small < -DBL_MIN_NORMAL && E < 700.0) return log_small * std::exp(E);
+  return -std::exp(gkw_log_neg_log1mexp(log_magnitude, log_small) + E);
+}
+
 
 // ============================================================================
 // PROBABILITY DENSITY FUNCTION
@@ -180,33 +216,22 @@ Rcpp::NumericVector dekw(
     double lb = safe_log(b);
     double lx = safe_log(xx);
     
-    // Compute log(x^α) = α * log(x)
-    double log_xalpha = a * lx;
-    
-    // Compute log(1 - x^α) using stable log1mexp
-    double log_v = gkw_log1mexp(log_xalpha);
-    if (!R_finite(log_v)) {
-      continue;
-    }
-    
-    // Term 1: (β-1) * log(1 - x^α)
-    double term2 = (b - 1.0) * log_v;
-    
-    // Compute log((1-x^α)^β) = β * log(1-x^α)
-    double log_v_beta = b * log_v;
-    
-    // Compute log(1 - (1-x^α)^β) = log(w) using log1mexp
-    double log_w = gkw_log1mexp(log_v_beta);
-    if (!R_finite(log_w)) {
-      continue;
-    }
-    
-    // Term 2: (λ-1) * log(w)
-    double term3 = (l - 1.0) * log_w;
-    
+    // log(x^α), log(v) and log(w) from the shared chain, which bridges the
+    // point where v underflows to 1. The `continue` guards that used to sit
+    // between these steps dropped the observation and left the fill value, 0 or
+    // -Inf in log, where the density is finite.
+    double log_xalpha, log_v, log_v_beta, log_w;
+    ekw_log_chain(lx, a, b, log_xalpha, log_v, log_v_beta, log_w);
+
     // Assemble log-density:
     // log(f) = log(λαβ) + (α-1)*log(x) + (β-1)*log(v) + (λ-1)*log(w)
-    double log_pdf = ll + la + lb + (a - 1.0) * lx + term2 + term3;
+    //
+    // A coefficient that is exactly zero contributes nothing even where its
+    // log is -Inf at the boundary of the support; writing 0 * -Inf gives NaN.
+    double log_pdf = ll + la + lb;
+    if (a != 1.0) log_pdf += (a - 1.0) * lx;
+    if (b != 1.0) log_pdf += (b - 1.0) * log_v;
+    if (l != 1.0) log_pdf += (l - 1.0) * log_w;
     
     // Validate result
     if (!R_finite(log_pdf)) {
@@ -315,9 +340,15 @@ Rcpp::NumericVector pekw(
     double log_x_alpha = a * std::log(xx);
 
     // F = [1 - (1 - x^alpha)^beta]^lambda
-    double log_t    = gkw_log1mexp(b * gkw_log1mexp(log_x_alpha));
+    //
+    // Both links through gkw_log1mexp_pow(): the bare form returned log(t) =
+    // -Inf once a*log(q) < -745, and pekw(1e-09, 40, 2, 0.02) was exactly 0 for
+    // a true 6.4e-08. The second link bridges the same band at x -> 1.
+    double log_v    = gkw_log1mexp(log_x_alpha);
+    double log_v_b  = b * log_v;
+    double log_t    = gkw_log1mexp_pow(log_x_alpha, log_v, log_v_b, b);
     double log_cdf  = l * log_t;
-    double log_surv = gkw_log1mexp(log_cdf);
+    double log_surv = gkw_log1mexp_pow(log_v_b, log_t, log_cdf, l);
 
     // Emit the requested tail on the requested scale without ever forming
     // 1 - p or log(p) from a value that has already lost its digits.
@@ -426,7 +457,11 @@ Rcpp::NumericVector qekw(
     if (log_1mu == R_NegInf) { out(i) = 1.0; continue; }
 
     // Q(u) = [1 - (1 - u^(1/lambda))^(1/beta)]^(1/alpha)
-    out(i) = std::exp(gkw_log1mexp(gkw_log1mexp(log_u / l) / b) / a);
+    //
+    // gkw_log_inv_link() rather than two bare log1mexp() calls, which flushed
+    // the lower tail to 0 once log(u)/lambda < -745: qekw(1e-08, 40, 2, 0.02)
+    // returned exactly 0 against a true 9.83e-11.
+    out(i) = std::exp(gkw_log_inv_link(log_u / l, b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -482,7 +517,7 @@ Rcpp::NumericVector rekw(
   // (rbeta(3, numeric(0), 1) is NA NA NA with a warning) instead of
   // reaching the `i % vec.n_elem` recycling with a zero divisor.
   if (a_vec.n_elem == 0 || b_vec.n_elem == 0 || l_vec.n_elem == 0) {
-    Rcpp::warning("rekw: NAs produced");
+    gkw_warning("rekw: NAs produced");
     return Rcpp::NumericVector(n, NA_REAL);
   }
 
@@ -514,11 +549,13 @@ Rcpp::NumericVector rekw(
     // x = [1 - (1 - U^(1/lambda))^(1/beta)]^(1/alpha), inverted in log space.
     // The draw itself is untouched, so the RNG stream is identical to
     // before; only the inversion that follows it changes.
-    out(i) = std::exp(gkw_log1mexp(gkw_log1mexp(std::log(U) / l) / b) / a);
+    // gkw_log_inv_link() as in qekw(); with lambda = 0.01 the bare form drew
+    // 55 exact zeros per 1e5.
+    out(i) = std::exp(gkw_log_inv_link(std::log(U) / l, b) / a);
   }
 
   if (bad_par) {
-    Rcpp::warning("rekw: NAs produced");
+    gkw_warning("rekw: NAs produced");
   }
 
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -599,15 +636,15 @@ double llekw(const Rcpp::NumericVector& par, const Rcpp::NumericVector& data) {
     // Term 1: (α-1) * log(x)
     sum_term1 += (alpha - 1.0) * log_xi;
 
-    // log(v) where v = 1 - x^α
-    double log_x_alpha = alpha * log_xi;
-    double log_v = gkw_log1mexp(log_x_alpha);
+    // log(v) where v = 1 - x^α, and log(w) where w = 1 - v^β, from the shared
+    // chain. The bare log1mexp(beta * log_v) returned -Inf once log_v
+    // underflowed, and llekw() then plateaued at +Inf -- for alpha >= 162 on
+    // x = c(.01,.3,.6,.9), where the nested llkkw(delta = 0) gives 1528.8.
+    double log_x_alpha, log_v, log_v_beta, log_w;
+    ekw_log_chain(log_xi, alpha, beta, log_x_alpha, log_v, log_v_beta, log_w);
 
     // Term 2: (β-1) * log(v)
     sum_term2 += (beta - 1.0) * log_v;
-
-    // log(w) where w = 1 - v^β
-    double log_w = gkw_log1mexp(beta * log_v);
 
     // Term 3: (λ-1) * log(w)
     sum_term3 += (lambda - 1.0) * log_w;
@@ -665,7 +702,7 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   
   // Convert and validate data
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (x.n_elem < 1 || arma::any(x <= 0) || arma::any(x >= 1)) {
+  if (x.n_elem < 1 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     return Rcpp::NumericVector(3, R_NaN);
   }
   
@@ -684,28 +721,39 @@ Rcpp::NumericVector grekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   //   R = ∂log(w)/∂β = -log(v) * S
   // Writing each ratio as a single exp() of a difference of logs avoids the
   // 0/0 and tiny/tiny divisions that the direct v, w forms degenerate into.
+  //
+  // Q and R are not formed from S. Once x^alpha underflows, S = v^beta/w has
+  // overflowed to +Inf while P and log(v) are 0 or subnormal, and the products
+  // -beta*P*S and -log(v)*S came back NaN or Inf although both are ordinary:
+  // Q -> log(x) and R -> 1/beta. Each is one exp() of a sum of logs, as in
+  // grbkw() and grkkw(), and log(w) comes from the bridged chain.
   for (int i = 0; i < n; i++) {
     double log_xi = std::log(x(i));
     d_alpha += log_xi;
 
-    double log_x_alpha = alpha * log_xi;
-    double log_v = gkw_log1mexp(log_x_alpha);
+    double log_x_alpha, log_v, log_v_beta, log_w;
+    ekw_log_chain(log_xi, alpha, beta, log_x_alpha, log_v, log_v_beta, log_w);
     d_beta += log_v;
-
-    double log_v_beta = beta * log_v;
-    double log_w = gkw_log1mexp(log_v_beta);
     d_lambda += log_w;
 
     double P = -log_xi * std::exp(log_x_alpha - log_v);
-    double S = std::exp(log_v_beta - log_w);
-    double Q = -beta * P * S;
-    double R = -log_v * S;
+    double Q = beta * log_xi * std::exp(log_x_alpha + (beta - 1.0) * log_v - log_w);
+    double R = -ekw_mul_small_log(log_v, log_x_alpha, log_v_beta - log_w);
 
     // ∂ℓ/∂α += (β-1) * P + (λ-1) * Q
     d_alpha += (beta - 1.0) * P + (lambda - 1.0) * Q;
 
     // ∂ℓ/∂β += (λ-1) * R
     d_beta += (lambda - 1.0) * R;
+  }
+
+  // A component that is still not finite here is a genuine boundary, and the
+  // whole vector goes with it, as in the other six families. grekw() used to
+  // return c(Inf, -Inf, 1022.6) next to a finite llekw() and say nothing.
+  if (!std::isfinite(d_alpha) || !std::isfinite(d_beta) ||
+      !std::isfinite(d_lambda)) {
+    gkw_warning("Gradient calculation produced non-finite values in grekw");
+    return Rcpp::NumericVector(3, R_NaN);
   }
 
   // Return NEGATIVE gradient (for minimization)
@@ -764,7 +812,7 @@ Rcpp::NumericMatrix hsekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   
   // Convert and validate data
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (x.n_elem < 1 || arma::any(x <= 0) || arma::any(x >= 1)) {
+  if (x.n_elem < 1 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     return nanH;
   }
   
@@ -788,19 +836,19 @@ Rcpp::NumericMatrix hsekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
   for (int i = 0; i < n; i++) {
     double log_xi = std::log(x(i));
 
-    double log_x_alpha = alpha * log_xi;
-    double log_v = gkw_log1mexp(log_x_alpha);
-    double log_v_beta = beta * log_v;
-    double log_w = gkw_log1mexp(log_v_beta);
+    double log_x_alpha, log_v, log_v_beta, log_w;
+    ekw_log_chain(log_xi, alpha, beta, log_x_alpha, log_v, log_v_beta, log_w);
 
-    double P = -log_xi * std::exp(log_x_alpha - log_v);
-    double S = std::exp(log_v_beta - log_w);
-    double Q = -beta * P * S;
-    double R = -log_v * S;
+    // PS stands for -P*S and Q for -beta*P*S, each one exp() of a sum of logs
+    // so that neither factor has to be representable on its own; see grekw().
+    double P  = -log_xi * std::exp(log_x_alpha - log_v);
+    double PS =  log_xi * std::exp(log_x_alpha + (beta - 1.0) * log_v - log_w);
+    double Q  =  beta * PS;
+    double R  = -ekw_mul_small_log(log_v, log_x_alpha, log_v_beta - log_w);
 
     double dP_dalpha = P * (log_xi - P);
     double dQ_dalpha = Q * (log_xi - P + beta * P - Q);
-    double dQ_dbeta  = -P * S * (1.0 + beta * (log_v - R));
+    double dQ_dbeta  = PS * (1.0 + beta * (log_v - R));
     double dR_dbeta  = R * (log_v - R);
 
     // d2l/dalpha^2
@@ -819,7 +867,15 @@ Rcpp::NumericMatrix hsekw(const Rcpp::NumericVector& par, const Rcpp::NumericVec
 
   // Symmetrize once after accumulation
   H = arma::symmatu(H);
-  
+
+  // An entry that is still not finite here is a genuine boundary, and the whole
+  // matrix goes with it, as in the other six families; hsekw() used to return
+  // its NaN entries without a word.
+  if (!H.is_finite()) {
+    gkw_warning("Hessian calculation produced non-finite values in hsekw");
+    return nanH;
+  }
+
   // Return NEGATIVE Hessian (for minimization)
   return Rcpp::wrap(-H);
 }

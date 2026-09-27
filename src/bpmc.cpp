@@ -333,6 +333,12 @@ Rcpp::NumericVector pmc(
     double log_xpow = ll * std::log(xx);
     if (!lower_tail && log_xpow > LOG1MEXP_CROSSOVER) {
       out(i) = R::pbeta(-std::expm1(log_xpow), dd + 1.0, gg, /*lower*/ 1, log_p);
+    } else if (log_xpow < LOG_DBL_MIN) {
+      // x^lambda is a subnormal or 0 here and R::pbeta returned 0, yet
+      // I_y(gamma, delta+1) is not small when gamma is: y^gamma is e^-46 at
+      // y = e^-921, gamma = 0.05. gkw_pbeta_from_log() carries y through its
+      // logarithm and the leading term of the incomplete beta.
+      out(i) = gkw_pbeta_from_log(log_xpow, gg, dd + 1.0, lower_tail, log_p);
     } else {
       // std::pow rather than exp(log_xpow): C99 requires pow(x, 1.0) == x
       // exactly, so pmc(x, g, d, 1) is bit-for-bit R::pbeta(x, g, d+1) on every
@@ -432,8 +438,22 @@ Rcpp::NumericVector qmc(
     }
 
     // x = [I^-1_{gamma,delta+1}(u)]^(1/lambda), with both flags passed through.
+    //
+    // std::pow(y, 1/lambda) is kept wherever y is a normal double at most 1/2.
+    // Above 1/2 the upper tail lives in 1 - y, which a double near 1 holds only
+    // to 1.1e-16, so log(y) comes from gkw_log_qbeta() through the reflected
+    // quantile, as in qbkw(). Below DBL_MIN, R::qbeta returned 0 while
+    // x = y^(1/lambda) is ordinary for large lambda; gkw_log_qbeta_tiny()
+    // carries y through the leading term of the incomplete beta there.
     double y = R::qbeta(pp, gg, dd + 1.0, lower_tail, log_p);
-    out(i) = std::pow(y, 1.0 / ll);
+    if (y > 0.5) {
+      double log_y = std::log1p(-R::qbeta(pp, dd + 1.0, gg, !lower_tail, log_p));
+      out(i) = std::exp(log_y / ll);
+    } else if (y < std::numeric_limits<double>::min()) {
+      out(i) = std::exp(gkw_log_qbeta_tiny(pp, gg, dd + 1.0, lower_tail, log_p) / ll);
+    } else {
+      out(i) = std::pow(y, 1.0 / ll);
+    }
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -489,7 +509,7 @@ Rcpp::NumericVector rmc(
   // (rbeta(3, numeric(0), 1) is NA NA NA with a warning) instead of
   // reaching the `i % vec.n_elem` recycling with a zero divisor.
   if (g_vec.n_elem == 0 || d_vec.n_elem == 0 || l_vec.n_elem == 0) {
-    Rcpp::warning("rmc: NAs produced");
+    gkw_warning("rmc: NAs produced");
     return Rcpp::NumericVector(n, NA_REAL);
   }
 
@@ -533,7 +553,7 @@ Rcpp::NumericVector rmc(
   }
 
   if (bad_par) {
-    Rcpp::warning("rmc: NAs produced");
+    gkw_warning("rmc: NAs produced");
   }
 
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
@@ -690,7 +710,7 @@ Rcpp::NumericVector grmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   
   // Convert and validate data
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (x.n_elem < 1 || arma::any(x <= 0) || arma::any(x >= 1)) {
+  if (x.n_elem < 1 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     return Rcpp::NumericVector(3, R_NaN);
   }
   
@@ -819,7 +839,7 @@ Rcpp::NumericMatrix hsmc(const Rcpp::NumericVector& par, const Rcpp::NumericVect
   
   // Convert and validate data
   arma::vec x = Rcpp::as<arma::vec>(data);
-  if (x.n_elem < 1 || arma::any(x <= 0) || arma::any(x >= 1)) {
+  if (x.n_elem < 1 || x.has_nan() || arma::any(x <= 0) || arma::any(x >= 1)) {
     return nanHess;
   }
   
