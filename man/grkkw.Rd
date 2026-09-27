@@ -68,195 +68,20 @@ evaluated at \eqn{\gamma=1}. Note that the component for \eqn{\gamma} is omitted
 Numerical stability is maintained through careful implementation.
 }
 \examples{
-\donttest{
-## Example 1: Basic Gradient Evaluation
-
-# Generate sample data
 set.seed(123)
-n <- 1000
-true_params <- c(alpha = 2.0, beta = 3.0, delta = 1.5, lambda = 2.0)
-data <- rkkw(n,
-  alpha = true_params[1], beta = true_params[2],
-  delta = true_params[3], lambda = true_params[4]
-)
+x <- rkkw(200, alpha = 2, beta = 3, delta = 0.5, lambda = 1.2)
+par <- c(alpha = 2, beta = 3, delta = 0.5, lambda = 1.2)
 
-# Evaluate gradient at true parameters
-grad_true <- grkkw(par = true_params, data = data)
-cat("Gradient at true parameters:\n")
-print(grad_true)
-cat("Norm:", sqrt(sum(grad_true^2)), "\n")
+## Gradient of the negative log-likelihood llkkw(), not of the log-likelihood
+g <- grkkw(par, x)
+g
 
-# Evaluate at different parameter values
-test_params <- rbind(
-  c(1.5, 2.5, 1.0, 1.5),
-  c(2.0, 3.0, 1.5, 2.0),
-  c(2.5, 3.5, 2.0, 2.5)
-)
+## A small step against the gradient lowers llkkw()
+llkkw(par - 1e-4 * g, x) < llkkw(par, x)
 
-grad_norms <- apply(test_params, 1, function(p) {
-  g <- grkkw(p, data)
-  sqrt(sum(g^2))
-})
-
-results <- data.frame(
-  Alpha = test_params[, 1],
-  Beta = test_params[, 2],
-  Delta = test_params[, 3],
-  Lambda = test_params[, 4],
-  Grad_Norm = grad_norms
-)
-print(results, digits = 4)
-
-
-## Example 2: Gradient in Optimization
-
-# Optimization with analytical gradient
-fit_with_grad <- optim(
-  par = c(1.5, 2.5, 1.0, 1.5),
-  fn = llkkw,
-  gr = grkkw,
-  data = data,
-  method = "BFGS",
-  hessian = TRUE,
-  control = list(trace = 0)
-)
-
-# Optimization without gradient
-fit_no_grad <- optim(
-  par = c(1.5, 2.5, 1.0, 1.5),
-  fn = llkkw,
-  data = data,
-  method = "BFGS",
-  hessian = TRUE,
-  control = list(trace = 0)
-)
-
-comparison <- data.frame(
-  Method = c("With Gradient", "Without Gradient"),
-  Alpha = c(fit_with_grad$par[1], fit_no_grad$par[1]),
-  Beta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
-  Delta = c(fit_with_grad$par[3], fit_no_grad$par[3]),
-  Lambda = c(fit_with_grad$par[4], fit_no_grad$par[4]),
-  NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
-  Iterations = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
-)
-print(comparison, digits = 4, row.names = FALSE)
-
-
-## Example 3: Verifying Gradient at MLE
-
-mle <- fit_with_grad$par
-names(mle) <- c("alpha", "beta", "delta", "lambda")
-
-# At MLE, gradient should be approximately zero
-gradient_at_mle <- grkkw(par = mle, data = data)
-cat("\nGradient at MLE:\n")
-print(gradient_at_mle)
-cat("Max absolute component:", max(abs(gradient_at_mle)), "\n")
-cat("Gradient norm:", sqrt(sum(gradient_at_mle^2)), "\n")
-
-
-## Example 4: Numerical vs Analytical Gradient
-
-# Manual finite difference gradient
-numerical_gradient <- function(f, x, data, h = 1e-7) {
-  grad <- numeric(length(x))
-  for (i in seq_along(x)) {
-    x_plus <- x_minus <- x
-    x_plus[i] <- x[i] + h
-    x_minus[i] <- x[i] - h
-    grad[i] <- (f(x_plus, data) - f(x_minus, data)) / (2 * h)
-  }
-  return(grad)
-}
-
-# Compare at MLE
-grad_analytical <- grkkw(par = mle, data = data)
-grad_numerical <- numerical_gradient(llkkw, mle, data)
-
-comparison_grad <- data.frame(
-  Parameter = c("alpha", "beta", "delta", "lambda"),
-  Analytical = grad_analytical,
-  Numerical = grad_numerical,
-  Abs_Diff = abs(grad_analytical - grad_numerical),
-  Rel_Error = abs(grad_analytical - grad_numerical) /
-    (abs(grad_analytical) + 1e-10)
-)
-print(comparison_grad, digits = 8)
-
-
-## Example 5: Score Test Statistic
-
-# Score test for H0: theta = theta0
-theta0 <- c(1.8, 2.8, 1.3, 1.8)
-score_theta0 <- -grkkw(par = theta0, data = data)
-
-# Fisher information at theta0
-fisher_info <- hskkw(par = theta0, data = data)
-
-# Score test statistic
-score_stat <- t(score_theta0) \%*\% solve(fisher_info) \%*\% score_theta0
-p_value <- pchisq(score_stat, df = 4, lower.tail = FALSE)
-
-cat("\nScore Test:\n")
-cat("H0: alpha=1.8, beta=2.8, delta=1.3, lambda=1.8\n")
-cat("Test statistic:", score_stat, "\n")
-cat("P-value:", format.pval(p_value, digits = 4), "\n")
-
-
-## Example 6: Confidence Ellipse with Gradient Information
-
-# For visualization, use first two parameters (alpha, beta)
-# Observed information
-obs_info <- hskkw(par = mle, data = data)
-vcov_full <- solve(obs_info)
-vcov_2d <- vcov_full[1:2, 1:2]
-
-# Create confidence ellipse
-theta <- seq(0, 2 * pi, length.out = 100)
-chi2_val <- qchisq(0.95, df = 2)
-
-# The observed information is not guaranteed positive definite at a
-# numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
-# below stays finite and the region remains drawable.
-eig_decomp <- eigen(vcov_2d, symmetric = TRUE)
-eig_decomp$values <- pmax(eig_decomp$values, 0)
-ellipse <- matrix(NA, nrow = 100, ncol = 2)
-for (i in 1:100) {
-  v <- c(cos(theta[i]), sin(theta[i]))
-  ellipse[i, ] <- mle[1:2] + sqrt(chi2_val) *
-    (eig_decomp$vectors \%*\% diag(sqrt(eig_decomp$values)) \%*\% v)
-}
-
-# Marginal confidence intervals
-se_2d <- sqrt(diag(vcov_2d))
-ci_alpha <- mle[1] + c(-1, 1) * 1.96 * se_2d[1]
-ci_beta <- mle[2] + c(-1, 1) * 1.96 * se_2d[2]
-
-# Plot
-plot(ellipse[, 1], ellipse[, 2],
-  type = "l", lwd = 2, col = "#2E4057",
-  xlab = expression(alpha), ylab = expression(beta),
-  main = "95\% Confidence Region (Alpha vs Beta)", las = 1
-)
-
-# Add marginal CIs
-abline(v = ci_alpha, col = "#808080", lty = 3, lwd = 1.5)
-abline(h = ci_beta, col = "#808080", lty = 3, lwd = 1.5)
-
-points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-
-legend("topright",
-  legend = c("MLE", "True", "95\% CR", "Marginal 95\% CI"),
-  col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-  pch = c(19, 17, NA, NA),
-  lty = c(NA, NA, 1, 3),
-  lwd = c(NA, NA, 2, 1.5),
-  bty = "n"
-)
-grid(col = "gray90")
-}
+## Agrees with a numerical derivative of llkkw()
+if (requireNamespace("numDeriv", quietly = TRUE))
+  all.equal(g, numDeriv::grad(llkkw, par, data = x), tolerance = 1e-6)
 
 }
 \references{

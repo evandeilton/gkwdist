@@ -55,99 +55,20 @@ minimizing the negative log-likelihood. They correspond to the relevant componen
 of the general GKw gradient (\code{\link{grgkw}}) evaluated at \eqn{\alpha=1, \beta=1}.
 }
 \examples{
-\donttest{
-## Example 1: Basic Gradient Evaluation
-
-# Generate sample data with more stable parameters
 set.seed(123)
-n <- 1000
-true_params <- c(gamma = 2.0, delta = 2.5, lambda = 1.5)
-data <- rmc(n,
-  gamma = true_params[1], delta = true_params[2],
-  lambda = true_params[3]
-)
+x <- rmc(200, gamma = 0.5, delta = 5, lambda = 3)
+par <- c(gamma = 0.5, delta = 5, lambda = 3)
 
-# Evaluate the gradient at the true parameters
-grad_true <- grmc(par = true_params, data = data)
-names(grad_true) <- c("gamma", "delta", "lambda")
-cat("Gradient at true parameters:\n")
-print(grad_true)
-cat("Gradient norm:", sqrt(sum(grad_true^2)), "\n")
+## Gradient of the negative log-likelihood llmc(), not of the log-likelihood
+g <- grmc(par, x)
+g
 
+## A small step against the gradient lowers llmc()
+llmc(par - 1e-4 * g, x) < llmc(par, x)
 
-## Example 2: Numerical Verification with numDeriv::grad()
-
-# grmc() returns the gradient of the *negative* log-likelihood minimized
-# by llmc(). numDeriv::grad() differentiates llmc() itself by finite
-# differences, so the two should agree closely at any parameter vector,
-# not just at the MLE.
-if (requireNamespace("numDeriv", quietly = TRUE)) {
-  test_points <- rbind(
-    c(1.5, 2.0, 1.0),
-    as.numeric(true_params),
-    c(2.5, 3.0, 2.0)
-  )
-
-  cat("\nAnalytical (grmc) vs numerical (numDeriv::grad) gradient:\n")
-  for (i in seq_len(nrow(test_points))) {
-    par_i <- test_points[i, ]
-    grad_analytic <- grmc(par = par_i, data = data)
-    grad_numeric <- numDeriv::grad(func = llmc, x = par_i, data = data)
-
-    comparison <- data.frame(
-      Parameter = c("gamma", "delta", "lambda"),
-      Analytical = grad_analytic,
-      Numerical = grad_numeric,
-      Abs_Diff = abs(grad_analytic - grad_numeric)
-    )
-    cat("\nPoint", i, ": (", paste(round(par_i, 2), collapse = ", "), ")\n")
-    print(comparison, digits = 8, row.names = FALSE)
-  }
-}
-
-
-## Example 3: Gradient-Based Optimization Convergence
-
-# Supplying the analytical gradient lets BFGS skip its internal
-# finite-difference approximation
-fit_with_grad <- optim(
-  par = c(1.5, 2.0, 1.0),
-  fn = llmc,
-  gr = grmc,
-  data = data,
-  method = "BFGS",
-  control = list(trace = 0)
-)
-
-# Same starting point and objective, relying on optim()'s own
-# finite-difference gradient instead
-fit_no_grad <- optim(
-  par = c(1.5, 2.0, 1.0),
-  fn = llmc,
-  data = data,
-  method = "BFGS",
-  control = list(trace = 0)
-)
-
-mle <- fit_with_grad$par
-names(mle) <- c("gamma", "delta", "lambda")
-
-comparison <- data.frame(
-  Method = c("Analytical gradient", "Finite-difference"),
-  Gamma = c(fit_with_grad$par[1], fit_no_grad$par[1]),
-  Delta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
-  Lambda = c(fit_with_grad$par[3], fit_no_grad$par[3]),
-  NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
-  Fn_Evals = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
-)
-cat("\nOptimization comparison:\n")
-print(comparison, digits = 6, row.names = FALSE)
-
-# At the MLE, the gradient of the negative log-likelihood should vanish
-grad_at_mle <- grmc(par = mle, data = data)
-cat("\nGradient at MLE:", grad_at_mle, "\n")
-cat("Max absolute component:", max(abs(grad_at_mle)), "\n")
-}
+## Agrees with a numerical derivative of llmc()
+if (requireNamespace("numDeriv", quietly = TRUE))
+  all.equal(g, numDeriv::grad(llmc, par, data = x), tolerance = 1e-6)
 
 }
 \references{

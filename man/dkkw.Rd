@@ -60,39 +60,20 @@ term \eqn{B(1, \delta+1)} when \eqn{\gamma=1}.
 Numerical evaluation follows similar stability considerations as \code{\link{dgkw}}.
 }
 \examples{
-# Example values
-x_vals <- c(0.2, 0.5, 0.8)
-alpha_par <- 2.0
-beta_par <- 3.0
-delta_par <- 0.5
-lambda_par <- 1.5
+x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+dkkw(x, alpha = 2, beta = 3, delta = 0.5, lambda = 1.2)
+dkkw(x, alpha = 2, beta = 3, delta = 0.5, lambda = 1.2, log = TRUE)
 
-# Calculate density
-densities <- dkkw(x_vals, alpha_par, beta_par, delta_par, lambda_par)
-print(densities)
+## KKw is GKw with gamma = 1
+all.equal(dkkw(x, 2, 3, 0.5, 1.2), dgkw(x, 2, 3, gamma = 1, delta = 0.5,
+    lambda = 1.2))
 
-# Calculate log-density
-log_densities <- dkkw(x_vals, alpha_par, beta_par, delta_par, lambda_par,
-  log = TRUE
-)
-print(log_densities)
-# Check: should match log(densities)
-print(log(densities))
+## The density integrates to one
+integrate(dkkw, 0, 1, alpha = 2, beta = 3, delta = 0.5, lambda = 1.2,
+    rel.tol = 1e-10)
 
-# Compare with dgkw setting gamma = 1
-densities_gkw <- dgkw(x_vals, alpha_par, beta_par,
-  gamma = 1.0,
-  delta_par, lambda_par
-)
-print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-
-# Plot the density
-curve_x <- seq(0.01, 0.99, length.out = 200)
-curve_y <- dkkw(curve_x, alpha_par, beta_par, delta_par, lambda_par)
-plot(curve_x, curve_y,
-  type = "l", main = "KKw Density Example",
-  xlab = "x", ylab = "f(x)", col = "blue"
-)
+curve(dkkw(x, alpha = 2, beta = 3, delta = 0.5, lambda = 1.2), from = 0,
+    to = 1, ylab = "density")
 
 }
 \references{

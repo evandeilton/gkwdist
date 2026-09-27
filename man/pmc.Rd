@@ -62,55 +62,15 @@ This is evaluated using the \code{\link[stats]{pbeta}} function as
 \code{pbeta(q^lambda, shape1 = gamma, shape2 = delta + 1)}.
 }
 \examples{
-# Example values
-q_vals <- c(0.2, 0.5, 0.8)
-gamma_par <- 2.0
-delta_par <- 1.5
-lambda_par <- 1.0 # Equivalent to Beta(gamma, delta+1)
+q <- c(0.2, 0.5, 0.8)
+pmc(q, gamma = 0.5, delta = 5, lambda = 3)
+pmc(q, gamma = 0.5, delta = 5, lambda = 3, lower.tail = FALSE)  # P(X > q)
+pmc(q, gamma = 0.5, delta = 5, lambda = 3, log.p = TRUE)
 
-# Calculate CDF P(X <= q) using pmc
-probs <- pmc(q_vals, gamma_par, delta_par, lambda_par)
-print(probs)
-# Compare with Beta CDF
-print(stats::pbeta(q_vals, shape1 = gamma_par, shape2 = delta_par + 1))
-
-# Calculate upper tail P(X > q)
-probs_upper <- pmc(q_vals, gamma_par, delta_par, lambda_par,
-  lower.tail = FALSE
-)
-print(probs_upper)
-# Check: probs + probs_upper should be 1
-print(probs + probs_upper)
-
-# Calculate log CDF
-logs <- pmc(q_vals, gamma_par, delta_par, lambda_par, log.p = TRUE)
-print(logs)
-# Check: should match log(probs)
-print(log(probs))
-
-# Compare with pgkw setting alpha = 1, beta = 1
-probs_gkw <- pgkw(q_vals,
-  alpha = 1.0, beta = 1.0, gamma = gamma_par,
-  delta = delta_par, lambda = lambda_par
-)
-print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-
-# Plot the CDF for different lambda values
-curve_q <- seq(0.01, 0.99, length.out = 200)
-curve_p1 <- pmc(curve_q, gamma = 2, delta = 3, lambda = 0.5)
-curve_p2 <- pmc(curve_q, gamma = 2, delta = 3, lambda = 1.0) # Beta(2, 4)
-curve_p3 <- pmc(curve_q, gamma = 2, delta = 3, lambda = 2.0)
-
-plot(curve_q, curve_p2,
-  type = "l", main = "Mc/Beta Power CDF (gamma=2, delta=3)",
-  xlab = "q", ylab = "F(q)", col = "red", ylim = c(0, 1)
-)
-lines(curve_q, curve_p1, col = "blue")
-lines(curve_q, curve_p3, col = "green")
-legend("bottomright",
-  legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
-  col = c("blue", "red", "green"), lty = 1, bty = "n"
-)
+## pmc() is the integral of dmc()
+Fq <- pmc(0.5, gamma = 0.5, delta = 5, lambda = 3)
+all.equal(Fq, integrate(dmc, 0, 0.5, gamma = 0.5, delta = 5, lambda = 3,
+    rel.tol = 1e-10)$value)
 
 }
 \references{

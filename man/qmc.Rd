@@ -68,50 +68,14 @@ via \code{qbeta(p, gamma, delta + 1, ...)} while respecting the
 GKw quantile function (\code{\link{qgkw}}) evaluated with \eqn{\alpha=1, \beta=1}.
 }
 \examples{
-# Example values
-p_vals <- c(0.1, 0.5, 0.9)
-gamma_par <- 2.0
-delta_par <- 1.5
-lambda_par <- 1.0 # Equivalent to Beta(gamma, delta+1)
+p <- c(0.1, 0.5, 0.9)
+qmc(p, gamma = 0.5, delta = 5, lambda = 3)
+# upper-tail quantiles
+qmc(p, gamma = 0.5, delta = 5, lambda = 3, lower.tail = FALSE)
 
-# Calculate quantiles using qmc
-quantiles <- qmc(p_vals, gamma_par, delta_par, lambda_par)
-print(quantiles)
-# Compare with Beta quantiles
-print(stats::qbeta(p_vals, shape1 = gamma_par, shape2 = delta_par + 1))
-
-# Calculate quantiles for upper tail probabilities P(X > q) = p
-quantiles_upper <- qmc(p_vals, gamma_par, delta_par, lambda_par,
-  lower.tail = FALSE
-)
-print(quantiles_upper)
-# Check: qmc(p, ..., lt=F) == qmc(1-p, ..., lt=T)
-print(qmc(1 - p_vals, gamma_par, delta_par, lambda_par))
-
-# Calculate quantiles from log probabilities
-log.p_vals <- log(p_vals)
-quantiles_logp <- qmc(log.p_vals, gamma_par, delta_par, lambda_par, log.p = TRUE)
-print(quantiles_logp)
-# Check: should match original quantiles
-print(quantiles)
-
-# Compare with qgkw setting alpha = 1, beta = 1
-quantiles_gkw <- qgkw(p_vals,
-  alpha = 1.0, beta = 1.0, gamma = gamma_par,
-  delta = delta_par, lambda = lambda_par
-)
-print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-
-# Verify inverse relationship with pmc
-p_check <- 0.75
-q_calc <- qmc(p_check, gamma_par, delta_par, lambda_par) # Use lambda != 1
-p_recalc <- pmc(q_calc, gamma_par, delta_par, lambda_par)
-print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
-
-# Boundary conditions
-print(qmc(c(0, 1), gamma_par, delta_par, lambda_par)) # Should be 0, 1
-print(qmc(c(-Inf, 0), gamma_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
+## qmc() inverts pmc()
+all.equal(pmc(qmc(p, gamma = 0.5, delta = 5, lambda = 3), gamma = 0.5,
+    delta = 5, lambda = 3), p)
 
 }
 \references{

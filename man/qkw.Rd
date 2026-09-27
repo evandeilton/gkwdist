@@ -59,43 +59,12 @@ appropriately before applying the formula. This is equivalent to the general
 GKw quantile function (\code{\link{qgkw}}) evaluated with \eqn{\gamma=1, \delta=0, \lambda=1}.
 }
 \examples{
-# Example values
-p_vals <- c(0.1, 0.5, 0.9)
-alpha_par <- 2.0
-beta_par <- 3.0
+p <- c(0.1, 0.5, 0.9)
+qkw(p, alpha = 2, beta = 3)
+qkw(p, alpha = 2, beta = 3, lower.tail = FALSE)  # upper-tail quantiles
 
-# Calculate quantiles using qkw
-quantiles <- qkw(p_vals, alpha_par, beta_par)
-print(quantiles)
-
-# Calculate quantiles for upper tail probabilities P(X > q) = p
-quantiles_upper <- qkw(p_vals, alpha_par, beta_par, lower.tail = FALSE)
-print(quantiles_upper)
-
-# Calculate quantiles from log probabilities
-log.p_vals <- log(p_vals)
-quantiles_logp <- qkw(log.p_vals, alpha_par, beta_par, log.p = TRUE)
-print(quantiles_logp)
-# Check: should match original quantiles
-print(quantiles)
-
-# Compare with qgkw setting gamma = 1, delta = 0, lambda = 1
-quantiles_gkw <- qgkw(p_vals,
-  alpha = alpha_par, beta = beta_par,
-  gamma = 1.0, delta = 0.0, lambda = 1.0
-)
-print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-
-# Verify inverse relationship with pkw
-p_check <- 0.75
-q_calc <- qkw(p_check, alpha_par, beta_par)
-p_recalc <- pkw(q_calc, alpha_par, beta_par)
-print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
-
-# Boundary conditions
-print(qkw(c(0, 1), alpha_par, beta_par)) # Should be 0, 1
-print(qkw(c(-Inf, 0), alpha_par, beta_par, log.p = TRUE)) # Should be 0, 1
+## qkw() inverts pkw()
+all.equal(pkw(qkw(p, alpha = 2, beta = 3), alpha = 2, beta = 3), p)
 
 }
 \references{

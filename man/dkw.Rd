@@ -54,43 +54,18 @@ the Kumaraswamy-Kumaraswamy (\code{\link{dkkw}}) with \eqn{\delta = 0}
 and \eqn{\lambda = 1}.
 }
 \examples{
-# Example values
-x_vals <- c(0.2, 0.5, 0.8)
-alpha_par <- 2.0
-beta_par <- 3.0
+x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+dkw(x, alpha = 2, beta = 3)
+dkw(x, alpha = 2, beta = 3, log = TRUE)
 
-# Calculate density using dkw
-densities <- dkw(x_vals, alpha_par, beta_par)
-print(densities)
+## Closed form: alpha * beta * x^(alpha - 1) * (1 - x^alpha)^(beta - 1)
+all.equal(dkw(x, 2, 3), 2 * 3 * x * (1 - x^2)^2)
 
-# Calculate log-density
-log_densities <- dkw(x_vals, alpha_par, beta_par, log = TRUE)
-print(log_densities)
-# Check: should match log(densities)
-print(log(densities))
+## The density integrates to one
+integrate(dkw, 0, 1, alpha = 2, beta = 3, rel.tol = 1e-10)
 
-# Compare with dgkw setting gamma = 1, delta = 0, lambda = 1
-densities_gkw <- dgkw(x_vals, alpha_par, beta_par,
-  gamma = 1.0, delta = 0.0,
-  lambda = 1.0
-)
-print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
+curve(dkw(x, alpha = 2, beta = 3), from = 0, to = 1, ylab = "density")
 
-# Plot the density for different shape parameter combinations
-curve_x <- seq(0.001, 0.999, length.out = 200)
-plot(curve_x, dkw(curve_x, alpha = 2, beta = 3),
-  type = "l",
-  main = "Kumaraswamy Density Examples", xlab = "x", ylab = "f(x)",
-  col = "blue", ylim = c(0, 4)
-)
-lines(curve_x, dkw(curve_x, alpha = 3, beta = 2), col = "red")
-lines(curve_x, dkw(curve_x, alpha = 0.5, beta = 0.5), col = "green") # U-shaped
-lines(curve_x, dkw(curve_x, alpha = 5, beta = 1), col = "purple") # J-shaped
-lines(curve_x, dkw(curve_x, alpha = 1, beta = 3), col = "orange") # J-shaped (reversed)
-legend("top",
-  legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
-  col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
-)
 }
 \references{
 Kumaraswamy, P. (1980). A generalized probability density function for

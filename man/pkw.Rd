@@ -57,49 +57,14 @@ The Kw distribution is a special case of several generalized distributions:
 The implementation uses the closed-form expression for efficiency.
 }
 \examples{
-# Example values
-q_vals <- c(0.2, 0.5, 0.8)
-alpha_par <- 2.0
-beta_par <- 3.0
+q <- c(0.2, 0.5, 0.8)
+pkw(q, alpha = 2, beta = 3)
+pkw(q, alpha = 2, beta = 3, lower.tail = FALSE)  # P(X > q)
+pkw(q, alpha = 2, beta = 3, log.p = TRUE)
 
-# Calculate CDF P(X <= q) using pkw
-probs <- pkw(q_vals, alpha_par, beta_par)
-print(probs)
-
-# Calculate upper tail P(X > q)
-probs_upper <- pkw(q_vals, alpha_par, beta_par, lower.tail = FALSE)
-print(probs_upper)
-# Check: probs + probs_upper should be 1
-print(probs + probs_upper)
-
-# Calculate log CDF
-logs <- pkw(q_vals, alpha_par, beta_par, log.p = TRUE)
-print(logs)
-# Check: should match log(probs)
-print(log(probs))
-
-# Compare with pgkw setting gamma = 1, delta = 0, lambda = 1
-probs_gkw <- pgkw(q_vals, alpha_par, beta_par,
-  gamma = 1.0, delta = 0.0,
-  lambda = 1.0
-)
-print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-
-# Plot the CDF for different shape parameter combinations
-curve_q <- seq(0.001, 0.999, length.out = 200)
-plot(curve_q, pkw(curve_q, alpha = 2, beta = 3),
-  type = "l",
-  main = "Kumaraswamy CDF Examples", xlab = "q", ylab = "F(q)",
-  col = "blue", ylim = c(0, 1)
-)
-lines(curve_q, pkw(curve_q, alpha = 3, beta = 2), col = "red")
-lines(curve_q, pkw(curve_q, alpha = 0.5, beta = 0.5), col = "green")
-lines(curve_q, pkw(curve_q, alpha = 5, beta = 1), col = "purple")
-lines(curve_q, pkw(curve_q, alpha = 1, beta = 3), col = "orange")
-legend("bottomright",
-  legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
-  col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
-)
+## pkw() is the integral of dkw()
+Fq <- pkw(0.5, alpha = 2, beta = 3)
+all.equal(Fq, integrate(dkw, 0, 0.5, alpha = 2, beta = 3, rel.tol = 1e-10)$value)
 
 }
 \references{

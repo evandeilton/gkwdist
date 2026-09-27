@@ -50,51 +50,14 @@ variate. The implementation generates \eqn{U} using \code{\link[stats]{runif}}
 and applies the transformation above.
 }
 \examples{
-set.seed(2027) # for reproducibility
+set.seed(123)
+x <- rekw(1000, alpha = 2, beta = 3, lambda = 1.2)
+summary(x)
 
-# Generate 1000 random values from a specific EKw distribution
-alpha_par <- 2.0
-beta_par <- 3.0
-lambda_par <- 1.5
-
-x_sample_ekw <- rekw(1000, alpha = alpha_par, beta = beta_par, lambda = lambda_par)
-summary(x_sample_ekw)
-
-# Histogram of generated values compared to theoretical density
-hist(x_sample_ekw,
-  breaks = 30, freq = FALSE, # freq=FALSE for density
-  main = "Histogram of EKw Sample", xlab = "x", ylim = c(0, 3.0)
-)
-curve(dekw(x, alpha = alpha_par, beta = beta_par, lambda = lambda_par),
-  add = TRUE, col = "red", lwd = 2, n = 201
-)
-legend("topright", legend = "Theoretical PDF", col = "red", lwd = 2, bty = "n")
-
-# Comparing empirical and theoretical quantiles (Q-Q plot)
-prob_points <- seq(0.01, 0.99, by = 0.01)
-theo_quantiles <- qekw(prob_points,
-  alpha = alpha_par, beta = beta_par,
-  lambda = lambda_par
-)
-emp_quantiles <- quantile(x_sample_ekw, prob_points, type = 7)
-
-plot(theo_quantiles, emp_quantiles,
-  pch = 16, cex = 0.8,
-  main = "Q-Q Plot for EKw Distribution",
-  xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
-)
-abline(a = 0, b = 1, col = "blue", lty = 2)
-
-# Compare summary stats with rgkw(..., gamma=1, delta=0, ...)
-# Note: individual values will differ due to randomness
-x_sample_gkw <- rgkw(1000,
-  alpha = alpha_par, beta = beta_par, gamma = 1.0,
-  delta = 0.0, lambda = lambda_par
-)
-print("Summary stats for rekw sample:")
-print(summary(x_sample_ekw))
-print("Summary stats for rgkw(gamma=1, delta=0) sample:")
-print(summary(x_sample_gkw)) # Should be similar
+## The sample follows the distribution
+hist(x, breaks = 30, freq = FALSE, main = "")
+curve(dekw(x, alpha = 2, beta = 3, lambda = 1.2), add = TRUE)
+ks.test(x, pekw, alpha = 2, beta = 3, lambda = 1.2)
 
 }
 \references{

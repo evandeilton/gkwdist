@@ -60,54 +60,14 @@ consistent parameter recycling and handling within the C++ environment,
 matching the style of other functions in the related families.
 }
 \examples{
-# Example values
-q_vals <- c(0.2, 0.5, 0.8)
-gamma_par <- 2.0 # Corresponds to shape1
-delta_par <- 3.0 # Corresponds to shape2 - 1
-shape1 <- gamma_par
-shape2 <- delta_par + 1
+q <- c(0.2, 0.5, 0.8)
+pbeta_(q, gamma = 2, delta = 3)
+pbeta_(q, gamma = 2, delta = 3, lower.tail = FALSE)  # P(X > q)
+pbeta_(q, gamma = 2, delta = 3, log.p = TRUE)
 
-# Calculate CDF using pbeta_
-probs <- pbeta_(q_vals, gamma_par, delta_par)
-print(probs)
-
-# Compare with stats::pbeta
-probs_stats <- stats::pbeta(q_vals, shape1 = shape1, shape2 = shape2)
-print(paste("Max difference vs stats::pbeta:", max(abs(probs - probs_stats))))
-
-# Compare with pgkw setting alpha=1, beta=1, lambda=1
-probs_gkw <- pgkw(q_vals,
-  alpha = 1.0, beta = 1.0, gamma = gamma_par,
-  delta = delta_par, lambda = 1.0
-)
-print(paste("Max difference vs pgkw:", max(abs(probs - probs_gkw))))
-
-# Compare with pmc setting lambda=1
-probs_mc <- pmc(q_vals, gamma = gamma_par, delta = delta_par, lambda = 1.0)
-print(paste("Max difference vs pmc:", max(abs(probs - probs_mc))))
-
-# Calculate upper tail P(X > q)
-probs_upper <- pbeta_(q_vals, gamma_par, delta_par, lower.tail = FALSE)
-print(probs_upper)
-print(stats::pbeta(q_vals, shape1, shape2, lower.tail = FALSE))
-
-# Calculate log CDF
-log.probs <- pbeta_(q_vals, gamma_par, delta_par, log.p = TRUE)
-print(log.probs)
-print(stats::pbeta(q_vals, shape1, shape2, log.p = TRUE))
-
-# Plot the CDF
-curve_q <- seq(0.001, 0.999, length.out = 200)
-curve_p <- pbeta_(curve_q, gamma = 2, delta = 3) # Beta(2, 4)
-plot(curve_q, curve_p,
-  type = "l", main = "Beta(2, 4) CDF via pbeta_",
-  xlab = "q", ylab = "F(q)", col = "blue"
-)
-curve(stats::pbeta(x, 2, 4), add = TRUE, col = "red", lty = 2)
-legend("bottomright",
-  legend = c("pbeta_(gamma=2, delta=3)", "stats::pbeta(shape1=2, shape2=4)"),
-  col = c("blue", "red"), lty = c(1, 2), bty = "n"
-)
+## pbeta_() is the integral of dbeta_()
+Fq <- pbeta_(0.5, gamma = 2, delta = 3)
+all.equal(Fq, integrate(dbeta_, 0, 0.5, gamma = 2, delta = 3, rel.tol = 1e-10)$value)
 
 }
 \references{

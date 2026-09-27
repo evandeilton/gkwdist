@@ -63,53 +63,15 @@ The implementation uses this closed-form expression for efficiency and handles
 \code{lower.tail} and \code{log.p} arguments appropriately.
 }
 \examples{
-# Example values
-q_vals <- c(0.2, 0.5, 0.8)
-alpha_par <- 2.0
-beta_par <- 3.0
-lambda_par <- 1.5
+q <- c(0.2, 0.5, 0.8)
+pekw(q, alpha = 2, beta = 3, lambda = 1.2)
+pekw(q, alpha = 2, beta = 3, lambda = 1.2, lower.tail = FALSE)  # P(X > q)
+pekw(q, alpha = 2, beta = 3, lambda = 1.2, log.p = TRUE)
 
-# Calculate CDF P(X <= q)
-probs <- pekw(q_vals, alpha_par, beta_par, lambda_par)
-print(probs)
-
-# Calculate upper tail P(X > q)
-probs_upper <- pekw(q_vals, alpha_par, beta_par, lambda_par,
-  lower.tail = FALSE
-)
-print(probs_upper)
-# Check: probs + probs_upper should be 1
-print(probs + probs_upper)
-
-# Calculate log CDF
-logs <- pekw(q_vals, alpha_par, beta_par, lambda_par, log.p = TRUE)
-print(logs)
-# Check: should match log(probs)
-print(log(probs))
-
-# Compare with pgkw setting gamma = 1, delta = 0
-probs_gkw <- pgkw(q_vals, alpha_par, beta_par,
-  gamma = 1.0, delta = 0.0,
-  lambda = lambda_par
-)
-print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-
-# Plot the CDF for different lambda values
-curve_q <- seq(0.01, 0.99, length.out = 200)
-curve_p1 <- pekw(curve_q, alpha = 2, beta = 3, lambda = 0.5)
-curve_p2 <- pekw(curve_q, alpha = 2, beta = 3, lambda = 1.0) # standard Kw
-curve_p3 <- pekw(curve_q, alpha = 2, beta = 3, lambda = 2.0)
-
-plot(curve_q, curve_p2,
-  type = "l", main = "EKw CDF Examples (alpha=2, beta=3)",
-  xlab = "q", ylab = "F(q)", col = "red", ylim = c(0, 1)
-)
-lines(curve_q, curve_p1, col = "blue")
-lines(curve_q, curve_p3, col = "green")
-legend("bottomright",
-  legend = c("lambda=0.5", "lambda=1.0 (Kw)", "lambda=2.0"),
-  col = c("blue", "red", "green"), lty = 1, bty = "n"
-)
+## pekw() is the integral of dekw()
+Fq <- pekw(0.5, alpha = 2, beta = 3, lambda = 1.2)
+all.equal(Fq, integrate(dekw, 0, 0.5, alpha = 2, beta = 3, lambda = 1.2,
+    rel.tol = 1e-10)$value)
 
 }
 \references{

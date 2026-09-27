@@ -95,45 +95,17 @@
 #' \code{\link[stats]{dbeta}}
 #'
 #' @examples
-#' # Example values
-#' x_vals <- c(0.2, 0.5, 0.8)
-#' gamma_par <- 2.0
-#' delta_par <- 1.5
-#' lambda_par <- 1.0 # Equivalent to Beta(gamma, delta+1)
+#' x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+#' dmc(x, gamma = 0.5, delta = 5, lambda = 3)
+#' dmc(x, gamma = 0.5, delta = 5, lambda = 3, log = TRUE)
 #'
-#' # Calculate density using dmc
-#' densities <- dmc(x_vals, gamma_par, delta_par, lambda_par)
-#' print(densities)
-#' # Compare with Beta density
-#' print(stats::dbeta(x_vals, shape1 = gamma_par, shape2 = delta_par + 1))
+#' ## Mc is GKw with alpha = beta = 1
+#' all.equal(dmc(x, 0.5, 5, 3), dgkw(x, 1, 1, 0.5, 5, 3))
 #'
-#' # Calculate log-density
-#' log_densities <- dmc(x_vals, gamma_par, delta_par, lambda_par, log = TRUE)
-#' print(log_densities)
+#' ## The density integrates to one
+#' integrate(dmc, 0, 1, gamma = 0.5, delta = 5, lambda = 3, rel.tol = 1e-10)
 #'
-#' # Compare with dgkw setting alpha = 1, beta = 1
-#' densities_gkw <- dgkw(x_vals,
-#'   alpha = 1.0, beta = 1.0, gamma = gamma_par,
-#'   delta = delta_par, lambda = lambda_par
-#' )
-#' print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#'
-#' # Plot the density for different lambda values
-#' curve_x <- seq(0.01, 0.99, length.out = 200)
-#' curve_y1 <- dmc(curve_x, gamma = 2, delta = 3, lambda = 0.5)
-#' curve_y2 <- dmc(curve_x, gamma = 2, delta = 3, lambda = 1.0) # Beta(2, 4)
-#' curve_y3 <- dmc(curve_x, gamma = 2, delta = 3, lambda = 2.0)
-#'
-#' plot(curve_x, curve_y2,
-#'   type = "l", main = "McDonald (Mc) Density (gamma=2, delta=3)",
-#'   xlab = "x", ylab = "f(x)", col = "red", ylim = range(0, curve_y1, curve_y2, curve_y3)
-#' )
-#' lines(curve_x, curve_y1, col = "blue")
-#' lines(curve_x, curve_y3, col = "green")
-#' legend("topright",
-#'   legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
-#'   col = c("blue", "red", "green"), lty = 1, bty = "n"
-#' )
+#' curve(dmc(x, gamma = 0.5, delta = 5, lambda = 3), from = 0, to = 1, ylab = "density")
 #'
 #' @export
 dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
@@ -244,55 +216,15 @@ dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
 #' \code{\link[stats]{pbeta}}
 #'
 #' @examples
-#' # Example values
-#' q_vals <- c(0.2, 0.5, 0.8)
-#' gamma_par <- 2.0
-#' delta_par <- 1.5
-#' lambda_par <- 1.0 # Equivalent to Beta(gamma, delta+1)
+#' q <- c(0.2, 0.5, 0.8)
+#' pmc(q, gamma = 0.5, delta = 5, lambda = 3)
+#' pmc(q, gamma = 0.5, delta = 5, lambda = 3, lower.tail = FALSE)  # P(X > q)
+#' pmc(q, gamma = 0.5, delta = 5, lambda = 3, log.p = TRUE)
 #'
-#' # Calculate CDF P(X <= q) using pmc
-#' probs <- pmc(q_vals, gamma_par, delta_par, lambda_par)
-#' print(probs)
-#' # Compare with Beta CDF
-#' print(stats::pbeta(q_vals, shape1 = gamma_par, shape2 = delta_par + 1))
-#'
-#' # Calculate upper tail P(X > q)
-#' probs_upper <- pmc(q_vals, gamma_par, delta_par, lambda_par,
-#'   lower.tail = FALSE
-#' )
-#' print(probs_upper)
-#' # Check: probs + probs_upper should be 1
-#' print(probs + probs_upper)
-#'
-#' # Calculate log CDF
-#' logs <- pmc(q_vals, gamma_par, delta_par, lambda_par, log.p = TRUE)
-#' print(logs)
-#' # Check: should match log(probs)
-#' print(log(probs))
-#'
-#' # Compare with pgkw setting alpha = 1, beta = 1
-#' probs_gkw <- pgkw(q_vals,
-#'   alpha = 1.0, beta = 1.0, gamma = gamma_par,
-#'   delta = delta_par, lambda = lambda_par
-#' )
-#' print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-#'
-#' # Plot the CDF for different lambda values
-#' curve_q <- seq(0.01, 0.99, length.out = 200)
-#' curve_p1 <- pmc(curve_q, gamma = 2, delta = 3, lambda = 0.5)
-#' curve_p2 <- pmc(curve_q, gamma = 2, delta = 3, lambda = 1.0) # Beta(2, 4)
-#' curve_p3 <- pmc(curve_q, gamma = 2, delta = 3, lambda = 2.0)
-#'
-#' plot(curve_q, curve_p2,
-#'   type = "l", main = "Mc/Beta Power CDF (gamma=2, delta=3)",
-#'   xlab = "q", ylab = "F(q)", col = "red", ylim = c(0, 1)
-#' )
-#' lines(curve_q, curve_p1, col = "blue")
-#' lines(curve_q, curve_p3, col = "green")
-#' legend("bottomright",
-#'   legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
-#'   col = c("blue", "red", "green"), lty = 1, bty = "n"
-#' )
+#' ## pmc() is the integral of dmc()
+#' Fq <- pmc(0.5, gamma = 0.5, delta = 5, lambda = 3)
+#' all.equal(Fq, integrate(dmc, 0, 0.5, gamma = 0.5, delta = 5, lambda = 3,
+#'     rel.tol = 1e-10)$value)
 #'
 #' @export
 pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
@@ -413,50 +345,14 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 #' \code{\link[stats]{qbeta}}
 #'
 #' @examples
-#' # Example values
-#' p_vals <- c(0.1, 0.5, 0.9)
-#' gamma_par <- 2.0
-#' delta_par <- 1.5
-#' lambda_par <- 1.0 # Equivalent to Beta(gamma, delta+1)
+#' p <- c(0.1, 0.5, 0.9)
+#' qmc(p, gamma = 0.5, delta = 5, lambda = 3)
+#' # upper-tail quantiles
+#' qmc(p, gamma = 0.5, delta = 5, lambda = 3, lower.tail = FALSE)
 #'
-#' # Calculate quantiles using qmc
-#' quantiles <- qmc(p_vals, gamma_par, delta_par, lambda_par)
-#' print(quantiles)
-#' # Compare with Beta quantiles
-#' print(stats::qbeta(p_vals, shape1 = gamma_par, shape2 = delta_par + 1))
-#'
-#' # Calculate quantiles for upper tail probabilities P(X > q) = p
-#' quantiles_upper <- qmc(p_vals, gamma_par, delta_par, lambda_par,
-#'   lower.tail = FALSE
-#' )
-#' print(quantiles_upper)
-#' # Check: qmc(p, ..., lt=F) == qmc(1-p, ..., lt=T)
-#' print(qmc(1 - p_vals, gamma_par, delta_par, lambda_par))
-#'
-#' # Calculate quantiles from log probabilities
-#' log.p_vals <- log(p_vals)
-#' quantiles_logp <- qmc(log.p_vals, gamma_par, delta_par, lambda_par, log.p = TRUE)
-#' print(quantiles_logp)
-#' # Check: should match original quantiles
-#' print(quantiles)
-#'
-#' # Compare with qgkw setting alpha = 1, beta = 1
-#' quantiles_gkw <- qgkw(p_vals,
-#'   alpha = 1.0, beta = 1.0, gamma = gamma_par,
-#'   delta = delta_par, lambda = lambda_par
-#' )
-#' print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-#'
-#' # Verify inverse relationship with pmc
-#' p_check <- 0.75
-#' q_calc <- qmc(p_check, gamma_par, delta_par, lambda_par) # Use lambda != 1
-#' p_recalc <- pmc(q_calc, gamma_par, delta_par, lambda_par)
-#' print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-#' print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
-#'
-#' # Boundary conditions
-#' print(qmc(c(0, 1), gamma_par, delta_par, lambda_par)) # Should be 0, 1
-#' print(qmc(c(-Inf, 0), gamma_par, delta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
+#' ## qmc() inverts pmc()
+#' all.equal(pmc(qmc(p, gamma = 0.5, delta = 5, lambda = 3), gamma = 0.5,
+#'     delta = 5, lambda = 3), p)
 #'
 #' @export
 qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = FALSE) {
@@ -571,63 +467,14 @@ qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
 #' \code{\link[stats]{rbeta}}
 #'
 #' @examples
-#' set.seed(2028) # for reproducibility
+#' set.seed(123)
+#' x <- rmc(1000, gamma = 0.5, delta = 5, lambda = 3)
+#' summary(x)
 #'
-#' # Generate 1000 random values from a specific Mc distribution
-#' gamma_par <- 2.0
-#' delta_par <- 1.5
-#' lambda_par <- 1.0 # Equivalent to Beta(gamma, delta+1)
-#'
-#' x_sample_mc <- rmc(1000,
-#'   gamma = gamma_par, delta = delta_par,
-#'   lambda = lambda_par
-#' )
-#' summary(x_sample_mc)
-#'
-#' # Histogram of generated values compared to theoretical density
-#' hist(x_sample_mc,
-#'   breaks = 30, freq = FALSE, # freq=FALSE for density
-#'   main = "Histogram of Mc Sample (Beta Case)", xlab = "x"
-#' )
-#' curve(dmc(x, gamma = gamma_par, delta = delta_par, lambda = lambda_par),
-#'   add = TRUE, col = "red", lwd = 2, n = 201
-#' )
-#' curve(stats::dbeta(x, gamma_par, delta_par + 1), add = TRUE, col = "blue", lty = 2)
-#' legend("topright",
-#'   legend = c("Theoretical Mc PDF", "Theoretical Beta PDF"),
-#'   col = c("red", "blue"), lwd = c(2, 1), lty = c(1, 2), bty = "n"
-#' )
-#'
-#' # Comparing empirical and theoretical quantiles (Q-Q plot)
-#' lambda_par_qq <- 0.7 # Use lambda != 1 for non-Beta case
-#' x_sample_mc_qq <- rmc(1000,
-#'   gamma = gamma_par, delta = delta_par,
-#'   lambda = lambda_par_qq
-#' )
-#' prob_points <- seq(0.01, 0.99, by = 0.01)
-#' theo_quantiles <- qmc(prob_points,
-#'   gamma = gamma_par, delta = delta_par,
-#'   lambda = lambda_par_qq
-#' )
-#' emp_quantiles <- quantile(x_sample_mc_qq, prob_points, type = 7)
-#'
-#' plot(theo_quantiles, emp_quantiles,
-#'   pch = 16, cex = 0.8,
-#'   main = "Q-Q Plot for Mc Distribution",
-#'   xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
-#' )
-#' abline(a = 0, b = 1, col = "blue", lty = 2)
-#'
-#' # Compare summary stats with rgkw(..., alpha=1, beta=1, ...)
-#' # Note: individual values will differ due to randomness
-#' x_sample_gkw <- rgkw(1000,
-#'   alpha = 1.0, beta = 1.0, gamma = gamma_par,
-#'   delta = delta_par, lambda = lambda_par_qq
-#' )
-#' print("Summary stats for rmc sample:")
-#' print(summary(x_sample_mc_qq))
-#' print("Summary stats for rgkw(alpha=1, beta=1) sample:")
-#' print(summary(x_sample_gkw)) # Should be similar
+#' ## The sample follows the distribution
+#' hist(x, breaks = 30, freq = FALSE, main = "")
+#' curve(dmc(x, gamma = 0.5, delta = 5, lambda = 3), add = TRUE)
+#' ks.test(x, pmc, gamma = 0.5, delta = 5, lambda = 3)
 #'
 #' @export
 rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
@@ -741,349 +588,20 @@ rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
 #' \code{\link[stats]{optim}}, \code{\link[base]{lbeta}}
 #'
 #' @examples
-#' \donttest{
-#' ## Example 1: Basic Log-Likelihood Evaluation
-#'
-#' # Generate sample data with more stable parameters
 #' set.seed(123)
-#' n <- 1000
-#' true_params <- c(gamma = 2.0, delta = 2.5, lambda = 1.5)
-#' data <- rmc(n,
-#'   gamma = true_params[1], delta = true_params[2],
-#'   lambda = true_params[3]
-#' )
+#' x <- rmc(1000, gamma = 0.5, delta = 5, lambda = 3)
+#' par <- c(gamma = 0.5, delta = 5, lambda = 3)
 #'
-#' # Evaluate negative log-likelihood at true parameters
-#' nll_true <- llmc(par = true_params, data = data)
-#' cat("Negative log-likelihood at true parameters:", nll_true, "\n")
+#' ## llmc() is the negative log-likelihood, -sum(log f(x))
+#' llmc(par, x)
+#' -sum(dmc(x, gamma = 0.5, delta = 5, lambda = 3, log = TRUE))
 #'
-#' # Evaluate at different parameter values
-#' test_params <- rbind(
-#'   c(1.5, 2.0, 1.0),
-#'   c(2.0, 2.5, 1.5),
-#'   c(2.5, 3.0, 2.0)
-#' )
-#'
-#' nll_values <- apply(test_params, 1, function(p) llmc(p, data))
-#' results <- data.frame(
-#'   Gamma = test_params[, 1],
-#'   Delta = test_params[, 2],
-#'   Lambda = test_params[, 3],
-#'   NegLogLik = nll_values
-#' )
-#' print(results, digits = 4)
-#'
-#'
-#' ## Example 2: Maximum Likelihood Estimation
-#'
-#' # Optimization using BFGS with analytical gradient
-#' fit <- optim(
-#'   par = c(1.5, 2.0, 1.0),
-#'   fn = llmc,
-#'   gr = grmc,
-#'   data = data,
-#'   method = "BFGS",
-#'   hessian = TRUE
-#' )
-#'
-#' mle <- fit$par
-#' names(mle) <- c("gamma", "delta", "lambda")
-#' se <- sqrt(diag(solve(fit$hessian)))
-#'
-#' results <- data.frame(
-#'   Parameter = c("gamma", "delta", "lambda"),
-#'   True = true_params,
-#'   MLE = mle,
-#'   SE = se,
-#'   CI_Lower = mle - 1.96 * se,
-#'   CI_Upper = mle + 1.96 * se
-#' )
-#' print(results, digits = 4)
-#'
-#' cat("\nNegative log-likelihood at MLE:", fit$value, "\n")
-#' cat("AIC:", 2 * fit$value + 2 * length(mle), "\n")
-#' cat("BIC:", 2 * fit$value + length(mle) * log(n), "\n")
-#'
-#'
-#' ## Example 3: Comparing Optimization Methods
-#'
-#' methods <- c("BFGS", "L-BFGS-B", "Nelder-Mead", "CG")
-#' start_params <- c(1.5, 2.0, 1.0)
-#'
-#' comparison <- data.frame(
-#'   Method = character(),
-#'   Gamma = numeric(),
-#'   Delta = numeric(),
-#'   Lambda = numeric(),
-#'   NegLogLik = numeric(),
-#'   Convergence = integer(),
-#'   stringsAsFactors = FALSE
-#' )
-#'
-#' for (method in methods) {
-#'   if (method %in% c("BFGS", "CG")) {
-#'     fit_temp <- optim(
-#'       par = start_params,
-#'       fn = llmc,
-#'       gr = grmc,
-#'       data = data,
-#'       method = method
-#'     )
-#'   } else if (method == "L-BFGS-B") {
-#'     fit_temp <- optim(
-#'       par = start_params,
-#'       fn = llmc,
-#'       gr = grmc,
-#'       data = data,
-#'       method = method,
-#'       lower = c(0.01, 0.01, 0.01),
-#'       upper = c(100, 100, 100)
-#'     )
-#'   } else {
-#'     fit_temp <- optim(
-#'       par = start_params,
-#'       fn = llmc,
-#'       data = data,
-#'       method = method
-#'     )
-#'   }
-#'
-#'   comparison <- rbind(comparison, data.frame(
-#'     Method = method,
-#'     Gamma = fit_temp$par[1],
-#'     Delta = fit_temp$par[2],
-#'     Lambda = fit_temp$par[3],
-#'     NegLogLik = fit_temp$value,
-#'     Convergence = fit_temp$convergence,
-#'     stringsAsFactors = FALSE
-#'   ))
-#' }
-#'
-#' print(comparison, digits = 4, row.names = FALSE)
-#'
-#'
-#' ## Example 4: Likelihood Ratio Test
-#'
-#' # Test H0: lambda = 1.5 vs H1: lambda free
-#' loglik_full <- -fit$value
-#'
-#' restricted_ll <- function(params_restricted, data, lambda_fixed) {
-#'   llmc(par = c(
-#'     params_restricted[1], params_restricted[2],
-#'     lambda_fixed
-#'   ), data = data)
-#' }
-#'
-#' fit_restricted <- optim(
-#'   par = c(mle[1], mle[2]),
-#'   fn = restricted_ll,
-#'   data = data,
-#'   lambda_fixed = 1.5,
-#'   method = "BFGS"
-#' )
-#'
-#' loglik_restricted <- -fit_restricted$value
-#' lr_stat <- 2 * (loglik_full - loglik_restricted)
-#' p_value <- pchisq(lr_stat, df = 1, lower.tail = FALSE)
-#'
-#' cat("LR Statistic:", round(lr_stat, 4), "\n")
-#' cat("P-value:", format.pval(p_value, digits = 4), "\n")
-#'
-#'
-#' ## Example 5: Univariate Profile Likelihoods
-#'
-#' # Profile for gamma
-#' gamma_grid <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = 50)
-#' gamma_grid <- gamma_grid[gamma_grid > 0]
-#' profile_ll_gamma <- numeric(length(gamma_grid))
-#'
-#' for (i in seq_along(gamma_grid)) {
-#'   profile_fit <- optim(
-#'     par = mle[-1],
-#'     fn = function(p) llmc(c(gamma_grid[i], p), data),
-#'     method = "BFGS"
-#'   )
-#'   profile_ll_gamma[i] <- -profile_fit$value
-#' }
-#'
-#' # Profile for delta
-#' delta_grid <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = 50)
-#' delta_grid <- delta_grid[delta_grid > 0]
-#' profile_ll_delta <- numeric(length(delta_grid))
-#'
-#' for (i in seq_along(delta_grid)) {
-#'   profile_fit <- optim(
-#'     par = mle[-2],
-#'     fn = function(p) llmc(c(p[1], delta_grid[i], p[2]), data),
-#'     method = "BFGS"
-#'   )
-#'   profile_ll_delta[i] <- -profile_fit$value
-#' }
-#'
-#' # Profile for lambda
-#' lambda_grid <- seq(mle[3] - 1.5, mle[3] + 1.5, length.out = 50)
-#' lambda_grid <- lambda_grid[lambda_grid > 0]
-#' profile_ll_lambda <- numeric(length(lambda_grid))
-#'
-#' for (i in seq_along(lambda_grid)) {
-#'   profile_fit <- optim(
-#'     par = mle[-3],
-#'     fn = function(p) llmc(c(p[1], p[2], lambda_grid[i]), data),
-#'     method = "BFGS"
-#'   )
-#'   profile_ll_lambda[i] <- -profile_fit$value
-#' }
-#'
-#' # 95% confidence threshold
-#' chi_crit <- qchisq(0.95, df = 1)
-#' threshold <- max(profile_ll_gamma) - chi_crit / 2
-#'
-#' # Plot all profiles
-#'
-#' plot(gamma_grid, profile_ll_gamma,
-#'   type = "l", lwd = 2, col = "#2E4057",
-#'   xlab = expression(gamma), ylab = "Profile Log-Likelihood",
-#'   main = expression(paste("Profile: ", gamma)), las = 1
-#' )
-#' abline(v = mle[1], col = "#8B0000", lty = 2, lwd = 2)
-#' abline(v = true_params[1], col = "#006400", lty = 2, lwd = 2)
-#' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-#' legend("topright",
-#'   legend = c("MLE", "True", "95% CI"),
-#'   col = c("#8B0000", "#006400", "#808080"),
-#'   lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8
-#' )
-#' grid(col = "gray90")
-#'
-#' plot(delta_grid, profile_ll_delta,
-#'   type = "l", lwd = 2, col = "#2E4057",
-#'   xlab = expression(delta), ylab = "Profile Log-Likelihood",
-#'   main = expression(paste("Profile: ", delta)), las = 1
-#' )
-#' abline(v = mle[2], col = "#8B0000", lty = 2, lwd = 2)
-#' abline(v = true_params[2], col = "#006400", lty = 2, lwd = 2)
-#' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-#' legend("topright",
-#'   legend = c("MLE", "True", "95% CI"),
-#'   col = c("#8B0000", "#006400", "#808080"),
-#'   lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8
-#' )
-#' grid(col = "gray90")
-#'
-#' plot(lambda_grid, profile_ll_lambda,
-#'   type = "l", lwd = 2, col = "#2E4057",
-#'   xlab = expression(lambda), ylab = "Profile Log-Likelihood",
-#'   main = expression(paste("Profile: ", lambda)), las = 1
-#' )
-#' abline(v = mle[3], col = "#8B0000", lty = 2, lwd = 2)
-#' abline(v = true_params[3], col = "#006400", lty = 2, lwd = 2)
-#' abline(h = threshold, col = "#808080", lty = 3, lwd = 1.5)
-#' legend("topright",
-#'   legend = c("MLE", "True", "95% CI"),
-#'   col = c("#8B0000", "#006400", "#808080"),
-#'   lty = c(2, 2, 3), lwd = 2, bty = "n", cex = 0.8
-#' )
-#' grid(col = "gray90")
-#'
-#' ## Example 6: 2D Log-Likelihood Surfaces (All pairs side by side)
-#'
-#' # Create 2D grids with wider range (±1.5)
-#' gamma_2d <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = round(n / 25))
-#' delta_2d <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = round(n / 25))
-#' lambda_2d <- seq(mle[3] - 1.5, mle[3] + 1.5, length.out = round(n / 25))
-#'
-#' gamma_2d <- gamma_2d[gamma_2d > 0]
-#' delta_2d <- delta_2d[delta_2d > 0]
-#' lambda_2d <- lambda_2d[lambda_2d > 0]
-#'
-#' # Compute all log-likelihood surfaces
-#' ll_surface_gd <- matrix(NA, nrow = length(gamma_2d), ncol = length(delta_2d))
-#' ll_surface_gl <- matrix(NA, nrow = length(gamma_2d), ncol = length(lambda_2d))
-#' ll_surface_dl <- matrix(NA, nrow = length(delta_2d), ncol = length(lambda_2d))
-#'
-#' # Gamma vs Delta
-#' for (i in seq_along(gamma_2d)) {
-#'   for (j in seq_along(delta_2d)) {
-#'     ll_surface_gd[i, j] <- -llmc(c(gamma_2d[i], delta_2d[j], mle[3]), data)
-#'   }
-#' }
-#'
-#' # Gamma vs Lambda
-#' for (i in seq_along(gamma_2d)) {
-#'   for (j in seq_along(lambda_2d)) {
-#'     ll_surface_gl[i, j] <- -llmc(c(gamma_2d[i], mle[2], lambda_2d[j]), data)
-#'   }
-#' }
-#'
-#' # Delta vs Lambda
-#' for (i in seq_along(delta_2d)) {
-#'   for (j in seq_along(lambda_2d)) {
-#'     ll_surface_dl[i, j] <- -llmc(c(mle[1], delta_2d[i], lambda_2d[j]), data)
-#'   }
-#' }
-#'
-#' # Confidence region levels
-#' max_ll_gd <- max(ll_surface_gd, na.rm = TRUE)
-#' max_ll_gl <- max(ll_surface_gl, na.rm = TRUE)
-#' max_ll_dl <- max(ll_surface_dl, na.rm = TRUE)
-#'
-#' levels_95_gd <- max_ll_gd - qchisq(0.95, df = 2) / 2
-#' levels_95_gl <- max_ll_gl - qchisq(0.95, df = 2) / 2
-#' levels_95_dl <- max_ll_dl - qchisq(0.95, df = 2) / 2
-#'
-#' # Plot
-#'
-#' # Gamma vs Delta
-#' contour(gamma_2d, delta_2d, ll_surface_gd,
-#'   xlab = expression(gamma), ylab = expression(delta),
-#'   main = "Gamma vs Delta", las = 1,
-#'   levels = seq(min(ll_surface_gd, na.rm = TRUE), max_ll_gd, length.out = 20),
-#'   col = "#2E4057", lwd = 1
-#' )
-#' contour(gamma_2d, delta_2d, ll_surface_gd,
-#'   levels = levels_95_gd, col = "#FF6347", lwd = 2.5, lty = 1, add = TRUE
-#' )
-#' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' # Gamma vs Lambda
-#' contour(gamma_2d, lambda_2d, ll_surface_gl,
-#'   xlab = expression(gamma), ylab = expression(lambda),
-#'   main = "Gamma vs Lambda", las = 1,
-#'   levels = seq(min(ll_surface_gl, na.rm = TRUE), max_ll_gl, length.out = 20),
-#'   col = "#2E4057", lwd = 1
-#' )
-#' contour(gamma_2d, lambda_2d, ll_surface_gl,
-#'   levels = levels_95_gl, col = "#FF6347", lwd = 2.5, lty = 1, add = TRUE
-#' )
-#' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' # Delta vs Lambda
-#' contour(delta_2d, lambda_2d, ll_surface_dl,
-#'   xlab = expression(delta), ylab = expression(lambda),
-#'   main = "Delta vs Lambda", las = 1,
-#'   levels = seq(min(ll_surface_dl, na.rm = TRUE), max_ll_dl, length.out = 20),
-#'   col = "#2E4057", lwd = 1
-#' )
-#' contour(delta_2d, lambda_2d, ll_surface_dl,
-#'   levels = levels_95_dl, col = "#FF6347", lwd = 2.5, lty = 1, add = TRUE
-#' )
-#' points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' legend("topright",
-#'   legend = c("MLE", "True", "95% CR"),
-#'   col = c("#8B0000", "#006400", "#FF6347"),
-#'   pch = c(19, 17, NA),
-#'   lty = c(NA, NA, 1),
-#'   lwd = c(NA, NA, 2.5),
-#'   bty = "n", cex = 0.8
-#' )
-#' }
+#' ## Maximum likelihood: minimize llmc(), with grmc() as its gradient
+#' start <- gkwgetstartvalues(x, family = "mc")
+#' fit <- optim(start, llmc, grmc, data = x, method = "L-BFGS-B", lower = 1e-4)
+#' fit$convergence  # 0: converged
+#' fit$par
+#' fit$value <= llmc(par, x)  # at least as good as the true values
 #'
 #' @export
 llmc <- function(par, data) {
@@ -1189,99 +707,20 @@ llmc <- function(par, data) {
 #' \code{\link[base]{digamma}}.
 #'
 #' @examples
-#' \donttest{
-#' ## Example 1: Basic Gradient Evaluation
-#'
-#' # Generate sample data with more stable parameters
 #' set.seed(123)
-#' n <- 1000
-#' true_params <- c(gamma = 2.0, delta = 2.5, lambda = 1.5)
-#' data <- rmc(n,
-#'   gamma = true_params[1], delta = true_params[2],
-#'   lambda = true_params[3]
-#' )
+#' x <- rmc(200, gamma = 0.5, delta = 5, lambda = 3)
+#' par <- c(gamma = 0.5, delta = 5, lambda = 3)
 #'
-#' # Evaluate the gradient at the true parameters
-#' grad_true <- grmc(par = true_params, data = data)
-#' names(grad_true) <- c("gamma", "delta", "lambda")
-#' cat("Gradient at true parameters:\n")
-#' print(grad_true)
-#' cat("Gradient norm:", sqrt(sum(grad_true^2)), "\n")
+#' ## Gradient of the negative log-likelihood llmc(), not of the log-likelihood
+#' g <- grmc(par, x)
+#' g
 #'
+#' ## A small step against the gradient lowers llmc()
+#' llmc(par - 1e-4 * g, x) < llmc(par, x)
 #'
-#' ## Example 2: Numerical Verification with numDeriv::grad()
-#'
-#' # grmc() returns the gradient of the *negative* log-likelihood minimized
-#' # by llmc(). numDeriv::grad() differentiates llmc() itself by finite
-#' # differences, so the two should agree closely at any parameter vector,
-#' # not just at the MLE.
-#' if (requireNamespace("numDeriv", quietly = TRUE)) {
-#'   test_points <- rbind(
-#'     c(1.5, 2.0, 1.0),
-#'     as.numeric(true_params),
-#'     c(2.5, 3.0, 2.0)
-#'   )
-#'
-#'   cat("\nAnalytical (grmc) vs numerical (numDeriv::grad) gradient:\n")
-#'   for (i in seq_len(nrow(test_points))) {
-#'     par_i <- test_points[i, ]
-#'     grad_analytic <- grmc(par = par_i, data = data)
-#'     grad_numeric <- numDeriv::grad(func = llmc, x = par_i, data = data)
-#'
-#'     comparison <- data.frame(
-#'       Parameter = c("gamma", "delta", "lambda"),
-#'       Analytical = grad_analytic,
-#'       Numerical = grad_numeric,
-#'       Abs_Diff = abs(grad_analytic - grad_numeric)
-#'     )
-#'     cat("\nPoint", i, ": (", paste(round(par_i, 2), collapse = ", "), ")\n")
-#'     print(comparison, digits = 8, row.names = FALSE)
-#'   }
-#' }
-#'
-#'
-#' ## Example 3: Gradient-Based Optimization Convergence
-#'
-#' # Supplying the analytical gradient lets BFGS skip its internal
-#' # finite-difference approximation
-#' fit_with_grad <- optim(
-#'   par = c(1.5, 2.0, 1.0),
-#'   fn = llmc,
-#'   gr = grmc,
-#'   data = data,
-#'   method = "BFGS",
-#'   control = list(trace = 0)
-#' )
-#'
-#' # Same starting point and objective, relying on optim()'s own
-#' # finite-difference gradient instead
-#' fit_no_grad <- optim(
-#'   par = c(1.5, 2.0, 1.0),
-#'   fn = llmc,
-#'   data = data,
-#'   method = "BFGS",
-#'   control = list(trace = 0)
-#' )
-#'
-#' mle <- fit_with_grad$par
-#' names(mle) <- c("gamma", "delta", "lambda")
-#'
-#' comparison <- data.frame(
-#'   Method = c("Analytical gradient", "Finite-difference"),
-#'   Gamma = c(fit_with_grad$par[1], fit_no_grad$par[1]),
-#'   Delta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
-#'   Lambda = c(fit_with_grad$par[3], fit_no_grad$par[3]),
-#'   NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
-#'   Fn_Evals = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
-#' )
-#' cat("\nOptimization comparison:\n")
-#' print(comparison, digits = 6, row.names = FALSE)
-#'
-#' # At the MLE, the gradient of the negative log-likelihood should vanish
-#' grad_at_mle <- grmc(par = mle, data = data)
-#' cat("\nGradient at MLE:", grad_at_mle, "\n")
-#' cat("Max absolute component:", max(abs(grad_at_mle)), "\n")
-#' }
+#' ## Agrees with a numerical derivative of llmc()
+#' if (requireNamespace("numDeriv", quietly = TRUE))
+#'   all.equal(g, numDeriv::grad(llmc, par, data = x), tolerance = 1e-6)
 #'
 #' @export
 grmc <- function(par, data) {
@@ -1396,366 +835,22 @@ grmc <- function(par, data) {
 #' \code{\link[base]{trigamma}}.
 #'
 #' @examples
-#' \donttest{
-#' ## Example 1: Basic Hessian Evaluation
-#'
-#' # Generate sample data with more stable parameters
 #' set.seed(123)
-#' n <- 1000
-#' true_params <- c(gamma = 2.0, delta = 2.5, lambda = 1.5)
-#' data <- rmc(n,
-#'   gamma = true_params[1], delta = true_params[2],
-#'   lambda = true_params[3]
-#' )
+#' x <- rmc(1000, gamma = 0.5, delta = 5, lambda = 3)
+#' par <- c(gamma = 0.5, delta = 5, lambda = 3)
 #'
-#' # Evaluate Hessian at true parameters
-#' hess_true <- hsmc(par = true_params, data = data)
-#' cat("Hessian matrix at true parameters:\n")
-#' print(hess_true, digits = 4)
+#' ## Hessian of the negative log-likelihood llmc()
+#' H <- hsmc(par, x)
+#' isSymmetric(H)
 #'
-#' # Check symmetry
-#' cat(
-#'   "\nSymmetry check (max |H - H^T|):",
-#'   max(abs(hess_true - t(hess_true))), "\n"
-#' )
+#' ## Agrees with a numerical Hessian of llmc()
+#' if (requireNamespace("numDeriv", quietly = TRUE))
+#'   all.equal(H, numDeriv::hessian(llmc, par, data = x), tolerance = 1e-8)
 #'
-#'
-#' ## Example 2: Hessian Properties at MLE
-#'
-#' # Fit model
-#' fit <- optim(
-#'   par = c(1.5, 2.0, 1.0),
-#'   fn = llmc,
-#'   gr = grmc,
-#'   data = data,
-#'   method = "BFGS",
-#'   hessian = TRUE
-#' )
-#'
-#' mle <- fit$par
-#' names(mle) <- c("gamma", "delta", "lambda")
-#'
-#' # Hessian at MLE
-#' hessian_at_mle <- hsmc(par = mle, data = data)
-#' cat("\nHessian at MLE:\n")
-#' print(hessian_at_mle, digits = 4)
-#'
-#' # Compare with optim's numerical Hessian
-#' cat("\nComparison with optim Hessian:\n")
-#' cat(
-#'   "Max absolute difference:",
-#'   max(abs(hessian_at_mle - fit$hessian)), "\n"
-#' )
-#'
-#' # Eigenvalue analysis
-#' eigenvals <- eigen(hessian_at_mle, only.values = TRUE)$values
-#' cat("\nEigenvalues:\n")
-#' print(eigenvals)
-#'
-#' cat("\nPositive definite:", all(eigenvals > 0), "\n")
-#' cat("Condition number:", max(eigenvals) / min(eigenvals), "\n")
-#'
-#'
-#' ## Example 3: Standard Errors and Confidence Intervals
-#'
-#' # Observed information matrix
-#' obs_info <- hessian_at_mle
-#'
-#' # Variance-covariance matrix
-#' vcov_matrix <- solve(obs_info)
-#' cat("\nVariance-Covariance Matrix:\n")
-#' print(vcov_matrix, digits = 6)
-#'
-#' # Standard errors
-#' se <- sqrt(diag(vcov_matrix))
-#' names(se) <- c("gamma", "delta", "lambda")
-#'
-#' # Correlation matrix
-#' corr_matrix <- cov2cor(vcov_matrix)
-#' cat("\nCorrelation Matrix:\n")
-#' print(corr_matrix, digits = 4)
-#'
-#' # Confidence intervals
-#' z_crit <- qnorm(0.975)
-#' results <- data.frame(
-#'   Parameter = c("gamma", "delta", "lambda"),
-#'   True = true_params,
-#'   MLE = mle,
-#'   SE = se,
-#'   CI_Lower = mle - z_crit * se,
-#'   CI_Upper = mle + z_crit * se
-#' )
-#' print(results, digits = 4)
-#'
-#'
-#' ## Example 4: Determinant and Trace Analysis
-#'
-#' # Compute at different points
-#' test_params <- rbind(
-#'   c(1.5, 2.0, 1.0),
-#'   c(2.0, 2.5, 1.5),
-#'   mle,
-#'   c(2.5, 3.0, 2.0)
-#' )
-#'
-#' hess_properties <- data.frame(
-#'   Gamma = numeric(),
-#'   Delta = numeric(),
-#'   Lambda = numeric(),
-#'   Determinant = numeric(),
-#'   Trace = numeric(),
-#'   Min_Eigenval = numeric(),
-#'   Max_Eigenval = numeric(),
-#'   Cond_Number = numeric(),
-#'   stringsAsFactors = FALSE
-#' )
-#'
-#' for (i in 1:nrow(test_params)) {
-#'   H <- hsmc(par = test_params[i, ], data = data)
-#'   eigs <- eigen(H, only.values = TRUE)$values
-#'
-#'   hess_properties <- rbind(hess_properties, data.frame(
-#'     Gamma = test_params[i, 1],
-#'     Delta = test_params[i, 2],
-#'     Lambda = test_params[i, 3],
-#'     Determinant = det(H),
-#'     Trace = sum(diag(H)),
-#'     Min_Eigenval = min(eigs),
-#'     Max_Eigenval = max(eigs),
-#'     Cond_Number = max(eigs) / min(eigs)
-#'   ))
-#' }
-#'
-#' cat("\nHessian Properties at Different Points:\n")
-#' print(hess_properties, digits = 4, row.names = FALSE)
-#'
-#'
-#' ## Example 5: Curvature Visualization (All pairs side by side)
-#'
-#' # Create grids around MLE with wider range (±1.5)
-#' gamma_grid <- seq(mle[1] - 1.5, mle[1] + 1.5, length.out = 25)
-#' delta_grid <- seq(mle[2] - 1.5, mle[2] + 1.5, length.out = 25)
-#' lambda_grid <- seq(mle[3] - 1.5, mle[3] + 1.5, length.out = 25)
-#'
-#' gamma_grid <- gamma_grid[gamma_grid > 0]
-#' delta_grid <- delta_grid[delta_grid > 0]
-#' lambda_grid <- lambda_grid[lambda_grid > 0]
-#'
-#' # Compute curvature measures for all pairs
-#' determinant_surface_gd <- matrix(NA, nrow = length(gamma_grid), ncol = length(delta_grid))
-#' trace_surface_gd <- matrix(NA, nrow = length(gamma_grid), ncol = length(delta_grid))
-#'
-#' determinant_surface_gl <- matrix(NA, nrow = length(gamma_grid), ncol = length(lambda_grid))
-#' trace_surface_gl <- matrix(NA, nrow = length(gamma_grid), ncol = length(lambda_grid))
-#'
-#' determinant_surface_dl <- matrix(NA, nrow = length(delta_grid), ncol = length(lambda_grid))
-#' trace_surface_dl <- matrix(NA, nrow = length(delta_grid), ncol = length(lambda_grid))
-#'
-#' # Gamma vs Delta
-#' for (i in seq_along(gamma_grid)) {
-#'   for (j in seq_along(delta_grid)) {
-#'     H <- hsmc(c(gamma_grid[i], delta_grid[j], mle[3]), data)
-#'     determinant_surface_gd[i, j] <- det(H)
-#'     trace_surface_gd[i, j] <- sum(diag(H))
-#'   }
-#' }
-#'
-#' # Gamma vs Lambda
-#' for (i in seq_along(gamma_grid)) {
-#'   for (j in seq_along(lambda_grid)) {
-#'     H <- hsmc(c(gamma_grid[i], mle[2], lambda_grid[j]), data)
-#'     determinant_surface_gl[i, j] <- det(H)
-#'     trace_surface_gl[i, j] <- sum(diag(H))
-#'   }
-#' }
-#'
-#' # Delta vs Lambda
-#' for (i in seq_along(delta_grid)) {
-#'   for (j in seq_along(lambda_grid)) {
-#'     H <- hsmc(c(mle[1], delta_grid[i], lambda_grid[j]), data)
-#'     determinant_surface_dl[i, j] <- det(H)
-#'     trace_surface_dl[i, j] <- sum(diag(H))
-#'   }
-#' }
-#'
-#' # Plot
-#'
-#' # Determinant plots
-#' contour(gamma_grid, delta_grid, determinant_surface_gd,
-#'   xlab = expression(gamma), ylab = expression(delta),
-#'   main = "Determinant: Gamma vs Delta", las = 1,
-#'   col = "#2E4057", lwd = 1.5, nlevels = 15
-#' )
-#' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' contour(gamma_grid, lambda_grid, determinant_surface_gl,
-#'   xlab = expression(gamma), ylab = expression(lambda),
-#'   main = "Determinant: Gamma vs Lambda", las = 1,
-#'   col = "#2E4057", lwd = 1.5, nlevels = 15
-#' )
-#' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' contour(delta_grid, lambda_grid, determinant_surface_dl,
-#'   xlab = expression(delta), ylab = expression(lambda),
-#'   main = "Determinant: Delta vs Lambda", las = 1,
-#'   col = "#2E4057", lwd = 1.5, nlevels = 15
-#' )
-#' points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' # Trace plots
-#' contour(gamma_grid, delta_grid, trace_surface_gd,
-#'   xlab = expression(gamma), ylab = expression(delta),
-#'   main = "Trace: Gamma vs Delta", las = 1,
-#'   col = "#2E4057", lwd = 1.5, nlevels = 15
-#' )
-#' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' contour(gamma_grid, lambda_grid, trace_surface_gl,
-#'   xlab = expression(gamma), ylab = expression(lambda),
-#'   main = "Trace: Gamma vs Lambda", las = 1,
-#'   col = "#2E4057", lwd = 1.5, nlevels = 15
-#' )
-#' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' contour(delta_grid, lambda_grid, trace_surface_dl,
-#'   xlab = expression(delta), ylab = expression(lambda),
-#'   main = "Trace: Delta vs Lambda", las = 1,
-#'   col = "#2E4057", lwd = 1.5, nlevels = 15
-#' )
-#' points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' legend("topright",
-#'   legend = c("MLE", "True"),
-#'   col = c("#8B0000", "#006400"),
-#'   pch = c(19, 17),
-#'   bty = "n", cex = 0.8
-#' )
-#'
-#' ## Example 6: Confidence Ellipses (All pairs side by side)
-#'
-#' # Extract all 2x2 submatrices
-#' vcov_gd <- vcov_matrix[1:2, 1:2]
-#' vcov_gl <- vcov_matrix[c(1, 3), c(1, 3)]
-#' vcov_dl <- vcov_matrix[2:3, 2:3]
-#'
-#' # Create confidence ellipses
-#' theta <- seq(0, 2 * pi, length.out = 100)
-#' chi2_val <- qchisq(0.95, df = 2)
-#'
-#' # Gamma vs Delta ellipse
-#' # The observed information is not guaranteed positive definite at a
-#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
-#' # below stays finite and the region remains drawable.
-#' eig_decomp_gd <- eigen(vcov_gd, symmetric = TRUE)
-#' eig_decomp_gd$values <- pmax(eig_decomp_gd$values, 0)
-#' ellipse_gd <- matrix(NA, nrow = 100, ncol = 2)
-#' for (i in 1:100) {
-#'   v <- c(cos(theta[i]), sin(theta[i]))
-#'   ellipse_gd[i, ] <- mle[1:2] + sqrt(chi2_val) *
-#'     (eig_decomp_gd$vectors %*% diag(sqrt(eig_decomp_gd$values)) %*% v)
-#' }
-#'
-#' # Gamma vs Lambda ellipse
-#' # The observed information is not guaranteed positive definite at a
-#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
-#' # below stays finite and the region remains drawable.
-#' eig_decomp_gl <- eigen(vcov_gl, symmetric = TRUE)
-#' eig_decomp_gl$values <- pmax(eig_decomp_gl$values, 0)
-#' ellipse_gl <- matrix(NA, nrow = 100, ncol = 2)
-#' for (i in 1:100) {
-#'   v <- c(cos(theta[i]), sin(theta[i]))
-#'   ellipse_gl[i, ] <- mle[c(1, 3)] + sqrt(chi2_val) *
-#'     (eig_decomp_gl$vectors %*% diag(sqrt(eig_decomp_gl$values)) %*% v)
-#' }
-#'
-#' # Delta vs Lambda ellipse
-#' # The observed information is not guaranteed positive definite at a
-#' # numerical optimum on a flat ridge; clamp the eigenvalues so sqrt()
-#' # below stays finite and the region remains drawable.
-#' eig_decomp_dl <- eigen(vcov_dl, symmetric = TRUE)
-#' eig_decomp_dl$values <- pmax(eig_decomp_dl$values, 0)
-#' ellipse_dl <- matrix(NA, nrow = 100, ncol = 2)
-#' for (i in 1:100) {
-#'   v <- c(cos(theta[i]), sin(theta[i]))
-#'   ellipse_dl[i, ] <- mle[2:3] + sqrt(chi2_val) *
-#'     (eig_decomp_dl$vectors %*% diag(sqrt(eig_decomp_dl$values)) %*% v)
-#' }
-#'
-#' # Marginal confidence intervals
-#' se_gd <- sqrt(diag(vcov_gd))
-#' ci_gamma_gd <- mle[1] + c(-1, 1) * 1.96 * se_gd[1]
-#' ci_delta_gd <- mle[2] + c(-1, 1) * 1.96 * se_gd[2]
-#'
-#' se_gl <- sqrt(diag(vcov_gl))
-#' ci_gamma_gl <- mle[1] + c(-1, 1) * 1.96 * se_gl[1]
-#' ci_lambda_gl <- mle[3] + c(-1, 1) * 1.96 * se_gl[2]
-#'
-#' se_dl <- sqrt(diag(vcov_dl))
-#' ci_delta_dl <- mle[2] + c(-1, 1) * 1.96 * se_dl[1]
-#' ci_lambda_dl <- mle[3] + c(-1, 1) * 1.96 * se_dl[2]
-#'
-#' # Plot
-#'
-#' # Gamma vs Delta
-#' plot(ellipse_gd[, 1], ellipse_gd[, 2],
-#'   type = "l", lwd = 2, col = "#2E4057",
-#'   xlab = expression(gamma), ylab = expression(delta),
-#'   main = "Gamma vs Delta", las = 1, xlim = range(ellipse_gd[, 1], ci_gamma_gd),
-#'   ylim = range(ellipse_gd[, 2], ci_delta_gd)
-#' )
-#' abline(v = ci_gamma_gd, col = "#808080", lty = 3, lwd = 1.5)
-#' abline(h = ci_delta_gd, col = "#808080", lty = 3, lwd = 1.5)
-#' points(mle[1], mle[2], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[1], true_params[2], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' # Gamma vs Lambda
-#' plot(ellipse_gl[, 1], ellipse_gl[, 2],
-#'   type = "l", lwd = 2, col = "#2E4057",
-#'   xlab = expression(gamma), ylab = expression(lambda),
-#'   main = "Gamma vs Lambda", las = 1, xlim = range(ellipse_gl[, 1], ci_gamma_gl),
-#'   ylim = range(ellipse_gl[, 2], ci_lambda_gl)
-#' )
-#' abline(v = ci_gamma_gl, col = "#808080", lty = 3, lwd = 1.5)
-#' abline(h = ci_lambda_gl, col = "#808080", lty = 3, lwd = 1.5)
-#' points(mle[1], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[1], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' # Delta vs Lambda
-#' plot(ellipse_dl[, 1], ellipse_dl[, 2],
-#'   type = "l", lwd = 2, col = "#2E4057",
-#'   xlab = expression(delta), ylab = expression(lambda),
-#'   main = "Delta vs Lambda", las = 1, xlim = range(ellipse_dl[, 1], ci_delta_dl),
-#'   ylim = range(ellipse_dl[, 2], ci_lambda_dl)
-#' )
-#' abline(v = ci_delta_dl, col = "#808080", lty = 3, lwd = 1.5)
-#' abline(h = ci_lambda_dl, col = "#808080", lty = 3, lwd = 1.5)
-#' points(mle[2], mle[3], pch = 19, col = "#8B0000", cex = 1.5)
-#' points(true_params[2], true_params[3], pch = 17, col = "#006400", cex = 1.5)
-#' grid(col = "gray90")
-#'
-#' legend("topright",
-#'   legend = c("MLE", "True", "95% CR", "Marginal 95% CI"),
-#'   col = c("#8B0000", "#006400", "#2E4057", "#808080"),
-#'   pch = c(19, 17, NA, NA),
-#'   lty = c(NA, NA, 1, 3),
-#'   lwd = c(NA, NA, 2, 1.5),
-#'   bty = "n", cex = 0.8
-#' )
-#' }
+#' ## At the MLE it is the observed information; its inverse estimates the
+#' ## covariance of the estimates
+#' fit <- optim(par, llmc, grmc, data = x, method = "L-BFGS-B", lower = 1e-4)
+#' sqrt(diag(solve(hsmc(fit$par, x))))  # standard errors
 #'
 #' @export
 hsmc <- function(par, data) {

@@ -85,43 +85,16 @@ Numerical stability is maintained by handling boundary cases (\code{p = 0},
 arguments to powers are non-negative).
 }
 \examples{
-# Basic quantile calculation (median)
-median_val <- qgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-print(median_val)
+p <- c(0.1, 0.5, 0.9)
+qgkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2)
+qgkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2,
+    lower.tail = FALSE)  # upper-tail quantiles
 
-# Computing multiple quantiles
-probs <- c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)
-quantiles <- qgkw(probs, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-print(quantiles)
+## qgkw() inverts pgkw()
+all.equal(pgkw(qgkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5,
+    lambda = 1.2), alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2),
+    p)
 
-# Upper tail quantile (e.g., find x such that P(X > x) = 0.1, which is 90th percentile)
-q90 <- qgkw(0.1,
-  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-  lower.tail = FALSE
-)
-print(q90)
-# Check: should match quantile for p = 0.9 with lower.tail = TRUE
-print(qgkw(0.9, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1))
-
-# Log probabilities
-median_logp <- qgkw(log(0.5),
-  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-  log.p = TRUE
-)
-print(median_logp) # Should match median_val
-
-# Vectorized parameters
-alphas_vec <- c(0.5, 1.0, 2.0)
-betas_vec <- c(1.0, 2.0, 3.0)
-# Get median for 3 different GKw distributions
-medians_vec <- qgkw(0.5, alpha = alphas_vec, beta = betas_vec, gamma = 1, delta = 0, lambda = 1)
-print(medians_vec)
-
-# Verify inverse relationship with pgkw
-p_val <- 0.75
-x_val <- qgkw(p_val, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-p_check <- pgkw(x_val, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-print(paste("Calculated p:", p_check, " (Expected:", p_val, ")"))
 }
 \references{
 Carrasco, J. M. F., Ferrari, S. L. P., & Cordeiro, G. M. (2010). A new

@@ -81,51 +81,14 @@ via \code{qbeta(p, gamma, delta + 1, ...)} while respecting the
 \code{lower.tail} and \code{log.p} arguments.
 }
 \examples{
-# Example values
-p_vals <- c(0.1, 0.5, 0.9)
-alpha_par <- 2.0
-beta_par <- 1.5
-gamma_par <- 1.0
-delta_par <- 0.5
+p <- c(0.1, 0.5, 0.9)
+qbkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5)
+# upper-tail quantiles
+qbkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lower.tail = FALSE)
 
-# Calculate quantiles
-quantiles <- qbkw(p_vals, alpha_par, beta_par, gamma_par, delta_par)
-print(quantiles)
-
-# Calculate quantiles for upper tail probabilities P(X > q) = p
-quantiles_upper <- qbkw(p_vals, alpha_par, beta_par, gamma_par, delta_par,
-  lower.tail = FALSE
-)
-print(quantiles_upper)
-# Check: qbkw(p, ..., lt=F) == qbkw(1-p, ..., lt=T)
-print(qbkw(1 - p_vals, alpha_par, beta_par, gamma_par, delta_par))
-
-# Calculate quantiles from log probabilities
-log.p_vals <- log(p_vals)
-quantiles_logp <- qbkw(log.p_vals, alpha_par, beta_par, gamma_par, delta_par,
-  log.p = TRUE
-)
-print(quantiles_logp)
-# Check: should match original quantiles
-print(quantiles)
-
-# Compare with qgkw setting lambda = 1
-quantiles_gkw <- qgkw(p_vals, alpha_par, beta_par,
-  gamma = gamma_par,
-  delta = delta_par, lambda = 1.0
-)
-print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-
-# Verify inverse relationship with pbkw
-p_check <- 0.75
-q_calc <- qbkw(p_check, alpha_par, beta_par, gamma_par, delta_par)
-p_recalc <- pbkw(q_calc, alpha_par, beta_par, gamma_par, delta_par)
-print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
-
-# Boundary conditions
-print(qbkw(c(0, 1), alpha_par, beta_par, gamma_par, delta_par)) # Should be 0, 1
-print(qbkw(c(-Inf, 0), alpha_par, beta_par, gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
+## qbkw() inverts pbkw()
+all.equal(pbkw(qbkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5),
+    alpha = 2, beta = 3, gamma = 1.5, delta = 0.5), p)
 
 }
 \references{

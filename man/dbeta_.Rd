@@ -62,49 +62,17 @@ where \code{dbeta(x, shape1, shape2)} uses \code{shape2} directly. Here,
 \code{shape1 = gamma} and \code{shape2 = delta + 1}.
 }
 \examples{
-# Example values
-x_vals <- c(0.2, 0.5, 0.8)
-gamma_par <- 2.0 # Corresponds to shape1
-delta_par <- 3.0 # Corresponds to shape2 - 1
-shape1 <- gamma_par
-shape2 <- delta_par + 1
+x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+dbeta_(x, gamma = 2, delta = 3)
+dbeta_(x, gamma = 2, delta = 3, log = TRUE)
 
-# Calculate density using dbeta_
-densities <- dbeta_(x_vals, gamma_par, delta_par)
-print(densities)
+## The package's Beta(gamma, delta) is stats::dbeta with shapes gamma, delta + 1
+all.equal(dbeta_(x, 2, 3), stats::dbeta(x, 2, 4))
 
-# Compare with stats::dbeta
-densities_stats <- stats::dbeta(x_vals, shape1 = shape1, shape2 = shape2)
-print(paste("Max difference vs stats::dbeta:", max(abs(densities - densities_stats))))
+## The density integrates to one
+integrate(dbeta_, 0, 1, gamma = 2, delta = 3, rel.tol = 1e-10)
 
-# Compare with dgkw setting alpha=1, beta=1, lambda=1
-densities_gkw <- dgkw(x_vals,
-  alpha = 1.0, beta = 1.0, gamma = gamma_par,
-  delta = delta_par, lambda = 1.0
-)
-print(paste("Max difference vs dgkw:", max(abs(densities - densities_gkw))))
-
-# Compare with dmc setting lambda=1
-densities_mc <- dmc(x_vals, gamma = gamma_par, delta = delta_par, lambda = 1.0)
-print(paste("Max difference vs dmc:", max(abs(densities - densities_mc))))
-
-# Calculate log-density
-log_densities <- dbeta_(x_vals, gamma_par, delta_par, log = TRUE)
-print(log_densities)
-print(stats::dbeta(x_vals, shape1 = shape1, shape2 = shape2, log = TRUE))
-
-# Plot the density
-curve_x <- seq(0.001, 0.999, length.out = 200)
-curve_y <- dbeta_(curve_x, gamma = 2, delta = 3) # Beta(2, 4)
-plot(curve_x, curve_y,
-  type = "l", main = "Beta(2, 4) Density via dbeta_",
-  xlab = "x", ylab = "f(x)", col = "blue"
-)
-curve(stats::dbeta(x, 2, 4), add = TRUE, col = "red", lty = 2)
-legend("topright",
-  legend = c("dbeta_(gamma=2, delta=3)", "stats::dbeta(shape1=2, shape2=4)"),
-  col = c("blue", "red"), lty = c(1, 2), bty = "n"
-)
+curve(dbeta_(x, gamma = 2, delta = 3), from = 0, to = 1, ylab = "density")
 
 }
 \references{

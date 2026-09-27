@@ -74,39 +74,22 @@ The function includes checks for valid parameters and input values \code{x}.
 It uses numerical stabilization for \code{x} close to 0 or 1.
 }
 \examples{
-# Simple density evaluation at a point
-dgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1) # Kw case
+x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+dgkw(x, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2)
+dgkw(x, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2, log = TRUE)
 
-# Plot the PDF for various parameter sets
-x_vals <- seq(0.01, 0.99, by = 0.01)
+## Kumaraswamy is GKw with gamma = 1, delta = 0, lambda = 1 (the defaults)
+all.equal(dgkw(x, alpha = 2, beta = 3), dkw(x, alpha = 2, beta = 3))
 
-# Standard Kumaraswamy (gamma=1, delta=0, lambda=1)
-pdf_kw <- dgkw(x_vals, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
+## Beta(gamma, delta + 1) is GKw with alpha = beta = lambda = 1
+all.equal(dgkw(x, gamma = 2, delta = 3), stats::dbeta(x, 2, 4))
 
-# Beta equivalent (alpha=1, beta=1, lambda=1) - Beta(gamma, delta+1)
-pdf_beta <- dgkw(x_vals, alpha = 1, beta = 1, gamma = 2, delta = 3, lambda = 1)
-# Compare with stats::dbeta
-pdf_beta_check <- stats::dbeta(x_vals, shape1 = 2, shape2 = 3 + 1)
-print(max(abs(pdf_beta - pdf_beta_check))) # Should be close to zero
+## The density integrates to one
+integrate(dgkw, 0, 1, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5,
+    lambda = 1.2, rel.tol = 1e-10)
 
-# Exponentiated Kumaraswamy (gamma=1, delta=0)
-pdf_ekw <- dgkw(x_vals, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 2)
-
-plot(x_vals, pdf_kw,
-  type = "l", ylim = range(c(pdf_kw, pdf_beta, pdf_ekw)),
-  main = "GKw Densities Examples", ylab = "f(x)", xlab = "x", col = "blue"
-)
-lines(x_vals, pdf_beta, col = "red")
-lines(x_vals, pdf_ekw, col = "green")
-legend("topright",
-  legend = c("Kw(2,3)", "Beta(2,4) equivalent", "EKw(2,3, lambda=2)"),
-  col = c("blue", "red", "green"), lty = 1, bty = "n"
-)
-
-# Log-density
-log.pdf_val <- dgkw(0.5, 2, 3, 1, 0, 1, log = TRUE)
-print(log.pdf_val)
-print(log(dgkw(0.5, 2, 3, 1, 0, 1))) # Should match
+curve(dgkw(x, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2),
+    from = 0, to = 1, ylab = "density")
 
 }
 \references{

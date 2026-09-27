@@ -51,40 +51,14 @@ consistent parameter recycling and handling within the C++ environment,
 matching the style of other functions in the related families.
 }
 \examples{
-set.seed(2030) # for reproducibility
+set.seed(123)
+x <- rbeta_(1000, gamma = 2, delta = 3)
+summary(x)
 
-# Generate 1000 samples using rbeta_
-gamma_par <- 2.0 # Corresponds to shape1
-delta_par <- 3.0 # Corresponds to shape2 - 1
-shape1 <- gamma_par
-shape2 <- delta_par + 1
-
-x_sample <- rbeta_(1000, gamma = gamma_par, delta = delta_par)
-summary(x_sample)
-
-# Compare with stats::rbeta
-x_sample_stats <- stats::rbeta(1000, shape1 = shape1, shape2 = shape2)
-# Visually compare histograms or QQ-plots
-hist(x_sample, main = "rbeta_ Sample", freq = FALSE, breaks = 30)
-curve(dbeta_(x, gamma_par, delta_par), add = TRUE, col = "red", lwd = 2)
-hist(x_sample_stats, main = "stats::rbeta Sample", freq = FALSE, breaks = 30)
-curve(stats::dbeta(x, shape1, shape2), add = TRUE, col = "blue", lwd = 2)
-# Compare summary stats (should be similar due to randomness)
-print(summary(x_sample))
-print(summary(x_sample_stats))
-
-# Compare summary stats with rgkw(alpha=1, beta=1, lambda=1)
-x_sample_gkw <- rgkw(1000,
-  alpha = 1.0, beta = 1.0, gamma = gamma_par,
-  delta = delta_par, lambda = 1.0
-)
-print("Summary stats for rgkw(a=1,b=1,l=1) sample:")
-print(summary(x_sample_gkw))
-
-# Compare summary stats with rmc(lambda=1)
-x_sample_mc <- rmc(1000, gamma = gamma_par, delta = delta_par, lambda = 1.0)
-print("Summary stats for rmc(l=1) sample:")
-print(summary(x_sample_mc))
+## The sample follows the distribution
+hist(x, breaks = 30, freq = FALSE, main = "")
+curve(dbeta_(x, gamma = 2, delta = 3), add = TRUE)
+ks.test(x, pbeta_, gamma = 2, delta = 3)
 
 }
 \references{
