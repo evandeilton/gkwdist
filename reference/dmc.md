@@ -110,48 +110,20 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-x_vals <- c(0.2, 0.5, 0.8)
-gamma_par <- 2.0
-delta_par <- 1.5
-lambda_par <- 1.0 # Equivalent to Beta(gamma, delta+1)
+x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+dmc(x, gamma = 0.5, delta = 5, lambda = 3)
+#> [1] 1.277650206 1.939587413 1.472684770 0.415872685 0.005630568
+dmc(x, gamma = 0.5, delta = 5, lambda = 3, log = TRUE)
+#> [1]  0.2450226  0.6624753  0.3870871 -0.8773761 -5.1795449
 
-# Calculate density using dmc
-densities <- dmc(x_vals, gamma_par, delta_par, lambda_par)
-print(densities)
-#> [1] 1.252198 1.546796 0.626099
-# Compare with Beta density
-print(stats::dbeta(x_vals, shape1 = gamma_par, shape2 = delta_par + 1))
-#> [1] 1.252198 1.546796 0.626099
+## Mc is GKw with alpha = beta = 1
+all.equal(dmc(x, 0.5, 5, 3), dgkw(x, 1, 1, 0.5, 5, 3))
+#> [1] TRUE
 
-# Calculate log-density
-log_densities <- dmc(x_vals, gamma_par, delta_par, lambda_par, log = TRUE)
-print(log_densities)
-#> [1]  0.2249005  0.4361857 -0.4682467
+## The density integrates to one
+integrate(dmc, 0, 1, gamma = 0.5, delta = 5, lambda = 3, rel.tol = 1e-10)
+#> 1 with absolute error < 1.4e-12
 
-# Compare with dgkw setting alpha = 1, beta = 1
-densities_gkw <- dgkw(x_vals,
-  alpha = 1.0, beta = 1.0, gamma = gamma_par,
-  delta = delta_par, lambda = lambda_par
-)
-print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#> [1] "Max difference: 0"
-
-# Plot the density for different lambda values
-curve_x <- seq(0.01, 0.99, length.out = 200)
-curve_y1 <- dmc(curve_x, gamma = 2, delta = 3, lambda = 0.5)
-curve_y2 <- dmc(curve_x, gamma = 2, delta = 3, lambda = 1.0) # Beta(2, 4)
-curve_y3 <- dmc(curve_x, gamma = 2, delta = 3, lambda = 2.0)
-
-plot(curve_x, curve_y2,
-  type = "l", main = "McDonald (Mc) Density (gamma=2, delta=3)",
-  xlab = "x", ylab = "f(x)", col = "red", ylim = range(0, curve_y1, curve_y2, curve_y3)
-)
-lines(curve_x, curve_y1, col = "blue")
-lines(curve_x, curve_y3, col = "green")
-legend("topright",
-  legend = c("lambda=0.5", "lambda=1.0 (Beta)", "lambda=2.0"),
-  col = c("blue", "red", "green"), lty = 1, bty = "n"
-)
+curve(dmc(x, gamma = 0.5, delta = 5, lambda = 3), from = 0, to = 1, ylab = "density")
 
 ```

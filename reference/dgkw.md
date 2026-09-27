@@ -130,42 +130,26 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Simple density evaluation at a point
-dgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1) # Kw case
-#> [1] 1.6875
+x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+dgkw(x, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2)
+#> [1] 0.10703949 1.33993326 2.30916136 1.18032685 0.05372826
+dgkw(x, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2, log = TRUE)
+#> [1] -2.2345574  0.2926198  0.8368844  0.1657914 -2.9238161
 
-# Plot the PDF for various parameter sets
-x_vals <- seq(0.01, 0.99, by = 0.01)
+## Kumaraswamy is GKw with gamma = 1, delta = 0, lambda = 1 (the defaults)
+all.equal(dgkw(x, alpha = 2, beta = 3), dkw(x, alpha = 2, beta = 3))
+#> [1] TRUE
 
-# Standard Kumaraswamy (gamma=1, delta=0, lambda=1)
-pdf_kw <- dgkw(x_vals, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
+## Beta(gamma, delta + 1) is GKw with alpha = beta = lambda = 1
+all.equal(dgkw(x, gamma = 2, delta = 3), stats::dbeta(x, 2, 4))
+#> [1] TRUE
 
-# Beta equivalent (alpha=1, beta=1, lambda=1) - Beta(gamma, delta+1)
-pdf_beta <- dgkw(x_vals, alpha = 1, beta = 1, gamma = 2, delta = 3, lambda = 1)
-# Compare with stats::dbeta
-pdf_beta_check <- stats::dbeta(x_vals, shape1 = 2, shape2 = 3 + 1)
-print(max(abs(pdf_beta - pdf_beta_check))) # Should be close to zero
-#> [1] 4.440892e-16
+## The density integrates to one
+integrate(dgkw, 0, 1, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5,
+    lambda = 1.2, rel.tol = 1e-10)
+#> 1 with absolute error < 4.1e-11
 
-# Exponentiated Kumaraswamy (gamma=1, delta=0)
-pdf_ekw <- dgkw(x_vals, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 2)
+curve(dgkw(x, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2),
+    from = 0, to = 1, ylab = "density")
 
-plot(x_vals, pdf_kw,
-  type = "l", ylim = range(c(pdf_kw, pdf_beta, pdf_ekw)),
-  main = "GKw Densities Examples", ylab = "f(x)", xlab = "x", col = "blue"
-)
-lines(x_vals, pdf_beta, col = "red")
-lines(x_vals, pdf_ekw, col = "green")
-legend("topright",
-  legend = c("Kw(2,3)", "Beta(2,4) equivalent", "EKw(2,3, lambda=2)"),
-  col = c("blue", "red", "green"), lty = 1, bty = "n"
-)
-
-
-# Log-density
-log.pdf_val <- dgkw(0.5, 2, 3, 1, 0, 1, log = TRUE)
-print(log.pdf_val)
-#> [1] 0.5232481
-print(log(dgkw(0.5, 2, 3, 1, 0, 1))) # Should match
-#> [1] 0.5232481
 ```

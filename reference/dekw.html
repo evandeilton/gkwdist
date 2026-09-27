@@ -46,7 +46,7 @@ This distribution is defined on the interval (0, 1)."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Density of the Exponentiated Kumaraswamy (EKw) Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/v1.1.7/R/ekw.R" class="external-link"><code>R/ekw.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/ekw.R" class="external-link"><code>R/ekw.R</code></a></small>
       <div class="d-none name"><code>dekw.Rd</code></div>
     </div>
 
@@ -151,49 +151,21 @@ double-bounded random processes. <em>Journal of Hydrology</em>, <em>46</em>(1-2)
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example values</span></span></span>
-<span class="r-in"><span><span class="va">x_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">alpha_par</span> <span class="op">&lt;-</span> <span class="fl">2.0</span></span></span>
-<span class="r-in"><span><span class="va">beta_par</span> <span class="op">&lt;-</span> <span class="fl">3.0</span></span></span>
-<span class="r-in"><span><span class="va">lambda_par</span> <span class="op">&lt;-</span> <span class="fl">1.5</span> <span class="co"># Exponent parameter</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">dekw</span><span class="op">(</span><span class="va">x</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, lambda <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.3492666 1.3516831 1.8148025 1.2741180 0.2336062</span>
+<span class="r-in"><span><span class="fu">dekw</span><span class="op">(</span><span class="va">x</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, lambda <span class="op">=</span> <span class="fl">1.2</span>, log <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -1.0519197  0.3013506  0.5959767  0.2422542 -1.4541184</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Calculate density</span></span></span>
-<span class="r-in"><span><span class="va">densities</span> <span class="op">&lt;-</span> <span class="fu">dekw</span><span class="op">(</span><span class="va">x_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">lambda_par</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">densities</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5631989 1.9246241 0.9110922</span>
+<span class="r-in"><span><span class="co">## EKw is GKw with gamma = 1, delta = 0</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu">dekw</span><span class="op">(</span><span class="va">x</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1.2</span><span class="op">)</span>, <span class="fu"><a href="dgkw.html">dgkw</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">2</span>, <span class="fl">3</span>, gamma <span class="op">=</span> <span class="fl">1</span>, delta <span class="op">=</span> <span class="fl">0</span>, lambda <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Calculate log-density</span></span></span>
-<span class="r-in"><span><span class="va">log_densities</span> <span class="op">&lt;-</span> <span class="fu">dekw</span><span class="op">(</span><span class="va">x_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>, <span class="va">lambda_par</span>, log <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">log_densities</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.57412239  0.65473067 -0.09311121</span>
-<span class="r-in"><span><span class="co"># Check: should match log(densities)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">densities</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.57412239  0.65473067 -0.09311121</span>
+<span class="r-in"><span><span class="co">## The density integrates to one</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/integrate.html" class="external-link">integrate</a></span><span class="op">(</span><span class="va">dekw</span>, <span class="fl">0</span>, <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, lambda <span class="op">=</span> <span class="fl">1.2</span>, rel.tol <span class="op">=</span> <span class="fl">1e-10</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 with absolute error &lt; 2.6e-13</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Compare with dgkw setting gamma = 1, delta = 0</span></span></span>
-<span class="r-in"><span><span class="va">densities_gkw</span> <span class="op">&lt;-</span> <span class="fu"><a href="dgkw.html">dgkw</a></span><span class="op">(</span><span class="va">x_vals</span>, <span class="va">alpha_par</span>, <span class="va">beta_par</span>,</span></span>
-<span class="r-in"><span>  gamma <span class="op">=</span> <span class="fl">1.0</span>, delta <span class="op">=</span> <span class="fl">0.0</span>,</span></span>
-<span class="r-in"><span>  lambda <span class="op">=</span> <span class="va">lambda_par</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Max difference:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">densities</span> <span class="op">-</span> <span class="va">densities_gkw</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># Should be near zero</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Max difference: 0"</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Plot the density for different lambda values</span></span></span>
-<span class="r-in"><span><span class="va">curve_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.99</span>, length.out <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">curve_y1</span> <span class="op">&lt;-</span> <span class="fu">dekw</span><span class="op">(</span><span class="va">curve_x</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, lambda <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="co"># less peaked</span></span></span>
-<span class="r-in"><span><span class="va">curve_y2</span> <span class="op">&lt;-</span> <span class="fu">dekw</span><span class="op">(</span><span class="va">curve_x</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, lambda <span class="op">=</span> <span class="fl">1.0</span><span class="op">)</span> <span class="co"># standard Kw</span></span></span>
-<span class="r-in"><span><span class="va">curve_y3</span> <span class="op">&lt;-</span> <span class="fu">dekw</span><span class="op">(</span><span class="va">curve_x</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, lambda <span class="op">=</span> <span class="fl">2.0</span><span class="op">)</span> <span class="co"># more peaked</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">curve_x</span>, <span class="va">curve_y2</span>,</span></span>
-<span class="r-in"><span>  type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"EKw Density Examples (alpha=2, beta=3)"</span>,</span></span>
-<span class="r-in"><span>  xlab <span class="op">=</span> <span class="st">"x"</span>, ylab <span class="op">=</span> <span class="st">"f(x)"</span>, col <span class="op">=</span> <span class="st">"red"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">curve_y1</span>, <span class="va">curve_y2</span>, <span class="va">curve_y3</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">curve_x</span>, <span class="va">curve_y1</span>, col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">curve_x</span>, <span class="va">curve_y3</span>, col <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>,</span></span>
-<span class="r-in"><span>  legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lambda=0.5"</span>, <span class="st">"lambda=1.0 (Kw)"</span>, <span class="st">"lambda=2.0"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"red"</span>, <span class="st">"green"</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">1</span>, bty <span class="op">=</span> <span class="st">"n"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/curve.html" class="external-link">curve</a></span><span class="op">(</span><span class="fu">dekw</span><span class="op">(</span><span class="va">x</span>, alpha <span class="op">=</span> <span class="fl">2</span>, beta <span class="op">=</span> <span class="fl">3</span>, lambda <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span>, from <span class="op">=</span> <span class="fl">0</span>, to <span class="op">=</span> <span class="fl">1</span>, ylab <span class="op">=</span> <span class="st">"density"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="dekw-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

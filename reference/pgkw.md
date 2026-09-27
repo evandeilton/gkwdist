@@ -133,59 +133,19 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Simple CDF evaluation
-prob <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1) # Kw case
-print(prob)
-#> [1] 0.578125
+q <- c(0.2, 0.5, 0.8)
+pgkw(q, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2)
+#> [1] 0.03395476 0.52305959 0.97804668
+pgkw(q, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2,
+    lower.tail = FALSE)  # P(X > q)
+#> [1] 0.96604524 0.47694041 0.02195332
+pgkw(q, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2,
+    log.p = TRUE)
+#> [1] -3.38272635 -0.64805989 -0.02219788
 
-# Upper tail probability P(X > q)
-prob_upper <- pgkw(0.5,
-  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-  lower.tail = FALSE
-)
-print(prob_upper)
-#> [1] 0.421875
-# Check: prob + prob_upper should be 1
-print(prob + prob_upper)
-#> [1] 1
-
-# Log probability
-log <- pgkw(0.5,
-  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-  log.p = TRUE
-)
-print(log)
-#> [1] -0.5479652
-# Check: exp(log) should be prob
-print(exp(log))
-#> [1] 0.578125
-
-# Use of vectorized parameters
-q_vals <- c(0.2, 0.5, 0.8)
-alphas_vec <- c(0.5, 1.0, 2.0)
-betas_vec <- c(1.0, 2.0, 3.0)
-# Vectorizes over q, alpha, beta
-pgkw(q_vals, alpha = alphas_vec, beta = betas_vec, gamma = 1, delta = 0.5, lambda = 0.5)
-#> [1] 0.8093429 0.9509619 0.9963730
-
-# Plotting the CDF for special cases
-x_seq <- seq(0.01, 0.99, by = 0.01)
-# Standard Kumaraswamy CDF
-cdf_kw <- pgkw(x_seq, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-# Beta distribution CDF equivalent (Beta(gamma, delta+1))
-cdf_beta_equiv <- pgkw(x_seq, alpha = 1, beta = 1, gamma = 2, delta = 3, lambda = 1)
-# Compare with stats::pbeta
-cdf_beta_check <- stats::pbeta(x_seq, shape1 = 2, shape2 = 3 + 1)
-print(max(abs(cdf_beta_equiv - cdf_beta_check))) # Should be close to zero
-#> [1] 3.330669e-16
-
-plot(x_seq, cdf_kw,
-  type = "l", ylim = c(0, 1),
-  main = "GKw CDF Examples", ylab = "F(x)", xlab = "x", col = "blue"
-)
-lines(x_seq, cdf_beta_equiv, col = "red", lty = 2)
-legend("bottomright",
-  legend = c("Kw(2,3)", "Beta(2,4) equivalent"),
-  col = c("blue", "red"), lty = c(1, 2), bty = "n"
-)
+## pgkw() is the integral of dgkw()
+Fq <- pgkw(0.5, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2)
+all.equal(Fq, integrate(dgkw, 0, 0.5, alpha = 2, beta = 3, gamma = 1.5,
+    delta = 0.5, lambda = 1.2, rel.tol = 1e-10)$value)
+#> [1] TRUE
 ```

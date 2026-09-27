@@ -121,58 +121,15 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-p_vals <- c(0.1, 0.5, 0.9)
-alpha_par <- 2.0
-beta_par <- 3.0
-lambda_par <- 1.5
+p <- c(0.1, 0.5, 0.9)
+qekw(p, alpha = 2, beta = 3, lambda = 1.2)
+#> [1] 0.2270178 0.4900199 0.7496334
+# upper-tail quantiles
+qekw(p, alpha = 2, beta = 3, lambda = 1.2, lower.tail = FALSE)
+#> [1] 0.7496334 0.4900199 0.2270178
 
-# Calculate quantiles
-quantiles <- qekw(p_vals, alpha_par, beta_par, lambda_par)
-print(quantiles)
-#> [1] 0.2787375 0.5311017 0.7695287
-
-# Calculate quantiles for upper tail probabilities P(X > q) = p
-quantiles_upper <- qekw(p_vals, alpha_par, beta_par, lambda_par,
-  lower.tail = FALSE
-)
-print(quantiles_upper)
-#> [1] 0.7695287 0.5311017 0.2787375
-# Check: qekw(p, ..., lt=F) == qekw(1-p, ..., lt=T)
-print(qekw(1 - p_vals, alpha_par, beta_par, lambda_par))
-#> [1] 0.7695287 0.5311017 0.2787375
-
-# Calculate quantiles from log probabilities
-log.p_vals <- log(p_vals)
-quantiles_logp <- qekw(log.p_vals, alpha_par, beta_par, lambda_par,
-  log.p = TRUE
-)
-print(quantiles_logp)
-#> [1] 0.2787375 0.5311017 0.7695287
-# Check: should match original quantiles
-print(quantiles)
-#> [1] 0.2787375 0.5311017 0.7695287
-
-# Compare with qgkw setting gamma = 1, delta = 0
-quantiles_gkw <- qgkw(p_vals,
-  alpha = alpha_par, beta = beta_par,
-  gamma = 1.0, delta = 0.0, lambda = lambda_par
-)
-print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-#> [1] "Max difference: 0"
-
-# Verify inverse relationship with pekw
-p_check <- 0.75
-q_calc <- qekw(p_check, alpha_par, beta_par, lambda_par)
-p_recalc <- pekw(q_calc, alpha_par, beta_par, lambda_par)
-print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-#> [1] "Original p: 0.75  Recalculated p: 0.75"
-print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
+## qekw() inverts pekw()
+all.equal(pekw(qekw(p, alpha = 2, beta = 3, lambda = 1.2), alpha = 2,
+    beta = 3, lambda = 1.2), p)
 #> [1] TRUE
-
-# Boundary conditions
-print(qekw(c(0, 1), alpha_par, beta_par, lambda_par)) # Should be 0, 1
-#> [1] 0 1
-print(qekw(c(-Inf, 0), alpha_par, beta_par, lambda_par, log.p = TRUE)) # Should be 0, 1
-#> [1] 0 1
 ```

@@ -112,54 +112,16 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-q_vals <- c(0.2, 0.5, 0.8)
-alpha_par <- 2.0
-beta_par <- 3.0
-
-# Calculate CDF P(X <= q) using pkw
-probs <- pkw(q_vals, alpha_par, beta_par)
-print(probs)
+q <- c(0.2, 0.5, 0.8)
+pkw(q, alpha = 2, beta = 3)
 #> [1] 0.115264 0.578125 0.953344
-
-# Calculate upper tail P(X > q)
-probs_upper <- pkw(q_vals, alpha_par, beta_par, lower.tail = FALSE)
-print(probs_upper)
+pkw(q, alpha = 2, beta = 3, lower.tail = FALSE)  # P(X > q)
 #> [1] 0.884736 0.421875 0.046656
-# Check: probs + probs_upper should be 1
-print(probs + probs_upper)
-#> [1] 1 1 1
-
-# Calculate log CDF
-logs <- pkw(q_vals, alpha_par, beta_par, log.p = TRUE)
-print(logs)
-#> [1] -2.16053013 -0.54796517 -0.04777948
-# Check: should match log(probs)
-print(log(probs))
+pkw(q, alpha = 2, beta = 3, log.p = TRUE)
 #> [1] -2.16053013 -0.54796517 -0.04777948
 
-# Compare with pgkw setting gamma = 1, delta = 0, lambda = 1
-probs_gkw <- pgkw(q_vals, alpha_par, beta_par,
-  gamma = 1.0, delta = 0.0,
-  lambda = 1.0
-)
-print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-#> [1] "Max difference: 0"
-
-# Plot the CDF for different shape parameter combinations
-curve_q <- seq(0.001, 0.999, length.out = 200)
-plot(curve_q, pkw(curve_q, alpha = 2, beta = 3),
-  type = "l",
-  main = "Kumaraswamy CDF Examples", xlab = "q", ylab = "F(q)",
-  col = "blue", ylim = c(0, 1)
-)
-lines(curve_q, pkw(curve_q, alpha = 3, beta = 2), col = "red")
-lines(curve_q, pkw(curve_q, alpha = 0.5, beta = 0.5), col = "green")
-lines(curve_q, pkw(curve_q, alpha = 5, beta = 1), col = "purple")
-lines(curve_q, pkw(curve_q, alpha = 1, beta = 3), col = "orange")
-legend("bottomright",
-  legend = c("a=2, b=3", "a=3, b=2", "a=0.5, b=0.5", "a=5, b=1", "a=1, b=3"),
-  col = c("blue", "red", "green", "purple", "orange"), lty = 1, bty = "n", ncol = 2
-)
-
+## pkw() is the integral of dkw()
+Fq <- pkw(0.5, alpha = 2, beta = 3)
+all.equal(Fq, integrate(dkw, 0, 0.5, alpha = 2, beta = 3, rel.tol = 1e-10)$value)
+#> [1] TRUE
 ```

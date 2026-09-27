@@ -101,52 +101,22 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-set.seed(2030) # for reproducibility
-
-# Generate 1000 samples using rbeta_
-gamma_par <- 2.0 # Corresponds to shape1
-delta_par <- 3.0 # Corresponds to shape2 - 1
-shape1 <- gamma_par
-shape2 <- delta_par + 1
-
-x_sample <- rbeta_(1000, gamma = gamma_par, delta = delta_par)
-summary(x_sample)
-#>     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-#> 0.007135 0.190328 0.306978 0.335931 0.466661 0.886553 
-
-# Compare with stats::rbeta
-x_sample_stats <- stats::rbeta(1000, shape1 = shape1, shape2 = shape2)
-# Visually compare histograms or QQ-plots
-hist(x_sample, main = "rbeta_ Sample", freq = FALSE, breaks = 30)
-curve(dbeta_(x, gamma_par, delta_par), add = TRUE, col = "red", lwd = 2)
-
-hist(x_sample_stats, main = "stats::rbeta Sample", freq = FALSE, breaks = 30)
-curve(stats::dbeta(x, shape1, shape2), add = TRUE, col = "blue", lwd = 2)
-
-# Compare summary stats (should be similar due to randomness)
-print(summary(x_sample))
-#>     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-#> 0.007135 0.190328 0.306978 0.335931 0.466661 0.886553 
-print(summary(x_sample_stats))
+set.seed(123)
+x <- rbeta_(1000, gamma = 2, delta = 3)
+summary(x)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#> 0.01034 0.19696 0.31440 0.33723 0.45535 0.84423 
+#> 0.01114 0.20168 0.31755 0.33709 0.45444 0.90972 
 
-# Compare summary stats with rgkw(alpha=1, beta=1, lambda=1)
-x_sample_gkw <- rgkw(1000,
-  alpha = 1.0, beta = 1.0, gamma = gamma_par,
-  delta = delta_par, lambda = 1.0
-)
-print("Summary stats for rgkw(a=1,b=1,l=1) sample:")
-#> [1] "Summary stats for rgkw(a=1,b=1,l=1) sample:"
-print(summary(x_sample_gkw))
-#>     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-#> 0.004943 0.189179 0.313707 0.328485 0.445345 0.892626 
+## The sample follows the distribution
+hist(x, breaks = 30, freq = FALSE, main = "")
+curve(dbeta_(x, gamma = 2, delta = 3), add = TRUE)
 
-# Compare summary stats with rmc(lambda=1)
-x_sample_mc <- rmc(1000, gamma = gamma_par, delta = delta_par, lambda = 1.0)
-print("Summary stats for rmc(l=1) sample:")
-#> [1] "Summary stats for rmc(l=1) sample:"
-print(summary(x_sample_mc))
-#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#> 0.00105 0.19221 0.31254 0.33300 0.45504 0.91894 
+ks.test(x, pbeta_, gamma = 2, delta = 3)
+#> 
+#>  Asymptotic one-sample Kolmogorov-Smirnov test
+#> 
+#> data:  x
+#> D = 0.026144, p-value = 0.5013
+#> alternative hypothesis: two-sided
+#> 
 ```

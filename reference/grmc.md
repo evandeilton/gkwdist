@@ -101,129 +101,21 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# \donttest{
-## Example 1: Basic Gradient Evaluation
-
-# Generate sample data with more stable parameters
 set.seed(123)
-n <- 1000
-true_params <- c(gamma = 2.0, delta = 2.5, lambda = 1.5)
-data <- rmc(n,
-  gamma = true_params[1], delta = true_params[2],
-  lambda = true_params[3]
-)
+x <- rmc(200, gamma = 0.5, delta = 5, lambda = 3)
+par <- c(gamma = 0.5, delta = 5, lambda = 3)
 
-# Evaluate the gradient at the true parameters
-grad_true <- grmc(par = true_params, data = data)
-names(grad_true) <- c("gamma", "delta", "lambda")
-cat("Gradient at true parameters:\n")
-#> Gradient at true parameters:
-print(grad_true)
-#>      gamma      delta     lambda 
-#> -13.504792   6.525193 -24.769059 
-cat("Gradient norm:", sqrt(sum(grad_true^2)), "\n")
-#> Gradient norm: 28.95624 
+## Gradient of the negative log-likelihood llmc(), not of the log-likelihood
+g <- grmc(par, x)
+g
+#> [1]  4.494737  2.750941 -4.223447
 
+## A small step against the gradient lowers llmc()
+llmc(par - 1e-4 * g, x) < llmc(par, x)
+#> [1] TRUE
 
-## Example 2: Numerical Verification with numDeriv::grad()
-
-# grmc() returns the gradient of the *negative* log-likelihood minimized
-# by llmc(). numDeriv::grad() differentiates llmc() itself by finite
-# differences, so the two should agree closely at any parameter vector,
-# not just at the MLE.
-if (requireNamespace("numDeriv", quietly = TRUE)) {
-  test_points <- rbind(
-    c(1.5, 2.0, 1.0),
-    as.numeric(true_params),
-    c(2.5, 3.0, 2.0)
-  )
-
-  cat("\nAnalytical (grmc) vs numerical (numDeriv::grad) gradient:\n")
-  for (i in seq_len(nrow(test_points))) {
-    par_i <- test_points[i, ]
-    grad_analytic <- grmc(par = par_i, data = data)
-    grad_numeric <- numDeriv::grad(func = llmc, x = par_i, data = data)
-
-    comparison <- data.frame(
-      Parameter = c("gamma", "delta", "lambda"),
-      Analytical = grad_analytic,
-      Numerical = grad_numeric,
-      Abs_Diff = abs(grad_analytic - grad_numeric)
-    )
-    cat("\nPoint", i, ": (", paste(round(par_i, 2), collapse = ", "), ")\n")
-    print(comparison, digits = 8, row.names = FALSE)
-  }
-}
-#> 
-#> Analytical (grmc) vs numerical (numDeriv::grad) gradient:
-#> 
-#> Point 1 : ( 1.5, 2, 1 )
-#>  Parameter  Analytical   Numerical      Abs_Diff
-#>      gamma  -569.17827  -569.17827 1.7215825e-08
-#>      delta   298.19112   298.19112 3.8869075e-08
-#>     lambda -1172.76622 -1172.76622 1.1249836e-07
-#> 
-#> Point 2 : ( 2, 2.5, 1.5 )
-#>  Parameter  Analytical   Numerical      Abs_Diff
-#>      gamma -13.5047924 -13.5047924 5.1955441e-08
-#>      delta   6.5251933   6.5251933 2.8501302e-08
-#>     lambda -24.7690588 -24.7690589 9.6862262e-08
-#> 
-#> Point 3 : ( 2.5, 3, 2 )
-#>  Parameter Analytical  Numerical      Abs_Diff
-#>      gamma  476.65067  476.65067 4.7074764e-08
-#>      delta -168.29540 -168.29540 9.6466408e-09
-#>     lambda  769.57550  769.57550 6.4076062e-08
-
-
-## Example 3: Gradient-Based Optimization Convergence
-
-# Supplying the analytical gradient lets BFGS skip its internal
-# finite-difference approximation
-fit_with_grad <- optim(
-  par = c(1.5, 2.0, 1.0),
-  fn = llmc,
-  gr = grmc,
-  data = data,
-  method = "BFGS",
-  control = list(trace = 0)
-)
-
-# Same starting point and objective, relying on optim()'s own
-# finite-difference gradient instead
-fit_no_grad <- optim(
-  par = c(1.5, 2.0, 1.0),
-  fn = llmc,
-  data = data,
-  method = "BFGS",
-  control = list(trace = 0)
-)
-
-mle <- fit_with_grad$par
-names(mle) <- c("gamma", "delta", "lambda")
-
-comparison <- data.frame(
-  Method = c("Analytical gradient", "Finite-difference"),
-  Gamma = c(fit_with_grad$par[1], fit_no_grad$par[1]),
-  Delta = c(fit_with_grad$par[2], fit_no_grad$par[2]),
-  Lambda = c(fit_with_grad$par[3], fit_no_grad$par[3]),
-  NegLogLik = c(fit_with_grad$value, fit_no_grad$value),
-  Fn_Evals = c(fit_with_grad$counts[1], fit_no_grad$counts[1])
-)
-cat("\nOptimization comparison:\n")
-#> 
-#> Optimization comparison:
-print(comparison, digits = 6, row.names = FALSE)
-#>               Method   Gamma   Delta  Lambda NegLogLik Fn_Evals
-#>  Analytical gradient 1.45821 2.64432 1.95583  -310.101       82
-#>    Finite-difference 1.46074 2.64340 1.95329  -310.101       80
-
-# At the MLE, the gradient of the negative log-likelihood should vanish
-grad_at_mle <- grmc(par = mle, data = data)
-cat("\nGradient at MLE:", grad_at_mle, "\n")
-#> 
-#> Gradient at MLE: -0.06057962 0.01657138 -0.05932882 
-cat("Max absolute component:", max(abs(grad_at_mle)), "\n")
-#> Max absolute component: 0.06057962 
-# }
+## Agrees with a numerical derivative of llmc()
+if (requireNamespace("numDeriv", quietly = TRUE))
+  all.equal(g, numDeriv::grad(llmc, par, data = x), tolerance = 1e-6)
+#> [1] TRUE
 ```

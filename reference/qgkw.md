@@ -146,48 +146,16 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Basic quantile calculation (median)
-median_val <- qgkw(0.5, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-print(median_val)
-#> [1] 0.454202
+p <- c(0.1, 0.5, 0.9)
+qgkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2)
+#> [1] 0.2771293 0.4900199 0.7004042
+qgkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2,
+    lower.tail = FALSE)  # upper-tail quantiles
+#> [1] 0.7004042 0.4900199 0.2771293
 
-# Computing multiple quantiles
-probs <- c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)
-quantiles <- qgkw(probs, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-print(quantiles)
-#> [1] 0.05783171 0.18577033 0.30238999 0.45420202 0.60830870 0.73201169 0.88575196
-
-# Upper tail quantile (e.g., find x such that P(X > x) = 0.1, which is 90th percentile)
-q90 <- qgkw(0.1,
-  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-  lower.tail = FALSE
-)
-print(q90)
-#> [1] 0.7320117
-# Check: should match quantile for p = 0.9 with lower.tail = TRUE
-print(qgkw(0.9, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1))
-#> [1] 0.7320117
-
-# Log probabilities
-median_logp <- qgkw(log(0.5),
-  alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1,
-  log.p = TRUE
-)
-print(median_logp) # Should match median_val
-#> [1] 0.454202
-
-# Vectorized parameters
-alphas_vec <- c(0.5, 1.0, 2.0)
-betas_vec <- c(1.0, 2.0, 3.0)
-# Get median for 3 different GKw distributions
-medians_vec <- qgkw(0.5, alpha = alphas_vec, beta = betas_vec, gamma = 1, delta = 0, lambda = 1)
-print(medians_vec)
-#> [1] 0.2500000 0.2928932 0.4542020
-
-# Verify inverse relationship with pgkw
-p_val <- 0.75
-x_val <- qgkw(p_val, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-p_check <- pgkw(x_val, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-print(paste("Calculated p:", p_check, " (Expected:", p_val, ")"))
-#> [1] "Calculated p: 0.75  (Expected: 0.75 )"
+## qgkw() inverts pgkw()
+all.equal(pgkw(qgkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5,
+    lambda = 1.2), alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2),
+    p)
+#> [1] TRUE
 ```

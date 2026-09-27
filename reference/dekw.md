@@ -107,48 +107,20 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-x_vals <- c(0.2, 0.5, 0.8)
-alpha_par <- 2.0
-beta_par <- 3.0
-lambda_par <- 1.5 # Exponent parameter
+x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+dekw(x, alpha = 2, beta = 3, lambda = 1.2)
+#> [1] 0.3492666 1.3516831 1.8148025 1.2741180 0.2336062
+dekw(x, alpha = 2, beta = 3, lambda = 1.2, log = TRUE)
+#> [1] -1.0519197  0.3013506  0.5959767  0.2422542 -1.4541184
 
-# Calculate density
-densities <- dekw(x_vals, alpha_par, beta_par, lambda_par)
-print(densities)
-#> [1] 0.5631989 1.9246241 0.9110922
+## EKw is GKw with gamma = 1, delta = 0
+all.equal(dekw(x, 2, 3, 1.2), dgkw(x, 2, 3, gamma = 1, delta = 0, lambda = 1.2))
+#> [1] TRUE
 
-# Calculate log-density
-log_densities <- dekw(x_vals, alpha_par, beta_par, lambda_par, log = TRUE)
-print(log_densities)
-#> [1] -0.57412239  0.65473067 -0.09311121
-# Check: should match log(densities)
-print(log(densities))
-#> [1] -0.57412239  0.65473067 -0.09311121
+## The density integrates to one
+integrate(dekw, 0, 1, alpha = 2, beta = 3, lambda = 1.2, rel.tol = 1e-10)
+#> 1 with absolute error < 2.6e-13
 
-# Compare with dgkw setting gamma = 1, delta = 0
-densities_gkw <- dgkw(x_vals, alpha_par, beta_par,
-  gamma = 1.0, delta = 0.0,
-  lambda = lambda_par
-)
-print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#> [1] "Max difference: 0"
-
-# Plot the density for different lambda values
-curve_x <- seq(0.01, 0.99, length.out = 200)
-curve_y1 <- dekw(curve_x, alpha = 2, beta = 3, lambda = 0.5) # less peaked
-curve_y2 <- dekw(curve_x, alpha = 2, beta = 3, lambda = 1.0) # standard Kw
-curve_y3 <- dekw(curve_x, alpha = 2, beta = 3, lambda = 2.0) # more peaked
-
-plot(curve_x, curve_y2,
-  type = "l", main = "EKw Density Examples (alpha=2, beta=3)",
-  xlab = "x", ylab = "f(x)", col = "red", ylim = range(0, curve_y1, curve_y2, curve_y3)
-)
-lines(curve_x, curve_y1, col = "blue")
-lines(curve_x, curve_y3, col = "green")
-legend("topright",
-  legend = c("lambda=0.5", "lambda=1.0 (Kw)", "lambda=2.0"),
-  col = c("blue", "red", "green"), lty = 1, bty = "n"
-)
+curve(dekw(x, alpha = 2, beta = 3, lambda = 1.2), from = 0, to = 1, ylab = "density")
 
 ```

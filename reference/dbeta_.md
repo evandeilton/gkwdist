@@ -112,54 +112,20 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-x_vals <- c(0.2, 0.5, 0.8)
-gamma_par <- 2.0 # Corresponds to shape1
-delta_par <- 3.0 # Corresponds to shape2 - 1
-shape1 <- gamma_par
-shape2 <- delta_par + 1
+x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+dbeta_(x, gamma = 2, delta = 3)
+#> [1] 1.458 2.058 1.250 0.378 0.018
+dbeta_(x, gamma = 2, delta = 3, log = TRUE)
+#> [1]  0.3770656  0.7217346  0.2231436 -0.9728611 -4.0173835
 
-# Calculate density using dbeta_
-densities <- dbeta_(x_vals, gamma_par, delta_par)
-print(densities)
-#> [1] 2.048 1.250 0.128
+## The package's Beta(gamma, delta) is stats::dbeta with shapes gamma, delta + 1
+all.equal(dbeta_(x, 2, 3), stats::dbeta(x, 2, 4))
+#> [1] TRUE
 
-# Compare with stats::dbeta
-densities_stats <- stats::dbeta(x_vals, shape1 = shape1, shape2 = shape2)
-print(paste("Max difference vs stats::dbeta:", max(abs(densities - densities_stats))))
-#> [1] "Max difference vs stats::dbeta: 0"
+## The density integrates to one
+integrate(dbeta_, 0, 1, gamma = 2, delta = 3, rel.tol = 1e-10)
+#> 1 with absolute error < 1.1e-14
 
-# Compare with dgkw setting alpha=1, beta=1, lambda=1
-densities_gkw <- dgkw(x_vals,
-  alpha = 1.0, beta = 1.0, gamma = gamma_par,
-  delta = delta_par, lambda = 1.0
-)
-print(paste("Max difference vs dgkw:", max(abs(densities - densities_gkw))))
-#> [1] "Max difference vs dgkw: 0"
-
-# Compare with dmc setting lambda=1
-densities_mc <- dmc(x_vals, gamma = gamma_par, delta = delta_par, lambda = 1.0)
-print(paste("Max difference vs dmc:", max(abs(densities - densities_mc))))
-#> [1] "Max difference vs dmc: 0"
-
-# Calculate log-density
-log_densities <- dbeta_(x_vals, gamma_par, delta_par, log = TRUE)
-print(log_densities)
-#> [1]  0.7168637  0.2231436 -2.0557250
-print(stats::dbeta(x_vals, shape1 = shape1, shape2 = shape2, log = TRUE))
-#> [1]  0.7168637  0.2231436 -2.0557250
-
-# Plot the density
-curve_x <- seq(0.001, 0.999, length.out = 200)
-curve_y <- dbeta_(curve_x, gamma = 2, delta = 3) # Beta(2, 4)
-plot(curve_x, curve_y,
-  type = "l", main = "Beta(2, 4) Density via dbeta_",
-  xlab = "x", ylab = "f(x)", col = "blue"
-)
-curve(stats::dbeta(x, 2, 4), add = TRUE, col = "red", lty = 2)
-legend("topright",
-  legend = c("dbeta_(gamma=2, delta=3)", "stats::dbeta(shape1=2, shape2=4)"),
-  col = c("blue", "red"), lty = c(1, 2), bty = "n"
-)
+curve(dbeta_(x, gamma = 2, delta = 3), from = 0, to = 1, ylab = "density")
 
 ```

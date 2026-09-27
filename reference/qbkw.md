@@ -135,59 +135,15 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-p_vals <- c(0.1, 0.5, 0.9)
-alpha_par <- 2.0
-beta_par <- 1.5
-gamma_par <- 1.0
-delta_par <- 0.5
+p <- c(0.1, 0.5, 0.9)
+qbkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5)
+#> [1] 0.2348264 0.4542020 0.6790672
+# upper-tail quantiles
+qbkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lower.tail = FALSE)
+#> [1] 0.6790672 0.4542020 0.2348264
 
-# Calculate quantiles
-quantiles <- qbkw(p_vals, alpha_par, beta_par, gamma_par, delta_par)
-print(quantiles)
-#> [1] 0.2138865 0.5149104 0.8003866
-
-# Calculate quantiles for upper tail probabilities P(X > q) = p
-quantiles_upper <- qbkw(p_vals, alpha_par, beta_par, gamma_par, delta_par,
-  lower.tail = FALSE
-)
-print(quantiles_upper)
-#> [1] 0.8003866 0.5149104 0.2138865
-# Check: qbkw(p, ..., lt=F) == qbkw(1-p, ..., lt=T)
-print(qbkw(1 - p_vals, alpha_par, beta_par, gamma_par, delta_par))
-#> [1] 0.8003866 0.5149104 0.2138865
-
-# Calculate quantiles from log probabilities
-log.p_vals <- log(p_vals)
-quantiles_logp <- qbkw(log.p_vals, alpha_par, beta_par, gamma_par, delta_par,
-  log.p = TRUE
-)
-print(quantiles_logp)
-#> [1] 0.2138865 0.5149104 0.8003866
-# Check: should match original quantiles
-print(quantiles)
-#> [1] 0.2138865 0.5149104 0.8003866
-
-# Compare with qgkw setting lambda = 1
-quantiles_gkw <- qgkw(p_vals, alpha_par, beta_par,
-  gamma = gamma_par,
-  delta = delta_par, lambda = 1.0
-)
-print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-#> [1] "Max difference: 2.77555756156289e-17"
-
-# Verify inverse relationship with pbkw
-p_check <- 0.75
-q_calc <- qbkw(p_check, alpha_par, beta_par, gamma_par, delta_par)
-p_recalc <- pbkw(q_calc, alpha_par, beta_par, gamma_par, delta_par)
-print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-#> [1] "Original p: 0.75  Recalculated p: 0.75"
-print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
+## qbkw() inverts pbkw()
+all.equal(pbkw(qbkw(p, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5),
+    alpha = 2, beta = 3, gamma = 1.5, delta = 0.5), p)
 #> [1] TRUE
-
-# Boundary conditions
-print(qbkw(c(0, 1), alpha_par, beta_par, gamma_par, delta_par)) # Should be 0, 1
-#> [1] 0 1
-print(qbkw(c(-Inf, 0), alpha_par, beta_par, gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
-#> [1] 0 1
 ```

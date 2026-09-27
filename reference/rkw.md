@@ -90,55 +90,22 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-set.seed(2029) # for reproducibility
-
-# Generate 1000 random values from a specific Kw distribution
-alpha_par <- 2.0
-beta_par <- 3.0
-
-x_sample_kw <- rkw(1000, alpha = alpha_par, beta = beta_par)
-summary(x_sample_kw)
+set.seed(123)
+x <- rkw(1000, alpha = 2, beta = 3)
+summary(x)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#> 0.01825 0.29985 0.45247 0.45264 0.58978 0.93608 
+#> 0.01246 0.30481 0.44835 0.45516 0.60611 0.95701 
 
-# Histogram of generated values compared to theoretical density
-hist(x_sample_kw,
-  breaks = 30, freq = FALSE, # freq=FALSE for density
-  main = "Histogram of Kw Sample", xlab = "x", ylim = c(0, 2.5)
-)
-curve(dkw(x, alpha = alpha_par, beta = beta_par),
-  add = TRUE, col = "red", lwd = 2, n = 201
-)
-legend("top", legend = "Theoretical PDF", col = "red", lwd = 2, bty = "n")
+## The sample follows the distribution
+hist(x, breaks = 30, freq = FALSE, main = "")
+curve(dkw(x, alpha = 2, beta = 3), add = TRUE)
 
-
-# Comparing empirical and theoretical quantiles (Q-Q plot)
-prob_points <- seq(0.01, 0.99, by = 0.01)
-theo_quantiles <- qkw(prob_points, alpha = alpha_par, beta = beta_par)
-emp_quantiles <- quantile(x_sample_kw, prob_points, type = 7)
-
-plot(theo_quantiles, emp_quantiles,
-  pch = 16, cex = 0.8,
-  main = "Q-Q Plot for Kw Distribution",
-  xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
-)
-abline(a = 0, b = 1, col = "blue", lty = 2)
-
-
-# Compare summary stats with rgkw(..., gamma=1, delta=0, lambda=1)
-# Note: individual values will differ due to randomness
-x_sample_gkw <- rgkw(1000,
-  alpha = alpha_par, beta = beta_par, gamma = 1.0,
-  delta = 0.0, lambda = 1.0
-)
-print("Summary stats for rkw sample:")
-#> [1] "Summary stats for rkw sample:"
-print(summary(x_sample_kw))
-#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#> 0.01825 0.29985 0.45247 0.45264 0.58978 0.93608 
-print("Summary stats for rgkw(gamma=1, delta=0, lambda=1) sample:")
-#> [1] "Summary stats for rgkw(gamma=1, delta=0, lambda=1) sample:"
-print(summary(x_sample_gkw)) # Should be similar
-#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#> 0.00568 0.30017 0.45069 0.45469 0.59646 0.95381 
+ks.test(x, pkw, alpha = 2, beta = 3)
+#> 
+#>  Asymptotic one-sample Kolmogorov-Smirnov test
+#> 
+#> data:  x
+#> D = 0.014051, p-value = 0.9891
+#> alternative hypothesis: two-sided
+#> 
 ```

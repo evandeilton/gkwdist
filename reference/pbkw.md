@@ -122,52 +122,18 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-q_vals <- c(0.2, 0.5, 0.8)
-alpha_par <- 2.0
-beta_par <- 1.5
-gamma_par <- 1.0
-delta_par <- 0.5
+q <- c(0.2, 0.5, 0.8)
+pbkw(q, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5)
+#> [1] 0.06408708 0.59906559 0.98313307
+# P(X > q)
+pbkw(q, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lower.tail = FALSE)
+#> [1] 0.93591292 0.40093441 0.01686693
+pbkw(q, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, log.p = TRUE)
+#> [1] -2.7475125 -0.5123842 -0.0170108
 
-# Calculate CDF P(X <= q)
-probs <- pbkw(q_vals, alpha_par, beta_par, gamma_par, delta_par)
-print(probs)
-#> [1] 0.08775756 0.47653477 0.89961227
-
-# Calculate upper tail P(X > q)
-probs_upper <- pbkw(q_vals, alpha_par, beta_par, gamma_par, delta_par,
-  lower.tail = FALSE
-)
-print(probs_upper)
-#> [1] 0.9122424 0.5234652 0.1003877
-# Check: probs + probs_upper should be 1
-print(probs + probs_upper)
-#> [1] 1 1 1
-
-# Calculate log CDF
-logs <- pbkw(q_vals, alpha_par, beta_par, gamma_par, delta_par,
-  log.p = TRUE
-)
-print(logs)
-#> [1] -2.4331773 -0.7412146 -0.1057914
-# Check: should match log(probs)
-print(log(probs))
-#> [1] -2.4331773 -0.7412146 -0.1057914
-
-# Compare with pgkw setting lambda = 1
-probs_gkw <- pgkw(q_vals, alpha_par, beta_par,
-  gamma = gamma_par,
-  delta = delta_par, lambda = 1.0
-)
-print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-#> [1] "Max difference: 0"
-
-# Plot the CDF
-curve_q <- seq(0.01, 0.99, length.out = 200)
-curve_p <- pbkw(curve_q, alpha = 2, beta = 3, gamma = 0.5, delta = 1)
-plot(curve_q, curve_p,
-  type = "l", main = "BKw CDF Example",
-  xlab = "q", ylab = "F(q)", col = "blue", ylim = c(0, 1)
-)
-
+## pbkw() is the integral of dbkw()
+Fq <- pbkw(0.5, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5)
+all.equal(Fq, integrate(dbkw, 0, 0.5, alpha = 2, beta = 3, gamma = 1.5,
+    delta = 0.5, rel.tol = 1e-10)$value)
+#> [1] TRUE
 ```

@@ -113,43 +113,23 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-set.seed(1234) # for reproducibility
-
-# Generate 1000 random values from a specific GKw distribution (Kw case)
-x_sample <- rgkw(1000, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-summary(x_sample)
+set.seed(123)
+x <- rgkw(1000, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2)
+summary(x)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#> 0.01524 0.31493 0.46345 0.46265 0.60804 0.96441 
+#> 0.07502 0.38251 0.49412 0.49439 0.60747 0.93562 
 
-# Histogram of generated values compared to theoretical density
-hist(x_sample,
-  breaks = 30, freq = FALSE, # freq=FALSE for density scale
-  main = "Histogram of GKw(2,3,1,0,1) Sample", xlab = "x", ylim = c(0, 2.5)
-)
-curve(dgkw(x, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1),
-  add = TRUE, col = "red", lwd = 2, n = 201
-)
-legend("topright", legend = "Theoretical PDF", col = "red", lwd = 2, bty = "n")
+## The sample follows the distribution
+hist(x, breaks = 30, freq = FALSE, main = "")
+curve(dgkw(x, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2),
+    add = TRUE)
 
-
-# Comparing empirical and theoretical quantiles (Q-Q plot)
-prob_points <- seq(0.01, 0.99, by = 0.01)
-theo_quantiles <- qgkw(prob_points, alpha = 2, beta = 3, gamma = 1, delta = 0, lambda = 1)
-emp_quantiles <- quantile(x_sample, prob_points)
-
-plot(theo_quantiles, emp_quantiles,
-  pch = 16, cex = 0.8,
-  main = "Q-Q Plot for GKw(2,3,1,0,1)",
-  xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles (n=1000)"
-)
-abline(a = 0, b = 1, col = "blue", lty = 2)
-
-
-# Using vectorized parameters: generate 1 value for each alpha
-alphas_vec <- c(0.5, 1.0, 2.0)
-n_param <- length(alphas_vec)
-samples_vec <- rgkw(n_param, alpha = alphas_vec, beta = 2, gamma = 1, delta = 0, lambda = 1)
-print(samples_vec) # One sample for each alpha value
-#> [1] 0.4386491 0.2135709 0.8667377
-# Result length matches n=3, parameters alpha recycled accordingly
+ks.test(x, pgkw, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, lambda = 1.2)
+#> 
+#>  Asymptotic one-sample Kolmogorov-Smirnov test
+#> 
+#> data:  x
+#> D = 0.024673, p-value = 0.5766
+#> alternative hypothesis: two-sided
+#> 
 ```

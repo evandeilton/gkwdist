@@ -120,63 +120,13 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-p_vals <- c(0.1, 0.5, 0.9)
-gamma_par <- 2.0 # Corresponds to shape1
-delta_par <- 3.0 # Corresponds to shape2 - 1
-shape1 <- gamma_par
-shape2 <- delta_par + 1
-
-# Calculate quantiles using qbeta_
-quantiles <- qbeta_(p_vals, gamma_par, delta_par)
-print(quantiles)
+p <- c(0.1, 0.5, 0.9)
+qbeta_(p, gamma = 2, delta = 3)
 #> [1] 0.1122350 0.3138102 0.5838904
-
-# Compare with stats::qbeta
-quantiles_stats <- stats::qbeta(p_vals, shape1 = shape1, shape2 = shape2)
-print(paste("Max difference vs stats::qbeta:", max(abs(quantiles - quantiles_stats))))
-#> [1] "Max difference vs stats::qbeta: 0"
-
-# Compare with qgkw setting alpha=1, beta=1, lambda=1
-quantiles_gkw <- qgkw(p_vals,
-  alpha = 1.0, beta = 1.0, gamma = gamma_par,
-  delta = delta_par, lambda = 1.0
-)
-print(paste("Max difference vs qgkw:", max(abs(quantiles - quantiles_gkw))))
-#> [1] "Max difference vs qgkw: 1.38777878078145e-17"
-
-# Compare with qmc setting lambda=1
-quantiles_mc <- qmc(p_vals, gamma = gamma_par, delta = delta_par, lambda = 1.0)
-print(paste("Max difference vs qmc:", max(abs(quantiles - quantiles_mc))))
-#> [1] "Max difference vs qmc: 0"
-
-# Calculate quantiles for upper tail
-quantiles_upper <- qbeta_(p_vals, gamma_par, delta_par, lower.tail = FALSE)
-print(quantiles_upper)
-#> [1] 0.5838904 0.3138102 0.1122350
-print(stats::qbeta(p_vals, shape1, shape2, lower.tail = FALSE))
+qbeta_(p, gamma = 2, delta = 3, lower.tail = FALSE)  # upper-tail quantiles
 #> [1] 0.5838904 0.3138102 0.1122350
 
-# Calculate quantiles from log probabilities
-log.p_vals <- log(p_vals)
-quantiles_logp <- qbeta_(log.p_vals, gamma_par, delta_par, log.p = TRUE)
-print(quantiles_logp)
-#> [1] 0.1122350 0.3138102 0.5838904
-print(stats::qbeta(log.p_vals, shape1, shape2, log.p = TRUE))
-#> [1] 0.1122350 0.3138102 0.5838904
-
-# Verify inverse relationship with pbeta_
-p_check <- 0.75
-q_calc <- qbeta_(p_check, gamma_par, delta_par)
-p_recalc <- pbeta_(q_calc, gamma_par, delta_par)
-print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-#> [1] "Original p: 0.75  Recalculated p: 0.75"
-print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
+## qbeta_() inverts pbeta_()
+all.equal(pbeta_(qbeta_(p, gamma = 2, delta = 3), gamma = 2, delta = 3), p)
 #> [1] TRUE
-
-# Boundary conditions
-print(qbeta_(c(0, 1), gamma_par, delta_par)) # Should be 0, 1
-#> [1] 0 1
-print(qbeta_(c(-Inf, 0), gamma_par, delta_par, log.p = TRUE)) # Should be 0, 1
-#> [1] 0 1
 ```

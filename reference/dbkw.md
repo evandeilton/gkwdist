@@ -111,51 +111,22 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-x_vals <- c(0.2, 0.5, 0.8)
-alpha_par <- 2.0
-beta_par <- 1.5
-gamma_par <- 1.0 # Equivalent to Kw when gamma=1
-delta_par <- 0.5
+x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+dbkw(x, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5)
+#> [1] 0.25421436 1.63569904 2.12220174 0.94358703 0.04097103
+dbkw(x, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5, log = TRUE)
+#> [1] -1.36957743  0.49207026  0.75245411 -0.05806668 -3.19488993
 
-# Calculate density
-densities <- dbkw(x_vals, alpha_par, beta_par, gamma_par, delta_par)
-print(densities)
-#> [1] 0.8552273 1.5703957 1.0038773
+## BKw is GKw with lambda = 1
+all.equal(dbkw(x, 2, 3, 1.5, 0.5), dgkw(x, 2, 3, 1.5, 0.5, lambda = 1))
+#> [1] TRUE
 
-# Calculate log-density
-log_densities <- dbkw(x_vals, alpha_par, beta_par, gamma_par, delta_par,
-  log = TRUE
-)
-print(log_densities)
-#> [1] -0.156388009  0.451327626  0.003869786
-# Check: should match log(densities)
-print(log(densities))
-#> [1] -0.156388009  0.451327626  0.003869786
+## The density integrates to one
+integrate(dbkw, 0, 1, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5,
+    rel.tol = 1e-10)
+#> 1 with absolute error < 2.5e-11
 
-# Compare with dgkw setting lambda = 1
-densities_gkw <- dgkw(x_vals, alpha_par, beta_par,
-  gamma = gamma_par,
-  delta = delta_par, lambda = 1.0
-)
-print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#> [1] "Max difference: 2.22044604925031e-16"
-
-# Plot the density for different gamma values
-curve_x <- seq(0.01, 0.99, length.out = 200)
-curve_y1 <- dbkw(curve_x, alpha = 2, beta = 3, gamma = 0.5, delta = 1)
-curve_y2 <- dbkw(curve_x, alpha = 2, beta = 3, gamma = 1.0, delta = 1)
-curve_y3 <- dbkw(curve_x, alpha = 2, beta = 3, gamma = 2.0, delta = 1)
-
-plot(curve_x, curve_y1,
-  type = "l", main = "BKw Density Examples (alpha=2, beta=3, delta=1)",
-  xlab = "x", ylab = "f(x)", col = "blue", ylim = range(0, curve_y1, curve_y2, curve_y3)
-)
-lines(curve_x, curve_y2, col = "red")
-lines(curve_x, curve_y3, col = "green")
-legend("topright",
-  legend = c("gamma=0.5", "gamma=1.0", "gamma=2.0"),
-  col = c("blue", "red", "green"), lty = 1, bty = "n"
-)
+curve(dbkw(x, alpha = 2, beta = 3, gamma = 1.5, delta = 0.5), from = 0,
+    to = 1, ylab = "density")
 
 ```

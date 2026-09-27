@@ -111,50 +111,13 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-p_vals <- c(0.1, 0.5, 0.9)
-alpha_par <- 2.0
-beta_par <- 3.0
-
-# Calculate quantiles using qkw
-quantiles <- qkw(p_vals, alpha_par, beta_par)
-print(quantiles)
+p <- c(0.1, 0.5, 0.9)
+qkw(p, alpha = 2, beta = 3)
 #> [1] 0.1857703 0.4542020 0.7320117
-
-# Calculate quantiles for upper tail probabilities P(X > q) = p
-quantiles_upper <- qkw(p_vals, alpha_par, beta_par, lower.tail = FALSE)
-print(quantiles_upper)
+qkw(p, alpha = 2, beta = 3, lower.tail = FALSE)  # upper-tail quantiles
 #> [1] 0.7320117 0.4542020 0.1857703
 
-# Calculate quantiles from log probabilities
-log.p_vals <- log(p_vals)
-quantiles_logp <- qkw(log.p_vals, alpha_par, beta_par, log.p = TRUE)
-print(quantiles_logp)
-#> [1] 0.1857703 0.4542020 0.7320117
-# Check: should match original quantiles
-print(quantiles)
-#> [1] 0.1857703 0.4542020 0.7320117
-
-# Compare with qgkw setting gamma = 1, delta = 0, lambda = 1
-quantiles_gkw <- qgkw(p_vals,
-  alpha = alpha_par, beta = beta_par,
-  gamma = 1.0, delta = 0.0, lambda = 1.0
-)
-print(paste("Max difference:", max(abs(quantiles - quantiles_gkw)))) # Should be near zero
-#> [1] "Max difference: 0"
-
-# Verify inverse relationship with pkw
-p_check <- 0.75
-q_calc <- qkw(p_check, alpha_par, beta_par)
-p_recalc <- pkw(q_calc, alpha_par, beta_par)
-print(paste("Original p:", p_check, " Recalculated p:", p_recalc))
-#> [1] "Original p: 0.75  Recalculated p: 0.75"
-print(abs(p_check - p_recalc) < 1e-9) # Should be TRUE
+## qkw() inverts pkw()
+all.equal(pkw(qkw(p, alpha = 2, beta = 3), alpha = 2, beta = 3), p)
 #> [1] TRUE
-
-# Boundary conditions
-print(qkw(c(0, 1), alpha_par, beta_par)) # Should be 0, 1
-#> [1] 0 1
-print(qkw(c(-Inf, 0), alpha_par, beta_par, log.p = TRUE)) # Should be 0, 1
-#> [1] 0 1
 ```

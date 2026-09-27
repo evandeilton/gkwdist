@@ -1,5 +1,13 @@
 # Changelog
 
+## gkwdist (development version)
+
+- Shorter examples on the help pages of all seven families. Each shows
+  what the function returns and checks it: the nesting identities,
+  `p*()` as the integral of `d*()`, `q*()` inverting `p*()`, and the
+  analytic gradients and Hessians against `numDeriv`. They run in under
+  a second.
+
 ## gkwdist 1.1.7
 
 ### Bug Fixes

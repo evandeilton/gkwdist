@@ -114,58 +114,17 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-q_vals <- c(0.2, 0.5, 0.8)
-alpha_par <- 2.0
-beta_par <- 3.0
-lambda_par <- 1.5
+q <- c(0.2, 0.5, 0.8)
+pekw(q, alpha = 2, beta = 3, lambda = 1.2)
+#> [1] 0.07482254 0.51811492 0.94427733
+pekw(q, alpha = 2, beta = 3, lambda = 1.2, lower.tail = FALSE)  # P(X > q)
+#> [1] 0.92517746 0.48188508 0.05572267
+pekw(q, alpha = 2, beta = 3, lambda = 1.2, log.p = TRUE)
+#> [1] -2.59263616 -0.65755820 -0.05733537
 
-# Calculate CDF P(X <= q)
-probs <- pekw(q_vals, alpha_par, beta_par, lambda_par)
-print(probs)
-#> [1] 0.03913276 0.43957464 0.93083875
-
-# Calculate upper tail P(X > q)
-probs_upper <- pekw(q_vals, alpha_par, beta_par, lambda_par,
-  lower.tail = FALSE
-)
-print(probs_upper)
-#> [1] 0.96086724 0.56042536 0.06916125
-# Check: probs + probs_upper should be 1
-print(probs + probs_upper)
-#> [1] 1 1 1
-
-# Calculate log CDF
-logs <- pekw(q_vals, alpha_par, beta_par, lambda_par, log.p = TRUE)
-print(logs)
-#> [1] -3.24079519 -0.82194776 -0.07166921
-# Check: should match log(probs)
-print(log(probs))
-#> [1] -3.24079519 -0.82194776 -0.07166921
-
-# Compare with pgkw setting gamma = 1, delta = 0
-probs_gkw <- pgkw(q_vals, alpha_par, beta_par,
-  gamma = 1.0, delta = 0.0,
-  lambda = lambda_par
-)
-print(paste("Max difference:", max(abs(probs - probs_gkw)))) # Should be near zero
-#> [1] "Max difference: 0"
-
-# Plot the CDF for different lambda values
-curve_q <- seq(0.01, 0.99, length.out = 200)
-curve_p1 <- pekw(curve_q, alpha = 2, beta = 3, lambda = 0.5)
-curve_p2 <- pekw(curve_q, alpha = 2, beta = 3, lambda = 1.0) # standard Kw
-curve_p3 <- pekw(curve_q, alpha = 2, beta = 3, lambda = 2.0)
-
-plot(curve_q, curve_p2,
-  type = "l", main = "EKw CDF Examples (alpha=2, beta=3)",
-  xlab = "q", ylab = "F(q)", col = "red", ylim = c(0, 1)
-)
-lines(curve_q, curve_p1, col = "blue")
-lines(curve_q, curve_p3, col = "green")
-legend("bottomright",
-  legend = c("lambda=0.5", "lambda=1.0 (Kw)", "lambda=2.0"),
-  col = c("blue", "red", "green"), lty = 1, bty = "n"
-)
-
+## pekw() is the integral of dekw()
+Fq <- pekw(0.5, alpha = 2, beta = 3, lambda = 1.2)
+all.equal(Fq, integrate(dekw, 0, 0.5, alpha = 2, beta = 3, lambda = 1.2,
+    rel.tol = 1e-10)$value)
+#> [1] TRUE
 ```

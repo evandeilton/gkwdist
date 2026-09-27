@@ -50,7 +50,7 @@ special case of the Generalized Kumaraswamy (GKw) distribution where
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Gradient of the Negative Log-Likelihood for the McDonald (Mc)/Beta Power Distribution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/v1.1.7/R/bpmc.R" class="external-link"><code>R/bpmc.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/gkwdist/blob/main/R/bpmc.R" class="external-link"><code>R/bpmc.R</code></a></small>
       <div class="d-none name"><code>grmc.Rd</code></div>
     </div>
 
@@ -150,131 +150,23 @@ distributions. <em>Journal of Statistical Computation and Simulation</em>,
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="co">## Example 1: Basic Gradient Evaluation</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="rmc.html">rmc</a></span><span class="op">(</span><span class="fl">200</span>, gamma <span class="op">=</span> <span class="fl">0.5</span>, delta <span class="op">=</span> <span class="fl">5</span>, lambda <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">par</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>gamma <span class="op">=</span> <span class="fl">0.5</span>, delta <span class="op">=</span> <span class="fl">5</span>, lambda <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Generate sample data with more stable parameters</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span></span>
-<span class="r-in"><span><span class="va">true_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>gamma <span class="op">=</span> <span class="fl">2.0</span>, delta <span class="op">=</span> <span class="fl">2.5</span>, lambda <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="rmc.html">rmc</a></span><span class="op">(</span><span class="va">n</span>,</span></span>
-<span class="r-in"><span>  gamma <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, delta <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span></span>
-<span class="r-in"><span>  lambda <span class="op">=</span> <span class="va">true_params</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## Gradient of the negative log-likelihood llmc(), not of the log-likelihood</span></span></span>
+<span class="r-in"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">grmc</span><span class="op">(</span><span class="va">par</span>, <span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">g</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  4.494737  2.750941 -4.223447</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Evaluate the gradient at the true parameters</span></span></span>
-<span class="r-in"><span><span class="va">grad_true</span> <span class="op">&lt;-</span> <span class="fu">grmc</span><span class="op">(</span>par <span class="op">=</span> <span class="va">true_params</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">grad_true</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gamma"</span>, <span class="st">"delta"</span>, <span class="st">"lambda"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Gradient at true parameters:\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gradient at true parameters:</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">grad_true</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      gamma      delta     lambda </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -13.504792   6.525193 -24.769059 </span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Gradient norm:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">grad_true</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gradient norm: 28.95624 </span>
+<span class="r-in"><span><span class="co">## A small step against the gradient lowers llmc()</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="llmc.html">llmc</a></span><span class="op">(</span><span class="va">par</span> <span class="op">-</span> <span class="fl">1e-4</span> <span class="op">*</span> <span class="va">g</span>, <span class="va">x</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fu"><a href="llmc.html">llmc</a></span><span class="op">(</span><span class="va">par</span>, <span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## Example 2: Numerical Verification with numDeriv::grad()</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># grmc() returns the gradient of the *negative* log-likelihood minimized</span></span></span>
-<span class="r-in"><span><span class="co"># by llmc(). numDeriv::grad() differentiates llmc() itself by finite</span></span></span>
-<span class="r-in"><span><span class="co"># differences, so the two should agree closely at any parameter vector,</span></span></span>
-<span class="r-in"><span><span class="co"># not just at the MLE.</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"numDeriv"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">test_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">1.0</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">true_params</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2.5</span>, <span class="fl">3.0</span>, <span class="fl">2.0</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nAnalytical (grmc) vs numerical (numDeriv::grad) gradient:\n"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">test_points</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="va">par_i</span> <span class="op">&lt;-</span> <span class="va">test_points</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span>    <span class="va">grad_analytic</span> <span class="op">&lt;-</span> <span class="fu">grmc</span><span class="op">(</span>par <span class="op">=</span> <span class="va">par_i</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">grad_numeric</span> <span class="op">&lt;-</span> <span class="fu">numDeriv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/numDeriv/man/grad.html" class="external-link">grad</a></span><span class="op">(</span>func <span class="op">=</span> <span class="va">llmc</span>, x <span class="op">=</span> <span class="va">par_i</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>      Parameter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gamma"</span>, <span class="st">"delta"</span>, <span class="st">"lambda"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>      Analytical <span class="op">=</span> <span class="va">grad_analytic</span>,</span></span>
-<span class="r-in"><span>      Numerical <span class="op">=</span> <span class="va">grad_numeric</span>,</span></span>
-<span class="r-in"><span>      Abs_Diff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">grad_analytic</span> <span class="op">-</span> <span class="va">grad_numeric</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nPoint"</span>, <span class="va">i</span>, <span class="st">": ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">par_i</span>, <span class="fl">2</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>, <span class="st">")\n"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span>, digits <span class="op">=</span> <span class="fl">8</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="op">}</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Analytical (grmc) vs numerical (numDeriv::grad) gradient:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point 1 : ( 1.5, 2, 1 )</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Parameter  Analytical   Numerical      Abs_Diff</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      gamma  -569.17827  -569.17827 1.7215825e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      delta   298.19112   298.19112 3.8869075e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     lambda -1172.76622 -1172.76622 1.1249836e-07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point 2 : ( 2, 2.5, 1.5 )</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Parameter  Analytical   Numerical      Abs_Diff</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      gamma -13.5047924 -13.5047924 5.1955441e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      delta   6.5251933   6.5251933 2.8501302e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     lambda -24.7690588 -24.7690589 9.6862262e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point 3 : ( 2.5, 3, 2 )</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Parameter Analytical  Numerical      Abs_Diff</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      gamma  476.65067  476.65067 4.7074764e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      delta -168.29540 -168.29540 9.6466408e-09</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     lambda  769.57550  769.57550 6.4076062e-08</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## Example 3: Gradient-Based Optimization Convergence</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Supplying the analytical gradient lets BFGS skip its internal</span></span></span>
-<span class="r-in"><span><span class="co"># finite-difference approximation</span></span></span>
-<span class="r-in"><span><span class="va">fit_with_grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">1.0</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  fn <span class="op">=</span> <span class="va">llmc</span>,</span></span>
-<span class="r-in"><span>  gr <span class="op">=</span> <span class="va">grmc</span>,</span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">data</span>,</span></span>
-<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"BFGS"</span>,</span></span>
-<span class="r-in"><span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trace <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Same starting point and objective, relying on optim()'s own</span></span></span>
-<span class="r-in"><span><span class="co"># finite-difference gradient instead</span></span></span>
-<span class="r-in"><span><span class="va">fit_no_grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">1.0</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  fn <span class="op">=</span> <span class="va">llmc</span>,</span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">data</span>,</span></span>
-<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"BFGS"</span>,</span></span>
-<span class="r-in"><span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trace <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">mle</span> <span class="op">&lt;-</span> <span class="va">fit_with_grad</span><span class="op">$</span><span class="va">par</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mle</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gamma"</span>, <span class="st">"delta"</span>, <span class="st">"lambda"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Analytical gradient"</span>, <span class="st">"Finite-difference"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  Gamma <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_with_grad</span><span class="op">$</span><span class="va">par</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">fit_no_grad</span><span class="op">$</span><span class="va">par</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  Delta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_with_grad</span><span class="op">$</span><span class="va">par</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="va">fit_no_grad</span><span class="op">$</span><span class="va">par</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  Lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_with_grad</span><span class="op">$</span><span class="va">par</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="va">fit_no_grad</span><span class="op">$</span><span class="va">par</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  NegLogLik <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_with_grad</span><span class="op">$</span><span class="va">value</span>, <span class="va">fit_no_grad</span><span class="op">$</span><span class="va">value</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  Fn_Evals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_with_grad</span><span class="op">$</span><span class="va">counts</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">fit_no_grad</span><span class="op">$</span><span class="va">counts</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nOptimization comparison:\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Optimization comparison:</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span>, digits <span class="op">=</span> <span class="fl">6</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               Method   Gamma   Delta  Lambda NegLogLik Fn_Evals</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Analytical gradient 1.45821 2.64432 1.95583  -310.101       82</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Finite-difference 1.46074 2.64340 1.95329  -310.101       80</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># At the MLE, the gradient of the negative log-likelihood should vanish</span></span></span>
-<span class="r-in"><span><span class="va">grad_at_mle</span> <span class="op">&lt;-</span> <span class="fu">grmc</span><span class="op">(</span>par <span class="op">=</span> <span class="va">mle</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nGradient at MLE:"</span>, <span class="va">grad_at_mle</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gradient at MLE: -0.06057962 0.01657138 -0.05932882 </span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max absolute component:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">grad_at_mle</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Max absolute component: 0.06057962 </span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="co">## Agrees with a numerical derivative of llmc()</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"numDeriv"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">g</span>, <span class="fu">numDeriv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/numDeriv/man/grad.html" class="external-link">grad</a></span><span class="op">(</span><span class="va">llmc</span>, <span class="va">par</span>, data <span class="op">=</span> <span class="va">x</span><span class="op">)</span>, tolerance <span class="op">=</span> <span class="fl">1e-6</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

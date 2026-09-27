@@ -112,42 +112,23 @@ Lopes, J. E.
 ## Examples
 
 ``` r
-# Example values
-x_vals <- c(0.2, 0.5, 0.8)
-alpha_par <- 2.0
-beta_par <- 3.0
-delta_par <- 0.5
-lambda_par <- 1.5
+x <- c(0.1, 0.3, 0.5, 0.7, 0.9)
+dkkw(x, alpha = 2, beta = 3, delta = 0.5, lambda = 1.2)
+#> [1] 0.52003496 1.82902324 1.88969788 0.75724620 0.03177953
+dkkw(x, alpha = 2, beta = 3, delta = 0.5, lambda = 1.2, log = TRUE)
+#> [1] -0.6538592  0.6037821  0.6364170 -0.2780669 -3.4489331
 
-# Calculate density
-densities <- dkkw(x_vals, alpha_par, beta_par, delta_par, lambda_par)
-print(densities)
-#> [1] 0.8281038 2.1612055 0.3594057
+## KKw is GKw with gamma = 1
+all.equal(dkkw(x, 2, 3, 0.5, 1.2), dgkw(x, 2, 3, gamma = 1, delta = 0.5,
+    lambda = 1.2))
+#> [1] TRUE
 
-# Calculate log-density
-log_densities <- dkkw(x_vals, alpha_par, beta_par, delta_par, lambda_par,
-  log = TRUE
-)
-print(log_densities)
-#> [1] -0.1886168  0.7706662 -1.0233034
-# Check: should match log(densities)
-print(log(densities))
-#> [1] -0.1886168  0.7706662 -1.0233034
+## The density integrates to one
+integrate(dkkw, 0, 1, alpha = 2, beta = 3, delta = 0.5, lambda = 1.2,
+    rel.tol = 1e-10)
+#> 1 with absolute error < 9.6e-13
 
-# Compare with dgkw setting gamma = 1
-densities_gkw <- dgkw(x_vals, alpha_par, beta_par,
-  gamma = 1.0,
-  delta_par, lambda_par
-)
-print(paste("Max difference:", max(abs(densities - densities_gkw)))) # Should be near zero
-#> [1] "Max difference: 8.88178419700125e-16"
-
-# Plot the density
-curve_x <- seq(0.01, 0.99, length.out = 200)
-curve_y <- dkkw(curve_x, alpha_par, beta_par, delta_par, lambda_par)
-plot(curve_x, curve_y,
-  type = "l", main = "KKw Density Example",
-  xlab = "x", ylab = "f(x)", col = "blue"
-)
+curve(dkkw(x, alpha = 2, beta = 3, delta = 0.5, lambda = 1.2), from = 0,
+    to = 1, ylab = "density")
 
 ```
