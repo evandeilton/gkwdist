@@ -247,9 +247,16 @@ inline double gkw_log1mexp_pow(double t, double s, double cs, double c) {
  * -- values outside the open support that llgkw() then rejects, so the
  * sampler's own output could not be fitted.
  */
+inline double gkw_log_inv_link_s(double log_w, double log_1mw, double beta) {
+  return gkw_log1mexp_pow(log_w, log_1mw, log_1mw / beta, 1.0 / beta);
+}
+
+// The same link when only log(w) is known. Callers that also hold log(1 - w)
+// more accurately -- the upper tail, where w is near 1 and log(w) is a
+// subnormal or 0 -- pass it to gkw_log_inv_link_s() instead: forming it here as
+// gkw_log1mexp(log_w) would flush that tail to x = 1.
 inline double gkw_log_inv_link(double log_w, double beta) {
-  const double s = gkw_log1mexp(log_w);          // log(1 - w) = beta * log(v)
-  return gkw_log1mexp_pow(log_w, s, s / beta, 1.0 / beta);
+  return gkw_log_inv_link_s(log_w, gkw_log1mexp(log_w), beta);  // log(1 - w) = beta * log(v)
 }
 
 /**
@@ -291,20 +298,34 @@ inline double gkw_log_qbeta_tiny(double pp, double a, double b,
 }
 
 /**
- * gkw_log_qbeta: log(I^-1(p; a, b)) accurate in both tails.
+ * gkw_log_qbeta: log(y) and log(1 - y) for y = I^-1(p; a, b), accurate in both
+ * tails.
  *
- * Above 1/2 a double holds y no more finely than 1.1e-16, so log(y) is formed as
- * log1p(-(1 - y)) with 1 - y taken straight from R::qbeta through the symmetry
- * I_y(a, b) = 1 - I_{1-y}(b, a), exactly as qbkw() already did. Without it
+ * Above 1/2 a double holds y no more finely than 1.1e-16, so 1 - y is taken
+ * straight from R::qbeta through the symmetry I_y(a, b) = 1 - I_{1-y}(b, a),
+ * exactly as qbkw() already did. Without it
  * qgkw(1e-26, 2, 3, 1.5, 0.5, 1.2, lower.tail = FALSE) returned exactly 1, where
- * the true 1 - x is 6.98e-07. Below DBL_MIN the expansion above takes over.
+ * the true 1 - x is 6.98e-07. Whichever of y and 1 - y is small, R::qbeta
+ * saturates it at about 1.1e-308, so below DBL_MIN its logarithm comes from the
+ * expansion above -- on the reflected side too, where the saturated value put
+ * qgkw(-750, 2, 100, 1, 0, 1, lower.tail = FALSE, log.p = TRUE) on a plateau at
+ * 1 - x = 4.16e-04 against a true 2.77e-04.
  */
-inline double gkw_log_qbeta(double pp, double a, double b,
-                            bool lower_tail, bool log_p) {
+inline void gkw_log_qbeta(double pp, double a, double b,
+                          bool lower_tail, bool log_p,
+                          double& log_y, double& log_1my) {
+  const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
   const double y = R::qbeta(pp, a, b, lower_tail, log_p);
-  if (y > 0.5) return std::log1p(-R::qbeta(pp, b, a, !lower_tail, log_p));
-  if (y >= std::numeric_limits<double>::min()) return std::log(y);
-  return gkw_log_qbeta_tiny(pp, a, b, lower_tail, log_p);
+  if (y > 0.5) {
+    const double omy = R::qbeta(pp, b, a, !lower_tail, log_p);
+    log_1my = (omy >= DBL_MIN_NORMAL) ? std::log(omy)
+                                      : gkw_log_qbeta_tiny(pp, b, a, !lower_tail, log_p);
+    log_y = std::log1p(-omy);
+  } else {
+    log_y = (y >= DBL_MIN_NORMAL) ? std::log(y)
+                                  : gkw_log_qbeta_tiny(pp, a, b, lower_tail, log_p);
+    log_1my = std::log1p(-y);
+  }
 }
 
 /**

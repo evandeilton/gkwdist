@@ -462,12 +462,25 @@ Rcpp::NumericVector pgkw(
     // so pgkw(1e-09, 40, 2, 0.05, 0.5, 0.1) returned 0 for a true 0.0163855.
     // gkw_log1mexp_pow() keeps log_w, and gkw_pbeta_from_log() carries a y below
     // DBL_MIN through the leading term of the incomplete beta.
+    //
+    // The reflected branch needs 1 - y, and near x = 1 it is -expm1(l*log_w)
+    // only while log_w is a normal double; past that 1 - y is taken through its
+    // logarithm, bridged from log(v^beta) exactly as log_z is in the chain.
+    // Without it pgkw(x, 2, 100, 1, 0, 1, lower.tail = FALSE, log.p = TRUE) was
+    // -Inf at x = 0.99972, where pkw() gives -750.
+    const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
     double log_q_alpha = a * std::log(qi);
     double log_v = gkw_log1mexp(log_q_alpha);
-    double log_w = gkw_log1mexp_pow(log_q_alpha, log_v, b * log_v, b);
+    double log_v_beta = b * log_v;
+    double log_w = gkw_log1mexp_pow(log_q_alpha, log_v, log_v_beta, b);
     double log_y = l * log_w;
     if ((!lower_tail || log_p) && log_y > LOG1MEXP_CROSSOVER) {
-      result(i) = R::pbeta(-std::expm1(log_y), d + 1.0, g, !lower_tail, log_p);
+      if (log_w < -DBL_MIN_NORMAL && log_y < -DBL_MIN_NORMAL) {
+        result(i) = R::pbeta(-std::expm1(log_y), d + 1.0, g, !lower_tail, log_p);
+      } else {
+        double log_1my = gkw_log1mexp_pow(log_v_beta, log_w, log_y, l);
+        result(i) = gkw_pbeta_from_log(log_1my, d + 1.0, g, !lower_tail, log_p);
+      }
     } else {
       result(i) = gkw_pbeta_from_log(log_y, g, d + 1.0, lower_tail, log_p);
     }
@@ -587,13 +600,18 @@ Rcpp::NumericVector qgkw(
     // lower_tail and log_p go straight to R::qbeta instead of being undone by
     // exp() and 1 - p first.
     //
-    // log(y) comes from gkw_log_qbeta(), which reflects above y = 1/2 the way
-    // qbkw() always has and pgkw() does -- log(y) of a y rounded to the double
-    // grid near 1 put qgkw(1e-26, 2, 3, 1.5, 0.5, 1.2, lower.tail = FALSE) at
-    // exactly 1 -- and carries a y below DBL_MIN through its leading term.
-    // gkw_log_inv_link() then inverts the chain without flushing a tiny w to 0.
-    double log_w = gkw_log_qbeta(pp, g, d + 1.0, lower_tail, log_p) / l;
-    result(i) = std::exp(gkw_log_inv_link(log_w, b) / a);
+    // log(y) and log(1 - y) come from gkw_log_qbeta(), which reflects above
+    // y = 1/2 the way qbkw() always has and pgkw() does -- log(y) of a y rounded
+    // to the double grid near 1 put qgkw(1e-26, 2, 3, 1.5, 0.5, 1.2,
+    // lower.tail = FALSE) at exactly 1 -- and carries whichever of the two is
+    // below DBL_MIN through its leading term. The chain is then inverted from
+    // both ends: log(1 - w) is bridged from log(1 - y), so neither a tiny w nor
+    // a w next to 1 is flushed.
+    double log_y, log_1my;
+    gkw_log_qbeta(pp, g, d + 1.0, lower_tail, log_p, log_y, log_1my);
+    double log_w   = log_y / l;
+    double log_1mw = gkw_log1mexp_pow(log_1my, log_y, log_w, 1.0 / l);
+    result(i) = std::exp(gkw_log_inv_link_s(log_w, log_1mw, b) / a);
   }
   
   if (bad_par) {

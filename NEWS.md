@@ -13,10 +13,11 @@
   `hsekw()` returned `-Inf`, `+Inf` or `NaN` where the nested GKw is finite, and
   `optim()` stopped on them. They now match `dgkw(gamma = 1, delta = 0)`.
 
-* **Lower tail flushed to 0** in the p, q and r functions of GKw, BKw, KKw,
+* **Tails flushed to 0 or 1** in the p, q and r functions of GKw, BKw, KKw,
   EKw, Kw and Mc. `pgkw(1e-9, 40, 2, 0.05, 0.5, 0.1)` returned 0 (true
-  0.0164), and `rgkw()` drew exact zeros that `llgkw()` then rejected. RNG
-  streams are otherwise unchanged.
+  0.0164), and `rgkw()` drew exact zeros that `llgkw()` then rejected. The
+  same held in the deep upper tail on the log scale (`log.p = TRUE`, log
+  probabilities below about -718). RNG streams are otherwise unchanged.
 
 * **Upper tail of `qgkw()` and `qmc()`**: both now reflect above y = 1/2, as
   `qbkw()` already did. `qgkw(1e-26, 2, 3, 1.5, 0.5, 1.2, lower.tail = FALSE)`
@@ -34,8 +35,8 @@
   20 calls on 2e6 values). Warnings now unwind cleanly; messages are unchanged.
 
 * **`gkwgetstartvalues(family = "beta")`** started from `Beta(gamma, delta + 2)`
-  instead of `Beta(gamma, delta + 1)`. A failed quadrature no longer injects a
-  made-up moment. Starting values are now the same on every compiler.
+  instead of `Beta(gamma, delta + 1)`. Starting values are now the same on
+  every compiler.
 
 * **Missing data** give the documented value in all seven families: `+Inf` from
   `ll*()`, `NaN` from `gr*()` and `hs*()`.

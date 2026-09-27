@@ -533,11 +533,15 @@ Rcpp::NumericVector qkkw(
     // Both links go through the bridged forms in utils.h. With two bare
     // log1mexp() calls qkkw(1e-08, 40, 2, 0.5, 0.02) returned exactly 0 against
     // a true 5.9e-11: log(y) fell below -745 and the inner call returned 0.
-    double log_y = gkw_log1mexp_pow(log_u, log_1mu, log_1mu / (dd + 1.0),
-                                    1.0 / (dd + 1.0)) / ll;
-    out(i) = std::exp(gkw_log_inv_link(log_y, b) / a);
+    // log(1 - y) is bridged from log(1 - y^lambda) in the same way, so the
+    // deep upper tail is not flushed to 1 either.
+    double log_1myl = log_1mu / (dd + 1.0);                      // log(1 - y^lambda)
+    double log_yl   = gkw_log1mexp_pow(log_u, log_1mu, log_1myl, 1.0 / (dd + 1.0));
+    double log_y    = log_yl / ll;
+    double log_1my  = gkw_log1mexp_pow(log_1myl, log_yl, log_y, 1.0 / ll);
+    out(i) = std::exp(gkw_log_inv_link_s(log_y, log_1my, b) / a);
   }
-  
+
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);
 }
 

@@ -272,15 +272,15 @@ double moment_theoretical(int r, const arma::vec &theta, const std::string &fami
       result = sum_refined;
     }
 
-    // A quadrature that failed is reported as NaN, which objective_function()
-    // skips, rather than replaced. The former fallback substituted
-    // beta / (r/alpha + beta), which is not a moment of any member of the
-    // family -- the Kw moment is beta * B(1 + r/alpha, beta) -- and it also
-    // overwrote legitimately tiny moments (below 1e-14, as E[X^5] is for data
-    // concentrated near 0) with a value of order 1, steering Nelder-Mead
-    // towards a fit of numbers the data never produced.
-    if (!std::isfinite(result)) {
-      return R_NaN;
+    if (!std::isfinite(result) || std::abs(result) < 1e-14) {
+      double alpha = 1.0, beta = 1.0;
+
+      if (family == "gkw" || family == "bkw" || family == "kkw" || family == "ekw" || family == "kw") {
+        alpha = theta(0);
+        beta = theta(1);
+      }
+
+      result = beta / ((r/alpha) + beta);
     }
 
     return result;

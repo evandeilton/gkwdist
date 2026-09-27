@@ -460,8 +460,11 @@ Rcpp::NumericVector qekw(
     //
     // gkw_log_inv_link() rather than two bare log1mexp() calls, which flushed
     // the lower tail to 0 once log(u)/lambda < -745: qekw(1e-08, 40, 2, 0.02)
-    // returned exactly 0 against a true 9.83e-11.
-    out(i) = std::exp(gkw_log_inv_link(log_u / l, b) / a);
+    // returned exactly 0 against a true 9.83e-11. log(1 - w) is bridged from
+    // log(1 - u), so the deep upper tail is not flushed to 1 either.
+    double log_w   = log_u / l;
+    double log_1mw = gkw_log1mexp_pow(log_1mu, log_u, log_w, 1.0 / l);
+    out(i) = std::exp(gkw_log_inv_link_s(log_w, log_1mw, b) / a);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

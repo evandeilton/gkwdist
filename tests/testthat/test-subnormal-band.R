@@ -16,7 +16,8 @@
 #    and grekw() NaN/Inf where the nested GKw is finite.
 # 3. The p/q/r functions of GKw, BKw, KKw, EKw, Kw and Mc flushed the lower
 #    tail to exactly 0 once x^alpha (or w^lambda, or x^lambda) underflowed --
-#    rgkw() drew thousands of exact zeros, which llgkw() then rejects.
+#    rgkw() drew thousands of exact zeros, which llgkw() then rejects -- and
+#    the deep upper tail on the log scale to 1, or onto a plateau.
 # 4. qgkw() and qmc() took log(y) of a y rounded to the double grid near 1, so
 #    the upper tail was lost; qbkw() had always reflected.
 # 5. hsgkw() still worked in linear space and returned NaN where every other
@@ -26,8 +27,8 @@
 # of the likelihood, integrate() of the density, round trips through the
 # matching p function, the nesting identities, and numDeriv.
 #
-# Against commit 5330814 the blocks below fail 63 assertions and error once;
-# with these fixes all 108 pass.
+# Against commit 5330814 the blocks below fail 71 assertions and error once;
+# with these fixes all 116 pass.
 
 X_BAND <- c(0.01, 0.3, 0.6, 0.9)
 
@@ -163,6 +164,28 @@ test_that("qgkw and qmc keep the upper tail, as qbkw always did", {
   expect_lt(qgkw(1e-50, 2, 3, 1.5, 1.2, 1, lower.tail = FALSE), 1)
   q <- qmc(1e-15, 2, 0.5, 1.2, lower.tail = FALSE)
   expect_equal(pmc(q, 2, 0.5, 1.2, lower.tail = FALSE), 1e-15, tolerance = 1e-6)
+})
+
+
+test_that("the deep upper tail on the log scale is neither flushed nor saturated", {
+  # Kw(2, 100) nested in every family; qkw()/pkw() are closed form and exact.
+  # Below log p ~ -718 the reflected quantity 1 - y is under DBL_MIN: qekw and
+  # qkkw returned 1, qbkw and qgkw sat on a plateau at 1 - x = 4.16e-04, and
+  # pbkw/pgkw returned -Inf.
+  lp <- -c(600, 718, 750, 800, 1000, 3000)
+  ref <- qkw(lp, 2, 100, lower.tail = FALSE, log.p = TRUE)
+  q <- list(qgkw(lp, 2, 100, 1, 0, 1, lower.tail = FALSE, log.p = TRUE),
+            qbkw(lp, 2, 100, 1, 0, lower.tail = FALSE, log.p = TRUE),
+            qkkw(lp, 2, 100, 0, 1, lower.tail = FALSE, log.p = TRUE),
+            qekw(lp, 2, 100, 1, lower.tail = FALSE, log.p = TRUE))
+  for (k in seq_along(q)) expect_equal(1 - q[[k]], 1 - ref, tolerance = 1e-6,
+                                       info = paste("family", k))
+  p <- list(pgkw(ref, 2, 100, 1, 0, 1, lower.tail = FALSE, log.p = TRUE),
+            pbkw(ref, 2, 100, 1, 0, lower.tail = FALSE, log.p = TRUE),
+            pkkw(ref, 2, 100, 0, 1, lower.tail = FALSE, log.p = TRUE),
+            pekw(ref, 2, 100, 1, lower.tail = FALSE, log.p = TRUE))
+  for (k in seq_along(p)) expect_equal(p[[k]], pkw(ref, 2, 100, lower.tail = FALSE, log.p = TRUE),
+                                       tolerance = 1e-10, info = paste("family", k))
 })
 
 

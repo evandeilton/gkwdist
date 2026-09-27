@@ -428,7 +428,9 @@ Rcpp::NumericVector pbkw(
     double log_v = gkw_log1mexp(log_x_alpha);
     double log_v_beta = b * log_v;                        // log(1 - z)
     if ((!lower_tail || log_p) && log_v_beta < LOG1MEXP_CROSSOVER) {
-      res(i) = R::pbeta(std::exp(log_v_beta), d + 1.0, g, !lower_tail, log_p);
+      // 1 - z = exp(log_v_beta) underflows next to x = 1; carried through its
+      // logarithm it stays exact (pbkw was -Inf where pkw gives -750).
+      res(i) = gkw_pbeta_from_log(log_v_beta, d + 1.0, g, !lower_tail, log_p);
     } else if (log_v < -DBL_MIN_NORMAL && log_v_beta < -DBL_MIN_NORMAL) {
       res(i) = R::pbeta(-std::expm1(log_v_beta), g, d + 1.0, lower_tail, log_p);
     } else {
@@ -535,17 +537,27 @@ Rcpp::NumericVector qbkw(
     // z passes 1/2 the accurate value of 1-z comes straight from R::qbeta via
     // the symmetry I_z(a,b) = 1 - I_{1-z}(b,a). Taking the symmetry in both
     // regimes is what returns 1 for small u and loses the quantile entirely.
+    //
+    // R::qbeta saturates the reflected 1 - z at about 1.1e-308, which put
+    // qbkw() on a plateau in the deep upper tail on the log scale; below
+    // DBL_MIN its logarithm comes from gkw_log_qbeta_tiny() instead.
+    const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
     double z = R::qbeta(pp, g, d + 1.0, lower_tail, log_p);
-    double log_1mz = (z <= 0.5)
-      ? std::log1p(-z)
-      : std::log(R::qbeta(pp, d + 1.0, g, !lower_tail, log_p));
+    double log_1mz;
+    if (z <= 0.5) {
+      log_1mz = std::log1p(-z);
+    } else {
+      double omz = R::qbeta(pp, d + 1.0, g, !lower_tail, log_p);
+      log_1mz = (omz >= DBL_MIN_NORMAL)
+        ? std::log(omz)
+        : gkw_log_qbeta_tiny(pp, d + 1.0, g, !lower_tail, log_p);
+    }
 
     // Once z < 2.2e-308, log1p(-z) is a subnormal or 0 and
     // gkw_log1mexp(log_1mz / b) lost the quantile with it: qbkw returned 0 in
     // the deep lower tail. gkw_log1mexp_pow() bridges that band from log(z),
     // which is formed only there, and through gkw_log_qbeta_tiny() when R::qbeta
     // itself could not hold z.
-    const double DBL_MIN_NORMAL = std::numeric_limits<double>::min();
     double log_z = R_NegInf;
     if (!(log_1mz < -DBL_MIN_NORMAL)) {
       log_z = (z >= DBL_MIN_NORMAL) ? std::log(z)
