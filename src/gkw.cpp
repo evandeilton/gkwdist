@@ -476,7 +476,7 @@ Rcpp::NumericVector pgkw(
     double log_y = l * log_w;
     if ((!lower_tail || log_p) && log_y > LOG1MEXP_CROSSOVER) {
       if (log_w < -DBL_MIN_NORMAL && log_y < -DBL_MIN_NORMAL) {
-        result(i) = R::pbeta(-std::expm1(log_y), d + 1.0, g, !lower_tail, log_p);
+        result(i) = gkw_pbeta(-std::expm1(log_y), d + 1.0, g, !lower_tail, log_p);
       } else {
         double log_1my = gkw_log1mexp_pow(log_v_beta, log_w, log_y, l);
         result(i) = gkw_pbeta_from_log(log_1my, d + 1.0, g, !lower_tail, log_p);

@@ -260,6 +260,108 @@ inline double gkw_log_inv_link(double log_w, double beta) {
 }
 
 /**
+ * gkw_log_ibeta_cf: log I_x(a, b) by the continued fraction of the incomplete
+ * Beta function (modified Lentz), given log(x) and log(1 - x).
+ *
+ * I_x(a, b) = x^a (1 - x)^b / (a B(a, b)) * cf(x; a, b), and the fraction
+ * converges quickly for x < (a + 1) / (a + b + 2). Everything but the fraction
+ * is formed on the log scale, so the result stays finite far below DBL_MIN.
+ *
+ * @param x Argument in (0, (a + 1) / (a + b + 2))
+ * @param a,b Shape parameters (> 0)
+ * @param log_prefix a log(x) + b log(1 - x) - log(a) - lbeta(a, b)
+ * @return log I_x(a, b), or NaN if the fraction did not converge
+ */
+inline double gkw_log_ibeta_cf(double x, double a, double b, double log_prefix) {
+  const double TINY = 1.0e-300;   // floor that keeps Lentz denominators nonzero
+  const int MAX_ITER = 200;
+  const double qab = a + b, qap = a + 1.0, qam = a - 1.0;
+
+  double c = 1.0;
+  double d = 1.0 - qab * x / qap;
+  if (std::fabs(d) < TINY) d = TINY;
+  d = 1.0 / d;
+  double h = d;
+
+  for (int m = 1; m <= MAX_ITER; ++m) {
+    const double m2 = 2.0 * m;
+
+    // Even step of the fraction
+    double aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1.0 + aa * d;
+    if (std::fabs(d) < TINY) d = TINY;
+    c = 1.0 + aa / c;
+    if (std::fabs(c) < TINY) c = TINY;
+    d = 1.0 / d;
+    h *= d * c;
+
+    // Odd step of the fraction
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1.0 + aa * d;
+    if (std::fabs(d) < TINY) d = TINY;
+    c = 1.0 + aa / c;
+    if (std::fabs(c) < TINY) c = TINY;
+    d = 1.0 / d;
+    const double del = d * c;
+    h *= del;
+
+    if (std::fabs(del - 1.0) < 1.0e-15) {
+      // The fraction is positive in the region of convergence
+      return (h > 0.0) ? log_prefix + std::log(h) : R_NaN;
+    }
+  }
+  return R_NaN;
+}
+
+/**
+ * gkw_pbeta: R::pbeta(x, a, b, lower_tail, log_p) with the deep tail of the
+ * log scale computed by continued fraction.
+ *
+ * R::pbeta(log_p = TRUE) loses the result for large a and moderate b once
+ * log I_x(a, b) falls below about -500: pbeta(0.92, 1e4, 31, log.p = TRUE) is
+ * -651.27 against -707.854458, and at x = 0.90 it is -Inf against -920.957.
+ * Below LOG_TAIL_CF the requested tail is taken from gkw_log_ibeta_cf(); every
+ * other result, and the whole linear scale, is R::pbeta unchanged.
+ */
+inline double gkw_pbeta(double x, double a, double b, bool lower_tail, bool log_p) {
+  if (!log_p || !(x > 0.0 && x < 1.0) || !(a > 0.0) || !(b > 0.0) ||
+      !std::isfinite(a) || !std::isfinite(b)) {
+    return R::pbeta(x, a, b, lower_tail, log_p);
+  }
+
+  const double LOG_TAIL_CF = -450.0;   // results above this are left to R::pbeta
+  const double LOG_PREFIX_SKIP = -400.0;
+
+  // The upper tail of (x, a, b) is the lower tail of (1 - x, b, a)
+  const double xx = lower_tail ? x : 1.0 - x;
+  const double aa = lower_tail ? a : b;
+  const double bb = lower_tail ? b : a;
+
+  if (xx > 0.0 && xx < (aa + 1.0) / (aa + bb + 2.0)) {
+    // Cheap screen for ordinary arguments. log(t) >= 1 - 1/t bounds
+    // aa log(xx) + bb log(1 - xx) from below, and for bb >= 1 the prefix is at
+    // least that sum because aa B(aa, bb) <= 1.
+    const double one_m = lower_tail ? 1.0 - x : x;
+    if (bb >= 1.0 && -aa * one_m / xx - bb * xx / one_m > LOG_PREFIX_SKIP) {
+      return R::pbeta(x, a, b, lower_tail, log_p);
+    }
+
+    // log(xx) and log(1 - xx), each taken from x itself
+    const double log_xx = lower_tail ? std::log(x) : std::log1p(-x);
+    const double log_1m = lower_tail ? std::log1p(-x) : std::log(x);
+    const double log_prefix = aa * log_xx + bb * log_1m - std::log(aa) - R::lbeta(aa, bb);
+
+    // The fraction is 2F1(aa + bb, 1; aa + 1; xx) >= 1 (all terms positive),
+    // so a prefix above the skip level cannot be deep tail
+    if (log_prefix < LOG_PREFIX_SKIP) {
+      const double log_F = gkw_log_ibeta_cf(xx, aa, bb, log_prefix);
+      if (std::isfinite(log_F) && log_F < LOG_TAIL_CF) return log_F;
+    }
+  }
+  return R::pbeta(x, a, b, lower_tail, log_p);
+}
+
+/**
  * gkw_pbeta_from_log: R::pbeta(y, a, b, lower_tail, log_p) for a y known only
  * through its logarithm.
  *
@@ -272,7 +374,7 @@ inline double gkw_log_inv_link(double log_w, double beta) {
 inline double gkw_pbeta_from_log(double log_y, double a, double b,
                                  bool lower_tail, bool log_p) {
   if (!(log_y < LOG_DBL_MIN)) {
-    return R::pbeta(std::exp(log_y), a, b, lower_tail, log_p);
+    return gkw_pbeta(std::exp(log_y), a, b, lower_tail, log_p);
   }
   double log_F = a * log_y - std::log(a) - R::lbeta(a, b);
   if (log_F > 0.0) log_F = 0.0;

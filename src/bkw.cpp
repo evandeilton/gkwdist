@@ -432,7 +432,7 @@ Rcpp::NumericVector pbkw(
       // logarithm it stays exact (pbkw was -Inf where pkw gives -750).
       res(i) = gkw_pbeta_from_log(log_v_beta, d + 1.0, g, !lower_tail, log_p);
     } else if (log_v < -DBL_MIN_NORMAL && log_v_beta < -DBL_MIN_NORMAL) {
-      res(i) = R::pbeta(-std::expm1(log_v_beta), g, d + 1.0, lower_tail, log_p);
+      res(i) = gkw_pbeta(-std::expm1(log_v_beta), g, d + 1.0, lower_tail, log_p);
     } else {
       double log_z = gkw_log1mexp_pow(log_x_alpha, log_v, log_v_beta, b);
       res(i) = gkw_pbeta_from_log(log_z, g, d + 1.0, lower_tail, log_p);

@@ -332,7 +332,7 @@ Rcpp::NumericVector pmc(
     // decide which of x^lambda and 1 - x^lambda a double can hold.
     double log_xpow = ll * std::log(xx);
     if (!lower_tail && log_xpow > LOG1MEXP_CROSSOVER) {
-      out(i) = R::pbeta(-std::expm1(log_xpow), dd + 1.0, gg, /*lower*/ 1, log_p);
+      out(i) = gkw_pbeta(-std::expm1(log_xpow), dd + 1.0, gg, /*lower*/ true, log_p);
     } else if (log_xpow < LOG_DBL_MIN) {
       // x^lambda is a subnormal or 0 here and R::pbeta returned 0, yet
       // I_y(gamma, delta+1) is not small when gamma is: y^gamma is e^-46 at
@@ -346,7 +346,7 @@ Rcpp::NumericVector pmc(
       // misses on 2 of 9 ordinary x under glibc, and misses on a different
       // pair under the macOS ARM64 libm. std::pow is also the more accurate
       // form -- see the note on safe_pow() in utils.h.
-      out(i) = R::pbeta(std::pow(xx, ll), gg, dd + 1.0, lower_tail, log_p);
+      out(i) = gkw_pbeta(std::pow(xx, ll), gg, dd + 1.0, lower_tail, log_p);
     }
   }
   

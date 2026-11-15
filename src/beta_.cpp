@@ -305,7 +305,7 @@ Rcpp::NumericVector pbeta_(
     // log() of an already underflowed probability returned -Inf where the log
     // scale still has room (pbeta_(1e-200, 2, 3, log.p = TRUE) gave -Inf
     // against a true -918.73).
-    out(i) = R::pbeta(qq, g, d + 1.0, lower_tail, log_p);
+    out(i) = gkw_pbeta(qq, g, d + 1.0, lower_tail, log_p);
   }
   
   return Rcpp::NumericVector(out.memptr(), out.memptr() + out.n_elem);

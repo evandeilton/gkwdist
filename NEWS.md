@@ -6,6 +6,10 @@
   against `numDeriv`. They run in under a second.
 * `d*()` returns densities in the subnormal range `[4.9e-324, 2.2e-308)`
   instead of 0, as `stats::dbeta()` does.
+* `pbeta_()`, `pmc()`, `pbkw()` and `pgkw()` with `log.p = TRUE` are accurate
+  in the deep tail (log probability below about -450) for large `gamma`, where
+  `stats::pbeta()` is off or returns `-Inf`: `pbeta_(0.92, 1e4, 30, log.p = TRUE)`
+  is now -707.85, not -651.27.
 * `rgkw()` stops with an error when `n` does not fit an integer (`Inf`,
   `2^31`), like the other generators.
 
