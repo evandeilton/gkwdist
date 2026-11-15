@@ -10,8 +10,12 @@
   in the deep tail (log probability below about -450) for large `gamma`, where
   `stats::pbeta()` is off or returns `-Inf`: `pbeta_(0.92, 1e4, 30, log.p = TRUE)`
   is now -707.85, not -651.27.
-* `rgkw()` stops with an error when `n` does not fit an integer (`Inf`,
-  `2^31`), like the other generators.
+* `r*()` rejects an `n` that does not fit an integer (`Inf`, `2^31`) with
+  "'n' must be a single non-negative integer".
+* `q*(log.p = TRUE)` warns when a log-probability is above 0, as it already
+  did for `p` outside `[0, 1]`.
+* Warnings raised in the compiled code report the user's call, such as
+  `pgkw(0.5, Inf)`.
 
 # gkwdist 1.1.7
 

@@ -493,3 +493,45 @@ test_that("the shape is dropped when a parameter recycles longer, as base R does
     expect_null(dim(call_fn("d", f$dpq, c(list(m), long))), info = f$dpq)
   }
 })
+
+# =============================================================================
+# SECTION 7 -- SAMPLE SIZE RANGE, LOG-PROBABILITIES ABOVE 0, WARNING CALLS
+# =============================================================================
+
+test_that("r* rejects a size that does not fit an integer", {
+  for (f in FAMILIES) {
+    for (bad in list(Inf, 2^31, 3e9)) {
+      # The first condition signaled is the error: no coercion warning before it
+      cond <- tryCatch(call_fn("r", f$dpq, c(list(bad), f$pars)),
+                       condition = identity)
+      expect_s3_class(cond, "error")
+      expect_match(conditionMessage(cond),
+                   "'n' must be a single non-negative integer",
+                   info = paste(f$dpq, "n =", format(bad)))
+    }
+  }
+})
+
+test_that("q*(log.p = TRUE) warns for a log-probability above 0", {
+  for (f in FAMILIES) {
+    expect_warning(
+      r <- call_fn("q", f$dpq, c(list(c(-1, 0, 1)), f$pars, list(log.p = TRUE))),
+      "'p' values above 0 will produce NaN",
+      info = f$dpq
+    )
+    expect_true(is.nan(r[3]), info = f$dpq)
+    expect_true(all(is.finite(r[1:2])), info = f$dpq)
+    # Valid log-probabilities stay silent
+    expect_no_warning(
+      call_fn("q", f$dpq, c(list(c(-Inf, -1, 0, NA)), f$pars, list(log.p = TRUE)))
+    )
+  }
+})
+
+test_that("a warning raised in C++ reports the user-facing call", {
+  for (fn in c("dgkw", "pgkw", "qgkw")) {
+    w <- tryCatch(do.call(fn, list(0.5, Inf)), warning = identity)
+    expect_s3_class(w, "warning")
+    expect_identical(as.character(conditionCall(w)[[1]]), fn)
+  }
+})

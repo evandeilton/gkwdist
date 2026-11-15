@@ -125,14 +125,15 @@ dmc <- function(x, gamma = 1, delta = 0, lambda = 1, log = FALSE) {
   }
 
   # Call C++ implementation
-  .shape_like(.Call("_gkwdist_dmc",
+  out <- .Call("_gkwdist_dmc",
     as.numeric(x),
     as.numeric(gamma),
     as.numeric(delta),
     as.numeric(lambda),
     as.logical(log),
     PACKAGE = "gkwdist"
-  ), x)
+  )
+  .shape_like(out, x)
 }
 
 
@@ -247,7 +248,7 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
   }
 
   # Call C++ implementation
-  .shape_like(.Call("_gkwdist_pmc",
+  out <- .Call("_gkwdist_pmc",
     as.numeric(q),
     as.numeric(gamma),
     as.numeric(delta),
@@ -255,7 +256,8 @@ pmc <- function(q, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
     as.logical(lower.tail),
     as.logical(log.p),
     PACKAGE = "gkwdist"
-  ), q)
+  )
+  .shape_like(out, q)
 }
 
 
@@ -378,9 +380,13 @@ qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
   if (!log.p && any(p < 0 | p > 1, na.rm = TRUE)) {
     warning("'p' values outside [0, 1] will produce NaN")
   }
+  # A log-probability is at most 0
+  if (log.p && any(p > 0, na.rm = TRUE)) {
+    warning("'p' values above 0 will produce NaN when 'log.p = TRUE'")
+  }
 
   # Call C++ implementation
-  .shape_like(.Call("_gkwdist_qmc",
+  out <- .Call("_gkwdist_qmc",
     as.numeric(p),
     as.numeric(gamma),
     as.numeric(delta),
@@ -388,7 +394,8 @@ qmc <- function(p, gamma = 1, delta = 0, lambda = 1, lower.tail = TRUE, log.p = 
     as.logical(lower.tail),
     as.logical(log.p),
     PACKAGE = "gkwdist"
-  ), p)
+  )
+  .shape_like(out, p)
 }
 
 
@@ -482,7 +489,9 @@ rmc <- function(n, gamma = 1, delta = 0, lambda = 1) {
   if (length(n) > 1) n <- length(n)
   # n = 0 is legal and yields numeric(0), as stats::rbeta(0, 2, 3) does.
   # Negative and missing n stay errors, which is also what base R does.
-  if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 0) {
+  # A size that does not fit an integer is rejected before as.integer()
+  if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 0 ||
+      !is.finite(n) || n > .Machine$integer.max) {
     stop("'n' must be a single non-negative integer")
   }
   n <- as.integer(n)

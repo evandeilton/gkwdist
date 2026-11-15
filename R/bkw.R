@@ -123,7 +123,7 @@ dbkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, log = FALSE) {
   }
 
   # Call C++ implementation
-  .shape_like(.Call("_gkwdist_dbkw",
+  out <- .Call("_gkwdist_dbkw",
     as.numeric(x),
     as.numeric(alpha),
     as.numeric(beta),
@@ -131,7 +131,8 @@ dbkw <- function(x, alpha = 1, beta = 1, gamma = 1, delta = 0, log = FALSE) {
     as.numeric(delta),
     as.logical(log),
     PACKAGE = "gkwdist"
-  ), x)
+  )
+  .shape_like(out, x)
 }
 
 
@@ -245,7 +246,7 @@ pbkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
   }
 
   # Call C++ implementation
-  .shape_like(.Call("_gkwdist_pbkw",
+  out <- .Call("_gkwdist_pbkw",
     as.numeric(q),
     as.numeric(alpha),
     as.numeric(beta),
@@ -254,7 +255,8 @@ pbkw <- function(q, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
     as.logical(lower.tail),
     as.logical(log.p),
     PACKAGE = "gkwdist"
-  ), q)
+  )
+  .shape_like(out, q)
 }
 
 
@@ -379,9 +381,13 @@ qbkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
   if (!log.p && any(p < 0 | p > 1, na.rm = TRUE)) {
     warning("'p' values outside [0, 1] will produce NaN")
   }
+  # A log-probability is at most 0
+  if (log.p && any(p > 0, na.rm = TRUE)) {
+    warning("'p' values above 0 will produce NaN when 'log.p = TRUE'")
+  }
 
   # Call C++ implementation
-  .shape_like(.Call("_gkwdist_qbkw",
+  out <- .Call("_gkwdist_qbkw",
     as.numeric(p),
     as.numeric(alpha),
     as.numeric(beta),
@@ -390,7 +396,8 @@ qbkw <- function(p, alpha = 1, beta = 1, gamma = 1, delta = 0, lower.tail = TRUE
     as.logical(lower.tail),
     as.logical(log.p),
     PACKAGE = "gkwdist"
-  ), p)
+  )
+  .shape_like(out, p)
 }
 
 
@@ -480,7 +487,9 @@ rbkw <- function(n, alpha = 1, beta = 1, gamma = 1, delta = 0) {
   if (length(n) > 1) n <- length(n)
   # n = 0 is legal and yields numeric(0), as stats::rbeta(0, 2, 3) does.
   # Negative and missing n stay errors, which is also what base R does.
-  if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 0) {
+  # A size that does not fit an integer is rejected before as.integer()
+  if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 0 ||
+      !is.finite(n) || n > .Machine$integer.max) {
     stop("'n' must be a single non-negative integer")
   }
   n <- as.integer(n)
