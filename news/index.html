@@ -49,6 +49,8 @@
 <li>
 <code>d*()</code> returns densities in the subnormal range <code>[4.9e-324, 2.2e-308)</code> instead of 0, as <code><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">stats::dbeta()</a></code> does.</li>
 <li>
+<code><a href="../reference/pbeta_.html">pbeta_()</a></code>, <code><a href="../reference/pmc.html">pmc()</a></code>, <code><a href="../reference/pbkw.html">pbkw()</a></code> and <code><a href="../reference/pgkw.html">pgkw()</a></code> with <code>log.p = TRUE</code> are accurate in the deep tail (log probability below about -450) for large <code>gamma</code>, where <code><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">stats::pbeta()</a></code> is off or returns <code>-Inf</code>: <code>pbeta_(0.92, 1e4, 30, log.p = TRUE)</code> is now -707.85, not -651.27.</li>
+<li>
 <code><a href="../reference/rgkw.html">rgkw()</a></code> stops with an error when <code>n</code> does not fit an integer (<code>Inf</code>, <code>2^31</code>), like the other generators.</li>
 </ul></div>
     <div class="section level2">
