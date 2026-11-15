@@ -1,20 +1,20 @@
 # tests/testthat/test-quantile-log-space.R
-# Regression tests for the seven quantile functions after the log-space rewrite.
+# The seven quantile functions where the inversion must run in log space.
 #
-# Each q*() converted log.p back with exp(), folded the upper tail with 1 - p,
-# and then inverted using 1 - u in linear space at every step. The result was
-# not merely imprecise: it left the open support (0,1) entirely.
+# Converting log.p back with exp(), folding the upper tail with 1 - p and
+# inverting with 1 - u in linear space would leave the open support (0,1):
+# each of these quantiles would round to exactly 0.
 #
-#   qekw(0.02, 20, 0.1, 0.1)      returned 0   true value 0.1587
-#   qekw(1e-08, 5, 2, 0.5)        returned 0   true value 5.49e-04
-#   qkw(1e-16, 0.2, 2)            returned 0   true value 3.125e-82
-#   qbeta_(-1000, 2, 3, log.p=T)  returned 0   true value 2.25e-218
+#   qekw(0.02, 20, 0.1, 0.1)      = 0.1587
+#   qekw(1e-08, 5, 2, 0.5)        = 5.49e-04
+#   qkw(1e-16, 0.2, 2)            = 3.125e-82
+#   qbeta_(-1000, 2, 3, log.p=T)  = 2.25e-218
 #
-# A quantile of exactly 0 or 1 then feeds d*() and ll*() a value outside the
-# support they accept, so the damage propagates.
+# A quantile of exactly 0 or 1 would then feed d*() and ll*() a value outside
+# the support they accept.
 #
-# The inversion now runs on log(u) and log(1-u), both carried from whatever
-# scale and tail the caller used, and the incomplete-beta families hand
+# The inversion runs on log(u) and log(1-u), both carried from whatever scale
+# and tail the caller used, and the incomplete-beta families hand
 # lower_tail/log_p to R::qbeta rather than undoing them first.
 
 l1m <- function(u) ifelse(u > -log(2), log(-expm1(u)), log1p(-exp(u)))
@@ -31,7 +31,7 @@ test_that("quantiles stay inside the open support", {
   expect_equal(qbeta_(-1000, 2, 3, log.p = TRUE),
                stats::qbeta(-1000, 2, 4, log.p = TRUE), tolerance = 1e-12)
 
-  # every one of these used to be exactly 0
+  # each of these rounds to exactly 0 in linear space
   for (v in c(qekw(0.02, 20, 0.1, 0.1), qekw(1e-08, 5, 2, 0.5), qkw(1e-16, 0.2, 2),
               qgkw(1e-12, 1, 1, 0.1, 0.1, 1), qmc(0.01, 0.1, 0.1, 0.1))) {
     expect_gt(v, 0)
@@ -79,11 +79,8 @@ test_that("p(q(u)) recovers u where the quantile is representable", {
 })
 
 test_that("log.p reaches quantiles the linear scale cannot", {
-  # Below about log(p) = -745 the chain cannot help: exp(log u) underflows, so
-  # 1 - u rounds to exactly 1 and the inversion has nothing left to invert. The
-  # first-order recovery there, log(u) - log(beta), needs each step to carry
-  # both log(q) and log(1-q) and belongs with its own change. 1.1.5 already
-  # returned 0 from log(p) = -40 downward.
+  # The log-scale inversion stays positive far below log(p) = -745, where
+  # exp(log p) underflows.
   for (lp in c(-700, -300, -100, -30)) {
     expect_gt(qbeta_(lp, 2, 3, log.p = TRUE), 0)
     expect_gt(qkw(lp, 2, 3, log.p = TRUE), 0)
@@ -91,11 +88,13 @@ test_that("log.p reaches quantiles the linear scale cannot", {
   }
   expect_equal(qkw(-700, 2, 3, log.p = TRUE),
                exp(l1m(l1m(-700) / 3) / 2), tolerance = 1e-11)
-  expect_equal(qkw(-1000, 2, 3, log.p = TRUE), 0)   # documented limit
+  # leading term: q^alpha = p / beta
+  expect_equal(log(qkw(-1000, 2, 3, log.p = TRUE)), (-1000 - log(3)) / 2,
+               tolerance = 1e-12)
 })
 
-test_that("the closed boundary p = 0 and p = 1 is unchanged", {
-  # These are in range, and are the values 1.1.5 returned.
+test_that("the closed boundary p = 0 and p = 1 maps to 0 and 1", {
+  # p = 0 and p = 1 are in range.
   expect_equal(qkw(0, 2, 3), 0)
   expect_equal(qkw(1, 2, 3), 1)
   expect_equal(qkw(0, 2, 3, lower.tail = FALSE), 1)

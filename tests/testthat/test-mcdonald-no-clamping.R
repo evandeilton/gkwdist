@@ -1,28 +1,24 @@
 # tests/testthat/test-mcdonald-no-clamping.R
-# Regression tests for llmc(), grmc() and hsmc() after the data clamps were
-# removed from bpmc.cpp.
+# llmc(), grmc() and hsmc() use the data and the parameters as given, with no
+# clamps or floors.
 #
-# Three defects lived in these loops:
-#
-#   1. Every observation was clamped to [1e-10, 1-1e-10] before use. That moved
-#      the log-likelihood by (gamma*lambda - 1) * (log(1e-10) - log(x)) nats --
-#      23 nats for a single observation at 1e-20 -- and broke the identity
+#   1. Observations are not clamped to [1e-10, 1-1e-10]. A clamp would move the
+#      log-likelihood by (gamma*lambda - 1) * (log(1e-10) - log(x)) nats -- 23
+#      nats for a single observation at 1e-20 -- and break the identity
 #      llmc(gamma, delta, 1) == llbeta(gamma, delta), where the two are the same
-#      model. The discrepancy reached 1140 nats.
+#      model.
 #
-#   2. For delta > 1000 the term delta * log(1 - x^lambda) was floored at
-#      -700 * n, so the objective stopped growing with delta while the constant
-#      term kept growing. The negative log-likelihood became unbounded below:
-#      llmc(c(1e300, 1e300, 1e-6), x) returned -2.77e+302, a global minimum at
-#      absurd parameters, with a visible step at delta = 1000.
+#   2. The term delta * log(1 - x^lambda) is not floored. A floor at -700 * n
+#      would stop the objective growing with delta while the constant term
+#      keeps growing, leaving the negative log-likelihood unbounded below, with
+#      a global minimum at absurd parameters.
 #
-#   3. grmc() and hsmc() floored v = 1 - x^lambda at 1e-10 and capped their
-#      lambda terms at +/-1e6, so the gradient plateaued where the objective
-#      kept moving.
+#   3. grmc() and hsmc() do not floor v = 1 - x^lambda or cap their lambda
+#      terms, so the gradient follows the objective.
 #
-# The clamps mattered most because grmc() and hsmc() shared them with llmc():
-# checking the analytic gradient against numDeriv::grad(llmc) passed anyway.
-# These tests use a closed-form reference written in R instead.
+# A clamp shared by llmc(), grmc() and hsmc() would pass a check of the
+# analytic gradient against numDeriv::grad(llmc), so these tests use a
+# closed-form reference written in R instead.
 
 ref_nll <- function(p, x) {
   g <- p[1]; d <- p[2]; l <- p[3]
@@ -31,13 +27,13 @@ ref_nll <- function(p, x) {
 }
 
 test_that("llmc uses observations as given, without clamping", {
-  # x below 1e-10 used to be pulled up to 1e-10.
+  # x below 1e-10 is not pulled up to 1e-10.
   for (xv in c(1e-10, 1e-11, 1e-15, 1e-20)) {
     data <- c(xv, 0.4, 0.6)
     expect_equal(llmc(c(2, 3, 1.5), data), ref_nll(c(2, 3, 1.5), data),
                  tolerance = 1e-12)
   }
-  # x above 1 - 1e-10 used to be pulled down.
+  # x above 1 - 1e-10 is not pulled down.
   for (xv in c(1 - 1e-10, 1 - 1e-12, 1 - 1e-15)) {
     data <- c(0.2, 0.5, xv)
     expect_equal(llmc(c(2, 3, 1.5), data), ref_nll(c(2, 3, 1.5), data),
@@ -63,7 +59,7 @@ test_that("llmc equals llbeta at lambda = 1, the model they share", {
 test_that("the negative log-likelihood is bounded below", {
   set.seed(2024)
   x <- rmc(200, 2.0, 1.5, 1.3)
-  # This used to return -2.77e+302: a global minimum any optimizer would take.
+  # A hugely negative value here would be a global minimum for any optimizer.
   expect_gt(llmc(c(1e300, 1e300, 1e-6), x), 0)
   expect_gt(llmc(c(1e6, 1e6, 1e-3), x), 0)
 })
@@ -75,7 +71,7 @@ test_that("there is no step in llmc at delta = 1000", {
     expect_equal(llmc(c(2, d, 1.3), x), -sum(dmc(x, 2, d, 1.3, log = TRUE)),
                  tolerance = 1e-8)
   }
-  # continuity across the former threshold
+  # continuity across delta = 1000
   lo <- llmc(c(2, 999.999, 1.3), x)
   hi <- llmc(c(2, 1000.001, 1.3), x)
   expect_lt(abs(hi - lo), 1)
@@ -88,8 +84,7 @@ test_that("grmc and hsmc agree with the closed-form reference", {
     c(1e-12, 1e-8, 1e-4, 0.2, 0.5, 0.8),
     c(0.2, 0.5, 0.8, 1 - 1e-4, 1 - 1e-8, 1 - 1e-12)
   )
-  # gamma + delta kept under 100: beyond that grmc switches to an asymptotic
-  # digamma expansion, a separate defect this change does not touch.
+  # Moderate gamma + delta, so that numDeriv resolves the digamma terms.
   pars <- list(c(2, 3, 1.5), c(0.5, 0.5, 0.5), c(0.3, 2, 0.2), c(2, 3, 12))
   for (data in datasets) {
     for (p in pars) {
@@ -107,7 +102,7 @@ test_that("the lambda gradient keeps its limit as x approaches 1", {
   skip_if_not_installed("numDeriv")
   # x^lambda log(x) / (1 - x^lambda) converges to -1/lambda as x -> 1, so the
   # gradient settles rather than diverging. The point is which value it settles
-  # on: the former v = max(v, 1e-10) drove the contribution to about -1e-5
+  # on: a floor v = max(v, 1e-10) would drive the contribution to about -1e-5
   # instead of -1/1.3 = -0.769, five orders of magnitude adrift.
   base <- c(0.3, 0.5, 0.7)
   par <- c(2, 3, 1.3)

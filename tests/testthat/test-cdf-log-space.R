@@ -1,24 +1,24 @@
 # tests/testthat/test-cdf-log-space.R
-# Regression tests for the seven CDFs after the log-space rewrite.
+# The seven CDFs where the chain must be carried in log space.
 #
-# Each p*() formed 1 - x^alpha and 1 - (1 - x^alpha)^beta in linear space.
-# Once x^alpha fell below 1.1e-16 the first rounded to exactly 1 and the second
-# to exactly 0, so the CDF collapsed to 0 or 1. This was not a last-digit loss:
+# In linear space 1 - x^alpha rounds to exactly 1 once x^alpha falls below
+# 1.1e-16, and 1 - (1 - x^alpha)^beta to exactly 0, which would send the CDF
+# to 0 or 1. The values at stake are not last-digit effects:
 #
-#   pekw(5.62e-09, 2, 5, 0.02)  returned 0     against a true 0.483
-#   pekw(0.14, 20, 20, 0.1)     returned 0     against a true 0.0264
-#   pkw(1e-09, 2, 5, log.p=T)   returned -Inf  against a true -39.84
+#   pekw(5.62e-09, 2, 5, 0.02)  = 0.483
+#   pekw(0.14, 20, 20, 0.1)     = 0.0264
+#   pkw(1e-09, 2, 5, log.p=T)   = -39.84
 #
 # The second of those sits at x = 0.14, nowhere near a tail: a small lambda
-# compresses the result toward 1 and brings the collapse into the body of the
+# compresses the result toward 1 and brings the regime into the body of the
 # distribution.
 #
-# lower.tail and log.p were also applied after the fact, as 1 - p and log(p),
-# rather than passed to R::pbeta, which loses the whole opposite tail.
+# lower.tail and log.p are also covered: forming 1 - p or log(p) after the
+# fact, instead of passing the flags to the Beta CDF, loses the opposite tail.
 
 l1m <- function(u) ifelse(u > -log(2), log(-expm1(u)), log1p(-exp(u)))
 
-test_that("the CDFs no longer collapse to 0 or 1", {
+test_that("the CDFs do not collapse to 0 or 1", {
   expect_equal(pekw(5.6234132519034910e-09, 2, 5, 0.02), 0.48303588962930716,
                tolerance = 1e-12)
   expect_equal(pekw(0.14, 20, 20, 0.1), 0.026445943814401841, tolerance = 1e-12)

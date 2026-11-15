@@ -1,11 +1,10 @@
 # tests/testthat/test-zero-length-input.R
-# Regression tests for zero-length arguments.
+# Zero-length arguments.
 #
-# Before these guards existed, a zero-length argument reached the
-# `i % vec.n_elem` recycling in C++ with a zero divisor. Integer division by
-# zero is undefined behavior and raised SIGFPE, killing the R process: not a
-# catchable error, no message, no traceback. A filtered vector that happens to
-# be empty (`x[x > 1]`) was enough to trigger it in all 28 d/p/q/r functions.
+# A zero-length argument must not reach the `i % vec.n_elem` recycling in C++:
+# integer division by zero is undefined behavior and raises SIGFPE, which kills
+# the R process with no catchable error. A filtered vector that happens to be
+# empty (`x[x > 1]`) is enough to get there in all 28 d/p/q/r functions.
 #
 # The expected behavior follows R's own recycling convention:
 #   dbeta(numeric(0), 1, 1)   -> numeric(0)

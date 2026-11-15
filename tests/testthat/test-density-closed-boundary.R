@@ -1,11 +1,10 @@
 # tests/testthat/test-density-closed-boundary.R
-# Regression tests for d*() at x = 0 and x = 1.
+# d*() at x = 0 and x = 1.
 #
 # The GKw support is the open interval, but base R's density functions return
 # the LIMIT at the closed boundary rather than 0 -- dbeta(0, 0.5, 1) is Inf and
 # dbeta(1, 2, 1) is 2 -- and any code that plots a density across [0,1] depends
-# on it. Every family here returned 0 at both ends, so curves fell to zero
-# exactly where they should have diverged.
+# on it. Every family here does the same.
 #
 # Substituting the first-order forms the log chain already uses,
 #
@@ -21,8 +20,6 @@
 # parameterization is the one case where an external arbiter exists, so the
 # whole rule is checked against stats::dbeta there, and against the nesting
 # identities everywhere else.
-#
-# Against 1.1.5 this file fails 34 assertions.
 
 test_that("the Beta family reproduces stats::dbeta at both boundaries", {
   # gamma = shape1, delta = shape2 - 1
@@ -70,7 +67,7 @@ test_that("the boundary value is the limit of the interior", {
   }
 })
 
-test_that("outside the closed interval the density is still zero", {
+test_that("outside the closed interval the density is zero", {
   for (x in c(-1, -1e-300, 1 + 1e-12, 2, 1e6)) {
     expect_equal(dkw(x, 2, 3), 0, info = x)
     expect_equal(dgkw(x, 2, 3, 1.5, 2, 0.8), 0, info = x)

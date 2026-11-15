@@ -4,10 +4,8 @@ library(gkwdist)
 # =============================================================================
 # Value-level checks on the density and distribution functions.
 #
-# The pre-existing PDF tests assert only type, length, non-negativity and
-# finiteness. A vector of zeros satisfies all four, which is how dgkw() could
-# return 0 everywhere (a name collision with R's own Rf_log1mexp, fixed in
-# 1.1.5) while the suite stayed green. These tests pin down actual values.
+# Type, length, non-negativity and finiteness are not enough: a vector of zeros
+# satisfies all four. These tests pin down actual values.
 # =============================================================================
 
 test_that("every density integrates to one over (0, 1)", {
@@ -117,8 +115,8 @@ test_that("quantile functions invert the distribution functions", {
 
 test_that("the package helpers do not collide with R's Rmath API", {
   # Rmath.h defines log1mexp/log1pexp with a different convention
-  # (log(1 - exp(-x)) for x >= 0). Binding to those silently produced NaN and
-  # zeroed dgkw(). This guards the fix at the level users can observe.
+  # (log(1 - exp(-x)) for x >= 0). Binding to those would give NaN and a zero
+  # dgkw(); this checks the result users can observe.
   expect_gt(dgkw(0.5, 2, 3, 1.5, 0.5, 2), 0)
   expect_true(all(dgkw(seq(0.05, 0.95, by = 0.05), 2, 3, 1.5, 0.5, 2) > 0))
   expect_true(all(is.finite(dgkw(seq(0.05, 0.95, by = 0.05), 2, 3, 1.5, 0.5, 2,

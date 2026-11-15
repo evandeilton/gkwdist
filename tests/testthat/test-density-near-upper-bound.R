@@ -1,17 +1,16 @@
 # tests/testthat/test-density-near-upper-bound.R
-# Regression tests for dgkw() as x approaches 1.
+# dgkw() as x approaches 1.
 #
-# dgkw() used to form x^alpha in linear space and bail out with a density of
-# zero whenever x^alpha >= 1 - sqrt(.Machine$double.eps). The guard existed
-# because log(x^alpha) loses its significant digits there -- doubles are spaced
-# 2.2e-16 apart near 1, so the relative error reaches 4e-6 by 1 - x = 1e-12 --
-# but returning zero is a far worse answer than an imprecise one. For
-# GKw(0.1, 0.1, 10, 0.1, 0.1) the discarded band held 13% of the probability
-# mass, and it broke the nesting identity: dgkw(x, 1, 0.1, 1, 0, 1) returned 0
-# where dkw(x, 1, 0.1), the same density, returned 1.26e7.
+# log(x^alpha) formed from a linear-space x^alpha loses its significant digits
+# once x^alpha >= 1 - sqrt(.Machine$double.eps): doubles are spaced 2.2e-16
+# apart near 1, so the relative error reaches 4e-6 by 1 - x = 1e-12. The
+# density must stay accurate through that band. For GKw(0.1, 0.1, 10, 0.1, 0.1)
+# the band holds 13% of the probability mass, and the nesting identity needs
+# it: dgkw(x, 1, 0.1, 1, 0, 1) and dkw(x, 1, 0.1) are the same density, 1.26e7
+# at x = 1 - 1e-9.
 #
-# Taking log(x^alpha) as alpha * log(x) removes both the imprecision and the
-# need for the guard; gkw_log1mexp() already handles the resulting regime.
+# Taking log(x^alpha) as alpha * log(x) keeps full precision, and
+# gkw_log1mexp() handles the resulting regime.
 
 log1mexp_ref <- function(u) ifelse(u > -log(2), log(-expm1(u)), log1p(-exp(u)))
 
@@ -24,10 +23,10 @@ ref_ldgkw <- function(x, a, b, g, d, l) {
     (a - 1) * lx + (b - 1) * lv + (g * l - 1) * lw + d * lz
 }
 
-# The band the old guard rejected: x^alpha within sqrt(eps) of 1.
+# The band where x^alpha is within sqrt(eps) of 1.
 near_one <- 1 - c(1e-8, 1.3e-8, 1e-9, 1e-10, 1e-11, 1e-13, 1e-15)
 
-test_that("dgkw is non-zero throughout the band the guard used to reject", {
+test_that("dgkw is non-zero where x^alpha is within sqrt(eps) of 1", {
   configs <- list(
     c(1, 0.1, 1, 0, 1),
     c(1, 0.2, 1, 0, 1),
@@ -44,16 +43,10 @@ test_that("dgkw is non-zero throughout the band the guard used to reject", {
 })
 
 test_that("the nesting identity holds as x approaches 1", {
-  # dgkw(x, a, b, 1, 0, 1) and dkw(x, a, b) are the same density. Before the
-  # fix the first returned 0 in this band while the second did not.
+  # dgkw(x, a, b, 1, 0, 1) and dkw(x, a, b) are the same density.
   for (ab in list(c(2, 3), c(0.5, 0.3), c(1, 0.1), c(40, 25))) {
-    # dgkw() still evaluates log(1 - w^lambda) and bails out when it is not
-    # finite, even for gamma*lambda = 1 and delta = 0 where that term drops out
-    # of the density entirely. Once beta * log(1 - x^alpha) falls below
-    # log(DBL_MIN) the inner exp() underflows, w rounds to 1, and the guard
-    # fires. That is a pre-existing defect of the same family as the
-    # observation-dropping guards in hsgkw(), unchanged here, and it belongs
-    # with the log-space rework. Assert the identity where the chain survives.
+    # Restricted to beta * log(1 - x^alpha) > -745, where (1 - x^alpha)^beta
+    # is representable.
     lv <- log1mexp_ref(ab[1] * log(near_one))
     ok <- ab[2] * lv > -745
     expect_true(any(ok))
@@ -69,8 +62,8 @@ test_that("the nesting identity holds as x approaches 1", {
   expect_equal(dgkw(near_one, 1, 1, 2, 2, 1.5), dmc(near_one, 2, 2, 1.5), tolerance = 1e-12)
 })
 
-test_that("recovered mass shows up in the integral", {
-  # This parameterization lost 13% of its mass to the guard.
+test_that("the density integrates to one including the band near 1", {
+  # This parameterization holds 13% of its mass in the band.
   mass <- integrate(function(t) dgkw(t, 0.1, 0.1, 10, 0.1, 0.1), 0, 1,
                     subdivisions = 5000)$value
   expect_equal(mass, 1, tolerance = 1e-3)
@@ -83,15 +76,15 @@ test_that("recovered mass shows up in the integral", {
 })
 
 test_that("the density stays monotone into the upper tail", {
-  # For beta < 1 the density diverges as x -> 1; the guard produced a cliff to
-  # zero instead of a rising tail.
+  # For beta < 1 the density diverges as x -> 1: a rising tail, with no cliff
+  # to zero.
   x <- 1 - 10^-(6:14)
   d <- dgkw(x, 1, 0.1, 1, 0, 1)
   expect_true(all(is.finite(d)))
   expect_true(all(diff(d) > 0))
 })
 
-test_that("the bulk of the distribution is unchanged", {
+test_that("the bulk of the distribution matches the reference", {
   x <- c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)
   expect_equal(dgkw(x, 2, 3, 1.5, 2, 1.2),
                exp(ref_ldgkw(x, 2, 3, 1.5, 2, 1.2)), tolerance = 1e-12)

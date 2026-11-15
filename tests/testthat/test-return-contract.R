@@ -68,7 +68,7 @@ test_that("out-of-bound and missing take the same route, in every position", {
   }
 })
 
-test_that("delta = 0 is still accepted, in every family that has it", {
+test_that("delta = 0 is accepted, in every family that has it", {
   # delta's bound is >= 0, not > 0 -- the one place an off-by-one could hide.
   for (f in FAMS) {
     if (!nzchar(f$nonneg)) next
@@ -81,19 +81,17 @@ test_that("delta = 0 is still accepted, in every family that has it", {
 })
 
 test_that("an infinite parameter is NOT intercepted by the wrapper", {
-  # Pinning the current state, not endorsing it. See the header: the wrapper
-  # lets Inf through, C++ rejects it, and the routine leaves its fill value.
-  # When the gkwreg clamp lands and this is tightened, these expectations are
-  # the ones to flip.
+  # See the header: the wrapper lets Inf through, C++ rejects it, and the
+  # routine leaves its fill value.
   expect_identical(suppressWarnings(dkw(0.5, Inf, 3)), 0)
   expect_identical(suppressWarnings(dbeta_(0.5, Inf, 3)), 0)
   expect_true(is.na(suppressWarnings(pkw(0.5, Inf, 3))))
   expect_true(is.na(suppressWarnings(qkw(0.5, Inf, 3))))
-  # and 0 is the correct limit here, which is why this is not urgent
+  # and 0 is the correct limit here
   expect_equal(dkw(0.5, 1e5, 3), 0)
 })
 
-test_that("gr and hs still return NaN, as their documentation says", {
+test_that("gr and hs return NaN, as their documentation says", {
   x <- c(0.2, 0.5, 0.8)
   expect_true(all(is.nan(grkw(c(-1, 3), x))))
   expect_true(all(is.nan(hskw(c(-1, 3), x))))
@@ -102,15 +100,14 @@ test_that("gr and hs still return NaN, as their documentation says", {
 })
 
 test_that("every family warns about data outside the open support", {
-  # llekw and llbeta already did; the other five were silent, so the same
-  # corrupted sample was announced in two families out of seven.
+  # The same corrupted sample must be announced by all seven families.
   for (f in FAMS) {
     expect_warning(do.call(f$ll, list(unlist(f$ok), c(0.5, 1.5))), "outside \\(0, 1\\)")
     expect_warning(do.call(f$ll, list(unlist(f$ok), c(0.5, 0))), "outside \\(0, 1\\)")
   }
 })
 
-test_that("valid input is silent and unchanged", {
+test_that("valid input is silent and gives the pinned values", {
   for (f in FAMS) {
     expect_silent(do.call(f$d, c(list(0.5), f$ok)))
     expect_silent(do.call(f$ll, list(unlist(f$ok), c(0.2, 0.5, 0.8))))

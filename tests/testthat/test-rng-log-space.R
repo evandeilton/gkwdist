@@ -1,26 +1,20 @@
 # tests/testthat/test-rng-log-space.R
-# Regression tests for the random generators after the log-space rewrite.
+# The random generators never return a value outside the open support (0,1).
 #
-# rbkw() drew V ~ Beta(gamma, delta+1) and then formed 1.0 - V. For V below
-# 1.1e-16 that rounds to exactly 1 and the generator returned 0 -- a value
-# outside the open support (0,1), which llbkw() then rejects. R::rbeta itself
-# never returned a zero: every one was fabricated by the subtraction.
+# A draw V ~ Beta(gamma, delta+1) followed by 1.0 - V in linear space rounds to
+# exactly 1 for V below 1.1e-16, which would make the variate exactly 0 -- a
+# value llbkw() rejects. In linear space the regime is common:
 #
-#   rbkw(1e5, 2, 3, 0.02, 0)   48,602 exact zeros   48.6% of the sample
-#   rbkw(1e5, 2, 3, 0.05, 0)   16,440 exact zeros
-#   rkkw(1e5, 0.2, 3, 0, 0.3)       6 exact zeros
+#   rbkw(1e5, 2, 3, 0.02, 0)   about 48% of the draws have V < 1.1e-16
+#   rbkw(1e5, 2, 3, 0.05, 0)   about 16%
+#   rkkw(1e5, 0.2, 3, 0, 0.3)  a few draws in 1e5 reach the same regime
 #
-# Six zeros in a hundred thousand were enough to break the package's own
-# simulate-then-fit workflow: llkkw() at the true parameters returned Inf and
-# optim() stopped with "L-BFGS-B needs finite values of 'fn'".
+# A single zero breaks a simulate-then-fit workflow: the likelihood at the true
+# parameters is Inf and optim() stops with "L-BFGS-B needs finite values of
+# 'fn'".
 #
-# The five affected generators (rgkw, rbkw, rkkw, rekw, rkw) now invert in log
-# space. rmc() and rbeta_() were already free of the defect -- the first is
-# U^(1/lambda) over an rbeta draw, the second delegates straight to R::rbeta --
-# and are untouched.
-#
-# The draws themselves are unchanged, so set.seed() reproduces the same stream
-# as before; only the inversion that follows differs.
+# rgkw, rbkw, rkkw, rekw and rkw invert in log space. rmc() is U^(1/lambda)
+# over an rbeta draw and rbeta_() delegates straight to R::rbeta.
 
 log1mexp_ref <- function(u) ifelse(u > -log(2), log(-expm1(u)), log1p(-exp(u)))
 
@@ -48,7 +42,7 @@ test_that("generators stay inside the open support", {
 })
 
 test_that("rbkw reproduces the closed-form inversion of its own draw", {
-  # The RNG stream is unchanged, so the underlying Beta draws can be replayed.
+  # The underlying Beta draws can be replayed with the same seed.
   for (par in list(c(2, 3, 0.02, 0), c(2, 3, 1.5, 2), c(0.5, 0.5, 0.5, 0))) {
     set.seed(5)
     x <- rbkw(20000L, par[1], par[2], par[3], par[4])
@@ -59,7 +53,7 @@ test_that("rbkw reproduces the closed-form inversion of its own draw", {
   }
 })
 
-test_that("the draws are unchanged, so set.seed still reproduces", {
+test_that("set.seed reproduces the draws", {
   for (cs in list(list(f = rkw, par = list(2, 3)),
                   list(f = rbkw, par = list(2, 3, 1.5, 2)),
                   list(f = rgkw, par = list(2, 3, 1.5, 2, 0.8)))) {
@@ -93,7 +87,7 @@ test_that("the sample follows its own distribution", {
 })
 
 test_that("simulate then fit works end to end", {
-  # This is the flow that six zeros in 100,000 used to break.
+  # A single exact zero in the sample would make the likelihood Inf.
   set.seed(5)
   x <- rkkw(20000L, 0.2, 3, 0, 0.3)
   expect_true(all(x > 0 & x < 1))
@@ -109,8 +103,8 @@ test_that("simulate then fit works end to end", {
   expect_true(is.finite(llbkw(c(2, 3, 0.02, 0), xb)))
 })
 
-test_that("rmc and rbeta_ are byte-for-byte what they always were", {
-  # Neither forms 1 - u, so neither was touched. rbeta_ must still be exactly
+test_that("rmc and rbeta_ are plain transformations of R's Beta draw", {
+  # Neither forms 1 - u, so neither is affected. rbeta_ must be exactly
   # R's own Beta draw.
   set.seed(21); a <- rbeta_(5000L, 2, 3)
   set.seed(21); b <- stats::rbeta(5000L, 2, 4)

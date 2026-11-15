@@ -289,7 +289,7 @@ test_that("p*(-Inf) is 0, as in base R", {
   }
 })
 
-test_that("q* already propagates NA and NaN, as in base R", {
+test_that("q* propagates NA and NaN, as in base R", {
   expect_identical(qbeta(NA_real_, 1.5, 0.5), NA_real_)
   expect_identical(qbeta(NaN, 1.5, 0.5), NaN)
   for (f in FAMILIES) {

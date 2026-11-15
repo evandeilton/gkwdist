@@ -34,8 +34,8 @@ test_that("BKw, KKw and GKw likelihoods are exact through the subnormal band", {
   expect_equal(llkkw(c(161, 2, 1, 1.5), X_BAND), 1516.412706057704, tolerance = 1e-12)
   expect_equal(llgkw(c(161.8, 2, 1.5, 1, 1), X_BAND), 1523.210700324179, tolerance = 1e-12)
 
-  # One level down: log_w is the subnormal here, and a step of 1e-6 in lambda
-  # moved the old objective by 0.35 nats around a smooth 1108.12903.
+  # One level down: log_w is the subnormal here, and the objective must stay
+  # smooth around 1108.12903 under a step of 1e-6 in lambda.
   x1 <- 0.93181528325658292
   expect_equal(llkkw(c(0.1, 150, 0.5, 0.5), x1), 1108.12903, tolerance = 1e-8)
   expect_equal(llkkw(c(0.1, 150, 0.5, 0.5 - 1e-6), x1), 1108.12903, tolerance = 1e-8)
@@ -84,14 +84,14 @@ test_that("EKw is exactly the nested GKw where x^alpha underflows", {
     expect_true(all(is.finite(grekw(c(a, 2, 1.5), X_BAND))))
     expect_true(all(is.finite(hsekw(c(a, 2, 1.5), X_BAND))))
   }
-  # the optimizer that used to stop with "non-finite value supplied"
+  # L-BFGS-B needs a finite objective and gradient along the whole path
   fit <- optim(c(161, 2, 1.5), llekw, grekw, data = X_BAND,
                method = "L-BFGS-B", lower = 1e-3)
   expect_equal(fit$convergence, 0L)
 })
 
 
-test_that("the lower tail of p* is no longer flushed to 0", {
+test_that("the lower tail of p* is not flushed to 0", {
   tol <- 1e-6
   expect_equal(pgkw(1e-9, 40, 2, 0.05, 0.5, 0.1),
                integrate(function(t) dgkw(t, 40, 2, 0.05, 0.5, 0.1), 0, 1e-9,
@@ -131,7 +131,7 @@ test_that("q* inverts p* in the deep lower tail instead of returning 0", {
 })
 
 
-test_that("r* no longer draws exact zeros from the lower tail", {
+test_that("r* draws no exact zeros from the lower tail", {
   set.seed(1)
   r <- rgkw(1e5, 40, 2, 0.05, 0.5, 0.1)
   expect_equal(sum(r == 0), 0)
@@ -142,7 +142,7 @@ test_that("r* no longer draws exact zeros from the lower tail", {
 })
 
 
-test_that("qgkw and qmc keep the upper tail, as qbkw always did", {
+test_that("qgkw and qmc keep the upper tail, as qbkw does", {
   # 1 - x from the reflected Beta quantile, written out by hand
   a <- 2; b <- 3; g <- 1.5; d <- 0.5; l <- 1.2
   for (p in c(1e-18, 1e-22, 1e-26)) {
@@ -162,9 +162,8 @@ test_that("qgkw and qmc keep the upper tail, as qbkw always did", {
 
 test_that("the deep upper tail on the log scale is neither flushed nor saturated", {
   # Kw(2, 100) nested in every family; qkw()/pkw() are closed form and exact.
-  # Below log p ~ -718 the reflected quantity 1 - y is under DBL_MIN: qekw and
-  # qkkw returned 1, qbkw and qgkw sat on a plateau at 1 - x = 4.16e-04, and
-  # pbkw/pgkw returned -Inf.
+  # Below log p ~ -718 the reflected quantity 1 - y is under DBL_MIN, where a
+  # quantile could saturate at 1 or on a plateau and a log CDF at -Inf.
   lp <- -c(600, 718, 750, 800, 1000, 3000)
   ref <- qkw(lp, 2, 100, lower.tail = FALSE, log.p = TRUE)
   q <- list(qgkw(lp, 2, 100, 1, 0, 1, lower.tail = FALSE, log.p = TRUE),
@@ -242,14 +241,13 @@ test_that("a warning caught by a handler does not leak the C++ state", {
   for (i in 1:20) invisible(tryCatch(grbkw(c(1, 1, 1, 1), x), warning = function(w) NULL))
   invisible(gc())
   expect_lt(rss() - r0, 40)
-  # the condition itself is unchanged
+  # the condition carries the support message and the user's call
   w <- tryCatch(grbkw(c(1, 1, 1, 1), c(0.5, 2)), warning = function(w) w)
   expect_match(conditionMessage(w), "Data must be strictly in \\(0,1\\)")
   expect_identical(deparse(conditionCall(w)), "grbkw(c(1, 1, 1, 1), c(0.5, 2))")
   # A handler that leaves by an error takes the same longjmp as options(warn = 2),
   # which testthat's own warning handler would intercept here. The error must
-  # arrive intact -- gkwgetstartvalues() has a catch (...) that used to be able
-  # to swallow it.
+  # arrive intact, including through the catch (...) in gkwgetstartvalues().
   boom <- function(w) stop("boom: ", conditionMessage(w))
   expect_error(withCallingHandlers(grbkw(c(1, 1, 1, 1), c(0.5, 2)), warning = boom),
                "boom: Data must be strictly")

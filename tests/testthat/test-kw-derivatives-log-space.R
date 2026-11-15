@@ -1,26 +1,21 @@
 # tests/testthat/test-kw-derivatives-log-space.R
-# Regression tests for grkw() and hskw() after the log-space rewrite.
+# grkw() and hskw() for observations near 1.
 #
-# kw.cpp was the last family file whose gradient and Hessian were not in log
-# space. It formed v = 1 - x^alpha in linear arithmetic and then applied
+# v = 1 - x^alpha formed in linear arithmetic needs a clamp such as
 #
 #   v = arma::clamp(v, eps, 1 - eps)     eps = 2.22e-14
 #
-# which froze log(v) at -31.4384832 for every observation near 1, independent of
-# the data. The frozen value +30.938483203129 in the beta component is the
-# signature.
+# which would freeze log(v) at -31.4384832 for every observation near 1,
+# independent of the data, and with it the beta component of the gradient.
 #
 #   par = (0.5, 2), x = 1 - 1e-14
-#     grkw            -2.44999999999999   30.938483203129
 #     numDeriv::grad  -3.99999999995549   32.430138079912
 #     grekw(lambda=1) -3.99999999999997   32.430138079907   <- same distribution
 #
-# The damage did not need pathological data: c(1-1e-9, 1-1e-11, 0.5) already
-# diverged by 3.4e-05, and hskw() was off by 47% in H[alpha,alpha] and 78% in
-# H[alpha,beta].
+# The regime does not need pathological data: c(1-1e-9, 1-1e-11, 0.5) is
+# already inside it.
 #
-# grkw() is now grekw() with lambda fixed at 1, so the two agree bit-for-bit.
-# Against 1.1.5 the nesting block below fails 26 assertions.
+# grkw() is grekw() with lambda fixed at 1, so the two agree bit-for-bit.
 
 PARS <- list(c(0.5, 2), c(2, 3), c(0.2, 2), c(5, 0.5), c(20, 20),
              c(0.1, 0.2), c(3, 100), c(1, 1))

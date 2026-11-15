@@ -1,13 +1,13 @@
 # tests/testthat/test-deep-tail-precision.R
-# Regression tests for the logarithmic bound constants in src/utils.h.
+# The logarithmic bound constants in src/utils.h.
 #
-# LOG_DBL_MAX held log10(DBL_MAX) = 308.25 while being used as a natural-log
-# threshold, so safe_exp() and safe_pow() returned +Inf for everything above
-# exp(308.25), discarding 174 orders of magnitude of representable range.
+# The overflow threshold of safe_exp() and safe_pow() is a natural logarithm:
+# a base-10 value there (308.25) would return +Inf for everything above
+# exp(308.25) and discard 174 orders of magnitude of representable range.
 #
-# safe_log() scaled by LOG_DBL_MIN = log(DBL_MIN) while dividing by
-# DBL_MIN_SAFE = 10 * DBL_MIN, so every result below 2.225e-307 was off by
-# exactly log(10) = 2.302585 -- a finite, plausible, wrong number.
+# safe_log() must scale and divide by the same constant: mixing log(DBL_MIN)
+# with DBL_MIN_SAFE = 10 * DBL_MIN would put every result below 2.225e-307 off
+# by exactly log(10) = 2.302585 -- a finite, plausible, wrong number.
 #
 # Both regimes are far out in the tail, but they are reachable from the public
 # API and the second one is silent, which is why they are pinned here.
@@ -39,7 +39,7 @@ test_that("the log(10) offset is gone from the log-likelihood", {
 })
 
 test_that("large densities are finite instead of saturating at exp(308)", {
-  # alpha < 1 with tiny x drives the density far above the old 7.5e133 ceiling
+  # alpha < 1 with tiny x drives the density far above exp(308) = 7.5e133
   # while staying well inside double range.
   cases <- list(
     list(x = 1e-268, a = 0.5,  b = 2),
@@ -60,20 +60,14 @@ test_that("large densities are finite instead of saturating at exp(308)", {
   expect_true(is.finite(dgkw(1e-300, 0.5, 2, 1, 0, 1)))
 })
 
-test_that("the nesting identity survives into the deep tail", {
-  # dgkw and dkw are the same density here; before the fix one returned Inf
-  # while the other did not.
+test_that("the nesting identity holds in the deep tail", {
+  # dgkw and dkw are the same density here.
   for (x in c(1e-200, 1e-280, 1e-300)) {
     expect_equal(dgkw(x, 0.5, 2, 1, 0, 1), dkw(x, 0.5, 2), tolerance = 1e-12)
   }
 
-  # On the log scale the identity is asserted only while x^alpha stays a normal
-  # double. dgkw() forms x^alpha in linear space before taking its logarithm,
-  # and safe_pow() flushes anything below DBL_MIN to zero, so dgkw() returns
-  # -Inf once alpha * log(x) < -708.4 while dkw(), which works from
-  # alpha * log(x) directly, still returns the correct finite value. That is a
-  # separate, pre-existing defect -- unchanged by the constants fixed here --
-  # and belongs with the log-space rework of gkw.cpp.
+  # On the log scale, with x^alpha a normal double. The range below DBL_MIN is
+  # covered in test-gkw-log-chain.R.
   for (x in c(1e-100, 1e-140, 1e-150)) {
     expect_true(x^2 > .Machine$double.xmin)  # guard: x^alpha is a normal double
     expect_equal(dgkw(x, 2, 3, 1, 0, 1, log = TRUE), dkw(x, 2, 3, log = TRUE),

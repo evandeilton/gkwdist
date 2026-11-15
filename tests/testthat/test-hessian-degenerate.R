@@ -1,22 +1,15 @@
 # tests/testthat/test-hessian-degenerate.R
-# Regression tests for hsgkw() when the log-space chain underflows.
+# hsgkw() where the chain underflows in linear space.
 #
-# hsgkw() used to `continue` past any observation whose log(1-x^alpha),
-# log(1-v^beta) or log(1-w^lambda) came out non-finite. That silently computed
-# the Hessian of a smaller sample and returned it as a finite, symmetric matrix
-# with no NaN and no warning -- the worst possible failure mode for a quantity
-# whose entire purpose is to produce standard errors.
+# Every observation must contribute to the Hessian, including those whose
+# log(1-x^alpha), log(1-v^beta) or log(1-w^lambda) is non-finite in linear
+# space. Skipping them would yield the Hessian of a smaller sample as a finite,
+# symmetric matrix with no NaN and no warning, and wrong standard errors.
 #
-# With beta = 500 and four observations, every observation was dropped and only
-# the parameter-only terms survived: H(alpha, alpha) came back as
-# n / alpha^2 = 4 against a true value of 1996.3, an error of a factor of 499.
-# With five observations one survived, and the function returned the Hessian of
-# a single point as if it were the Hessian of five.
+# With beta = 500 and four such observations, only the parameter-only terms
+# would remain: H(alpha, alpha) = n / alpha^2 = 4 against a true 1996.3.
 #
-# The interim fix returned NaN with a warning, the honest answer until the
-# chain was reworked in log space. That rework is done: hsgkw() is now built
-# from the same log-space blocks as hskkw(), so these cases have their true
-# Hessians. The reference is the nesting identity -- at gamma = 1, delta = 0,
+# The reference is the nesting identity -- at gamma = 1, delta = 0,
 # lambda = 1 the (alpha, beta) block is hskw() -- and numDeriv where delta is
 # far enough from 0 for a central difference.
 
@@ -36,16 +29,16 @@ test_that("hsgkw is finite where the chain underflows, and equals the nested Kw"
   }
 })
 
-test_that("hsgkw no longer reports the Hessian of a smaller sample", {
-  # The specific number the old code returned: n / alpha^2 with every
-  # observation dropped. The true value is 1996.267.
+test_that("hsgkw does not report the Hessian of a smaller sample", {
+  # n / alpha^2 is the value with every observation skipped. The true value
+  # is 1996.267.
   x <- c(0.80, 0.85, 0.90, 0.95)
   H <- hsgkw(c(1, 500, 1, 0, 1), x)
   expect_false(isTRUE(all.equal(H[1, 1], length(x))))
   expect_equal(H[1, 1], 1996.267, tolerance = 1e-6)
 })
 
-test_that("hsgkw matches numDeriv in the regime that used to return NaN", {
+test_that("hsgkw matches numDeriv where the chain underflows", {
   skip_if_not_installed("numDeriv")
   x5 <- c(0.10, 0.25, 0.40, 0.72, 0.99)
   cases <- list(
@@ -83,7 +76,7 @@ test_that("well-behaved parameters are untouched", {
   }
 })
 
-test_that("the Hessian still matches the gradient jacobian where both are finite", {
+test_that("the Hessian matches the gradient jacobian where both are finite", {
   skip_if_not_installed("numDeriv")
   set.seed(3)
   x <- runif(200, 0.05, 0.95)

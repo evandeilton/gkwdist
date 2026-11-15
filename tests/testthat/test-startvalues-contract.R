@@ -1,55 +1,40 @@
 # tests/testthat/test-startvalues-contract.R
-# Regression tests for the three contracts gkwgetstartvalues() advertises:
-# that n_starts buys a wider search, that the answer is deterministic, and that
-# data outside the support is not altered in silence.
+# The three contracts gkwgetstartvalues() advertises: n_starts buys a wider
+# search, the answer is deterministic, and data outside the support is not
+# altered in silence.
 #
-# 1. n_starts was inert. The selection loop decided whether to run Nelder-Mead
-#    from a candidate by comparing the RAW objective at that starting point
-#    against best_obj -- which after the first iteration already held an
-#    OPTIMIZED value. A merely poor start, exactly what multi-start exists to
-#    rescue, was thrown away before the optimizer saw it, so only the first
-#    candidate was ever optimized:
+# 1. Every candidate start is optimized. Whether to run Nelder-Mead from a
+#    candidate cannot be decided by comparing its RAW objective against the
+#    best OPTIMIZED value so far: a merely poor start, exactly what multi-start
+#    exists to rescue, would be discarded before the optimizer sees it, and
+#    n_starts would have no effect.
 #
-#      set.seed(202); x <- rgkw(500, 5, 1.2, 3, 0.5, 2)
-#        n_starts =   1     objective 6.262579e-04
-#        n_starts =  10     objective 6.262579e-04   bit-identical
-#        n_starts = 200     objective 6.262579e-04   bit-identical
-#
-#    The cost was not just a suboptimal start. The single optimized path could
-#    walk into a corner where the numerical integral of the density underflows,
-#    moment_theoretical() falls back to its closed-form Kumaraswamy moment, and
-#    the optimizer is rewarded for parameters whose real moments are nothing
-#    like the sample's -- a method-of-moments estimate that misses the first
-#    moment by five orders of magnitude:
+#    A single optimized path can walk into a corner where the numerical
+#    integral of the density underflows and the implied moments are nothing
+#    like the sample's. The returned parameters must reproduce the first
+#    sample moment: for
 #
 #      set.seed(3050); x <- rgkw(50, 2, 3, 1.5, 2, 0.8)   sample mean 0.296299
-#        alpha 0.100000 (pinned at the lower bound), beta 9.874503,
-#        gamma 0.574504, delta 0.131984, lambda 1.276909
-#        implied mean 1.394060e-06
 #
-#    Starting optim() from that corner, 8 of 10 GKw samples of size 500
-#    converged to a POSITIVE negative log-likelihood, around +4100 to +4900
-#    where the correct region is near -300.
+#    a corner with alpha pinned at its lower bound has an implied mean of
+#    1.39e-06, and optim() started there converges to the wrong region.
 #
 # 2. The starting-point grid is drawn from a generator with a fixed internal
 #    seed. That is deliberate -- the output seeds optimizers elsewhere, so two
-#    calls on the same data have to agree -- but nothing said so, and the
-#    determinism only became a meaningful claim once the draws were actually
-#    used for something.
+#    calls on the same data have to agree -- and it is stated on the help page.
 #
-# 3. Observations outside (0,1) were clamped into [1e-10, 1-1e-10] in silence.
-#    Truncation moves every sample moment and therefore every estimate:
+# 3. Observations outside (0,1) are clamped into [1e-10, 1-1e-10] with a
+#    warning. Truncation moves every sample moment and therefore every
+#    estimate:
 #
 #      set.seed(1); y <- rkw(300, 2, 3)          alpha       beta
 #        gkwgetstartvalues(y, "kw")            2.137549   3.506511
-#        gkwgetstartvalues(c(y, 5, -3), "kw")  2.047567   3.251306   silent
-#        gkwgetstartvalues(y * 100, "kw")     50.000000  50.000000   silent
+#        gkwgetstartvalues(c(y, 5, -3), "kw")  2.047567   3.251306
+#        gkwgetstartvalues(y * 100, "kw")     50.000000  50.000000
 #
-#    The last row is the defect entire: a sample handed over on a 0-100 scale
-#    came back with both parameters pinned at the upper edge of the parameter
-#    box, indistinguishable from a fit.
-#
-# Against 1.1.5 every test_that() block below fails.
+#    In the last row a sample on a 0-100 scale gives both parameters pinned at
+#    the upper edge of the parameter box, which without the warning would be
+#    indistinguishable from a fit.
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -117,8 +102,7 @@
 # ---------------------------------------------------------------------------
 
 test_that("n_starts is not inert: more starting points change the answer", {
-  # Against 1.1.5 all three of these are bit-identical, because Nelder-Mead ran
-  # exactly once no matter what n_starts was set to.
+  # Identical results would mean Nelder-Mead ran from the first candidate only.
   expect_false(identical(.sv_mm_fits[[1]], .sv_mm_fits[[3]]))
   expect_false(identical(.sv_mm_fits[[1]], .sv_mm_fits[[2]]))
 
@@ -143,15 +127,14 @@ test_that("more starting points never return a worse moment fit", {
     expect_lte(obj[k + 1L], obj[k] * (1 + 1e-6))
   }
 
-  # And on this sample the extra starts genuinely buy something. This is the
-  # assertion 1.1.5 cannot satisfy: there, obj is one constant repeated.
+  # And on this sample the extra starts genuinely buy something.
   expect_lt(obj[length(obj)], obj[1] * 0.5)
 })
 
 test_that("the returned parameters reproduce the first sample moment", {
-  # A method-of-moments estimate that misses the mean is not an estimate. On
-  # 1.1.5 each of these returns a degenerate corner whose implied mean is
-  # ~1e-6 against sample means near 0.3, i.e. a ratio of about 5e-06.
+  # A method-of-moments estimate that misses the mean is not an estimate. Each
+  # of these samples has a degenerate corner whose implied mean is ~1e-6
+  # against sample means near 0.3, i.e. a ratio of about 5e-06.
   cases <- list(c(3050, 50), c(6050, 50), c(1200, 200),
                 c(5200, 200), c(6200, 200), c(8200, 200))
   for (cs in cases) {
@@ -174,8 +157,7 @@ test_that("starting values ignore the seed in force and do not consume it", {
 
   # n_starts = 25 puts 21 drawn points into the grid, so this is a regime where
   # the draws demonstrably affect the answer -- which is what makes the
-  # seed-independence below a claim about anything. On 1.1.5 the drawn points
-  # are never used and this expectation fails.
+  # seed-independence below a claim about anything.
   wide <- gkwgetstartvalues(x, "gkw", n_starts = 25L)
   expect_false(identical(wide, .sv_mm_fits[[1]]))
 
@@ -205,12 +187,12 @@ test_that("the determinism contract is stated on the help page", {
     capture.output(tools::Rd2txt(db[["gkwgetstartvalues.Rd"]])),
     collapse = " ")
 
-  # 1.1.5 documents "multiple random starting points" and stops there, leaving
-  # a reader to assume a seed control that does not exist.
+  # "Random starting points" alone would suggest a seed control that does not
+  # exist.
   expect_match(txt, "[Dd]eterminis")
   expect_match(txt, "set\\.seed")
   expect_match(txt, "\\.Random\\.seed")
-  # And the truncation of out-of-support data is now advertised as a warning.
+  # The truncation of out-of-support data is advertised as a warning.
   expect_match(txt, "warning")
 })
 
@@ -222,8 +204,8 @@ test_that("observations outside (0,1) raise a warning naming how many", {
   set.seed(1)
   y <- rkw(300, 2, 3)
 
-  # Wrong scale: the signature case. 1.1.5 returns (50, 50) -- both parameters
-  # pinned at the upper edge of the box -- and says nothing.
+  # Wrong scale: the result is (50, 50), both parameters pinned at the upper
+  # edge of the box, so the warning is the only signal.
   expect_warning(gkwgetstartvalues(y * 100, family = "kw"),
                  "300 of 300 observations lie outside the open interval")
 
@@ -254,17 +236,14 @@ test_that("clean, NA and non-finite data do not raise the truncation warning", {
   set.seed(1)
   y <- rkw(300, 2, 3)
 
-  # No false positives: nothing here leaves the open interval. expect_silent()
-  # rather than expect_no_warning() so the file stays within the testthat
-  # version DESCRIPTION declares.
+  # No false positives: nothing here leaves the open interval.
   expect_silent(gkwgetstartvalues(y, family = "kw"))
   expect_silent(gkwgetstartvalues(c(y, NA), family = "kw"))
   expect_silent(gkwgetstartvalues(c(y, Inf, -Inf), family = "kw"))
   expect_silent(gkwgetstartvalues(y, family = "gkw"))
 
-  # Warning or not, the return contract is unchanged: a named, finite,
-  # strictly positive vector of the right length. On 1.1.5 the contaminated
-  # call is silent, so this block fails there on the expect_warning() alone.
+  # Warning or not, the return contract is the same: a named, finite,
+  # strictly positive vector of the right length.
   expect_warning(gkwgetstartvalues(c(y, 5, -3), family = "kw"),
                  "outside the open interval")
   clamped <- suppressWarnings(gkwgetstartvalues(c(y, 5, -3), family = "kw"))
@@ -272,8 +251,8 @@ test_that("clean, NA and non-finite data do not raise the truncation warning", {
   expect_equal(names(clamped), c("alpha", "beta"))
   expect_true(all(is.finite(clamped)) && all(clamped > 0))
 
-  # And the clamp still does what it always did: dropping the two offenders by
-  # hand gives the same answer as letting the function clamp them.
+  # Clamping the two offenders by hand gives the same answer as letting the
+  # function clamp them.
   expect_equal(clamped,
                suppressWarnings(gkwgetstartvalues(c(y, 1 - 1e-10, 1e-10),
                                                   family = "kw")))

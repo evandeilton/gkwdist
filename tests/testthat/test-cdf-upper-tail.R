@@ -1,29 +1,24 @@
 # tests/testthat/test-cdf-upper-tail.R
-# Regression tests for the upper tail of pgkw() and pbkw().
+# The upper tail of pgkw() and pbkw().
 #
-# The CDF batch moved lower.tail and log.p onto R::pbeta rather than applying
-# them afterwards, which fixed the lower tail. The upper tail kept a second
-# defect, in the ARGUMENT rather than the tail flag.
+# pgkw builds y = [1 - (1 - x^alpha)^beta]^lambda and evaluates
+# I_y(gamma, delta+1). As x -> 1 the exponent lambda*log_w passes below
+# 1.1e-16 and exp() returns exactly 1, where the upper tail of the Beta CDF is
+# exactly 0; pbkw meets the same limit through -expm1 of an exponent running
+# off to -Inf. The argument must therefore be reflected, not only the tail
+# flag.
 #
-# pgkw builds y = [1 - (1 - x^alpha)^beta]^lambda and calls I_y(gamma, delta+1).
-# As x -> 1 the exponent lambda*log_w passes below 1.1e-16, exp() returns
-# exactly 1, and R::pbeta(1, ., ., lower = FALSE) returns exactly 0. pbkw does
-# the same through -expm1 of an exponent running off to -Inf.
+# 300-digit incomplete beta, pgkw(x, 2, 3, 1.5, 2, 0.8, lower = FALSE):
 #
-# Against a 300-digit incomplete beta, pgkw(x, 2, 3, 1.5, 2, 0.8, lower = FALSE):
+#   1-x     exact
+#   1e-4    5.731820e-34
+#   1e-5    5.734142e-43
+#   1e-6    5.734374e-52
+#   1e-16   1.469535e-141
 #
-#   1-x     returned        exact           rel err
-#   1e-4    5.731692e-34    5.731820e-34    2.2e-05
-#   1e-5    5.840671e-43    5.734142e-43    1.9e-02
-#   1e-6    0               5.734374e-52    1.00      <- collapse
-#   1e-16   0               1.469535e-141   1.00
-#
-# The true tail stays representable sixteen decades past the point where the
-# routine gave up. I_y(a,b) = 1 - I_{1-y}(b,a) is exact and 1 - y comes from
-# -expm1 of the same exponent, so reflecting above y = 1/2 sends the small
-# quantity into pbeta. Below the crossover nothing changes.
-#
-# Against 1.1.5 this file fails 30 assertions.
+# I_y(a,b) = 1 - I_{1-y}(b,a) is exact and 1 - y comes from -expm1 of the same
+# exponent, so reflecting above y = 1/2 sends the small quantity into the Beta
+# CDF. Below the crossover the direct form is used.
 
 test_that("the upper tail does not collapse to zero", {
   x <- 1 - 10^-(2:16)

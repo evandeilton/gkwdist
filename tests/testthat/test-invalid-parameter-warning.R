@@ -1,24 +1,18 @@
 # tests/testthat/test-invalid-parameter-warning.R
-# Regression tests for the invalid-parameter warning in the vectorized routines.
+# The invalid-parameter warning in the vectorized routines.
 #
-# dgkw, pgkw, qgkw, rgkw and the six nested r* called
+# dgkw, pgkw, qgkw, rgkw and the six nested r* warn once per call, which is R's
+# own convention, and not once per element from inside the loop: on 50,000
+# values with half the parameters invalid a per-element warning costs 51x, and
+# under options(warn = 2) it would leave the loop through C++ frames holding
+# live Armadillo objects.
 #
-#     Rcpp::warning("...: invalid parameters at index %d", i + 1)
-#
-# from inside the per-element loop. On 50,000 values with half the parameters
-# invalid that cost 51x, and under options(warn = 2) each call longjmps out of
-# the loop through C++ frames holding live Armadillo objects. R's own convention
-# is one warning per call, not one per element.
-#
-# The message also has to match what the function actually returns, which is the
-# defect this release fixed for q*(): the wrappers promised NaN while the C++
-# saturated, so defensive code testing is.nan() saw nothing. base R pairs them --
+# The message also has to match what the function returns. base R pairs them --
 # dbeta(0.5, -1, 1) is NaN and warns "NaNs produced", rbeta(2, -1, 1) is NA and
 # warns "NAs produced".
 #
-# The invalid-parameter path is no longer reachable from the exported API at all:
-# the wrappers stop() on <= 0, NA, NaN and, since the @return contract fix, on
-# Inf as well. These tests reach it through .Call.
+# The wrappers stop() on <= 0, NA and NaN before reaching C++, so these tests
+# reach the invalid-parameter path through .Call.
 
 test_that("one warning per call, not one per element", {
   x <- runif(2000, 0.01, 0.99)
