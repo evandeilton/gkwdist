@@ -51,7 +51,10 @@
 <li>
 <code><a href="../reference/pbeta_.html">pbeta_()</a></code>, <code><a href="../reference/pmc.html">pmc()</a></code>, <code><a href="../reference/pbkw.html">pbkw()</a></code> and <code><a href="../reference/pgkw.html">pgkw()</a></code> with <code>log.p = TRUE</code> are accurate in the deep tail (log probability below about -450) for large <code>gamma</code>, where <code><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">stats::pbeta()</a></code> is off or returns <code>-Inf</code>: <code>pbeta_(0.92, 1e4, 30, log.p = TRUE)</code> is now -707.85, not -651.27.</li>
 <li>
-<code><a href="../reference/rgkw.html">rgkw()</a></code> stops with an error when <code>n</code> does not fit an integer (<code>Inf</code>, <code>2^31</code>), like the other generators.</li>
+<code>r*()</code> rejects an <code>n</code> that does not fit an integer (<code>Inf</code>, <code>2^31</code>) with “‘n’ must be a single non-negative integer”.</li>
+<li>
+<code>q*(log.p = TRUE)</code> warns when a log-probability is above 0, as it already did for <code>p</code> outside <code>[0, 1]</code>.</li>
+<li>Warnings raised in the compiled code report the user’s call, such as <code>pgkw(0.5, Inf)</code>.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.7" id="gkwdist-117">gkwdist 1.1.7<a class="anchor" aria-label="anchor" href="#gkwdist-117"></a></h2><p class="text-muted">CRAN release: 2026-09-27</p>
