@@ -656,6 +656,11 @@ Rcpp::NumericVector rgkw(
     const Rcpp::NumericVector& delta,
     const Rcpp::NumericVector& lambda
 ) {
+  // A negative n (NA_integer_ included) must not reach the allocations below
+  if (n < 0) {
+    Rcpp::stop("rgkw: n must be non-negative");
+  }
+
   // Convert R vectors to Armadillo vectors
   arma::vec alpha_vec(alpha.begin(), alpha.size());
   arma::vec beta_vec(beta.begin(), beta.size());

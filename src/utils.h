@@ -435,9 +435,9 @@ inline double safe_log(double x) {
  * safe_exp: Compute exp(x) with protection against overflow/underflow
  * 
  * @param x Input value
- * @return exp(x), +Inf for overflow, 0 or scaled result for underflow
- * 
- * @note Uses scaled arithmetic near underflow threshold for gradual transition
+ * @return exp(x), +Inf for overflow, 0 below the smallest subnormal
+ *
+ * @note Results below DBL_MIN are returned as subnormals (gradual underflow)
  * @note Time complexity: O(1)
  */
 inline double safe_exp(double x) {
@@ -446,17 +446,12 @@ inline double safe_exp(double x) {
     return R_PosInf;
   }
 
-  // Handle severe underflow
-  if (x < LOG_DBL_MIN - 10.0) {
+  // Below log(4.94e-324 / 2) = -745.13 the result rounds to exactly 0
+  if (x < -745.2) {
     return 0.0;
   }
-  
-  // Handle moderate underflow with scaling:
-  // DBL_MIN * exp(x - log(DBL_MIN)) = exp(x)  — exact, avoids abrupt flush to zero
-  if (x < LOG_DBL_MIN) {
-    return std::numeric_limits<double>::min() * std::exp(x - LOG_DBL_MIN);
-  }
-  
+
+  // std::exp underflows gradually, so [4.94e-324, DBL_MIN) comes out subnormal
   return std::exp(x);
 }
 
@@ -1182,7 +1177,8 @@ inline bool check_beta_pars(double gamma, double delta, bool strict = false) {
   
   // Strict bounds
   if (strict) {
-    if (gamma < STRICT_MIN_PARAM || delta < STRICT_MIN_PARAM) {
+    // delta = 0 stays valid in strict mode; only a tiny positive delta is out
+    if (gamma < STRICT_MIN_PARAM || (delta > 0.0 && delta < STRICT_MIN_PARAM)) {
       return false;
     }
     if (gamma > STRICT_MAX_PARAM || delta > STRICT_MAX_PARAM) {

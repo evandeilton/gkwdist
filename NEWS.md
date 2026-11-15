@@ -4,6 +4,10 @@
   function returns and checks it: the nesting identities, `p*()` as the integral
   of `d*()`, `q*()` inverting `p*()`, and the analytic gradients and Hessians
   against `numDeriv`. They run in under a second.
+* `d*()` returns densities in the subnormal range `[4.9e-324, 2.2e-308)`
+  instead of 0, as `stats::dbeta()` does.
+* `rgkw()` stops with an error when `n` does not fit an integer (`Inf`,
+  `2^31`), like the other generators.
 
 # gkwdist 1.1.7
 
