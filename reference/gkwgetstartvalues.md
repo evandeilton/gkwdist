@@ -143,7 +143,7 @@ print(params_kw)
 params_gkw <- gkwgetstartvalues(x, family = "gkw", n_starts = 10)
 print(params_gkw)
 #>     alpha      beta     gamma     delta    lambda 
-#> 0.5562367 1.4240218 1.9332680 1.2036964 2.4553624 
+#> 0.5547325 1.4228063 1.9426876 1.2053510 2.4522481 
 
 # Deterministic: the seed in force does not change the answer, and the
 # function does not consume draws from R's stream.
