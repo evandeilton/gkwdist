@@ -1,28 +1,17 @@
 # tests/testthat/test-return-contract.R
-# Regression tests for audit finding A-10 (the @return contract) and for the
-# out-of-support warning in ll*().
+# The @return contract of the d/p/q/r functions and the out-of-support warning
+# in ll*().
 #
-# A-10. The @return blocks of the 28 d/p/q/r functions promised "NaN if
-# parameters are invalid" while the R wrappers stop(). The audit asked for one
-# contract chosen and propagated. stop() is the one kept: it is what the package
-# has shipped for its whole CRAN life, a named error is a better diagnostic than
-# a NaN for the case that actually occurs -- a mistyped parameter -- and
-# switching to NaN would break every tryCatch(..., error = ) guard written
-# against it, which is a larger break than the one being fixed.
+# An invalid finite parameter is an error in the 28 d/p/q/r functions: a named
+# error is a better diagnostic than a NaN for a mistyped parameter. gr*() and
+# hs*() return NaN for an invalid parameter, and that asymmetry is pinned here.
 #
-# gr*() and hs*() genuinely DO return NaN for an invalid parameter, so their 14
-# @return blocks are deliberately unchanged, and that asymmetry is pinned here.
-#
-# Known and deliberately NOT changed here: an infinite parameter is not
-# intercepted by the wrapper. `any(alpha <= 0)` is FALSE for Inf and anyNA() does
-# not catch it, so it reaches C++, where check_*_pars() rejects it and the
-# routine leaves its fill value. Rejecting it at the R layer is correct in
-# principle but is a behaviour change that breaks gkwreg::predict(), which clamps
-# only the lower bound of its linear predictor and so can hand an Inf through on
-# extrapolated newdata. That call currently returns 0, which is the correct limit
-# -- Kw(alpha, beta) concentrates at 1 as alpha grows -- and one such row would
-# abort the whole prediction vector. The gkwreg clamp is the prerequisite. The
-# current behaviour is pinned below so the eventual change is visible.
+# An infinite parameter is not intercepted by the wrapper: `any(alpha <= 0)` is
+# FALSE for Inf and anyNA() does not catch it, so it reaches C++, where
+# check_*_pars() rejects it and the routine leaves its fill value. d*() returns
+# 0 there, the correct limit -- Kw(alpha, beta) concentrates at 1 as alpha
+# grows -- and gkwreg::predict() relies on it, since it clamps only the lower
+# bound of its linear predictor and can pass an Inf on extrapolated newdata.
 
 FAMS <- list(
   list(d = dgkw, p = pgkw, q = qgkw, r = rgkw, ll = llgkw, ok = list(2, 3, 1.5, 0.5, 2),

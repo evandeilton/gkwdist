@@ -19,7 +19,7 @@
 #      alpha = 162  llkkw(c(a,2,1,1.5), x) = Inf               (true 1526.0259318659)
 #
 #    and every larger alpha stayed at Inf -- an artificial plateau on the
-#    likelihood surface that an optimiser will happily sit on.
+#    likelihood surface that an optimizer will happily sit on.
 #
 #    The alpha = 161 values were pinned here as correct, and were not: x^alpha
 #    is a subnormal at alpha*log(0.01) = -741.4, and the chain read its few
@@ -232,7 +232,7 @@ test_that("grkkw and hskkw refuse bad input the way grbkw and hsbkw do", {
   expect_warning(H <- hskkw(c(2, 3, 0.5, 1.5), xn), "strictly in \\(0,1\\)")
   expect_true(all(is.nan(H)))
 
-  # the BKw pair, which is the behaviour being matched
+  # the BKw pair, which is the behavior being matched
   expect_warning(gb <- grbkw(c(2, 3, 1.5, 0.5), xn), "strictly in \\(0,1\\)")
   expect_true(all(is.nan(gb)))
   expect_warning(Hb <- hsbkw(c(2, 3, 1.5, 0.5), xn), "strictly in \\(0,1\\)")
@@ -260,7 +260,7 @@ test_that("grkkw and hskkw fail uniformly at a genuine boundary", {
 })
 
 
-test_that("the likelihood surface has no plateau for an optimiser to sit on", {
+test_that("the likelihood surface has no plateau for an optimizer to sit on", {
   # alpha = 300 is inside the region that used to return +Inf, so L-BFGS-B
   # could not even start there ("L-BFGS-B needs finite values of 'fn'"), and a
   # method that tolerates the start would have sat on the plateau.

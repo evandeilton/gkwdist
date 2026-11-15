@@ -70,7 +70,7 @@ test_that("the nesting identity holds as x approaches 1", {
 })
 
 test_that("recovered mass shows up in the integral", {
-  # This parameterisation lost 13% of its mass to the guard.
+  # This parameterization lost 13% of its mass to the guard.
   mass <- integrate(function(t) dgkw(t, 0.1, 0.1, 10, 0.1, 0.1), 0, 1,
                     subdivisions = 5000)$value
   expect_equal(mass, 1, tolerance = 1e-3)

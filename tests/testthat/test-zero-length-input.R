@@ -3,11 +3,11 @@
 #
 # Before these guards existed, a zero-length argument reached the
 # `i % vec.n_elem` recycling in C++ with a zero divisor. Integer division by
-# zero is undefined behaviour and raised SIGFPE, killing the R process: not a
+# zero is undefined behavior and raised SIGFPE, killing the R process: not a
 # catchable error, no message, no traceback. A filtered vector that happens to
 # be empty (`x[x > 1]`) was enough to trigger it in all 28 d/p/q/r functions.
 #
-# The expected behaviour follows R's own recycling convention:
+# The expected behavior follows R's own recycling convention:
 #   dbeta(numeric(0), 1, 1)   -> numeric(0)
 #   dbeta(0.5, numeric(0), 1) -> numeric(0)
 #   rbeta(3, numeric(0), 1)   -> NA NA NA, with a warning

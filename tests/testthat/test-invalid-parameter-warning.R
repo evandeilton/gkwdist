@@ -1,5 +1,5 @@
 # tests/testthat/test-invalid-parameter-warning.R
-# Regression tests for the invalid-parameter warning in the vectorised routines.
+# Regression tests for the invalid-parameter warning in the vectorized routines.
 #
 # dgkw, pgkw, qgkw, rgkw and the six nested r* called
 #

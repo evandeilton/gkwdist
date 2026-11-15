@@ -156,7 +156,7 @@ test_that("llmc and grmc resolve log(1 - x^lambda) below one ulp of 1", {
   }
 })
 
-test_that("llmc equals -sum(dmc(log = TRUE)), the objective it optimises", {
+test_that("llmc equals -sum(dmc(log = TRUE)), the objective it optimizes", {
   # The two used different expressions for delta * log(1 - x^lambda) and so
   # disagreed by up to 0.45 nats an observation near x = 1.
   datasets <- list(
@@ -267,7 +267,7 @@ sweep_pars <- c(99.9, 99.99, 99.999, 99.9999, 100, 100.0001, 100.001, 100.01, 10
 sweep_data <- c(0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9)
 
 test_that("grmc has no step at the gamma = 100 or delta = 100 thresholds", {
-  # A jump shows up as a second difference far larger than the neighbouring
+  # A jump shows up as a second difference far larger than the neighboring
   # ones. Away from the threshold the sequence is smooth to 1e-9.
   for (slot in 1:2) {
     at <- function(v, k) {

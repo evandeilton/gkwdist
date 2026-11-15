@@ -2,7 +2,7 @@
 # Test log-likelihood functions for all families
 #
 # Every ll*() in this package returns the NEGATIVE log-likelihood, which is what
-# optim() and nlminb() minimise. Its defining relationship is therefore
+# optim() and nlminb() minimize. Its defining relationship is therefore
 #
 #     ll*(par, data) == -sum(d*(data, <par>, log = TRUE))
 #

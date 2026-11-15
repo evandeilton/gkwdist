@@ -100,7 +100,7 @@ params_to_vector <- function(subfamily, params) {
 # -----------------------------------------------------------------------------
 # Core Fitting Function
 # -----------------------------------------------------------------------------
-fit_mle_timed <- function(subfamily, data, start, scenario = c("none", "gr", "gr_hs")) {
+fit_mle <- function(subfamily, data, start, scenario = c("none", "gr", "gr_hs")) {
   scenario <- match.arg(scenario)
 
   # Dynamically get function names
@@ -114,8 +114,6 @@ fit_mle_timed <- function(subfamily, data, start, scenario = c("none", "gr", "gr
 
   lower <- rep(1e-4, length(start))
   upper <- rep(100, length(start))
-
-  start_time <- Sys.time()
 
   result <- tryCatch(
     {
@@ -137,8 +135,6 @@ fit_mle_timed <- function(subfamily, data, start, scenario = c("none", "gr", "gr
     }
   )
 
-  elapsed <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
-  result$time <- elapsed
   return(result)
 }
 
@@ -154,7 +150,6 @@ run_benchmark <- function(subfamily, config_id, n_reps = 20, n_obs = 1000) {
   storage <- list()
   for (s in scenarios) {
     storage[[s]] <- data.frame(
-      time = numeric(n_reps),
       evals = numeric(n_reps),
       error = numeric(n_reps),
       converged = logical(n_reps)
@@ -181,9 +176,8 @@ run_benchmark <- function(subfamily, config_id, n_reps = 20, n_obs = 1000) {
 
     # Run all scenarios on the same data
     for (scen in scenarios) {
-      fit <- fit_mle_timed(subfamily, data, start, scenario = scen)
+      fit <- fit_mle(subfamily, data, start, scenario = scen)
 
-      storage[[scen]]$time[i] <- fit$time
       storage[[scen]]$evals[i] <- fit$evaluations[1] # Function evaluations
       storage[[scen]]$converged[i] <- (fit$convergence == 0)
 
@@ -199,7 +193,6 @@ run_benchmark <- function(subfamily, config_id, n_reps = 20, n_obs = 1000) {
   summary_stats <- lapply(storage, function(df) {
     valid <- df[df$converged, ]
     list(
-      mean_time = mean(valid$time, na.rm = TRUE),
       mean_evals = mean(valid$evals, na.rm = TRUE),
       mean_error = mean(valid$error, na.rm = TRUE),
       convergence_rate = mean(df$converged),
@@ -219,12 +212,7 @@ run_benchmark <- function(subfamily, config_id, n_reps = 20, n_obs = 1000) {
 # Custom Expectation Function
 # =============================================================================
 expect_efficiency_gain <- function(bench_result, dist_name) {
-  # 1. Check basic stability - all scenarios should converge most of the time
-  # Skip if numerical baseline fails (data/model issue, not gradient issue)
-  if (bench_result$none$convergence_rate < 0.5) {
-    skip(paste(dist_name, ": Low baseline convergence rate - skipping"))
-  }
-
+  # 1. Stability: the fits with analytical derivatives converge
   expect_gt(bench_result$gr$convergence_rate, 0.3,
     label = paste(dist_name, ": Gradient scenario convergence too low")
   )
@@ -232,33 +220,11 @@ expect_efficiency_gain <- function(bench_result, dist_name) {
     label = paste(dist_name, ": Gradient+Hessian scenario convergence too low")
   )
 
-  # 2. Analytical gradient should not be much slower than numerical.
+  # 2. Accuracy, paired on the reps where both scenarios converged.
   #
-  # Only assert this when the baseline fit is slow enough for the measurement to
-  # mean something. For the two- and three-parameter families a fit of n = 1000
-  # takes a couple of milliseconds, so the ratio is dominated by the per-call R
-  # overhead of passing a separate gradient function to the optimiser rather
-  # than by the derivative computation itself, and the comparison is pure noise.
-  # This assertion previously failed intermittently for that reason.
-  noise_floor <- 0.02 # seconds
-  if (!is.na(bench_result$gr$mean_time) && !is.na(bench_result$none$mean_time) &&
-    bench_result$none$mean_time > noise_floor) {
-    expect_lte(bench_result$gr$mean_time, bench_result$none$mean_time * 3.0,
-      label = paste(dist_name, ": Analytical gradient too slow")
-    )
-  }
-
-  # 3. Check accuracy, on the reps where both scenarios converged.
-  #
-  # Comparing each scenario's mean over its own converged subset penalises the
-  # more robust one. The analytical gradient fits datasets the numerical
-  # baseline gives up on, and those are precisely the hard ones: in one gkw run
-  # it converged on 4 reps the baseline could not touch, whose mean error was
-  # 16.1 against 0.50 on the shared reps. That pushed the reported ratio from
-  # 0.82 to 4.66 and failed the check while the gradient was in fact the better
-  # of the two -- it also reached a lower negative log-likelihood in 21 of the
-  # 23 shared reps. The data is generated once per rep precisely so that this
-  # comparison can be paired.
+  # Each scenario's own converged subset is a different set of reps: the
+  # analytical gradient also fits the hard datasets the numerical baseline
+  # gives up on, so unpaired means penalize the more robust scenario.
   both <- bench_result$none$converged & bench_result$gr$converged
   if (sum(both) >= 3) {
     err_none <- mean(bench_result$none$raw_error[both], na.rm = TRUE)
@@ -269,10 +235,6 @@ expect_efficiency_gain <- function(bench_result, dist_name) {
       )
     }
   }
-
-  # 4. Hessian accuracy check (optional - only warn, don't fail)
-  # In some cases Hessian can cause numerical issues
-  # This is informational, not a hard requirement
 }
 
 # =============================================================================

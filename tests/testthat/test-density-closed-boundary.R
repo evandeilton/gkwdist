@@ -18,7 +18,7 @@
 #   at 0:  alpha*gamma*lambda - 1      at 1:  beta*(delta + 1) - 1
 #
 # positive gives 0, negative gives Inf, zero leaves the constant. The Beta
-# parameterisation is the one case where an external arbiter exists, so the
+# parameterization is the one case where an external arbiter exists, so the
 # whole rule is checked against stats::dbeta there, and against the nesting
 # identities everywhere else.
 #
@@ -35,7 +35,7 @@ test_that("the Beta family reproduces stats::dbeta at both boundaries", {
   }
 })
 
-test_that("the audit's two cases now give the limit", {
+test_that("the density at a boundary is its limit, finite or infinite", {
   expect_identical(dkw(0, 0.5, 1), Inf)      # density diverges
   expect_equal(dbeta_(1, 2, 0), 2)           # finite, equals stats::dbeta(1, 2, 1)
   expect_identical(dkw(1, 2, 0.5), Inf)

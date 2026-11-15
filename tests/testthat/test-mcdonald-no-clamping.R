@@ -63,7 +63,7 @@ test_that("llmc equals llbeta at lambda = 1, the model they share", {
 test_that("the negative log-likelihood is bounded below", {
   set.seed(2024)
   x <- rmc(200, 2.0, 1.5, 1.3)
-  # This used to return -2.77e+302: a global minimum any optimiser would take.
+  # This used to return -2.77e+302: a global minimum any optimizer would take.
   expect_gt(llmc(c(1e300, 1e300, 1e-6), x), 0)
   expect_gt(llmc(c(1e6, 1e6, 1e-3), x), 0)
 })

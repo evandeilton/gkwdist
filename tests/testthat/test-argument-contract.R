@@ -1,76 +1,35 @@
 # =============================================================================
 # Test Suite: Argument Contract
 # =============================================================================
-# The suite had a 100% pass rate over 341 assertions while covering none of the
-# surfaces the critical 1.1.6 bugs lived on. Zero-length input, `lower.tail`,
-# `log.p` and the deep tail now have files of their own. This file covers the
-# two that were still untested: the ~218 documented `stop()` conditions in the
-# R wrappers, and non-finite input (NA_real_, NaN, +Inf, -Inf).
-#
-# It is organised in four sections, and the split matters:
+# The documented stop() conditions of the R wrappers and the handling of
+# non-finite input (NA_real_, NaN, +Inf, -Inf), with stats::dbeta(), pbeta()
+# and qbeta() as the reference for the d/p/q convention.
 #
 #   1. ERROR CONTRACT. Every documented stop() in every d/p/q/r/ll/gr/hs of all
-#      seven families. These are real assertions and they pass.
+#      seven families.
 #
 #   2. STRUCTURAL INVARIANTS under non-finite input: length, type, and the
-#      absence of an error. True today and true after the NA defect below is
-#      fixed, so these are real assertions too.
+#      absence of an error.
 #
-#   3. NON-FINITE CASES THAT ALREADY MATCH BASE R. Not everything is broken --
-#      d(+-Inf) = 0, p(-Inf) = 0, q(NA) = NA and q(NaN) = NaN are all already
-#      the base-R answers. Pinned so a fix to section 4 cannot regress them.
+#   3. NON-FINITE CASES AT THE ENDS OF THE SUPPORT: d(+-Inf) = 0, p(-Inf) = 0,
+#      q(NA) = NA and q(NaN) = NaN.
 #
-#   4. TARGET STATE for the open NA-propagation defect. Every test in this
-#      section is marked skip() and asserts the behaviour the functions SHOULD
-#      have, not the behaviour they have. They are the specification, written
-#      down and executable, waiting for the fix.
+#   4. PROPAGATION OF NON-FINITE INPUT, and the guards on logical flags and NA
+#      parameters:
 #
-# ----------------------------------------------------------------------------
-# WHY SECTION 4 IS SKIPPED RATHER THAN FAILING
-# ----------------------------------------------------------------------------
-# NA propagation is a known open defect and is being fixed separately. Leaving
-# failing tests on the branch would make the suite red for everyone else and
-# collide with that work. Skipping keeps the suite green while still recording
-# the contract precisely. When the fix lands, delete the skip() line at the top
-# of each affected test_that() -- nothing else needs to change.
+#        call             result
+#        d*(NA_real_)     NA
+#        d*(NaN)          NaN
+#        p*(NA_real_)     NA
+#        p*(NaN)          NaN
+#        p*(+Inf)         1
+#        q*(+-Inf)        NaN, with a warning
+#        q*(p < 0)        NaN, with a warning
+#        q*(p > 1)        NaN, with a warning
 #
-# What section 4 asserts, against base R's `dbeta`/`pbeta`/`qbeta` as the
-# reference for the convention every d/p/q function in R follows:
+#   5. THE SHAPE OF THE RESULT: dim, dimnames and names of the first argument.
 #
-#   call             base R    gkwdist 1.1.6    verdict
-#   d*(NA_real_)     NA        0                defect
-#   d*(NaN)          NaN       0                defect
-#   d*(+Inf)         0         0                already correct  (section 3)
-#   d*(-Inf)         0         0                already correct  (section 3)
-#   p*(NA_real_)     NA        0                defect
-#   p*(NaN)          NaN       0                defect
-#   p*(+Inf)         1         0                defect
-#   p*(-Inf)         0         0                already correct  (section 3)
-#   q*(NA_real_)     NA        NA               already correct  (section 3)
-#   q*(NaN)          NaN       NaN              already correct  (section 3)
-#   q*(+Inf)         NaN       1                defect
-#   q*(-Inf)         NaN       0                defect
-#   q*(p < 0)        NaN       0                defect
-#   q*(p > 1)        NaN       1                defect
-#
-# Note that q*() already warns "'p' values outside [0, 1] will produce NaN" for
-# the last four, and then does not produce NaN. The warning is right and the
-# return value is wrong.
-#
-# Section 4 also covers two argument-contract holes found while writing this
-# file, which are not the same defect but are the same shape:
-#
-#   * `log = NA` and `lower.tail = NA` pass the "must be a single logical
-#     value" guard, because is.logical(NA) is TRUE and length(NA) is 1. They
-#     then reach C++ as NA_LOGICAL and are read as TRUE. dgkw(0.5, ..., log =
-#     NA) returns 0.8517722, which is the log-density, not the density.
-#
-#   * The `any(par <= 0)` guards are written two ways. gkw, bkw, kkw, mc and kw
-#     use `any(alpha <= 0)`, so a NA parameter makes `if` see NA and R raises
-#     "missing value where TRUE/FALSE needed" -- not the package's own message.
-#     ekw and beta_ use `any(alpha <= 0, na.rm = TRUE)`, which drops the NA, so
-#     an NA parameter is accepted silently and returns 0. Neither is right, and
-#     they disagree with each other.
+#   6. SAMPLE SIZE RANGE, LOG-PROBABILITIES ABOVE 0, WARNING CALLS.
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -201,9 +160,7 @@ test_that("the logical flags reject anything that is not a single logical", {
 })
 
 test_that("r* rejects a sample size that is not a non-negative integer", {
-  # n = 0 used to be rejected here too. It is legal now, and tested just below:
-  # stats::rbeta(0, 2, 3) is numeric(0), and a generator that errors instead
-  # breaks any loop or replicate() that happens to reach an empty case.
+  # n = 0 is legal and tested just below: stats::rbeta(0, 2, 3) is numeric(0)
   for (f in FAMILIES) {
     for (bad in list(-1, NA, "5")) {
       expect_error(
@@ -268,9 +225,8 @@ test_that("ll*/gr*/hs* reject non-numeric and empty data", {
 # =============================================================================
 # SECTION 2 -- STRUCTURAL INVARIANTS UNDER NON-FINITE INPUT
 #
-# These hold whatever the values turn out to be, so they survive the fix to
-# section 4. What they rule out is the failure mode that mattered: a crash, an
-# error, or a result of the wrong length silently misaligning a vectorised call.
+# These hold whatever the values are. They rule out a crash, an error, or a
+# result of the wrong length silently misaligning a vectorized call.
 # =============================================================================
 
 test_that("d*/p*/q* accept non-finite input without erroring", {
@@ -294,8 +250,8 @@ test_that("d*/p*/q* return one double per input element for non-finite input", {
   }
 })
 
-test_that("a non-finite element does not disturb its finite neighbours", {
-  # The vectorised call must give each finite element the same answer it gets
+test_that("a non-finite element does not disturb its finite neighbors", {
+  # The vectorized call must give each finite element the same answer it gets
   # on its own, whatever the non-finite elements evaluate to.
   x <- c(0.25, NA_real_, 0.5, NaN, 0.75, Inf, -Inf)
   finite <- c(1, 3, 5)
@@ -312,9 +268,7 @@ test_that("a non-finite element does not disturb its finite neighbours", {
 })
 
 # =============================================================================
-# SECTION 3 -- NON-FINITE CASES THAT ALREADY MATCH BASE R
-#
-# Pinned so that fixing section 4 cannot regress what is already right.
+# SECTION 3 -- NON-FINITE CASES AT THE ENDS OF THE SUPPORT
 # =============================================================================
 
 test_that("d*(+-Inf) is 0, as in base R", {
@@ -371,14 +325,12 @@ test_that("q* does not warn at the closed boundary p = 0 and p = 1", {
 # =============================================================================
 # SECTION 4 -- NON-FINITE INPUT PROPAGATES, AS IN BASE R
 #
-# These were written as the target state while NA propagation was still open,
-# and were skipped until it landed. They now run: d*(NA) is NA and d*(NaN) is
-# NaN, p*(+Inf) is 1, and a probability outside [0, 1] gives NaN rather than
-# saturating at a bound outside the open support.
+# d*(NA) is NA and d*(NaN) is NaN, p*(+Inf) is 1, and a probability outside
+# [0, 1] gives NaN rather than saturating at a bound of the support.
 # =============================================================================
 
 test_that("d* propagates NA and NaN like base R", {
-  # Currently returns 0 for both. base R: dbeta(NA) is NA, dbeta(NaN) is NaN.
+  # base R: dbeta(NA) is NA, dbeta(NaN) is NaN.
   for (f in FAMILIES) {
     v <- call_fn("d", f$dpq, c(list(c(NA_real_, NaN)), f$pars))
     expect_identical(v[1], NA_real_, info = paste(f$dpq, "d(NA)"))
@@ -387,7 +339,7 @@ test_that("d* propagates NA and NaN like base R", {
 })
 
 test_that("p* propagates NA and NaN like base R", {
-  # Currently returns 0 for both.
+  # base R: pbeta(NA) is NA, pbeta(NaN) is NaN.
   for (f in FAMILIES) {
     v <- call_fn("p", f$dpq, c(list(c(NA_real_, NaN)), f$pars))
     expect_identical(v[1], NA_real_, info = paste(f$dpq, "p(NA)"))
@@ -396,8 +348,8 @@ test_that("p* propagates NA and NaN like base R", {
 })
 
 test_that("p*(+Inf) is 1, like base R", {
-  # Currently returns 0. The support is (0, 1), so every mass lies below +Inf
-  # and the CDF there is 1: pbeta(Inf, 1.5, 0.5) is 1.
+  # The support is (0, 1), so all the mass lies below +Inf and the CDF there
+  # is 1: pbeta(Inf, 1.5, 0.5) is 1.
   expect_equal(pbeta(Inf, 1.5, 0.5), 1)
   for (f in FAMILIES) {
     expect_equal(call_fn("p", f$dpq, c(list(Inf), f$pars)), 1, info = f$dpq)
@@ -405,8 +357,7 @@ test_that("p*(+Inf) is 1, like base R", {
 })
 
 test_that("q* returns NaN for probabilities outside [0, 1], as it warns it will", {
-  # Currently clamps: q(-0.5) and q(-Inf) give 0, q(1.5) and q(Inf) give 1,
-  # each with a warning that says NaN will be produced.
+  # base R: qbeta() of -0.5, 1.5, Inf and -Inf is NaN, each with a warning.
   expect_true(all(is.nan(suppressWarnings(qbeta(c(-0.5, 1.5, Inf, -Inf), 1.5, 0.5)))))
   for (f in FAMILIES) {
     v <- suppressWarnings(
@@ -417,10 +368,8 @@ test_that("q* returns NaN for probabilities outside [0, 1], as it warns it will"
 })
 
 test_that("the logical flags reject NA", {
-  # is.logical(NA) is TRUE and length(NA) is 1, so NA passes the "single
-  # logical value" guard, reaches C++ as NA_LOGICAL and is read as TRUE:
-  # dgkw(0.5, 2, 3, 1.5, 0.5, 2, log = NA) returns 0.8517722, the LOG density,
-  # while the density is 2.343797.
+  # is.logical(NA) is TRUE and length(NA) is 1, so the guard must test is.na()
+  # too: an NA flag would reach C++ as NA_LOGICAL and be read as TRUE.
   for (f in FAMILIES) {
     expect_error(
       call_fn("d", f$dpq, c(list(0.5), f$pars, list(log = NA))),
@@ -438,10 +387,8 @@ test_that("the logical flags reject NA", {
 })
 
 test_that("an NA shape parameter raises the package's own error in every family", {
-  # Two different guard styles today. gkw, bkw, kkw, mc and kw write
-  # `any(alpha <= 0)`, so `if` sees NA and R raises "missing value where
-  # TRUE/FALSE needed" instead of the documented message. ekw and beta_ write
-  # `any(alpha <= 0, na.rm = TRUE)`, which drops the NA entirely and returns 0.
+  # The documented message, not R's "missing value where TRUE/FALSE needed"
+  # from `if (any(par <= 0))`, and not a silent 0 from `na.rm = TRUE`.
   for (f in FAMILIES) {
     for (par in names(f$bounds)) {
       bad <- f$pars
@@ -459,9 +406,9 @@ test_that("an NA shape parameter raises the package's own error in every family"
 # SECTION 5 -- THE SHAPE OF THE RESULT
 #
 # base R's d/p/q carry the first argument's attributes through to the output,
-# so code that indexes or plots by shape keeps working. This package dropped
-# them. The copy is conditional on the lengths agreeing, which is what base R
-# does once a recycled parameter makes the output longer than the input.
+# so code that indexes or plots by shape keeps working. The copy is conditional
+# on the lengths agreeing, which is what base R does once a recycled parameter
+# makes the output longer than the input.
 # =============================================================================
 
 test_that("d, p and q carry dim, dimnames and names, as base R does", {
@@ -495,7 +442,7 @@ test_that("the shape is dropped when a parameter recycles longer, as base R does
 })
 
 # =============================================================================
-# SECTION 7 -- SAMPLE SIZE RANGE, LOG-PROBABILITIES ABOVE 0, WARNING CALLS
+# SECTION 6 -- SAMPLE SIZE RANGE, LOG-PROBABILITIES ABOVE 0, WARNING CALLS
 # =============================================================================
 
 test_that("r* rejects a size that does not fit an integer", {

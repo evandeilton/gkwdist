@@ -4,19 +4,16 @@ library(gkwdist)
 # =============================================================================
 # Componentwise validation of the analytical derivatives.
 #
-# The existing derivative tests evaluate generic interior parameter values.
-# The bugs fixed in 1.1.5 lived exactly where those tests do not look:
+# The grids cover the points that generic interior values miss:
 #
 #   * the degenerate points gamma = 1, beta = 1, lambda = 1 and delta = 0,
 #     where a mixed second derivative loses the factor that the pure second
-#     derivatives keep, so guards of the form `if (abs(p - 1) > eps)` silently
-#     zeroed true entries;
+#     derivatives keep;
 #   * data with observations near 0 combined with moderate alpha, where
-#     1 - x^alpha and 1 - v^beta round to 1 and 0 in double precision and the
-#     old clamping at 1e-10 replaced log(w) = -53 by log(1e-10) = -23.
+#     1 - x^alpha and 1 - v^beta round to 1 and 0 in double precision.
 #
-# Every gradient component and every Hessian entry is therefore compared
-# individually against two independent references:
+# Every gradient component and every Hessian entry is compared individually
+# against two independent references:
 #   (1) the general GKw routines restricted to the constrained parameter point
 #       (exact by construction: the sub-families are GKw with fixed parameters);
 #   (2) numDeriv Richardson extrapolation on the sub-family's own likelihood.
@@ -45,7 +42,7 @@ par_names <- list(bkw = c("alpha", "beta", "gamma", "delta"),
                   kw = c("alpha", "beta"),
                   beta = c("gamma", "delta"))
 
-# Parameter grids centred on the degenerate values, with alpha large enough
+# Parameter grids centered on the degenerate values, with alpha large enough
 # that the near-boundary observations matter.
 grids <- list(
   bkw  = expand.grid(alpha = c(0.5, 2, 3.5), beta = c(0.5, 1, 3),
@@ -60,8 +57,8 @@ grids <- list(
   beta = expand.grid(gamma = c(0.5, 1, 2), delta = c(0, 0.5, 2))
 )
 
-# "extreme" carries observations down to ~1e-7, which is what broke the old
-# clamped implementations; "moderate" is an ordinary well-behaved sample.
+# "extreme" carries observations down to ~1e-7, where the linear-space chain
+# loses log(w); "moderate" is an ordinary well-behaved sample.
 make_datasets <- function() {
   set.seed(7)
   list(moderate = rgkw(300, 2, 3, 1.5, 0.5, 2),
@@ -70,6 +67,21 @@ make_datasets <- function() {
 
 rel_err <- function(actual, expected) {
   max(abs(actual - expected) / pmax(abs(expected), 1))
+}
+
+# One expectation for all entries, each held to the scalar rule of
+# expect_equal(): relative error where |expected| > tolerance, else absolute.
+# Comparing the whole vector at once would average the errors instead.
+expect_entries_equal <- function(actual, expected, tolerance, info) {
+  err <- abs(actual - expected)
+  rel <- abs(expected) > tolerance
+  err[rel] <- err[rel] / abs(expected[rel])
+  worst <- which.max(err)
+  expect_true(
+    all(err < tolerance),
+    info = sprintf("%s: entry %d off by %.3g (tolerance %.3g)",
+                   info, worst, err[worst], tolerance)
+  )
 }
 
 test_that("sub-family log-likelihoods match the general GKw likelihood", {
@@ -106,12 +118,10 @@ test_that("every gradient component matches the general GKw score", {
         analytic <- gr_fn(p, x)
         if (!all(is.finite(reference)) || !all(is.finite(analytic))) next
         # componentwise, so a single wrong entry cannot hide behind the others
-        for (k in seq_along(analytic)) {
-          expect_equal(analytic[k], reference[k], tolerance = 1e-7,
-                       info = sprintf("%s d/d%s at (%s)", family,
-                                      par_names[[family]][k],
-                                      paste(p, collapse = ", ")))
-        }
+        expect_entries_equal(analytic, reference, tolerance = 1e-7,
+                             info = sprintf("%s gradient (%s) at (%s)", family,
+                                            paste(par_names[[family]], collapse = ", "),
+                                            paste(p, collapse = ", ")))
       }
     }
   }
@@ -131,15 +141,12 @@ test_that("every Hessian entry matches the general GKw Hessian", {
         reference <- hsgkw(full, x)[idx, idx]
         analytic <- hs_fn(p, x)
         if (!all(is.finite(reference)) || !all(is.finite(analytic))) next
-        for (r in seq_len(nrow(analytic))) {
-          for (cc in seq_len(ncol(analytic))) {
-            expect_equal(analytic[r, cc], reference[r, cc], tolerance = 1e-7,
-                         info = sprintf("%s d2/d%s d%s at (%s)", family,
-                                        par_names[[family]][r],
-                                        par_names[[family]][cc],
-                                        paste(p, collapse = ", ")))
-          }
-        }
+        # entry by entry, in column-major order
+        expect_entries_equal(as.vector(analytic), as.vector(reference),
+                             tolerance = 1e-7,
+                             info = sprintf("%s Hessian (%s) at (%s)", family,
+                                            paste(par_names[[family]], collapse = ", "),
+                                            paste(p, collapse = ", ")))
       }
     }
   }

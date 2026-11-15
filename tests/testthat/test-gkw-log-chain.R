@@ -42,7 +42,7 @@ test_that("llgkw is finite wherever the density is", {
       expect_true(is.finite(v), info = paste(nm, paste(p, collapse = ",")))
     }
   }
-  # the case the audit reported, to the digit
+  # a pinned value where log(v) underflows in linear space
   expect_equal(llgkw(c(1, 300, 1, 0, 1), c(.8, .85, .9, .95)),
                2609.842574, tolerance = 1e-6)
 })

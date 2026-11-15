@@ -61,7 +61,7 @@ test_that("sub-family densities equal the GKw density at the constrained point",
 
 test_that("the Beta special case matches base R", {
   x <- c(0.05, 0.2, 0.5, 0.8, 0.95)
-  # the package parameterises the Beta sub-family as Beta(gamma, delta + 1)
+  # the package parameterizes the Beta sub-family as Beta(gamma, delta + 1)
   expect_equal(dgkw(x, 1, 1, 2, 3, 1), dbeta(x, 2, 4))
   expect_equal(dbeta_(x, 2, 3), dbeta(x, 2, 4))
   expect_equal(pbeta_(x, 2, 3), pbeta(x, 2, 4))

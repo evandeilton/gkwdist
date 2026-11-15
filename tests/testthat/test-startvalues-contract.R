@@ -6,19 +6,19 @@
 # 1. n_starts was inert. The selection loop decided whether to run Nelder-Mead
 #    from a candidate by comparing the RAW objective at that starting point
 #    against best_obj -- which after the first iteration already held an
-#    OPTIMISED value. A merely poor start, exactly what multi-start exists to
-#    rescue, was thrown away before the optimiser saw it, so only the first
-#    candidate was ever optimised:
+#    OPTIMIZED value. A merely poor start, exactly what multi-start exists to
+#    rescue, was thrown away before the optimizer saw it, so only the first
+#    candidate was ever optimized:
 #
 #      set.seed(202); x <- rgkw(500, 5, 1.2, 3, 0.5, 2)
 #        n_starts =   1     objective 6.262579e-04
 #        n_starts =  10     objective 6.262579e-04   bit-identical
 #        n_starts = 200     objective 6.262579e-04   bit-identical
 #
-#    The cost was not just a suboptimal start. The single optimised path could
+#    The cost was not just a suboptimal start. The single optimized path could
 #    walk into a corner where the numerical integral of the density underflows,
 #    moment_theoretical() falls back to its closed-form Kumaraswamy moment, and
-#    the optimiser is rewarded for parameters whose real moments are nothing
+#    the optimizer is rewarded for parameters whose real moments are nothing
 #    like the sample's -- a method-of-moments estimate that misses the first
 #    moment by five orders of magnitude:
 #
@@ -32,7 +32,7 @@
 #    where the correct region is near -300.
 #
 # 2. The starting-point grid is drawn from a generator with a fixed internal
-#    seed. That is deliberate -- the output seeds optimisers elsewhere, so two
+#    seed. That is deliberate -- the output seeds optimizers elsewhere, so two
 #    calls on the same data have to agree -- but nothing said so, and the
 #    determinism only became a meaningful claim once the draws were actually
 #    used for something.

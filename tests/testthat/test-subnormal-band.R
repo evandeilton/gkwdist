@@ -1,34 +1,27 @@
 # tests/testthat/test-subnormal-band.R
-# Regression tests for the second round of log-space chain repairs.
+# The log-space chain where a link is subnormal or underflows to 0.
 #
 # Every family walks some part of the chain
 #
 #   v = 1 - x^alpha     w = 1 - v^beta     z = 1 - w^lambda
 #
-# and the first repairs bridged a link only where its linear quantity had
-# underflowed to exactly 0. Five defects survived that:
+# and the tests cover the five places where linear-space arithmetic fails:
 #
 # 1. The band just before 0. For x^alpha in [5e-324, 2.2e-308) log(v) is a
-#    subnormal with a few significant bits, and log1mexp() read it as exact.
-#    llbkw(c(161.8, 2, 1.5, 1), c(.01,.3,.6,.9)) was 0.34 nats off and the
-#    alpha component of the gradient dipped by 16% across the band.
-# 2. EKw never received the bridge at all: dekw() returned -Inf, llekw() +Inf
-#    and grekw() NaN/Inf where the nested GKw is finite.
-# 3. The p/q/r functions of GKw, BKw, KKw, EKw, Kw and Mc flushed the lower
-#    tail to exactly 0 once x^alpha (or w^lambda, or x^lambda) underflowed --
-#    rgkw() drew thousands of exact zeros, which llgkw() then rejects -- and
-#    the deep upper tail on the log scale to 1, or onto a plateau.
-# 4. qgkw() and qmc() took log(y) of a y rounded to the double grid near 1, so
-#    the upper tail was lost; qbkw() had always reflected.
-# 5. hsgkw() still worked in linear space and returned NaN where every other
-#    derivative is finite.
+#    subnormal with a few significant bits; the likelihood and the gradient
+#    must be exact across it.
+# 2. EKw through the same band: dekw(), llekw() and grekw() are finite where
+#    the nested GKw is.
+# 3. The p/q/r functions of GKw, BKw, KKw, EKw, Kw and Mc in the lower tail
+#    once x^alpha (or w^lambda, or x^lambda) underflows, and in the deep upper
+#    tail on the log scale. r*() must not draw exact zeros there.
+# 4. qgkw(), qmc() and qbkw() in the upper tail, where y rounds to the double
+#    grid near 1.
+# 5. hsgkw() where every other derivative is finite.
 #
 # References are independent of the code under test: a __float128 evaluation
 # of the likelihood, integrate() of the density, round trips through the
 # matching p function, the nesting identities, and numDeriv.
-#
-# Against commit 5330814 the blocks below fail 71 assertions and error once;
-# with these fixes all 116 pass.
 
 X_BAND <- c(0.01, 0.3, 0.6, 0.9)
 
@@ -91,7 +84,7 @@ test_that("EKw is exactly the nested GKw where x^alpha underflows", {
     expect_true(all(is.finite(grekw(c(a, 2, 1.5), X_BAND))))
     expect_true(all(is.finite(hsekw(c(a, 2, 1.5), X_BAND))))
   }
-  # the optimiser that used to stop with "non-finite value supplied"
+  # the optimizer that used to stop with "non-finite value supplied"
   fit <- optim(c(161, 2, 1.5), llekw, grekw, data = X_BAND,
                method = "L-BFGS-B", lower = 1e-3)
   expect_equal(fit$convergence, 0L)
